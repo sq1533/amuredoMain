@@ -1,0 +1,320 @@
+/* 기본 리셋 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f0f0f0; /* 배경을 가벼운 회색으로 둬서 메인 1024px 박스가 잘 보이게 설정 */
+    color: #222;
+}
+
+/* 
+ * 1. 앱 컨테이너 
+ * 최대 가로길이를 1024px로 고정하고, 브라우저 화면 중앙에 오도록 배치합니다.
+ */
+.app-container {
+    width: 100%;
+    max-width: 1024px;
+    margin: 0 auto;
+    background-color: #fff;
+    min-height: 100vh;
+    position: relative;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05); /* 경계 구분을 위한 가벼운 그림자 부여 */
+}
+
+/* ========= 2. 헤더 및 네비게이션 영역 ========= */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 2px solid #eaeaea; /* 헤더 구분선 */
+}
+
+/* 중앙 빈 공간은 flex: space-between 설정에 의해 가운데에 자동 발생하므로 생략 */
+
+/* 로고 래퍼 (요청 사항에 따라 가로 너비 25% 비율 할당) */
+.logo-wrapper {
+    width: 25%;
+    /* aspect-ratio를 통해 브라우저가 자동으로 가로너비에 맞춰 
+       높이를 (가로의 1/2) 비율로 계산하여 유지시킵니다. (종횡비 2:1) */
+    aspect-ratio: 2 / 1; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* 공간 안에서 비율이 깨지지 않게 맞춤설정 */
+}
+
+/* PC 화면 (640px 초과 시) 기본 활성화 요소 세팅 */
+.menu-toggle-btn, .close-menu-btn, .nav-overlay {
+    display: none; /* 토글 햄버거 메뉴 및 배경색 어둡게 하는 영역은 숨깁니다 */
+}
+
+.nav-links {
+    display: flex;         /* PC에서는 메뉴가 펼쳐진 상태로 나열됩니다 (가로 정렬) */
+    list-style: none;
+    gap: 1.5rem;          /* 각 전환 버튼들 사이를 띄웁니다 */
+}
+
+.nav-switch-btn {
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #333;
+    transition: color 0.2s ease;
+}
+
+.nav-switch-btn:hover {
+    color: #4a90e2; /* 마우스 올렸을 때의 변화 컬러 */
+}
+
+/* 640px 이하 모바일 대응: 토스트 사이드 드로어 메뉴 처리 (왼쪽에서 넘어오는 방식) */
+@media (max-width: 640px) {
+    /* 모바일에서는 햄버거 토글 버튼(가로/세로 똑같은 정사각형 모양)만 노출 시킵니다 */
+    .menu-toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px; 
+        height: 40px; 
+        background-color: #222;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    /* 햄버거 선(라인 아이콘) 디자인 */
+    .hamburger-box {
+        display: block;
+        width: 20px;
+        height: 2px;
+        background-color: #fff;
+        position: relative;
+    }
+    .hamburger-box::before, .hamburger-box::after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background-color: #fff;
+        left: 0;
+    }
+    .hamburger-box::before { top: -6px; }
+    .hamburger-box::after { bottom: -6px; }
+
+    /* 드로어 메뉴 창의 위치를 강제로 화면 왼쪽 밖(-300px)으로 뺌 (초기 상태 숨겨짐) */
+    .page-nav {
+        position: fixed;
+        top: 0;
+        left: -300px; /* 창을 화면의 좌측 바깥쪽으로 숨깁니다 */
+        width: 250px;
+        height: 100%;
+        background-color: #fff;
+        z-index: 1000;
+        transition: left 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); /* 튀어나오는 슬라이드 애니메이션 효과 */
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+    
+    /* JS에서 .open 클래스 활성화 시 원래 위치(left:0)로 튀어 나옵니다 */
+    .page-nav.open {
+        left: 0; 
+    }
+
+    .close-menu-btn {
+        display: block;
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 1rem;
+        text-align: right;
+        width: 100%;
+    }
+
+    .nav-links {
+        flex-direction: column; /* 메뉴 항목 리스트를 세로 방향으로 정렬시킵니다 */
+        padding: 0 1.5rem;
+    }
+
+    .nav-switch-btn {
+        font-size: 1.2rem;
+        padding: 1rem 0;
+        display: block;
+        width: 100%;
+        text-align: left;
+        border-bottom: 1px solid #f0f0f0; /* 모바일 메뉴 구분선 */
+    }
+
+    /* 토스트 창 노출 시 화면 전체 배경을 어둡게 까는 반투명 오버레이 요소 */
+    .nav-overlay.open {
+        display: block;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+    }
+}
+
+/* ========= 3. 메인 배너 영역 (Main Banner) ========= */
+.banner-section {
+    width: 100%;
+}
+
+.banner-container {
+    width: 100%; /* 어느 환경이든 브라우저 영역을 전부(100%) 채우도록 설정 */
+    /* 너비의 60% 높이 비율을 유지시키기 위해 종횡비를 5:3으로 강제 유지시킴 */
+    aspect-ratio: 5 / 3; 
+    position: relative;
+    overflow: hidden; /* 영역 가로/세로 밖으로 넘쳐 흐르는 이전, পরের 이미지를 숨깁니다 */
+    background-color: #f7f7f7;
+}
+
+/* 여러 이미지 요소들을 감싸는 스크롤 궤도 트랙 영역 */
+.banner-track {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    /* 슬라이드 넘김이 넘어갈 때 부드러운 전환 효과 부과 (0.5s 동안 이동) */
+    transition: transform 0.5s ease-in-out; 
+}
+
+/* 화면 내부의 실제 배너 이미지 */
+.banner-img {
+    width: 100%; /* flex 구조 안에서도 이미지 한 장당 컨테이너 전체 공간을 차지하게 함 */
+    height: 100%;
+    object-fit: cover; /* 사이즈가 다소 틀어져도 빈 공간 없이 이미지가 가득 차게 맞춥니다 */
+    flex-shrink: 0; /* 강제로 작아지거나 비율이 찌그러지지 않도록 크기를 고정합니다 */
+}
+
+/* ========= 4. 배너 제어 (이전 / 다음) 버튼 UI ========= */
+.banner-ctrl-btn {
+    position: absolute; /* 메인 이미지 위에 떠 있는 상태 부여 */
+    top: 0;
+    height: 100%; /* 버튼 높이가 안에 들어간 이미지 높이와 완전히 일치하도록 100% 설정 */
+    width: 30px;  /* 변경된 요구사항에 맞추어 버튼 너비 "30px" 로 강제 고정함 */
+    background-color: rgba(255, 255, 255, 0.4); /* 버튼 형태 구분을 위해 투명한 흰색/회색 적용 */
+    border: none;
+    cursor: pointer;
+    opacity: 0; /* 평소 화면 상에는 완전히 숨김 처리하여 보이지 않게 함 (투명) */
+    transition: opacity 0.3s ease, background-color 0.2s ease;
+    z-index: 10;
+}
+
+/* 고객이 마우스 커서를 올렸을 때(Hover)만 버튼의 투명도를 1로 올려서 노출 */
+.banner-container:hover .banner-ctrl-btn {
+    opacity: 1; 
+}
+
+/* 클릭 시 피드백으로 어두운 검정색으로 살짝 눌리는 느낌 부여 */
+.banner-ctrl-btn:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* 가장자리 (좌측 / 우측) 밀착 배치 */
+.banner-ctrl-btn.prev {
+    left: 0;
+}
+
+.banner-ctrl-btn.next {
+    right: 0;
+}
+
+/* ========= 5. 베스트 아이템 영역 (Item Cards) ========= */
+.best-items-section {
+    width: 100%;
+    /* 상하좌우 여백을 주어 배너 및 테두리 사이에 숨을 돌릴 공간(호흡) 마련 */
+    padding: 3.5rem 1.5rem 5rem 1.5rem; 
+    background-color: #fff;
+}
+
+/* 서브 타이틀 'Best' */
+.section-subtitle {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 2.5rem;
+    color: #111;
+    text-transform: uppercase;
+    letter-spacing: 2px; /* 깔끔한 모던 쇼핑몰 연출 (자간 증가) */
+}
+
+/* 아이템 3열 고정 그리드 배치 시스템 */
+.item-grid-container {
+    display: grid;
+    /* 사용자 요구사항: 고정 3열(3 Columns). 각 열은 1fr(Fraction) 균등하게 3분할 됨. 줄 바꿈 시 자동 행 확장. */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; /* 각 상품 카드 사이의 공백(간격) */
+}
+
+/* 개별 아이템 카드 루트 */
+.item-card {
+    display: flex;
+    flex-direction: column;
+    /* CSS Grid 이슈 방지: 상품명 텍스트가 매우 길 때 열이 모바일 화면 밖을 밀어내버리는 Over 현상 원천 차단 */
+    min-width: 0; 
+    width: 100%;
+}
+
+/* 1. 이미지 컨테이너 (정사각형 1:1 비율 강제 규격 유지) */
+.item-image-wrapper {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* 사진의 가로/세로 비율 1:1 강제 지정 */
+    overflow: hidden;    /* 튀어나가는 부분 자르기 */
+    background-color: #fafafa;
+    cursor: pointer;     /* 이미지를 클릭할 수 있음을 표시(손가락) */
+    margin-bottom: 1rem;
+    border-radius: 4px;  /* 날카롭지 않게 살짝 둥글림 (선택적) */
+}
+
+.item-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 이미지가 찌그러지지 않고 1:1 상자에 꽉 차도록 세팅 */
+    transition: transform 0.3s ease;
+}
+
+/* 감성적인 애니메이션: 사진을 Hover 시 미세하게 커지는 팝업 효과 */
+.item-image-wrapper:hover .item-image {
+    transform: scale(1.05); 
+}
+
+/* 2. 상품명 (string) */
+.item-name {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 0.4rem;
+    cursor: pointer; /* 상품명 텍스트도 클릭할 수 있음을 표시 */
+    transition: color 0.2s;
+    /* 글자가 너무 길면 줄바꿈 대신 말줄임표(...) 표시 (필요시) */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-name:hover {
+    color: #4a90e2; /* 클릭 인식을 돕기 위해 타이틀 색상 변환 피드백 */
+}
+
+/* 3. 상품 가격 (string) */
+.item-price {
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: #555;
+}
+
+/* *특이사항 알림: 
+   화면이 모바일(640px 이하) 환경 등 협소해지더라도 요구사항("3열 배치 고정")을 최우선으로 준수하기 위해 
+   그리드를 1열 혹은 2열로 축소시키지 않고 3열 체제로 모바일에서도 그대로 락다운(Fixed) 합니다. 
+*/
