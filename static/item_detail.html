@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>amuredoMain - 상품 상세</title>
+    <!-- 외부 공통 스타일시트 연결 -->
+    <link rel="stylesheet" href="/static/style.css?v=5.1">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- 최상단 헤더(Header) 영역: 사이트 전역 공통 사용 -->
+        <header class="main-header">
+            <div class="logo-wrapper">
+                <img src="https://via.placeholder.com/256x128.png?text=amuredo" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
+            </div>
+            
+            <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
+                <span class="hamburger-box"></span>
+            </button>
+
+            <nav class="page-nav" id="pageNav">
+                <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
+                <ul class="nav-links">
+                    <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunglasses</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/goggles'">Goggles</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/about'">about</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/contact'">문의하기</button></li>
+                </ul>
+            </nav>
+            <div class="nav-overlay" id="navOverlay"></div>
+        </header>
+
+        <!-- 메인 콘텐츠 영역 (상세 페이지) -->
+        <main class="main-content detail-content">
+            <!-- [추가] 모바일 1단 / PC 2단 배열을 위한 이미지 좌측 컨테이너 -->
+            <div class="detail-left-column">
+                <!-- 좌우 마진 10px, Swipe가 되는 이미지 슬라이더 영역 -->
+                <div class="detail-slider-container">
+                    <div class="detail-slider-track" id="detailSliderTrack">
+                        <!-- JS 배열(paths)로부터 슬라이드 아이템들이 1:1 박스 형태로 append 됨 -->
+                    </div>
+                </div>
+
+                <!-- 현재 위치를 알려주는 페이징 인디케이터 (Swipe 짝꿍) -->
+                <div class="detail-slider-dots" id="detailSliderDots"></div>
+            </div>
+
+            <!-- 하단부/우측 추가 묘사 영역 -->
+            <div class="detail-info-area" id="detailInfoArea">
+                <h2 class="detail-item-name" id="detailItemName">Loading...</h2>
+                <p class="detail-item-price" id="detailItemPrice">₩ 0</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- 상세 페이지 로직 파일 (V버전 증가) -->
+    <script src="/static/itemDetail.js?v=7.0"></script>
+    
+    <!-- 공통 메뉴 동작용 스크립트 -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const menuToggleBtn = document.getElementById("menuToggleBtn");
+            const closeMenuBtn = document.getElementById("closeMenuBtn");
+            const pageNav = document.getElementById("pageNav");
+            const navOverlay = document.getElementById("navOverlay");
+
+            function toggleMenu() {
+                pageNav.classList.toggle("open");
+                navOverlay.classList.toggle("active");
+            }
+
+            if(menuToggleBtn) menuToggleBtn.addEventListener("click", toggleMenu);
+            if(closeMenuBtn) closeMenuBtn.addEventListener("click", toggleMenu);
+            if(navOverlay) navOverlay.addEventListener("click", toggleMenu);
+        });
+    </script>
+</body>
+</html>

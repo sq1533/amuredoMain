@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>amuredoMain</title>
-    <!-- 외부 스타일시트 연결 -->
-    <link rel="stylesheet" href="/static/style.css">
+    <!-- 외부 스타일시트 연결 (캐시 무효화) -->
+    <link rel="stylesheet" href="/static/style.css?v=3.5">
 </head>
+
 <body>
     <!-- 최대 1024px 너비 제한 및 중앙 정렬을 위한 래퍼(Wrapper) 묶음 -->
     <div class="app-container">
-        
+
         <!-- 최상단 헤더(Header) 영역: 로고 + 메뉴(네비게이션) -->
         <header class="main-header">
             <!-- 1. 좌측 로고 이미지 (가로 25%, 높이 50% 비율 유지) -->
@@ -18,7 +20,7 @@
                 <!-- 실제 로고를 연동할 때는 이쪽의 src 경로를 변경하시면 됩니다. -->
                 <img src="https://via.placeholder.com/256x128.png?text=amuredo" alt="amuredo Logo" class="logo">
             </div>
-            
+
             <!-- 2. 중앙 빈 공간 (flex box에 의해 자동으로 여백 형성됨) -->
 
             <!-- 3. 우측 모바일 전용 메뉴 버튼 (정사각형 크기, 640px 이하에서 노출) -->
@@ -32,12 +34,14 @@
                 <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
                 <ul class="nav-links">
                     <!-- 페이지 전환(Switch) 버튼들 -->
-                    <li><button class="nav-switch-btn" onclick="location.href='/'">Home</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/about'">About Space</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/store'">Store</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunglasses</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/goggles'">Goggles</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/about'">about</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/contact'">문의하기</button></li>
                 </ul>
             </nav>
-            
+
             <!-- 모바일 드로어가 열렸을 때 화면 어둡게 하기 위한 오버레이 배경 -->
             <div class="nav-overlay" id="navOverlay"></div>
         </header>
@@ -51,20 +55,20 @@
                     <div class="banner-track" id="bannerTrack">
                         <!-- JS 코드가 API 통신 후 <img> 태그를 자동으로 채웁니다 -->
                     </div>
-                    
+
                     <!-- 호버 시 나타나는 제어 버튼 (위치: 양 끝 / 너비: 10px / 높이: 100%) -->
                     <button class="banner-ctrl-btn prev" id="bannerPrevBtn"></button>
                     <button class="banner-ctrl-btn next" id="bannerNextBtn"></button>
                 </div>
             </section>
-            
+
             <!-- 추후 추가될 컨텐츠 구성 공간 -->
-            
+
             <!-- 베스트 아이템 카드 (Item Cards) 구역 -->
             <section class="best-items-section">
                 <!-- 서브 타이틀 'Best' -->
                 <h2 class="section-subtitle">Best</h2>
-                
+
                 <!-- 아이템 3열 그리드 컨테이너 -->
                 <div class="item-grid-container" id="bestItemsGrid">
                     <!-- JS 코드가 API에서 Best 품목을 불러와 아이템 카드를 자동으로 삽입시킵니다 -->
@@ -74,6 +78,7 @@
     </div>
 
     <!-- 로직 자바스크립트 스크립트 파일 연결 -->
-    <script src="/static/main.js"></script>
+    <script src="/static/main.js?v=3.5"></script>
 </body>
+
 </html>
