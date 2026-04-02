@@ -68,158 +68,125 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 2. 전달받은 이미지 URL 목록 데이터를 화면의 HTML 태그(<img>)로 만들어 출력시키는 함수입니다
     function renderBanner(paths) {
-        bannerTrack.innerHTML = ''; // 기본적으로 남아있는 임시 영역 텍스트 등 초기화
+        bannerTrack.innerHTML = '';
         
-        // 반복문을 돌며 이미지 태그 하나하나를 동적으로 생성해 넣습니다.
-        paths.forEach((url, index) => {
+        // [지능형 루프 핵심] 이미지 클로닝 (앞뒤에 하나씩 더 붙임)
+        // 구성: [마지막장 복제] - [1, 2, 3...] - [1번장 복제]
+        const extendedPaths = [
+            paths[paths.length - 1], 
+            ...paths,                
+            paths[0]                 
+        ];
+
+        extendedPaths.forEach((url, index) => {
             const img = document.createElement('img');
             img.src = url;
-            img.alt = `amuredo 메인 배너 이미지 ${index + 1}`;
-            img.className = 'banner-img'; // CSS에서 '100% 꽉 채운 속성'을 상속합니다
+            img.alt = `amuredo 메인 배너 이미지 ${index}`;
+            img.className = 'banner-img'; 
             bannerTrack.appendChild(img);
         });
 
-        // 3. PC 데스크탑 환경을 위한 마우스 드래그(스와이프) 폴리필 부착
+        // 3. 초기 위치 설정 (두 번째 칸 - 원본 첫 번째 장)
+        // 렌더링 직후 너비 계산을 위해 최소한의 지연시간(50ms) 후 이동
+        setTimeout(() => {
+            const width = bannerTrack.offsetWidth;
+            bannerTrack.scrollLeft = width;
+            
+            // 무한 루프 감시 엔진 가동
+            setupInfiniteLoop(bannerTrack, paths.length);
+        }, 50);
+
+        // 4. PC 데스크탑 환경을 위한 마우스 드래그(스와이프) 폴리필 부착
         setupDesktopDrag(bannerTrack);
     }
-    /* ====================================================
-       2.5. 프로모션(Code) 영역 스와이퍼 제어 로직
-       ==================================================== */
-    const promoSection = document.getElementById("promoSection");
-    const promoImage = document.getElementById("promoImage");
-    const promoInfo = document.getElementById("promoInfo");
-    const promoPrevBtn = document.getElementById("promoPrevBtn");
-    const promoNextBtn = document.getElementById("promoNextBtn");
-    const promoDetailBtn = document.getElementById("promoDetailBtn"); // 상세보기 버튼 취득
 
-    let promoDataList = [];
-    let currentPromoIdx = 0;
+    /* 🏁 신규: 모든 베스트 섹션(선글라스/안경) 이미지 스와이프 배너 드래그 연결 */
+    const itemBestTracks = document.querySelectorAll(".best-banner-track");
+    itemBestTracks.forEach(track => {
+        setupDesktopDrag(track);
+    });
 
-    // 1. 프로모션 데이터 파싱
-    fetch('/api/promotions')
-        .then(res => res.json())
-        .then(data => {
-            const items = data.items;
-            if (items && items.length > 0) {
-                promoDataList = items;
-                promoSection.style.display = 'block'; // 데이터가 있으면 화면에 노출
-                renderPromo(0); // 최초 첫 번째 렌더링
-            }
-        })
-        .catch(error => {
-            console.error("Firebase 프로모션 데이터 호출 에러:", error);
-        });
-
-    // 2. 인덱스 기반 화면 렌더 트랜지션 함수
-    function renderPromo(idx) {
-        if (promoDataList.length === 0) return;
-        
-        // 투명도 트랜지션 효과를 위해 일시적으로 투명하게 만듦
-        promoImage.style.opacity = '0';
-        promoInfo.style.opacity = '0';
-
-        setTimeout(() => {
-            const item = promoDataList[idx];
-            promoImage.src = item.path;
-            promoInfo.innerHTML = item.info.replace(/\n/g, '<br>'); // 줄바꿈 지원
+    // [지능형 루프 엔진] 스크롤 위치를 실시간 감시하여 경계선에서 '사일런트 워프' 수행
+    function setupInfiniteLoop(track, originalCount) {
+        track.addEventListener('scroll', () => {
+            const width = track.offsetWidth;
+            const scrollLeft = track.scrollLeft;
             
-            // 데이터 교체 후 투명도 복구
-            promoImage.style.opacity = '1';
-            promoInfo.style.opacity = '1';
-        }, 200); // 0.2초 딜레이
-    }
-
-    if (promoPrevBtn && promoNextBtn) {
-        promoPrevBtn.addEventListener('click', () => {
-            currentPromoIdx--;
-            if (currentPromoIdx < 0) currentPromoIdx = promoDataList.length - 1;
-            renderPromo(currentPromoIdx);
-        });
-
-        promoNextBtn.addEventListener('click', () => {
-            currentPromoIdx++;
-            if (currentPromoIdx >= promoDataList.length) currentPromoIdx = 0;
-            renderPromo(currentPromoIdx);
-        });
-    }
-
-    // 3. 상세보기(징검다리 API) 연결 연동
-    if (promoDetailBtn) {
-        promoDetailBtn.addEventListener("click", () => {
-            if (promoDataList.length > 0) {
-                // 현재 보고 있는 프로모션의 고유 아이디(code) 추출
-                const targetCodeId = promoDataList[currentPromoIdx].id;
-                // 만들어둔 백엔드 리다이렉트 API로 브라우저 이동
-                location.href = `/api/promo-redirect/${targetCodeId}`;
+            // 1. 맨 앞(마지막장 복제본) 위치에 도달했을 때 -> 진짜 마지막장 위치로 순간 이동
+            if (scrollLeft <= 0) {
+                track.style.scrollBehavior = 'auto'; // 애니메이션 없이 점프
+                track.scrollLeft = originalCount * width;
+                setTimeout(() => { track.style.scrollBehavior = 'smooth'; }, 10);
+            }
+            
+            // 2. 맨 뒤(1번장 복제본) 위치에 도달했을 때 -> 진짜 1번장 위치로 순간 이동
+            // (originalCount + 1) 번째 칸이 마지막 클론 위치임
+            if (scrollLeft >= (originalCount + 1) * width - 1) {
+                track.style.scrollBehavior = 'auto';
+                track.scrollLeft = width;
+                setTimeout(() => { track.style.scrollBehavior = 'smooth'; }, 10);
             }
         });
     }
-
-    /* ====================================================
-       3. 메인 하단: 'Best' 아이템 카드 3열 그리드 생성 로직
-          (Firebase 필터링 데이터 호출 및 1:1 카드 렌더링, 클릭 이벤트)
-       ==================================================== */
-    
+    // 3. 메인 하단: 'Best' 아이템 카드 스와이퍼 생성 로직
     const bestItemsGrid = document.getElementById("bestItemsGrid");
-
-    // 백엔드의 FastAPI (Firebase event: 'best' 필터링 대상) 엔드포인트 요청
     fetch('/api/items/best')
         .then(response => response.json())
         .then(data => {
             const bestItems = data.items;
             if (bestItems && bestItems.length > 0) {
-                renderBestItems(bestItems);
+                renderItemsTrack(bestItemsGrid, bestItems);
+                setupDesktopDrag(bestItemsGrid);
             }
         })
-        .catch(error => {
-            console.error("Best 아이템 데이터를 불러오는 중 통신 오류 발생:", error);
-        });
+        .catch(error => console.error("Best 아이템 통신 오류:", error));
 
-    // 받은 JSON (str 계열의 name, price 및 이미지url) 바탕으로 즉시 아이템 카드 HTML 삽입
-    function renderBestItems(items) {
-        bestItemsGrid.innerHTML = ''; // 요소 청소
+    // 4. 메인 최하단: 'New' 신규 상품 카드 스와이퍼 생성 로직
+    const newItemsGrid = document.getElementById("newItemsGrid");
+    fetch('/api/items/new')
+        .then(response => response.json())
+        .then(data => {
+            const newItems = data.items;
+            if (newItems && newItems.length > 0) {
+                renderItemsTrack(newItemsGrid, newItems);
+                setupDesktopDrag(newItemsGrid);
+            }
+        })
+        .catch(error => console.error("New 아이템 통신 오류:", error));
+
+    /**
+     * 상품 리스트를 받아서 지정된 컨테이너에 가로 스와이프용 카드를 생성하는 공용 함수
+     */
+    function renderItemsTrack(container, items) {
+        container.innerHTML = ''; 
 
         items.forEach(item => {
-            // 개별 아이템 카드 컨테이너
             const card = document.createElement('article');
             card.className = 'item-card';
 
-            // 1. 이미지 래퍼 (정사각형 1:1 비율 세팅 구역) - 클릭 이벤트(Switch) 탑재
             const imgWrapper = document.createElement('div');
             imgWrapper.className = 'item-image-wrapper';
-            imgWrapper.addEventListener('click', () => {
-                // 요구사항: 상세 페이지 switch 전환 연결
-                location.href = `/item/${item.id}`; 
-            });
+            imgWrapper.addEventListener('click', () => { location.href = `/item/${item.id}`; });
 
-            // 2. 실제 썸네일 이미지 태그
             const img = document.createElement('img');
             img.src = item.image_url;
             img.alt = item.name;
             img.className = 'item-image';
             imgWrapper.appendChild(img);
 
-            // 3. 상품명 문자열 생성 및 클릭 전환(Switch) 이벤트 처리
             const nameEl = document.createElement('h3');
             nameEl.className = 'item-name';
-            nameEl.textContent = item.name; // string 삽입
-            nameEl.addEventListener('click', () => {
-                // 요구사항: 이미지, name 부분 모두 상세 페이지로 전환됨.
-                location.href = `/item/${item.id}`;
-            });
+            nameEl.textContent = item.name;
+            nameEl.addEventListener('click', () => { location.href = `/item/${item.id}`; });
 
-            // 4. 상품 가격 문자열 생성
             const priceEl = document.createElement('p');
             priceEl.className = 'item-price';
-            priceEl.textContent = item.price; // 예: "35,000원" 등의 string 삽입
+            priceEl.textContent = `₩ ${item.price}`;
 
-            // 상자 조립 (부모 요소에 자식 순서대로 결합)
             card.appendChild(imgWrapper);
             card.appendChild(nameEl);
             card.appendChild(priceEl);
-
-            // 최종적으로 페이지의 그리드 시스템 컨테이너에 카드를 장착
-            bestItemsGrid.appendChild(card);
+            container.appendChild(card);
         });
     }
 
@@ -233,26 +200,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
         trackElement.addEventListener('mousedown', (e) => {
             isDown = true;
-            trackElement.classList.add('active-drag'); // CSS Snap 해제용
+            trackElement.classList.add('active-drag'); // 드래그 중 스냅 일시 해제
             startX = e.pageX - trackElement.offsetLeft;
             scrollLeft = trackElement.scrollLeft;
         });
 
         trackElement.addEventListener('mouseleave', () => {
+            if (!isDown) return;
             isDown = false;
             trackElement.classList.remove('active-drag');
         });
 
-        trackElement.addEventListener('mouseup', () => {
+        trackElement.addEventListener('mouseup', (e) => {
+            if (!isDown) return;
             isDown = false;
             trackElement.classList.remove('active-drag');
+            
+            // 드래그 거리에 따른 강제 스냅 보정 로직
+            const endX = e.pageX - trackElement.offsetLeft;
+            const diff = startX - endX; // 양수: 다음으로 밀기, 음수: 이전으로 밀기
+            const threshold = 50; // 50px 이상 움직이면 다음 장으로 판단
+            const width = trackElement.offsetWidth;
+            
+            if (Math.abs(diff) > threshold) {
+                const target = diff > 0 
+                    ? Math.ceil(trackElement.scrollLeft / width) * width 
+                    : Math.floor(trackElement.scrollLeft / width) * width;
+                
+                trackElement.scrollTo({
+                    left: target,
+                    behavior: 'smooth'
+                });
+            }
         });
 
         trackElement.addEventListener('mousemove', (e) => {
             if (!isDown) return;
             e.preventDefault();
             const x = e.pageX - trackElement.offsetLeft;
-            const walk = (x - startX) * 1.5; // 드래그 속도 배율
+            const walk = (x - startX) * 1.5; // 드래그 가속도
             trackElement.scrollLeft = scrollLeft - walk;
         });
     }

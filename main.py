@@ -75,14 +75,7 @@ async def serve_about_page():
 # 외부 데이터 통신용 API 엔드포인트
 # ---------------------------------------------------------
 
-@app.get("/api/banner")
-async def get_banner_data():
-    dummy_paths = [
-        "https://via.placeholder.com/1024x614.png?text=amuredo+Banner+1",
-        "https://via.placeholder.com/1024x614.png?text=amuredo+Banner+2",
-        "https://via.placeholder.com/1024x614.png?text=amuredo+Banner+3"
-    ]
-    return {"paths": dummy_paths}
+
 
 
 @app.get("/api/items/best")
@@ -115,6 +108,47 @@ async def get_best_items():
         return {"items": real_items}
         
     except Exception as e:
+        return {"items": [], "error": str(e)}
+
+@app.get("/api/items/new")
+async def get_new_items():
+    """
+    메인 페이지 하단 '신규상품' 섹션에 들어갈 아이템 리스트를 조회합니다.
+    Firebase: 'item' collection -> event == 'new' 필터링
+    """
+    if db is None:
+        return {"items": [], "error": "Firebase 연동 불가"}
+        
+    try:
+        # event 필드 값이 'new'인 문서들만 스트림으로 불러옵니다.
+        new_docs = db.collection('item').where('event', '==', 'new').stream()
+        
+        real_items = []
+        for doc in new_docs:
+            data = doc.to_dict()
+            paths = data.get("paths", [])
+            # 첫 번째 이미지를 썸네일로 사용, 없으면 플레이스홀더 처리
+            image_url = paths[0] if (paths and len(paths) > 0) else "https://via.placeholder.com/600x600.png?text=No+Image"
+            
+            # 가격 천 단위 콤마 포맷팅 (예: 35000 -> 35,000)
+            raw_price = data.get("price", "0")
+            try:
+                formatted_price = f"{int(float(raw_price)):,}"
+            except (ValueError, TypeError):
+                formatted_price = str(raw_price)
+
+            real_items.append({
+                "id": doc.id,
+                "name": data.get("name", "이름 없음"),
+                "price": formatted_price,
+                "image_url": image_url
+            })
+            
+        return {"items": real_items}
+        
+    except Exception as e:
+        # 에러 발생 시 로그를 찍고 빈 리스트를 반환하여 프론트엔드 중단을 방지합니다.
+        print(f"🔥 신규 상품 조회 에러 발생: {e}")
         return {"items": [], "error": str(e)}
 
 @app.get("/api/items")

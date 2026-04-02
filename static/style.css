@@ -57,7 +57,7 @@ body {
 
 /* PC 화면 (640px 초과 시) 기본 활성화 요소 세팅 */
 .menu-toggle-btn, .close-menu-btn, .nav-overlay {
-    display: none; /* 토글 햄버거 메뉴 및 배경색 어둡게 하는 영역은 숨깁니다 */
+    display: none; /* 토글 햄버거 메뉴 및 배경색 어둡게 하는 영역은 숨킵니다 */
 }
 
 .nav-links {
@@ -118,7 +118,7 @@ body {
     .page-nav {
         position: fixed;
         top: 0;
-        left: -300px; /* 창을 화면의 좌측 바깥쪽으로 숨깁니다 */
+        left: -300px; /* 창을 화면의 좌측 바깥쪽으로 숨킵니다 */
         width: 250px;
         height: 100%;
         background-color: #fff;
@@ -127,7 +127,7 @@ body {
         box-shadow: 2px 0 10px rgba(0,0,0,0.1);
     }
     
-    /* JS에서 .open 클래스 활성화 시 원래 위치(left:0)로 튀어 나옵니다 */
+    /* JS에서 .open 클래스 활성화 시 원래 위치(left:0)로 튀어 나옴 */
     .page-nav.open {
         left: 0; 
     }
@@ -170,19 +170,14 @@ body {
 /* ========= 3. 메인 배너 영역 (Main Banner) ========= */
 .banner-section {
     width: 100%;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
 }
 
 .banner-container {
-    width: 100%; /* 어느 환경이든 브라우저 영역을 전부(100%) 채우도록 설정 */
+    width: 100%;
     /* 너비의 60% 높이 비율을 유지시키기 위해 종횡비를 5:3으로 강제 유지시킴 */
     aspect-ratio: 5 / 3; 
     position: relative;
-    overflow: hidden; /* 영역 가로/세로 밖으로 넘쳐 흐르는 이전, পরের 이미지를 숨깁니다 */
+    overflow: hidden; /* 영역 가로/세로 밖으로 넘쳐 흐르는 이전, 다음 이미지를 숨깁니다 */
     background-color: #f7f7f7;
 }
 
@@ -212,170 +207,161 @@ body {
     object-fit: cover; /* 사이즈가 다소 틀어져도 빈 공간 없이 이미지가 가득 차게 맞춥니다 */
     flex-shrink: 0; 
     scroll-snap-align: center;
+    scroll-snap-stop: always; /* 추가: 중간에 어중간하게 멈추는 현상 원천 방지 */
     pointer-events: none; /* 드래그할 때 브라우저 자체 이미지 잔상이 뽑혀나오는 것을 방지 */
 }
 
-
-
-/* ========= 4. 프로모션(Code) 스와이퍼 영역 ========= */
-.promo-section {
+/* ========= 4. 브랜드 스토리 섹션 (Brand Story) ========= */
+.brand-story-section {
     width: 100%;
-    /* 상하좌우 여백을 주어 숨 돌릴 공간 확보 */
-    padding: 4rem 1.5rem; 
+    padding: 80px 20px;
     background-color: #fff;
-    /* 만약 데이터가 없을 때를 대비해 초기 상태 완전 숨김 (JS에서 제어) */
-    display: none; 
+    text-align: center;
+    /* 초기 상태: 애니메이션 실행 전 투명 및 아래 배치 */
+    opacity: 0;
+    transform: translateY(40px);
+    transition: none; /* fade-in-section의 기본 트랜지션 대신 전용 애니메이션 사용 */
 }
 
-.promo-container {
-    display: flex;
-    flex-direction: row;
-    align-items: center; /* 자식 요소들을 세로 중앙으로 맞춤 */
-    width: 100%;
-    max-width: 900px;
+/* 로고 박스 디자인 */
+.brand-story-logo {
+    margin-bottom: 30px;
+}
+
+.brand-story-logo img {
+    max-width: 125px; /* 프리미엄 쇼핑몰의 세련된 크기 */
+    height: auto;
+    opacity: 0.85;
+}
+
+/* 브랜드 슬로건 텍스트 디자인 */
+.brand-story-text {
+    max-width: 850px;
     margin: 0 auto;
-    gap: 2rem; /* 이미지와 텍스트 사이의 간격 */
 }
 
-/* 1. 좌측 이미지 영역: 강제 분할 1비율(1fr) */
-.promo-image-wrapper {
-    flex: 1; 
-    aspect-ratio: 1 / 1; /* 1:1 정사각형 절대 유지 */
-    overflow: hidden;
-    background-color: #f0f0f0;
-    border-radius: 10px; /* 유저 요구사항: 모서리 10px 둥글게 */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+.brand-story-text p {
+    font-size: 1.2rem;
+    line-height: 2;
+    color: #666; /* 사용자 요구사항: 회색 톤 */
+    margin-bottom: 2rem;
+    font-weight: 400;
+    word-break: keep-all;
 }
 
-.promo-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block; /* img 태그 공백 버그 방지 */
-    transition: opacity 0.5s ease-in-out; /* JS 교체 시 부드러운 트랜지션 연출용 */
+/* 🏁 Bottom-Up 애니메이션 엔진 (신규 추가) */
+.brand-story-section.is-visible {
+    animation: amuredoSlideUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: 0.1s; /* 스크롤 위치 도달 시 약간의 시차를 두고 등장 */
 }
 
-/* 2. 우측 텍스트 영역: 강제 분할 2비율(2fr) */
-.promo-text-container {
-    flex: 2; 
-    display: flex;
-    flex-direction: column;
-    /* 유저 요구사항: 글 - 컨테이너 중간 높이에 배치 (상하 중앙) */
-    justify-content: center; 
-    height: 100%; /* 부모의 100% 높이를 가져가야 상하 중앙 정렬이 제대로 동작함 */
-    min-height: 200px; /* 텍스트가 너무 적을 경우 높이가 무너지는 현상 방지 */
+@keyframes amuredoSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-/* 실제 텍스트 문자열 요소 (중앙 정렬) */
-.promo-text-content {
-    /* 유저 요구사항: 중앙정렬 */
-    text-align: center; 
-    font-size: 1.15rem;
-    line-height: 1.8;
-    color: #333;
-    word-break: keep-all; 
-    transition: opacity 0.5s ease-in-out;
-}
-
-/* 컨테이너 하단 '이전' '다음' 네비게이션 버튼 박스 */
-.promo-controls {
-    display: flex;
-    justify-content: space-between; /* 양 끝단으로 버튼 밀어내기 */
-    width: 100%;
-    margin-top: 2.5rem; /* 글씨와 버튼을 서로 멀리 띄웁니다 */
-}
-
-/* 브랜드 시그니처 버튼 디자인 */
-.promo-btn {
-    background-color: #0e3a5b; /* 시그니처 네이비 कलर */
-    border: none;
-    border-radius: 8px; /* 모서리가 둥근 사각형 */
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: #fff; /* 화살표 폰트 화이트 */
-    cursor: pointer;
-    letter-spacing: 2px;
-    padding: 0.8rem 1.5rem; /* 넉넉한 클릭 영역 (Padding) */
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-/* 마우스 호버(Hover) 시 상호작용 피드백 */
-.promo-btn:hover {
-    background-color: #175785; /* 기존 색상보다 밝은 네이비 톤 전환 */
-    transform: translateY(-2px); /* 살짝 위로 떠오르는 엘리베이트 효과 추가 */
-}
-
-/* 중앙 상세보기 투명 텍스트 버튼 디자인 */
-.promo-detail-btn {
-    background: transparent;
-    border: none;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #555; /* 모던한 다크 그레이 */
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 0.8rem 1rem;
-    transition: color 0.3s ease, transform 0.2s ease;
-}
-
-.promo-detail-btn:hover {
-    color: #0e3a5b; /* 시그니처 네이비 톤으로 반응 */
-    transform: translateY(-2px);
-    font-weight: 800;
-}
-
-/* 640px 이하 모바일 환경 (유저 승인 사항: 상하 배치) */
+/* 모바일 전용 여백 조정 */
 @media screen and (max-width: 640px) {
-    .promo-container {
-        flex-direction: column; /* 세로 배열 (위쪽: 이미지, 아래쪽: 글) */
-        gap: 1.5rem;
+    .brand-story-section {
+        padding: 60px 1.5rem;
     }
-    .promo-image-wrapper {
-        width: 100%; /* 모바일에 꽉 차게 변경 */
-        max-width: 300px; /* 하지만 너무 거대해지는 것을 방지 (300px 제약) */
-        margin: 0 auto;
-    }
-    .promo-text-container {
-        width: 100%;
+    .brand-story-text p {
+        font-size: 1.05rem;
     }
 }
-
 
 /* ========= 5. 베스트 아이템 영역 (Item Cards) ========= */
 .best-items-section {
     width: 100%;
-    /* 상하좌우 여백을 주어 배너 및 테두리 사이에 숨을 돌릴 공간(호흡) 마련 */
-    padding: 3.5rem 1.5rem 5rem 1.5rem; 
+    /* 상단 10px, 하단 10px로 고정하여 섹션 간 간격 통일 */
+    padding: 10px 1.5rem 10px 1.5rem; 
     background-color: #fff;
 }
 
-/* 서브 타이틀 'Best' */
+/* 서브 타이틀 공통 스타일 */
 .section-subtitle {
-    text-align: center;
-    font-size: 2.2rem;
+    text-align: center; /* 유저 요구사항: 중앙 정렬 */
+    font-size: 2rem; /* 텍스트가 길어졌으므로 살짝 조정 */
     font-weight: 800;
     margin-bottom: 2.5rem;
     color: #111;
     text-transform: uppercase;
-    letter-spacing: 2px; /* 깔끔한 모던 쇼핑몰 연출 (자간 증가) */
+    letter-spacing: 2.2px; /* 깔끔한 모던 쇼핑몰 연출 (자간 증가) */
 }
 
-/* 아이템 3열 고정 그리드 배치 시스템 */
+/* 🏁 신규: 베스트 섹션 전용 2매 이미지 스와이프 배너 (600px 제한) */
+.best-banner-container {
+    max-width: 600px;
+    margin: 0 auto 2.5rem; /* 중앙 정렬 및 선글라스 그리드와의 간격 */
+    overflow: hidden;
+    border-radius: 8px; /* 모던한 라운딩 */
+}
+
+.best-banner-track {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none; /* IE, Edge */
+}
+
+.best-banner-track::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.best-banner-track.active-drag {
+    scroll-snap-type: none; /* 마우스 드래그 중 스냅 일시 해제 */
+    cursor: grabbing;
+}
+
+.best-banner-img {
+    width: 100%;
+    height: auto;
+    flex-shrink: 0;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+/* 아이템 가로 스와이프 그리드 배치 시스템 (1행 무한 둘러보기) */
 .item-grid-container {
-    display: grid;
-    /* 사용자 요구사항: 고정 3열(3 Columns). 각 열은 1fr(Fraction) 균등하게 3분할 됨. 줄 바꿈 시 자동 행 확장. */
-    grid-template-columns: repeat(3, 1fr);
+    display: flex; /* 가로 1행 배치를 위해 Flex 사용 */
+    flex-wrap: nowrap; /* 무조건 한 줄로만 배치 */
+    overflow-x: auto; /* 가로 스크롤 활성화 */
+    scroll-snap-type: x mandatory; /* 카드별 딱딱 끊어지는 스냅 부여 */
     gap: 1.5rem; /* 각 상품 카드 사이의 공백(간격) */
+    padding: 0 10px 1rem 10px; /* 좌측 아이템 정렬 선 맞춤 및 하단 숨통 확보 */
+    scrollbar-width: none; /* 파이어폭스 스크롤바 숨김 */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 크롬, 사파리 스크롤바 숨김 */
+.item-grid-container::-webkit-scrollbar {
+    display: none;
+}
+
+.item-grid-container.active-drag {
+    scroll-snap-type: none; /* 드래그 중인 경우 스냅 방해 해제 */
+    cursor: grabbing;
 }
 
 /* 개별 아이템 카드 루트 */
 .item-card {
+    flex: 0 0 calc(45%); /* 모바일: 한 줄에 2개 정도 걸치도록 설정 */
     display: flex;
     flex-direction: column;
-    /* CSS Grid 이슈 방지: 상품명 텍스트가 매우 길 때 열이 모바일 화면 밖을 밀어내버리는 Over 현상 원천 차단 */
+    scroll-snap-align: center; /* 스냅 고정 포인트 */
     min-width: 0; 
-    width: 100%;
 }
 
 /* 1. 이미지 컨테이너 (정사각형 1:1 비율 강제 규격 유지) */
@@ -427,9 +413,20 @@ body {
 }
 
 /* *특이사항 알림: 
-   화면이 모바일(640px 이하) 환경 등 협소해지더라도 요구사항("3열 배치 고정")을 최우선으로 준수하기 위해 
-   그리드를 1열 혹은 2열로 축소시키지 않고 3열 체제로 모바일에서도 그대로 락다운(Fixed) 합니다. 
+   화면이 모바일(640px 이하) 환경 등 협소해지더라도 요구사항을 최우선으로 준수하기 위해 
+   그리드를 1열 혹은 2열로 축소시키지 않고 가로 스와이프 체제로 모바일에서도 그대로 락다운(Fixed) 합니다. 
 */
+
+@media screen and (min-width: 641px) {
+    .item-card {
+        flex: 0 0 calc(24%); /* PC: 한 줄에 4개 정도 정갈하게 배치 */
+    }
+    .section-subtitle {
+        font-size: 2.5rem;
+        padding-left: 0;
+        margin-left: 0; /* PC에서는 컨테이너 마진이 있으므로 기본값 활용 가능 */
+    }
+}
 
 /* ========= 6. 상세 카테고리 (itemList) 전용 그리드 UI ========= */
 /* 페이지 상단 타이틀 (sunglasses 등) */
