@@ -13,7 +13,7 @@
         <!-- 최상단 헤더(Header) 영역: 사이트 전역 공통 사용 -->
         <header class="main-header">
             <div class="logo-wrapper">
-                <img src="https://via.placeholder.com/256x128.png?text=amuredo" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
+                <img src="/static/logo.webp" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
             </div>
             
             <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
@@ -52,7 +52,26 @@
             <div class="detail-info-area" id="detailInfoArea">
                 <h2 class="detail-item-name" id="detailItemName">Loading...</h2>
                 <p class="detail-item-price" id="detailItemPrice">₩ 0</p>
+                
+                <!-- 상품 코멘트 (인용 디자인용 컨테이너) -->
+                <div class="detail-item-desc" id="detailItemDesc" style="display: none;"></div>
+                
+                <!-- 네이버 스마트스토어 외부 전환 구매 버튼 영역 -->
+                <div class="naver-btn-wrapper" id="naverBtnWrapper">
+                    <button class="naver-store-btn" id="naverStoreBtn" style="display: none;">네이버에서 구매하기</button>
+                </div>
             </div>
+            
+            <!-- 연관 상품(Same Code) 추천 최하단 갤러리 룸 -->
+            <section class="related-items-section" id="relatedSection" style="display: none;">
+                <h3 class="related-subtitle">연관 아이템</h3>
+                <!-- 가로 무한 스와이퍼 가능 존 -->
+                <div class="related-track-container">
+                    <div class="related-track" id="relatedTrack">
+                        <!-- JS가 연관 상품별 카드를 생성하여 이곳에 append -->
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 

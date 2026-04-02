@@ -25,6 +25,24 @@ document.addEventListener("DOMContentLoaded", () => {
     closeMenuBtn.addEventListener("click", toggleMenu);
     navOverlay.addEventListener("click", toggleMenu);
 
+    /* ====================================================
+       1.5. 스크롤 위치 감지(IntersectionObserver) 애니메이션 등록
+       ==================================================== */
+    const fadeElements = document.querySelectorAll(".fade-in-section");
+    // 사용자가 스크롤을 내려 해당 요소가 뷰포트에 살짝(10%) 걸치면 노출시킴
+    const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                obs.unobserve(entry.target); // 한번 렌더링된 후에는 감지 해제 (퍼포먼스 향상)
+            }
+        });
+    }, { 
+        threshold: 0.1 
+    });
+    
+    // HTML에 class="fade-in-section" 가 붙은 모든 요소들을 감시 대상에 넣음
+    fadeElements.forEach(el => observer.observe(el));
 
     /* ====================================================
        2. 메인 배너 슬라이드 캐러셀 로직 
@@ -32,13 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
        ==================================================== */
        
     const bannerTrack = document.getElementById("bannerTrack");
-    const prevBtn = document.getElementById("bannerPrevBtn");
-    const nextBtn = document.getElementById("bannerNextBtn");
     
-    let currentSlide = 0;   // 현재 보고 있는 이미지 번호의 위치 (인덱스)
-    let totalSlides = 0;    // 전달 받은 전체 이미지 배너 개수
-    let slideTimer = null;  // 5초 간격으로 이미지를 넘겨줄 타이머 저장용 변수
-
     // 1. 백엔드(FastAPI)의 Firebase 데이터 조회(임시) 엔드포인트에 요청을 보냅니다.
     fetch('/api/banner')
         .then(response => response.json())
@@ -48,14 +60,13 @@ document.addEventListener("DOMContentLoaded", () => {
             // 불러온 이미지 리스트(.paths)가 존재할 경우 화면 렌더링 과정을 시작합니다
             if (paths && paths.length > 0) {
                 renderBanner(paths);
-                startAutoSlide(); // 렌더링이 완전히 성공하면 즉시 5초 세기 타이머 시작
             }
         })
         .catch(error => {
             console.error("Firebase API 배너 이미지 데이터를 불러오는 중 오류 발생:", error);
         });
 
-    // 2. 전달받은 이미지 URL 목록 데이터(paths)를 화면의 HTML 태그(<img>)로 만들어 출력시키는 함수입니다
+    // 2. 전달받은 이미지 URL 목록 데이터를 화면의 HTML 태그(<img>)로 만들어 출력시키는 함수입니다
     function renderBanner(paths) {
         bannerTrack.innerHTML = ''; // 기본적으로 남아있는 임시 영역 텍스트 등 초기화
         
@@ -67,60 +78,82 @@ document.addEventListener("DOMContentLoaded", () => {
             img.className = 'banner-img'; // CSS에서 '100% 꽉 채운 속성'을 상속합니다
             bannerTrack.appendChild(img);
         });
+
+        // 3. PC 데스크탑 환경을 위한 마우스 드래그(스와이프) 폴리필 부착
+        setupDesktopDrag(bannerTrack);
+    }
+    /* ====================================================
+       2.5. 프로모션(Code) 영역 스와이퍼 제어 로직
+       ==================================================== */
+    const promoSection = document.getElementById("promoSection");
+    const promoImage = document.getElementById("promoImage");
+    const promoInfo = document.getElementById("promoInfo");
+    const promoPrevBtn = document.getElementById("promoPrevBtn");
+    const promoNextBtn = document.getElementById("promoNextBtn");
+    const promoDetailBtn = document.getElementById("promoDetailBtn"); // 상세보기 버튼 취득
+
+    let promoDataList = [];
+    let currentPromoIdx = 0;
+
+    // 1. 프로모션 데이터 파싱
+    fetch('/api/promotions')
+        .then(res => res.json())
+        .then(data => {
+            const items = data.items;
+            if (items && items.length > 0) {
+                promoDataList = items;
+                promoSection.style.display = 'block'; // 데이터가 있으면 화면에 노출
+                renderPromo(0); // 최초 첫 번째 렌더링
+            }
+        })
+        .catch(error => {
+            console.error("Firebase 프로모션 데이터 호출 에러:", error);
+        });
+
+    // 2. 인덱스 기반 화면 렌더 트랜지션 함수
+    function renderPromo(idx) {
+        if (promoDataList.length === 0) return;
         
-        totalSlides = paths.length; // 들어간 이미지의 총 개수 파악
-        goToSlide(0); // 렌더링 끝난 직후 0번(첫 번째) 화면 세팅
+        // 투명도 트랜지션 효과를 위해 일시적으로 투명하게 만듦
+        promoImage.style.opacity = '0';
+        promoInfo.style.opacity = '0';
+
+        setTimeout(() => {
+            const item = promoDataList[idx];
+            promoImage.src = item.path;
+            promoInfo.innerHTML = item.info.replace(/\n/g, '<br>'); // 줄바꿈 지원
+            
+            // 데이터 교체 후 투명도 복구
+            promoImage.style.opacity = '1';
+            promoInfo.style.opacity = '1';
+        }, 200); // 0.2초 딜레이
     }
 
-    // 3. 원하는 슬라이드 번호(index) 방향으로 이미지를 강제로 밀어 전환시키는 효과 함수
-    function goToSlide(index) {
-        if (totalSlides === 0) return; // 표시할 사진이 없으면 정지
-        
-        currentSlide = index;
-        
-        // 배열 범위를 계산하여 루프(무한 반복)를 구현합니다
-        if (currentSlide < 0) {
-            // 맨 처음 사진에서 '이전' 방향으로 돌아갈 경우 맨 뒷 사진이 나옵니다
-            currentSlide = totalSlides - 1; 
-        } 
-        else if (currentSlide >= totalSlides) {
-            // 끝 사진에서 '다음' 방향을 누르면 배열 갯수를 초과해 0번 사진으로 루프됩니다
-            currentSlide = 0; 
-        }
+    if (promoPrevBtn && promoNextBtn) {
+        promoPrevBtn.addEventListener('click', () => {
+            currentPromoIdx--;
+            if (currentPromoIdx < 0) currentPromoIdx = promoDataList.length - 1;
+            renderPromo(currentPromoIdx);
+        });
 
-        /* 
-           flex box에서 track(기차 길이 연상)을 통째로 좌측(-X축)으로 좌표이동 시킵니다
-           계산예시 : 0% (첫 번째 사진), -100% (옆의 두 번째 사진 표시), -200% (세 번째 사진 표시) 
-        */
-        const offset = currentSlide * 100;
-        bannerTrack.style.transform = `translateX(-${offset}%)`;
+        promoNextBtn.addEventListener('click', () => {
+            currentPromoIdx++;
+            if (currentPromoIdx >= promoDataList.length) currentPromoIdx = 0;
+            renderPromo(currentPromoIdx);
+        });
     }
 
-    // 4. 요구사항 조건: 이미지가 화면에 노출된 지 '5초(5000ms)' 유지 시 자동으로 넘기는 구동기
-    function startAutoSlide() {
-        clearInterval(slideTimer); // 이미 과거에 작동중인 타이머가 있으면 혼서 방지를 위해 바로 파괴함
-        
-        // 5초에 한번씩 강제로 goToSlide 방향을 한 칸씩 뒤(+1)로 보냅니다
-        slideTimer = setInterval(() => {
-            goToSlide(currentSlide + 1); 
-        }, 5000); 
+    // 3. 상세보기(징검다리 API) 연결 연동
+    if (promoDetailBtn) {
+        promoDetailBtn.addEventListener("click", () => {
+            if (promoDataList.length > 0) {
+                // 현재 보고 있는 프로모션의 고유 아이디(code) 추출
+                const targetCodeId = promoDataList[currentPromoIdx].id;
+                // 만들어둔 백엔드 리다이렉트 API로 브라우저 이동
+                location.href = `/api/promo-redirect/${targetCodeId}`;
+            }
+        });
     }
-
-    // 5. 고객이 수동으로 배너 좌, 우 (이전/다음) 10px 버튼 클릭 시 발생하는 액션 함수
-    function handleManualSlide(direction) {
-        if (direction === 'next') {
-            goToSlide(currentSlide + 1);
-        } else {
-            goToSlide(currentSlide - 1);
-        }
-        
-        // **고객이 버튼으로 화면을 수동 조작했다면, 5초 타이머를 강제로 첫 0초 지점으로 초기화시켜 사용자 경험(UX) 엉킴을 방지합니다**
-        startAutoSlide();
-    }
-
-    // 사용자가 실제로 누를 다음 버튼 객체에 클릭 이벤트 연동
-    nextBtn.addEventListener("click", () => handleManualSlide('next'));
-    prevBtn.addEventListener("click", () => handleManualSlide('prev'));
 
     /* ====================================================
        3. 메인 하단: 'Best' 아이템 카드 3열 그리드 생성 로직
@@ -187,6 +220,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // 최종적으로 페이지의 그리드 시스템 컨테이너에 카드를 장착
             bestItemsGrid.appendChild(card);
+        });
+    }
+
+    /* ====================================================
+       4. [공용 유틸리티] 데스크탑 마우스 드래그 가로 스크롤 호환 함수
+       ==================================================== */
+    function setupDesktopDrag(trackElement) {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        trackElement.addEventListener('mousedown', (e) => {
+            isDown = true;
+            trackElement.classList.add('active-drag'); // CSS Snap 해제용
+            startX = e.pageX - trackElement.offsetLeft;
+            scrollLeft = trackElement.scrollLeft;
+        });
+
+        trackElement.addEventListener('mouseleave', () => {
+            isDown = false;
+            trackElement.classList.remove('active-drag');
+        });
+
+        trackElement.addEventListener('mouseup', () => {
+            isDown = false;
+            trackElement.classList.remove('active-drag');
+        });
+
+        trackElement.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - trackElement.offsetLeft;
+            const walk = (x - startX) * 1.5; // 드래그 속도 배율
+            trackElement.scrollLeft = scrollLeft - walk;
         });
     }
 });

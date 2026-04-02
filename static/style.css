@@ -170,6 +170,11 @@ body {
 /* ========= 3. 메인 배너 영역 (Main Banner) ========= */
 .banner-section {
     width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 }
 
 .banner-container {
@@ -181,13 +186,23 @@ body {
     background-color: #f7f7f7;
 }
 
-/* 여러 이미지 요소들을 감싸는 스크롤 궤도 트랙 영역 */
+/* 여러 이미지 요소들을 감싸는 스와이프 스크롤 트랙 영역 */
 .banner-track {
     display: flex;
     height: 100%;
     width: 100%;
-    /* 슬라이드 넘김이 넘어갈 때 부드러운 전환 효과 부과 (0.5s 동안 이동) */
-    transition: transform 0.5s ease-in-out; 
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+.banner-track::-webkit-scrollbar {
+    display: none;
+}
+.banner-track.active-drag {
+    scroll-snap-type: none; /* 마우스 드래깅 시 부자연스러운 끊김 해소 */
+    cursor: grabbing;
 }
 
 /* 화면 내부의 실제 배너 이미지 */
@@ -195,41 +210,137 @@ body {
     width: 100%; /* flex 구조 안에서도 이미지 한 장당 컨테이너 전체 공간을 차지하게 함 */
     height: 100%;
     object-fit: cover; /* 사이즈가 다소 틀어져도 빈 공간 없이 이미지가 가득 차게 맞춥니다 */
-    flex-shrink: 0; /* 강제로 작아지거나 비율이 찌그러지지 않도록 크기를 고정합니다 */
+    flex-shrink: 0; 
+    scroll-snap-align: center;
+    pointer-events: none; /* 드래그할 때 브라우저 자체 이미지 잔상이 뽑혀나오는 것을 방지 */
 }
 
-/* ========= 4. 배너 제어 (이전 / 다음) 버튼 UI ========= */
-.banner-ctrl-btn {
-    position: absolute; /* 메인 이미지 위에 떠 있는 상태 부여 */
-    top: 0;
-    height: 100%; /* 버튼 높이가 안에 들어간 이미지 높이와 완전히 일치하도록 100% 설정 */
-    width: 30px;  /* 변경된 요구사항에 맞추어 버튼 너비 "30px" 로 강제 고정함 */
-    background-color: rgba(255, 255, 255, 0.4); /* 버튼 형태 구분을 위해 투명한 흰색/회색 적용 */
+
+
+/* ========= 4. 프로모션(Code) 스와이퍼 영역 ========= */
+.promo-section {
+    width: 100%;
+    /* 상하좌우 여백을 주어 숨 돌릴 공간 확보 */
+    padding: 4rem 1.5rem; 
+    background-color: #fff;
+    /* 만약 데이터가 없을 때를 대비해 초기 상태 완전 숨김 (JS에서 제어) */
+    display: none; 
+}
+
+.promo-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center; /* 자식 요소들을 세로 중앙으로 맞춤 */
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    gap: 2rem; /* 이미지와 텍스트 사이의 간격 */
+}
+
+/* 1. 좌측 이미지 영역: 강제 분할 1비율(1fr) */
+.promo-image-wrapper {
+    flex: 1; 
+    aspect-ratio: 1 / 1; /* 1:1 정사각형 절대 유지 */
+    overflow: hidden;
+    background-color: #f0f0f0;
+    border-radius: 10px; /* 유저 요구사항: 모서리 10px 둥글게 */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.promo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block; /* img 태그 공백 버그 방지 */
+    transition: opacity 0.5s ease-in-out; /* JS 교체 시 부드러운 트랜지션 연출용 */
+}
+
+/* 2. 우측 텍스트 영역: 강제 분할 2비율(2fr) */
+.promo-text-container {
+    flex: 2; 
+    display: flex;
+    flex-direction: column;
+    /* 유저 요구사항: 글 - 컨테이너 중간 높이에 배치 (상하 중앙) */
+    justify-content: center; 
+    height: 100%; /* 부모의 100% 높이를 가져가야 상하 중앙 정렬이 제대로 동작함 */
+    min-height: 200px; /* 텍스트가 너무 적을 경우 높이가 무너지는 현상 방지 */
+}
+
+/* 실제 텍스트 문자열 요소 (중앙 정렬) */
+.promo-text-content {
+    /* 유저 요구사항: 중앙정렬 */
+    text-align: center; 
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: #333;
+    word-break: keep-all; 
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* 컨테이너 하단 '이전' '다음' 네비게이션 버튼 박스 */
+.promo-controls {
+    display: flex;
+    justify-content: space-between; /* 양 끝단으로 버튼 밀어내기 */
+    width: 100%;
+    margin-top: 2.5rem; /* 글씨와 버튼을 서로 멀리 띄웁니다 */
+}
+
+/* 브랜드 시그니처 버튼 디자인 */
+.promo-btn {
+    background-color: #0e3a5b; /* 시그니처 네이비 कलर */
     border: none;
+    border-radius: 8px; /* 모서리가 둥근 사각형 */
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff; /* 화살표 폰트 화이트 */
     cursor: pointer;
-    opacity: 0; /* 평소 화면 상에는 완전히 숨김 처리하여 보이지 않게 함 (투명) */
-    transition: opacity 0.3s ease, background-color 0.2s ease;
-    z-index: 10;
+    letter-spacing: 2px;
+    padding: 0.8rem 1.5rem; /* 넉넉한 클릭 영역 (Padding) */
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-/* 고객이 마우스 커서를 올렸을 때(Hover)만 버튼의 투명도를 1로 올려서 노출 */
-.banner-container:hover .banner-ctrl-btn {
-    opacity: 1; 
+/* 마우스 호버(Hover) 시 상호작용 피드백 */
+.promo-btn:hover {
+    background-color: #175785; /* 기존 색상보다 밝은 네이비 톤 전환 */
+    transform: translateY(-2px); /* 살짝 위로 떠오르는 엘리베이트 효과 추가 */
 }
 
-/* 클릭 시 피드백으로 어두운 검정색으로 살짝 눌리는 느낌 부여 */
-.banner-ctrl-btn:hover {
-    background-color: rgba(0, 0, 0, 0.5);
+/* 중앙 상세보기 투명 텍스트 버튼 디자인 */
+.promo-detail-btn {
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #555; /* 모던한 다크 그레이 */
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.8rem 1rem;
+    transition: color 0.3s ease, transform 0.2s ease;
 }
 
-/* 가장자리 (좌측 / 우측) 밀착 배치 */
-.banner-ctrl-btn.prev {
-    left: 0;
+.promo-detail-btn:hover {
+    color: #0e3a5b; /* 시그니처 네이비 톤으로 반응 */
+    transform: translateY(-2px);
+    font-weight: 800;
 }
 
-.banner-ctrl-btn.next {
-    right: 0;
+/* 640px 이하 모바일 환경 (유저 승인 사항: 상하 배치) */
+@media screen and (max-width: 640px) {
+    .promo-container {
+        flex-direction: column; /* 세로 배열 (위쪽: 이미지, 아래쪽: 글) */
+        gap: 1.5rem;
+    }
+    .promo-image-wrapper {
+        width: 100%; /* 모바일에 꽉 차게 변경 */
+        max-width: 300px; /* 하지만 너무 거대해지는 것을 방지 (300px 제약) */
+        margin: 0 auto;
+    }
+    .promo-text-container {
+        width: 100%;
+    }
 }
+
 
 /* ========= 5. 베스트 아이템 영역 (Item Cards) ========= */
 .best-items-section {
@@ -520,10 +631,11 @@ body {
 }
 
 .detail-item-name {
-    font-size: 1.35rem;
-    font-weight: 700;
+    font-size: 1.5rem; /* 사이즈 업 (Rem 기반 반응형 최적화) */
+    font-weight: 800;
     color: #111;
     margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
 }
 
 .detail-item-price {
@@ -533,12 +645,52 @@ body {
 }
 
 /* ==========================================================
+   상품 코멘트 (매거진 스타일 인용 블록 렌더링)
+   ========================================================== */
+.detail-item-desc {
+    position: relative;
+    max-width: 80%; /* 너무 넓으면 가독성이 떨어지므로 조율 */
+    margin: 3.5rem auto 3rem auto;
+    padding: 0 1.5rem;
+    color: #555; /* 네이비/블랙 메인 폰트와 대비되는 진한 회색 */
+    font-size: 0.95rem;
+    line-height: 1.8; /* 넉넉한 3줄 독해를 위한 자간 */
+    font-style: italic; /* 인용된 글 같은 느낌 부여 */
+    word-break: keep-all; 
+}
+
+/* 좌측 상단 큰따옴표 오프닝 마크 */
+.detail-item-desc::before {
+    content: "“";
+    position: absolute;
+    top: -1.8rem;
+    left: -0.5rem;
+    font-size: 3.5rem;
+    color: #ddd;
+    line-height: 1;
+    font-family: 'Georgia', serif; /* 클래식 폰트 적용 */
+}
+
+/* 우측 하단 큰따옴표 클로징 마크 */
+.detail-item-desc::after {
+    content: "”";
+    position: absolute;
+    bottom: -2.3rem;
+    right: -0.5rem;
+    font-size: 3.5rem;
+    color: #ddd;
+    line-height: 1;
+    font-family: 'Georgia', serif;
+}
+
+/* ==========================================================
    PC 환경 (640px 초과) : 좌측 500px 이미지 / 우측 정보 텍스트 분할 UI
    ========================================================== */
 @media screen and (min-width: 641px) {
     .detail-content {
         display: flex;
         flex-direction: row; /* 컨텐츠를 좌우로 가릅니다 */
+        flex-wrap: wrap; /* 추가: 100% 크기의 연관 상품 섹션이 밑으로 줄바꿈 되도록 허용 */
         align-items: flex-start; /* 상단 라인을 깔끔하게 맞춥니다 */
     }
 
@@ -559,6 +711,27 @@ body {
         flex: 1; /* 남는 우측 공간을 모두 가져갑니다 */
         text-align: right; /* 가장 끝단 기준 우측 정렬 */
         padding: 0 1.5rem 0 2rem; /* 사진과 너무 붙지 않게 띄우고, 우측 벽과의 마진도 확보 */
+    }
+
+    /* 반응형 폭발: PC 모니터에서는 브랜드명이 2.0rem으로 웅장하게 확대됨 */
+    .detail-item-name {
+        font-size: 2.0rem;
+        margin-bottom: 0.8rem;
+    }
+    
+    /* PC 모드에서는 코멘트를 조금 우측 정렬 */
+    .detail-item-desc {
+        max-width: 100%;
+        margin: 3rem 0; /* 중앙 정렬용 auto 제거 */
+        padding: 0 0 0 1rem; 
+    }
+    
+    /* PC 우측 정렬 시 따옴표 위치 보정 */
+    .detail-item-desc::before {
+        left: -1rem;
+    }
+    .detail-item-desc::after {
+        right: 0rem;
     }
 }
 
@@ -656,6 +829,48 @@ body {
     font-size: 1.1rem;
 }
 
+/* ========= 8. 네이버 구매 연동 버튼 (item_detail.html) ========= */
+.naver-btn-wrapper {
+    margin-top: 3.5rem;
+    width: 100%;
+    /* PC 모드: 우측 정렬 기본값 */
+    text-align: right; 
+}
+
+.naver-store-btn {
+    display: inline-block;
+    background-color: transparent;
+    color: #0e3a5b; /* 시그니처 폰트 컬러 */
+    border: 2px solid #0e3a5b; /* 아웃라인 디자인 */
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    /* 사용자 요구사항: 입체 효과 (3D Flat 박스 섀도우) */
+    box-shadow: 4px 4px 0px #0e3a5b;
+    transition: all 0.2s ease;
+}
+
+.naver-store-btn:hover {
+    background-color: #0e3a5b;
+    color: #fff;
+    /* 호버 시 박스가 그림자 쪽으로 눌리는 입체적인 프레스 효과 */
+    box-shadow: 0px 0px 0px #0e3a5b;
+    transform: translate(4px, 4px);
+}
+
+.naver-store-btn:active {
+    filter: brightness(0.9);
+}
+
+/* 640px 이하 모바일 환경: 디자인 중앙 정렬 오버라이딩 */
+@media screen and (max-width: 640px) {
+    .naver-btn-wrapper {
+        text-align: center;
+        margin-top: 2.5rem;
+    }
+}
+
 /* ========= 9. JS 전용 마이크로 Fade-in 애니메이션 ========= */
 /* 아래에서 위로 은은하게 등장하는 클래스 규칙 */
 .fade-in-section {
@@ -669,4 +884,104 @@ body {
 .fade-in-section.is-visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+/* ========= 10. 상세 페이지 연관 아이템 스와이퍼 ========= */
+/* 기본 컨테이너 여백 통제 영역: .detail-content 와 독립 */
+.related-items-section {
+    width: 100%;
+    margin-top: 5rem;
+    padding-top: 3rem;
+    border-top: 1px solid #eee; /* 시각적 분리선 */
+}
+
+.related-subtitle {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #111;
+    letter-spacing: 1px;
+}
+
+/* 스와이프를 허용할 래핑 보호구역 */
+.related-track-container {
+    width: 100%;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory; /* 카드 스냅 활성화 */
+    /* 스크롤바 모던화 숨김 처리 */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.related-track-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* 실제 카드가 나열될 길쭉한 트랙 */
+.related-track {
+    display: flex;
+    flex-wrap: nowrap; /* 절대로 다음 줄로 넘기지 않음 */
+    gap: 1.5rem; /* 카드 사이의 여백 */
+    padding-bottom: 1rem;
+}
+
+/* 개별 카드 프레임 (4개 초과 시를 고려한 1:4 분할 설계) */
+.related-card {
+    /* PC 환경 기본 1열 4분할 유지 (간격 1.5rem 분배분 차감) */
+    flex: 0 0 calc(25% - 1.125rem); 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    scroll-snap-align: start; /* 스와이프 시 멈추는 기준 포인트 */
+    cursor: pointer;
+    text-decoration: none; /* 혹시 모를 a태그 사용 대비 */
+}
+
+/* 첫 번째 카드에만 왼쪽 마진 10px 부여 (메인 사진 영역과 동일 선상 정렬) */
+.related-card:first-child {
+    margin-left: 10px;
+}
+
+.related-card-img-wrapper {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    margin-bottom: 0.8rem;
+}
+
+.related-card-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.related-card:hover .related-card-img-wrapper img {
+    transform: scale(1.05); /* 사진 미세 줌 효과 피드백 */
+}
+
+/* 상품명 중앙 정렬 문자열 */
+.related-card p.related-name {
+    font-size: 1rem;
+    color: #333;
+    font-weight: 500;
+    text-align: center;
+    margin: 0;
+    /* 긴 이름 자르기 줄임표 처리 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%; 
+}
+
+/* 모바일 분할 재설계 (화면이 좁으므로 1장에 여러 개를 구겨 넣지 않음) */
+@media screen and (max-width: 768px) {
+    .related-card {
+        /* 스마트폰은 2개씩 보여주기 위해 % 수정 */
+        flex: 0 0 calc(45%);
+    }
 }

@@ -17,8 +17,8 @@
         <header class="main-header">
             <!-- 1. 좌측 로고 이미지 (가로 25%, 높이 50% 비율 유지) -->
             <div class="logo-wrapper">
-                <!-- 실제 로고를 연동할 때는 이쪽의 src 경로를 변경하시면 됩니다. -->
-                <img src="https://via.placeholder.com/256x128.png?text=amuredo" alt="amuredo Logo" class="logo">
+                <!-- 오리지널 브랜드 로고 적용 (클릭 시 새로고침 동작 추가) -->
+                <img src="/static/logo.webp" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
             </div>
 
             <!-- 2. 중앙 빈 공간 (flex box에 의해 자동으로 여백 형성됨) -->
@@ -55,17 +55,34 @@
                     <div class="banner-track" id="bannerTrack">
                         <!-- JS 코드가 API 통신 후 <img> 태그를 자동으로 채웁니다 -->
                     </div>
-
-                    <!-- 호버 시 나타나는 제어 버튼 (위치: 양 끝 / 너비: 10px / 높이: 100%) -->
-                    <button class="banner-ctrl-btn prev" id="bannerPrevBtn"></button>
-                    <button class="banner-ctrl-btn next" id="bannerNextBtn"></button>
                 </div>
             </section>
 
-            <!-- 추후 추가될 컨텐츠 구성 공간 -->
+            <!-- 프로모션(코드) 아이템 스와이퍼 영역 -->
+            <section class="promo-section fade-in-section" id="promoSection">
+                <div class="promo-container">
+                    <!-- 좌측 이미지 박스 (1:1 정사각형 비율 렌더링 존) -->
+                    <div class="promo-image-wrapper">
+                        <img src="" alt="Promo Presentation" class="promo-image" id="promoImage">
+                    </div>
+                    
+                    <!-- 우측 텍스트 인포 박스 (2비율, 높이 중앙 정렬) -->
+                    <div class="promo-text-container">
+                        <div class="promo-text-content" id="promoInfo">
+                            <!-- JS를 통해 Firebase 'info' 데이터가 들어옵니다 -->
+                        </div>
+                        <!-- 최하단 스와이핑 제어 버튼 그룹 -->
+                        <div class="promo-controls">
+                            <button class="promo-btn prev" id="promoPrevBtn">&lt;&lt;</button>
+                            <button class="promo-detail-btn" id="promoDetailBtn">상세보기</button>
+                            <button class="promo-btn next" id="promoNextBtn">&gt;&gt;</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             <!-- 베스트 아이템 카드 (Item Cards) 구역 -->
-            <section class="best-items-section">
+            <section class="best-items-section fade-in-section">
                 <!-- 서브 타이틀 'Best' -->
                 <h2 class="section-subtitle">Best</h2>
 

@@ -26,6 +26,34 @@ document.addEventListener("DOMContentLoaded", () => {
             itemName.textContent = data.name;
             itemPrice.textContent = `₩ ${data.price}`;
 
+            // 상품 설명(코멘트) 렌더링 (인용 블록 디자인)
+            const detailItemDesc = document.getElementById("detailItemDesc");
+            if (detailItemDesc) {
+                if (data.desc && data.desc.trim() !== "") {
+                    // \n 줄바꿈 문자를 HTML <br> 태그로 치환해 뷰에 투영합니다 (정규식 사용)
+                    detailItemDesc.innerHTML = data.desc.replace(/\n/g, '<br>');
+                    detailItemDesc.style.display = 'block';
+                } else {
+                    // 코멘트가 빈 값이면 우아하게 숨김 처리합니다.
+                    detailItemDesc.style.display = 'none';
+                }
+            }
+
+            // 네이버 스마트스토어 외부 전환 버튼 로직
+            const naverStoreBtn = document.getElementById("naverStoreBtn");
+            if (naverStoreBtn) {
+                if (data.naver && data.naver.trim() !== "") {
+                    // 데이터가 있으면(True) 화면에 표시하고 클릭 연동
+                    naverStoreBtn.style.display = 'inline-block';
+                    naverStoreBtn.addEventListener("click", () => {
+                        window.open(data.naver, '_blank'); // 파싱받은 외부 주소로 새 창 띄우기
+                    });
+                } else {
+                    // 없으면 버튼 숨김 (방어 코딩)
+                    naverStoreBtn.style.display = 'none';
+                }
+            }
+
             // 이미지 배열 패치 및 스와이프 슬라이더 렌더링
             const paths = data.paths || [];
             if (paths.length === 0) {
@@ -140,5 +168,57 @@ document.addEventListener("DOMContentLoaded", () => {
             const walk = (x - startX) * 1.5; // 스크롤 민감도(속도)
             trackElement.scrollLeft = scrollLeft - walk;
         });
+    }
+
+    // -------------------------------------------------------------
+    // 6. 최하단 '연관 아이템' 비동기 호출 및 렌더링 로직
+    // -------------------------------------------------------------
+    const relatedSection = document.getElementById("relatedSection");
+    const relatedTrack = document.getElementById("relatedTrack");
+
+    if (itemId && relatedSection && relatedTrack) {
+        fetch(`/api/items/${itemId}/related`)
+            .then(res => res.json())
+            .then(data => {
+                const items = data.items;
+                // 동일 코드를 가진 연관 상품이 1개라도 있을 때만 노출
+                if (items && items.length > 0) {
+                    relatedSection.style.display = 'block';
+                    
+                    items.forEach(item => {
+                        // 1. 전체 카드 컨테이너
+                        const card = document.createElement('a');
+                        card.className = 'related-card';
+                        card.href = `/item/${item.id}`; // 클릭 시 페이지 이동
+
+                        // 2. 1:1 이미지 래퍼 박스
+                        const imgWrapper = document.createElement('div');
+                        imgWrapper.className = 'related-card-img-wrapper';
+
+                        const img = document.createElement('img');
+                        img.src = item.path;
+                        img.alt = item.name;
+
+                        imgWrapper.appendChild(img);
+
+                        // 3. 상품명 라벨
+                        const nameEl = document.createElement('p');
+                        nameEl.className = 'related-name';
+                        nameEl.textContent = item.name;
+
+                        // 4. 조합 후 트랙에 삽입
+                        card.appendChild(imgWrapper);
+                        card.appendChild(nameEl);
+                        
+                        relatedTrack.appendChild(card);
+                    });
+
+                    // 연관 아이템 스와이퍼 영역 역시 PC 마우스 드래그를 지원합니다.
+                    setupDesktopDrag(document.querySelector('.related-track-container'));
+                }
+            })
+            .catch(err => {
+                console.error("연관 상품 호출 에러:", err);
+            });
     }
 });
