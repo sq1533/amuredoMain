@@ -3,11 +3,20 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: inherit; /* 모든 요소가 부모의 폰트를 상속받도록 설정 */
+}
+
+/* 버튼, 입력창 등 폼 요소는 명시적으로 상속 설정이 필요함 */
+button, input, select, textarea {
+    font-family: inherit;
+    font-size: inherit;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: #f0f0f0; /* 배경을 가벼운 회색으로 둬서 메인 1024px 박스가 잘 보이게 설정 */
+    font-family: 'Dongle', sans-serif; /* 전체 폰트를 'Dongle'로 통일 */
+    font-size: 24px; /* 'Dongle' 폰트 특성상 작게 느껴지므로 기본 크기 대폭 상향 */
+    line-height: 1.2;
+    background-color: #f0f0f0; 
     color: #222;
 }
 
@@ -69,7 +78,7 @@ body {
 .nav-switch-btn {
     background: transparent;
     border: none;
-    font-size: 1rem;
+    font-size: 1.5rem; /* PC 환경: 20px에서 1.5rem으로 변경 */
     font-weight: 600;
     cursor: pointer;
     color: #333;
@@ -149,7 +158,7 @@ body {
     }
 
     .nav-switch-btn {
-        font-size: 1.2rem;
+        font-size: 1.5rem; /* 모바일 환경: 20px에서 1.5rem으로 변경 */
         padding: 1rem 0;
         display: block;
         width: 100%;
@@ -241,12 +250,14 @@ body {
 }
 
 .brand-story-text p {
-    font-size: 1.2rem;
-    line-height: 2;
-    color: #666; /* 사용자 요구사항: 회색 톤 */
-    margin-bottom: 2rem;
+    font-size: 2.5rem; /* 사용자 요청에 따라 큼직하게 상향 조정 */
+    line-height: 1.1;
+    color: #0e3a5b; /* 시그니처 블루는 유지 */
+    margin-bottom: 1.5rem;
+    font-family: 'Dongle', sans-serif; /* 통일감 부여 */
     font-weight: 400;
     word-break: keep-all;
+    letter-spacing: 0.8px;
 }
 
 /* 🏁 Bottom-Up 애니메이션 엔진 (신규 추가) */
@@ -389,7 +400,7 @@ body {
 
 /* 2. 상품명 (string) */
 .item-name {
-    font-size: 1.05rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: #222;
     margin-bottom: 0.4rem;
@@ -431,13 +442,14 @@ body {
 /* ========= 6. 상세 카테고리 (itemList) 전용 그리드 UI ========= */
 /* 페이지 상단 타이틀 (sunglasses 등) */
 .category-page-title {
+    font-family: 'Dongle', sans-serif;
+    font-size: 3rem;       /* 메인보다 더 크게 강조 */
     text-align: center;
-    font-size: 2.2rem;
-    font-weight: 800;
-    margin-bottom: 2rem;
-    color: #111;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    color: #0e3a5b;       /* 시그니처 블루 적용 */
+    margin: 2.5rem 0 1.5rem 0;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    text-transform: capitalize; 
 }
 
 /* ======= Flexbox 기반 반응형 레이아웃 (Grid 버그 절대 불가) ======= */
@@ -510,9 +522,9 @@ body {
     text-align: center; 
 }
 
-/* 상품명 텍스트 (작고 정갈하게) */
+/* 상품명 텍스트 (모던하고 시원하게) */
 .category-item-name {
-    font-size: 0.85rem;
+    font-size: 1.5rem; /* 메인 페이지와 동일하게 1.5rem으로 상향 */
     font-weight: 600;
     color: #111;
     white-space: nowrap;
@@ -522,9 +534,9 @@ body {
     margin: 0;
 }
 
-/* 가격 텍스트 (더 작고 회색조 톤다운 처리해 상품명 보조) */
+/* 가격 텍스트 (가독성을 고려해 1.2rem으로 상향) */
 .category-item-price {
-    font-size: 0.8rem;
+    font-size: 1.2rem;
     font-weight: 500;
     color: #555;
     margin: 0;
@@ -628,7 +640,7 @@ body {
 }
 
 .detail-item-name {
-    font-size: 1.5rem; /* 사이즈 업 (Rem 기반 반응형 최적화) */
+    font-size: 2.5rem; /* 사용자 요청: 2.5rem으로 상향 */
     font-weight: 800;
     color: #111;
     margin-bottom: 0.5rem;
@@ -636,7 +648,7 @@ body {
 }
 
 .detail-item-price {
-    font-size: 1.2rem;
+    font-size: 1.5rem; /* 사용자 요청: 1.5rem으로 상향 */
     font-weight: 500;
     color: #4a90e2; 
 }
@@ -650,8 +662,8 @@ body {
     margin: 3.5rem auto 3rem auto;
     padding: 0 1.5rem;
     color: #555; /* 네이비/블랙 메인 폰트와 대비되는 진한 회색 */
-    font-size: 0.95rem;
-    line-height: 1.8; /* 넉넉한 3줄 독해를 위한 자간 */
+    font-size: 1.5rem; /* 사용자 요청: 1.5rem으로 상향 */
+    line-height: 1.6; /* 글자가 커졌으므로 줄간격 소폭 조정 */
     font-style: italic; /* 인용된 글 같은 느낌 부여 */
     word-break: keep-all; 
 }
@@ -712,7 +724,7 @@ body {
 
     /* 반응형 폭발: PC 모니터에서는 브랜드명이 2.0rem으로 웅장하게 확대됨 */
     .detail-item-name {
-        font-size: 2.0rem;
+        font-size: 2.5rem; /* PC 환경에서도 2.5rem으로 고정 상향 */
         margin-bottom: 0.8rem;
     }
     
@@ -840,7 +852,7 @@ body {
     color: #0e3a5b; /* 시그니처 폰트 컬러 */
     border: 2px solid #0e3a5b; /* 아웃라인 디자인 */
     padding: 0.8rem 2rem;
-    font-size: 1.1rem;
+    font-size: 2.0rem; /* 사용자 요청: 2.0rem으로 대폭 상향 */
     font-weight: 700;
     cursor: pointer;
     /* 사용자 요구사항: 입체 효과 (3D Flat 박스 섀도우) */
@@ -894,7 +906,7 @@ body {
 
 .related-subtitle {
     text-align: center;
-    font-size: 1.5rem;
+    font-size: 2.5rem; /* 사용자 요청: 2.5rem으로 상향 */
     font-weight: 700;
     margin-bottom: 2rem;
     color: #111;
@@ -963,7 +975,7 @@ body {
 
 /* 상품명 중앙 정렬 문자열 */
 .related-card p.related-name {
-    font-size: 1rem;
+    font-size: 1.5rem; /* 사용자 요청: 1.5rem으로 상향 */
     color: #333;
     font-weight: 500;
     text-align: center;

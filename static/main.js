@@ -128,31 +128,31 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-    // 3. 메인 하단: 'Best' 아이템 카드 스와이퍼 생성 로직
-    const bestItemsGrid = document.getElementById("bestItemsGrid");
+    // 3. 메인 하단: 'Sunglasses Best' 아이템 카드 스와이퍼 생성 로직
+    const sunglassesBestGrid = document.getElementById("sunglassesBestGrid");
     fetch('/api/items/best')
         .then(response => response.json())
         .then(data => {
             const bestItems = data.items;
             if (bestItems && bestItems.length > 0) {
-                renderItemsTrack(bestItemsGrid, bestItems);
-                setupDesktopDrag(bestItemsGrid);
+                renderItemsTrack(sunglassesBestGrid, bestItems);
+                setupDesktopDrag(sunglassesBestGrid);
             }
         })
-        .catch(error => console.error("Best 아이템 통신 오류:", error));
+        .catch(error => console.error("Sunglasses Best 아이템 통신 오류:", error));
 
-    // 4. 메인 최하단: 'New' 신규 상품 카드 스와이퍼 생성 로직
-    const newItemsGrid = document.getElementById("newItemsGrid");
+    // 4. 메인 최하단: 'Glasses Best' 신규 상품 카드 스와이퍼 생성 로직
+    const glassesBestGrid = document.getElementById("glassesBestGrid");
     fetch('/api/items/new')
         .then(response => response.json())
         .then(data => {
             const newItems = data.items;
             if (newItems && newItems.length > 0) {
-                renderItemsTrack(newItemsGrid, newItems);
-                setupDesktopDrag(newItemsGrid);
+                renderItemsTrack(glassesBestGrid, newItems);
+                setupDesktopDrag(glassesBestGrid);
             }
         })
-        .catch(error => console.error("New 아이템 통신 오류:", error));
+        .catch(error => console.error("Glasses Best 아이템 통신 오류:", error));
 
     /**
      * 상품 리스트를 받아서 지정된 컨테이너에 가로 스와이프용 카드를 생성하는 공용 함수

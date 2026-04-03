@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>amuredoMain - 카테고리 리스트</title>
-    <!-- 외부 공통 스타일시트 연결 (캐시 무효화 쿼리스트링 삽입) -->
-    <link rel="stylesheet" href="/static/style.css?v=4.0">
+    <!-- 구글 폰트 'Dongle' 전용 (웹사이트 메인 폰트) -->
+    <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- 외부 공통 스타일시트 연결 (캐시 무효화) -->
+    <link rel="stylesheet" href="/static/style.css?v=4.6">
 </head>
 <body>
     <div class="app-container">
@@ -13,7 +15,7 @@
         <!-- 최상단 헤더(Header) 영역: 사이트 전역 공통 사용 -->
         <header class="main-header">
             <div class="logo-wrapper">
-                <img src="/static/logo.webp" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
+                <img src="/static/img/logo.webp" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
             </div>
             
             <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
@@ -46,7 +48,7 @@
     </div>
 
     <!-- itemList용 라우팅 및 렌더링을 처리하는 자바스크립트 연결 (캐시 갱신) -->
-    <script src="/static/itemList.js?v=4.0"></script>
+    <script src="/static/itemList.js?v=4.5"></script>
     
     <!-- 공통 메뉴 동작용 스크립트: main.js의 역할을 카테고리 페이지에서도 사용할 수 있도록 탑재 -->
     <script>

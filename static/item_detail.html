@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>amuredoMain - 상품 상세</title>
-    <!-- 외부 공통 스타일시트 연결 -->
-    <link rel="stylesheet" href="/static/style.css?v=5.1">
+    <!-- 구글 폰트 'Dongle' 전용 (웹사이트 메인 폰트) -->
+    <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- 외부 공통 스타일시트 연결 (캐시 무효화) -->
+    <link rel="stylesheet" href="/static/style.css?v=5.3">
 </head>
 <body>
     <div class="app-container">
@@ -13,7 +15,7 @@
         <!-- 최상단 헤더(Header) 영역: 사이트 전역 공통 사용 -->
         <header class="main-header">
             <div class="logo-wrapper">
-                <img src="/static/logo.webp" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
+                <img src="/static/img/logo.webp" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
             </div>
             
             <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
@@ -76,7 +78,7 @@
     </div>
 
     <!-- 상세 페이지 로직 파일 (V버전 증가) -->
-    <script src="/static/itemDetail.js?v=7.0"></script>
+    <script src="/static/itemDetail.js?v=7.1"></script>
     
     <!-- 공통 메뉴 동작용 스크립트 -->
     <script>

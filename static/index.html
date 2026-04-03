@@ -5,8 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>amuredoMain</title>
+    <!-- 구글 폰트 'Dongle' 전용 (웹사이트 메인 폰트) -->
+    <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@300;400;700&display=swap" rel="stylesheet">
     <!-- 외부 스타일시트 연결 (캐시 무효화) -->
-    <link rel="stylesheet" href="/static/style.css?v=3.5">
+    <link rel="stylesheet" href="/static/style.css?v=4.6">
 </head>
 
 <body>
@@ -18,7 +20,7 @@
             <!-- 1. 좌측 로고 이미지 (가로 25%, 높이 50% 비율 유지) -->
             <div class="logo-wrapper">
                 <!-- 오리지널 브랜드 로고 적용 (클릭 시 새로고침 동작 추가) -->
-                <img src="/static/logo.webp" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
+                <img src="/static/img/logo.webp" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
             </div>
 
             <!-- 2. 중앙 빈 공간 (flex box에 의해 자동으로 여백 형성됨) -->
@@ -62,52 +64,52 @@
             <section class="brand-story-section fade-in-section">
                 <!-- 브랜드 중앙 로고 배치 -->
                 <div class="brand-story-logo">
-                    <img src="/static/logo.webp" alt="amuredo Logo">
+                    <img src="/static/img/logo.webp" alt="amuredo Logo">
                 </div>
                 
                 <!-- 브랜드 슬로건 및 철학 (중앙 정렬 회색 글씨) -->
                 <div class="brand-story-text">
-                    <p>트렌드는 찰나이지만, 클래식의 가치는 영원합니다. 아무래도는 타협하지 않는 품질과 정교한 디테일로 아이웨어의 본질에 집중합니다. 억지로 꾸며낸 화려함보다, 어떤 순간에도 묵묵히 당신의 품격을 대변하는 변치 않는 모던함을 추구합니다. 가벼운 유행 대신 깊이 있는 세련됨을 선택하십시오.</p>
+                    <p>아무래도는 타협하지 않는 품질과 정교한 디테일로 아이웨어의 본질에 집중합니다. 어떤 순간에도 묵묵히 당신의 품격을 대변하는 변치 않는 모던함을 추구합니다. 가벼운 유행 대신 깊이 있는 세련됨을 선택하십시오.</p>
                     
-                    <p>일상을 넘어 당신의 시그니처가 될 데일리 아이웨어, 오직 변함없는 가치와 신뢰로 답하겠습니다.</p>
+                    <p>일상을 넘어 당신의 시그니처가 될 데일리 아이웨어, 아무래도.</p>
                 </div>
             </section>
 
-            <!-- 베스트 아이템 카드 (Item Cards) 구역 -->
-            <section class="best-items-section fade-in-section">
+            <!-- 선글라스 아이템 카드 (Sunglasses Best) 구역 -->
+            <section class="best-items-section sunglasses-best-section fade-in-section">
                 <!-- 서브 타이틀 'Best' -->
                 <h2 class="section-subtitle">Sunglasses Best</h2>
 
                 <!-- 🏁 신규: 베스트 섹션 전용 2매 이미지 스와이프 배너 (600px 제한) -->
                 <div class="best-banner-container fade-in-section" id="bestBannerSwiper">
                     <div class="best-banner-track">
-                        <img src="/static/main01_sunglasses.webp" alt="Best Sunglasses Banner 1" class="best-banner-img">
-                        <img src="/static/main02_sunglasses.webp" alt="Best Sunglasses Banner 2" class="best-banner-img">
+                        <img src="/static/img/main01_sunglasses.webp" alt="Best Sunglasses Banner 1" class="best-banner-img">
+                        <img src="/static/img/main02_sunglasses.webp" alt="Best Sunglasses Banner 2" class="best-banner-img">
                     </div>
                 </div>
 
                 <!-- 아이템 3열 그리드 컨테이너 -->
-                <div class="item-grid-container" id="bestItemsGrid">
-                    <!-- JS 코드가 API에서 Best 품목을 불러와 아이템 카드를 자동으로 삽입시킵니다 -->
+                <div class="item-grid-container" id="sunglassesBestGrid">
+                    <!-- JS 코드가 API에서 Sunglasses Best 품목을 불러와 아이템 카드를 자동으로 삽입시킵니다 -->
                 </div>
             </section>
 
-            <!-- 신규 상품 카드 (New Arrivals) 구역 - 위 베스트 섹션과 동일한 UI 활용 -->
-            <section class="best-items-section fade-in-section">
+            <!-- 안경 아이템 카드 (Glasses Best) 구역 -->
+            <section class="best-items-section glasses-best-section fade-in-section">
                 <!-- 서브 타이틀 '신규상품' -->
                 <h2 class="section-subtitle">Glasses Best</h2>
 
                 <!-- 🏁 신규: 안경 섹션 전용 2매 이미지 스와이프 배너 (600px 제한) -->
                 <div class="best-banner-container fade-in-section">
                     <div class="best-banner-track">
-                        <img src="/static/main03_glasses.webp" alt="Best Glasses Banner 1" class="best-banner-img">
-                        <img src="/static/main04_glasses.webp" alt="Best Glasses Banner 2" class="best-banner-img">
+                        <img src="/static/img/main03_glasses.webp" alt="Best Glasses Banner 1" class="best-banner-img">
+                        <img src="/static/img/main04_glasses.webp" alt="Best Glasses Banner 2" class="best-banner-img">
                     </div>
                 </div>
 
                 <!-- 아이템 가로 스와이프 그리드 컨테이너 -->
-                <div class="item-grid-container" id="newItemsGrid">
-                    <!-- JS 코드가 API에서 New 품목을 불러와 아이템 카드를 자동으로 삽입시킵니다 -->
+                <div class="item-grid-container" id="glassesBestGrid">
+                    <!-- JS 코드가 API에서 Glasses Best 품목을 불러와 아이템 카드를 자동으로 삽입시킵니다 -->
                 </div>
             </section>
         </main>
