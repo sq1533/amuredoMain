@@ -3,7 +3,17 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: inherit; /* 모든 요소가 부모의 폰트를 상속받도록 설정 */
+    font-family: inherit;
+}
+
+/* 🏁 전역 스크롤 바 시각적 숨김 (기능은 유지, 내부 컨테이너 포함) */
+* {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+*::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
 }
 
 /* 버튼, 입력창 등 폼 요소는 명시적으로 상속 설정이 필요함 */
@@ -804,7 +814,7 @@ body {
 }
 
 .about-philosophy h2 {
-    font-size: 1.5rem;
+    font-size: 2.0rem;
     font-weight: 700;
     color: #111;
     margin-bottom: 3.5rem;
@@ -823,7 +833,7 @@ body {
 }
 
 .philosophy-content p {
-    font-size: 1rem;
+    font-size: 1.5rem;
     line-height: 2; /* 넉넉한 줄간격 허용 */
     color: #444;
     margin-bottom: 2.2rem;
@@ -835,7 +845,7 @@ body {
     font-style: italic;
     color: #888;
     margin-top: 4.5rem;
-    font-size: 1.1rem;
+    font-size: 1.7rem;
 }
 
 /* ========= 8. 네이버 구매 연동 버튼 (item_detail.html) ========= */
@@ -992,5 +1002,347 @@ body {
     .related-card {
         /* 스마트폰은 2개씩 보여주기 위해 % 수정 */
         flex: 0 0 calc(45%);
+    }
+}
+/* ========= 11. 문의하기(Contact Us) 페이지 전용 스타일 ========= */
+.contact-main {
+    padding-top: 5rem;
+    padding-bottom: 8rem;
+    background-color: #fff;
+    min-height: 100vh;
+}
+
+.contact-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.contact-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #111;
+    text-align: center;
+    margin-bottom: 1rem;
+    letter-spacing: 2px;
+}
+
+.contact-subtitle {
+    font-size: 2rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 4.5rem;
+    word-break: keep-all;
+}
+
+/* 폼 그룹 레이아웃 */
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.form-group label {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #222;
+    padding-left: 0.2rem;
+}
+
+/* 입력 필드 공통 스타일 */
+.form-group input[type="email"],
+.form-group textarea {
+    width: 100%;
+    padding: 1.2rem 1rem;
+    font-family: 'Dongle', sans-serif;
+    font-size: 1.4rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fafafa;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.form-group input[type="email"]:focus,
+.form-group textarea:focus {
+    border-color: #0e3a5b;
+    background-color: #fff;
+    box-shadow: 0 0 8px rgba(14, 58, 91, 0.1);
+}
+
+/* 파일 업로드 디자인 */
+.file-upload-wrapper {
+    border: 2px dashed #eee;
+    padding: 2.5rem 2rem;
+    border-radius: 8px;
+    background-color: #fdfdfd;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* 커스텀 첨부 버튼 (강제 우선순위 상향) */
+.contact-form .custom-file-label {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background-color: #0e3a5b !important;
+    color: #ffffff !important;
+    padding: 0.7rem 2.5rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-family: 'Dongle', sans-serif;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(14, 58, 91, 0.2);
+    min-width: 140px; /* 너비 약간 더 확보 */
+    text-align: center !important;
+}
+
+.custom-file-label:hover {
+    background-color: #1a4f7e;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(14, 58, 91, 0.3);
+}
+
+#images {
+    display: none; /* 실제 인풋은 완전히 숨김 */
+}
+
+.file-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.preview-item {
+    position: relative;
+    width: 90px; /* 약간 크기 상향 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.preview-item img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #eee;
+}
+
+/* 이미지 개별 삭제 버튼 (X) */
+.btn-remove-file {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background-color: #ff4d4d;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 10;
+    transition: transform 0.2s ease;
+}
+
+.btn-remove-file:hover {
+    background-color: #e60000;
+    transform: scale(1.1);
+}
+
+.preview-item .file-name {
+    font-size: 0.8rem;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    text-align: center;
+    margin-top: 0.3rem;
+}
+
+.file-help-text {
+    font-size: 1.5rem;
+    color: #999;
+    margin-top: 1rem;
+    margin-bottom: 0;
+}
+
+/* 동의 체크박스 커스텀 */
+.consent-group {
+    margin-top: 1rem;
+}
+
+.contact-form .checkbox-container {
+    display: flex !important;
+    align-items: center !important;
+    position: relative;
+    padding-left: 55px !important; /* 간격을 55px까지 넉넉히 확장함 */
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #444;
+    user-select: none;
+    line-height: 1.5;
+}
+
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    height: 22px;
+    width: 22px;
+    background-color: #eee;
+    border-radius: 4px;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+    background-color: #ccc;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+    background-color: #0e3a5b;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkbox-container .checkmark:after {
+    left: 8px;
+    top: 4px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* 전송 버튼 (메인 로직 계승) */
+.form-submit-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.submit-btn {
+    background-color: #0e3a5b;
+    color: #fff;
+    border: none;
+    padding: 1rem 4rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: 'Dongle', sans-serif;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 4px 4px 0px #08243a;
+}
+
+.submit-btn:disabled {
+    background-color: #ccc;
+    color: #f9f9f9;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.submit-btn:not(:disabled):hover {
+    background-color: #1a4f7e;
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #08243a;
+}
+
+.submit-btn:not(:disabled):active {
+    transform: translate(4px, 4px);
+    box-shadow: 0px 0px 0px #08243a;
+}
+
+/* 모바일 폼 대응 */
+@media screen and (max-width: 640px) {
+    .contact-title {
+        font-size: 2.8rem;
+    }
+    .contact-subtitle {
+        font-size: 1.3rem;
+    }
+    .form-group label {
+        font-size: 1.2rem;
+    }
+    .submit-btn {
+        width: 100%;
+    }
+}
+
+/* ========= 12. 공통 푸터 (Footer: 사업자 정보) ========= */
+.main-footer {
+    margin-top: 5rem;
+    padding: 3rem 1.5rem 5rem;
+    background-color: #fff;
+    text-align: center;
+}
+
+.footer-divider {
+    border: 0;
+    border-top: 1px solid #eeeeee;
+    margin-bottom: 2.5rem;
+    max-width: 1024px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.footer-info {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.footer-info p {
+    font-family: 'Dongle', sans-serif;
+    font-size: 1.2rem; /* 동글 폰트 특성상 1.2rem이 일반 폰트 12~13px 느낌 */
+    color: #999999;
+    margin-bottom: 0.3rem;
+    line-height: 1.4;
+    word-break: keep-all;
+}
+
+/* 모바일 푸터 대응 */
+@media screen and (max-width: 640px) {
+    .main-footer {
+        margin-top: 3rem;
+        padding: 2rem 1rem 4rem;
+    }
+    .footer-info p {
+        font-size: 1.1rem;
     }
 }

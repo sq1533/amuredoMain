@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     // 3. 메인 하단: 'Sunglasses Best' 아이템 카드 스와이퍼 생성 로직
     const sunglassesBestGrid = document.getElementById("sunglassesBestGrid");
-    fetch('/api/items/best')
+    fetch('/api/items/sunglasses_best')
         .then(response => response.json())
         .then(data => {
             const bestItems = data.items;
@@ -141,9 +141,9 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .catch(error => console.error("Sunglasses Best 아이템 통신 오류:", error));
 
-    // 4. 메인 최하단: 'Glasses Best' 신규 상품 카드 스와이퍼 생성 로직
+    // 4. 메인 최하단: 'Glasses Best' 전용 상품 카드 스와이퍼 생성 로직
     const glassesBestGrid = document.getElementById("glassesBestGrid");
-    fetch('/api/items/new')
+    fetch('/api/items/glasses_best')
         .then(response => response.json())
         .then(data => {
             const newItems = data.items;

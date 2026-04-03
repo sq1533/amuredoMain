@@ -1,0 +1,135 @@
+document.addEventListener("DOMContentLoaded", () => {
+    const contactForm = document.getElementById("contactForm");
+    const emailInput = document.getElementById("email");
+    const messageInput = document.getElementById("message");
+    const imageInput = document.getElementById("images");
+    const consentCheckbox = document.getElementById("consent");
+    const submitBtn = document.getElementById("submitBtn");
+    const filePreview = document.getElementById("filePreview");
+
+    // [상태 관리] 현재 선택된 파일들을 담는 전용 배열
+    let selectedFiles = [];
+
+    // 1. 전송 버튼 제어 (체크박스 및 필수 입력값 기반)
+    function updateSubmitBtnState() {
+        const isEmailValid = emailInput.value.includes("@"); // 간단한 클라이언트 체크
+        if (consentCheckbox.checked && isEmailValid && messageInput.value.trim().length > 0) {
+            submitBtn.disabled = false;
+        } else {
+            submitBtn.disabled = true;
+        }
+    }
+
+    consentCheckbox.addEventListener("change", updateSubmitBtnState);
+    emailInput.addEventListener("input", updateSubmitBtnState);
+    messageInput.addEventListener("input", updateSubmitBtnState);
+
+    // 2. 미리보기 및 삭제 버튼 렌더링 함수
+    function renderPreviews() {
+        filePreview.innerHTML = ""; // 기존 UI 초기화
+        
+        selectedFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const imgWrap = document.createElement("div");
+                imgWrap.className = "preview-item";
+                imgWrap.innerHTML = `
+                    <div class="btn-remove-file" data-index="${index}">✕</div>
+                    <img src="${event.target.result}" alt="Preview">
+                    <span class="file-name">${file.name}</span>
+                `;
+                filePreview.appendChild(imgWrap);
+
+                // 삭제 버튼 이벤트 연결
+                imgWrap.querySelector(".btn-remove-file").addEventListener("click", () => {
+                    removeFile(index);
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // 3. 파일 개별 삭제 로직
+    function removeFile(index) {
+        selectedFiles.splice(index, 1); // 배열에서 해당 인덱스 제거
+        renderPreviews(); // 다시 그리기
+    }
+
+    // 4. 이미지 파일 추가 이벤트
+    imageInput.addEventListener("change", (e) => {
+        const newFiles = Array.from(e.target.files);
+        const allowedExtensions = ["jpg", "jpeg", "png", "webp"];
+        const maxSize = 2 * 1024 * 1024; // 2MB
+
+        for (const file of newFiles) {
+            // 5장 제한 체크
+            if (selectedFiles.length >= 5) {
+                alert("이미지는 최대 5개까지만 첨부할 수 있습니다.");
+                break;
+            }
+
+            // 확장자 및 크기 검사
+            const ext = file.name.split(".").pop().toLowerCase();
+            if (!allowedExtensions.includes(ext)) {
+                alert(`허용되지 않은 파일 형식입니다: ${file.name}`);
+                continue;
+            }
+            if (file.size > maxSize) {
+                alert(`파일 크기가 2MB를 초과합니다: ${file.name}`);
+                continue;
+            }
+
+            // 모든 통과 시 배열에 추가
+            selectedFiles.push(file);
+        }
+
+        renderPreviews();
+        imageInput.value = ""; // 동일 파일 다시 올리기 가능하도록 인풋 리셋
+    });
+
+    // 5. 폼 전송 처리 (AJAX)
+    contactForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // 중복 전송 방지 및 시각적 피드백
+        submitBtn.disabled = true;
+        const originalText = submitBtn.innerText;
+        submitBtn.innerText = "전송 중...";
+
+        const formData = new FormData();
+        formData.append("email", emailInput.value);
+        formData.append("message", messageInput.value);
+        formData.append("consent", consentCheckbox.checked);
+
+        // [핵심] selectedFiles 배열에 담긴 실제 파일을 FormData에 추가
+        selectedFiles.forEach(file => {
+            formData.append("images", file);
+        });
+
+        try {
+            const response = await fetch("/api/contact", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.status === "success") {
+                alert("문의가 성공적으로 전달되었습니다. 감사합니다!");
+                contactForm.reset();
+                selectedFiles = []; // 상태 초기화
+                renderPreviews();
+                updateSubmitBtnState();
+            } else {
+                alert(`전송 실패: ${result.message}`);
+                submitBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error("Error submitting form:", error);
+            alert("서버 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+            submitBtn.disabled = false;
+        } finally {
+            submitBtn.innerText = originalText;
+        }
+    });
+});

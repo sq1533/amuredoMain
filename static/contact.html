@@ -3,40 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 검색엔진 최적화 (SEO) -->
+    <title>아무래도 안경</title>
     <meta name="description" content="분위기와 억양을 디자인을 디자인합니다. 아무래도 안경, 본질의 아름다움을 추구합니다">
     <!-- 아무레도 검색엔진 최적화(SEO) 및 SNS 공유 설정 -->
-    <title>아무래도 안경</title>
     <meta property="og:title" content="아무래도 안경 공식 홈페이지">
     <meta property="og:description" content="분위기와 억양을 디자인을 디자인합니다. 아무래도 안경, 본질의 아름다움을 추구합니다">
     <meta property="og:image" content="/static/img/meta.webp">
     <meta property="og:type" content="website">
-
     <!-- 아무레도 브랜드 파비콘(Favicon) 설정 -->
     <link rel="icon" href="/static/img/icon.webp" type="image/webp">
     <link rel="apple-touch-icon" href="/static/img/icon.webp">
     <!-- 구글 폰트 'Dongle' 전용 (웹사이트 메인 폰트) -->
     <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@300;400;700&display=swap" rel="stylesheet">
-    <!-- 외부 공통 스타일시트 연결 (캐시 무효화) -->
-    <!-- 외부 공통 스타일시트 연결 (캐시 무효화) -->
-    <!-- 외부 공통 스타일시트 연결 (캐시 무효화) -->
+    <!-- 외부 공통 스타일시트 연결 -->
     <link rel="stylesheet" href="/static/style.css?v=9.4">
 </head>
 <body>
     <div class="app-container">
         
-        <!-- 최상단 헤더(Header) 영역: 모든 페이지 공통 레이아웃 구조체 -->
+        <!-- 최상단 헤더(Header) 영역: 모든 페이지 공통 레이아웃 -->
         <header class="main-header">
             <div class="logo-wrapper">
                 <img src="/static/img/logo.webp" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
             </div>
-
-            <!-- 모바일 전용 햄버거 메뉴 버튼 -->
             <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
                 <span class="hamburger-box"></span>
             </button>
-
-            <!-- 640px 이하 모바일 토스트 / 데스크탑 가로 나열 네비게이션 트리 -->
             <nav class="page-nav" id="pageNav">
                 <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
                 <ul class="nav-links">
@@ -50,34 +42,53 @@
             <div class="nav-overlay" id="navOverlay"></div>
         </header>
 
-        <!-- About 메인 컨텐츠 영역 -->
-        <main class="about-main">
-            <!-- 1. 거대한 브랜드 히어로 이미지 배너 -->
-            <section class="about-hero fade-in-section">
-                <!-- 가로 100%, 강렬한 흑백 대비 혹은 브랜드 심볼 사진 -->
-                <img src="/static/img/about_banner.webp" alt="About Amuredo" class="about-hero-img">
-                <div class="about-hero-text">
-                    <h1>The Vision</h1>
-                    <p>Redefining Eyewear Excellence.</p>
-                </div>
-            </section>
+        <!-- 문의하기 메인 컨텐츠 영역 -->
+        <main class="contact-main fade-in-section">
+            <div class="contact-container">
+                <h1 class="contact-title">Contact Us</h1>
+                <p class="contact-subtitle">궁금하신 점이 있다면 언제든 문의해 주세요. 최대한 빠르게 답변 드리겠습니다.</p>
+                
+                <form id="contactForm" class="contact-form" enctype="multipart/form-data">
+                    <!-- 1. 이메일 입력란 -->
+                    <div class="form-group">
+                        <label for="email">답변 받으실 이메일</label>
+                        <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                    </div>
 
-            <!-- 2. 프리미엄 철학 및 스토리 영역 (모바일/PC 반응형, 여백 극대화 레이아웃) -->
-            <section class="about-philosophy fade-in-section">
-                <h2>Our Story</h2>
-                <div class="philosophy-content">
-                    <p>
-                        amuredo는 단순한 시력 보조 도구를 넘어,<br> 
-                        개인의 분위기와 억양을 디자인하는 프리미엄 아이웨어 브랜드입니다.
-                    </p>
-                    <p>
-                        모든 실루엣의 곡선은 수많은 연구 끝에 탄생했으며, <br>
-                        빛의 반사와 그림자까지 고려하여 가장 우아한 형태를 만듭니다.<br>
-                        과도한 장식을 버리고, 오직 본질의 아름다움만을 추구합니다.
-                    </p>
-                    <p class="signature-text">- amuredo Design Studio</p>
-                </div>
-            </section>
+                    <!-- 2. 문의사항 입력란 -->
+                    <div class="form-group">
+                        <label for="message">문의 내용</label>
+                        <textarea id="message" name="message" rows="8" placeholder="문의하실 내용을 입력해주세요. (허용되지 않은 특수문자는 자동 필터링될 수 있습니다.)" required></textarea>
+                    </div>
+
+                    <!-- 3. 사진 첨부란 (최대 5개) -->
+                    <div class="form-group">
+                        <label>사진 첨부 (최대 5장, 장당 2MB 이내)</label>
+                        <div class="file-upload-wrapper">
+                            <!-- 실제 input은 숨기고 커스텀 label로 트리거 -->
+                            <input type="file" id="images" name="images" accept=".jpg, .jpeg, .png, .webp" multiple style="display: none;">
+                            <label for="images" class="custom-file-label">첨부하기</label>
+                            
+                            <div class="file-preview-container" id="filePreview"></div>
+                            <p class="file-help-text">* 허용 확장자: jpg, jpeg, png, webp</p>
+                        </div>
+                    </div>
+
+                    <!-- 4. 이메일 수집 동의 체크박스 -->
+                    <div class="form-group consent-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="consent" name="consent">
+                            <span class="checkmark"></span>
+                            이메일 수집 및 이용에 동의합니다. (필수)
+                        </label>
+                    </div>
+
+                    <!-- 5. 전송 버튼 -->
+                    <div class="form-submit-wrapper">
+                        <button type="submit" id="submitBtn" class="submit-btn" disabled>전송하기</button>
+                    </div>
+                </form>
+            </div>
         </main>
 
         <!-- 공통 푸터(Footer): 사업자 정보 -->
@@ -94,10 +105,11 @@
         </footer>
     </div>
 
-    <!-- 네비게이션 드로어 & 애니메이션 로직 -->
+    <!-- 문의하기 전용 스크립트 연결 -->
+    <script src="/static/contact.js?v=1.0"></script>
     <script>
+        // 헤더 공통 로직 (기본 탑재)
         document.addEventListener("DOMContentLoaded", () => {
-            // 1. 공통 메뉴 동작 (open 상태 스위칭)
             const menuBtn = document.getElementById("menuToggleBtn");
             const closeBtn = document.getElementById("closeMenuBtn");
             const pageNav = document.getElementById("pageNav");
@@ -107,25 +119,12 @@
                 pageNav.classList.toggle("open");
                 navOverlay.classList.toggle("active");
             }
-
             if(menuBtn) menuBtn.addEventListener("click", toggleMenu);
             if(closeBtn) closeBtn.addEventListener("click", toggleMenu);
             if(navOverlay) navOverlay.addEventListener("click", toggleMenu);
 
-            // 2. 부드러운 스크롤 페이드인(Fade-in) 마이크로 애니메이션 트래킹
-            const fadeElements = document.querySelectorAll(".fade-in-section");
-            const observer = new IntersectionObserver((entries, obs) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add("is-visible");
-                        obs.unobserve(entry.target); 
-                    }
-                });
-            }, { 
-                threshold: 0.2, // 20% 정도 뷰포트에 들어오면 작동
-            });
-
-            fadeElements.forEach(el => observer.observe(el));
+            const fadeEl = document.querySelector(".fade-in-section");
+            setTimeout(() => { fadeEl.classList.add("is-visible"); }, 100);
         });
     </script>
 </body>

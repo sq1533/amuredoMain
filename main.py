@@ -4,6 +4,12 @@ from fastapi.staticfiles import StaticFiles
 import os
 import firebase_admin
 from firebase_admin import credentials, firestore
+import requests
+import re
+import json
+from fastapi import File, UploadFile, Form
+from typing import List
+from email_validator import validate_email, EmailNotValidError
 
 app = FastAPI()
 
@@ -71,20 +77,33 @@ async def serve_about_page():
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>About 템플릿(about.html)을 찾을 수 없습니다.</h1>", status_code=404)
 
+# 문의하기(Contact) 화면 HTML 서빙용 프론트엔드 라우팅
+@app.get("/contact", response_class=HTMLResponse)
+async def serve_contact_page():
+    contact_path = os.path.join(static_dir, "contact.html")
+    if os.path.exists(contact_path):
+        with open(contact_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>Contact 템플릿(contact.html)을 찾을 수 없습니다.</h1>", status_code=404)
+
 # ---------------------------------------------------------
 # 외부 데이터 통신용 API 엔드포인트
 # ---------------------------------------------------------
 
 
 
-
-@app.get("/api/items/best")
-async def get_best_items():
+@app.get("/api/items/sunglasses_best")
+async def get_sunglasses_best_items():
+    """
+    메인 페이지 'Sunglasses Best' 섹션에 들어갈 전용 아이템 리스트를 조회합니다.
+    Firebase: 'item' collection -> event == 'sunglasses_best' 필터링
+    """
     if db is None:
         return {"items": [], "error": "Firebase 연동 불가"}
         
     try:
-        best_docs = db.collection('item').where('event', '==', 'best').stream()
+        # event 필드 값이 'sunglasses_best'인 문서들만 스트림으로 불러옵니다.
+        best_docs = db.collection('item').where('event', '==', 'sunglasses_best').stream()
         
         real_items = []
         for doc in best_docs:
@@ -108,20 +127,21 @@ async def get_best_items():
         return {"items": real_items}
         
     except Exception as e:
+        print(f"🔥 Sunglasses Best 조회 에러 발생: {e}")
         return {"items": [], "error": str(e)}
 
-@app.get("/api/items/new")
-async def get_new_items():
+@app.get("/api/items/glasses_best")
+async def get_glasses_best_items():
     """
-    메인 페이지 하단 '신규상품' 섹션에 들어갈 아이템 리스트를 조회합니다.
-    Firebase: 'item' collection -> event == 'new' 필터링
+    메인 페이지 하단 'Glasses Best' 섹션에 들어갈 전용 아이템 리스트를 조회합니다.
+    Firebase: 'item' collection -> event == 'glasses_best' 필터링
     """
     if db is None:
         return {"items": [], "error": "Firebase 연동 불가"}
         
     try:
-        # event 필드 값이 'new'인 문서들만 스트림으로 불러옵니다.
-        new_docs = db.collection('item').where('event', '==', 'new').stream()
+        # event 필드 값이 'glasses_best'인 문서들만 스트림으로 불러옵니다.
+        new_docs = db.collection('item').where('event', '==', 'glasses_best').stream()
         
         real_items = []
         for doc in new_docs:
@@ -148,7 +168,7 @@ async def get_new_items():
         
     except Exception as e:
         # 에러 발생 시 로그를 찍고 빈 리스트를 반환하여 프론트엔드 중단을 방지합니다.
-        print(f"🔥 신규 상품 조회 에러 발생: {e}")
+        print(f"🔥 Glasses Best 조회 에러 발생: {e}")
         return {"items": [], "error": str(e)}
 
 @app.get("/api/items")
@@ -369,3 +389,99 @@ async def promo_redirect(promo_code: str):
     except Exception as e:
         print(f"🔥 프로모션 리다이렉트 에러: {e}")
         return HTMLResponse(f"<h1>서버 에러 발생: {e}</h1>", status_code=500)
+# -------------------------------------------------------------
+# 6. 문의하기(Contact) 및 텔레그램 연동 API
+# -------------------------------------------------------------
+
+# 텔레그램 보안 설정 로드 (database/telegram.json)
+tg_config_path = os.path.join(os.path.dirname(__file__), "database", "telegram.json")
+try:
+    with open(tg_config_path, "r", encoding="utf-8") as f:
+        tg_data = json.load(f)
+        TELEGRAM_BOT_TOKEN = tg_data.get("bot_token")
+        TELEGRAM_CHAT_ID = tg_data.get("user_request_id")
+    print("✅ Telegram 봇 정보 로드 완료")
+except Exception as e:
+    print(f"🔥 Telegram 설정 파일 로드 실패: {e}")
+    TELEGRAM_BOT_TOKEN = None
+    TELEGRAM_CHAT_ID = None
+
+@app.post("/api/contact")
+async def handle_contact_form(
+    email: str = Form(...),
+    message: str = Form(...),
+    consent: bool = Form(...),
+    images: List[UploadFile] = File(None)
+):
+    """
+    문의사항을 접수하고 유효성 검사 후 텔레그램 봇으로 전송합니다.
+    """
+    # 1. 이메일 유효성 검사
+    try:
+        validate_email(email)
+    except EmailNotValidError as e:
+        return {"status": "error", "message": f"이메일 형식이 올바르지 않습니다: {str(e)}"}
+
+    # 2. 개인정보 동의 여부 확인
+    if not consent:
+        return {"status": "error", "message": "개인정보 수집 및 이용에 동의해야 합니다."}
+
+    # 3. 특수문자 화이트리스트 필터링 (정규식 사용)
+    # 허용: 한글, 영문, 숫자, 공백 및 지정된 특수문자
+    # 화이트리스트: . , ! ? ( ) [ ] { } - _ : / @ ~ & + = *
+    allowed_pattern = r'^[a-zA-Z0-9가-힣\s\.,!\?\(\)\[\]\{\}\-_:/@~&\+\=\*]+$'
+    if not re.match(allowed_pattern, message):
+        return {"status": "error", "message": "허용되지 않은 특수문자가 포함되어 있습니다."}
+
+    # 4. 이미지 검증 (최대 5장, 각 2MB 이하, 확장자 체크)
+    validated_images = []
+    if images:
+        if len(images) > 5:
+            return {"status": "error", "message": "이미지는 최대 5개까지만 첨부할 수 있습니다."}
+        
+        allowed_extensions = {".jpg", ".jpeg", ".png", ".webp"}
+        for img in images:
+            # 파일이 비어있는지 체크 (FastAPI 특성상 빈 값도 리스트에 들어올 수 있음)
+            if not img.filename:
+                continue
+                
+            # 확장자 체크
+            ext = os.path.splitext(img.filename)[1].lower()
+            if ext not in allowed_extensions:
+                return {"status": "error", "message": f"허용되지 않은 파일 형식입니다: {img.filename}"}
+            
+            # 크기 체크 (2MB = 2 * 1024 * 1024 bytes)
+            content = await img.read()
+            if len(content) > 2 * 1024 * 1024:
+                return {"status": "error", "message": f"파일 크기가 2MB를 초과합니다: {img.filename}"}
+            
+            # 이미지 저장을 위해 포인터 리셋 후 리스트에 보관하거나 바이너리 유지
+            validated_images.append((img.filename, content))
+
+    # 5. 텔레그램 메시지 구성
+    text_content = f"📩 [amuredo] 신규 문의 접수\n\n- 이메일: {email}\n- 문의내용:\n{message}"
+
+    try:
+        # 텔레그램 봇으로 텍스트 전송
+        tg_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        requests.post(tg_url, data={"chat_id": TELEGRAM_CHAT_ID, "text": text_content})
+
+        # 텔레그램 봇으로 이미지 전송 (이미지가 있을 때)
+        if validated_images:
+            if len(validated_images) == 1:
+                # 1장일 땐 단일 전송
+                img_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
+                requests.post(img_url, data={"chat_id": TELEGRAM_CHAT_ID}, files={"photo": validated_images[0][1]})
+            else:
+                # 여러 장일 땐 MediaGroup 전송 (순차적으로 혹은 MediaGroup API 사용 가능)
+                # 여기서는 가장 안정적인 개별 순차 발송 방식을 제안합니다.
+                img_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
+                for name, content in validated_images:
+                    requests.post(img_url, data={"chat_id": TELEGRAM_CHAT_ID}, files={"photo": content})
+
+        print(f"✅ 텔레그램 발송 완료: {email}의 문의사항을 전달했습니다.")
+        return {"status": "success", "message": "문의가 성공적으로 전달되었습니다."}
+
+    except Exception as e:
+        print(f"🔥 텔레그램 발송 중 오류 발생: {e}")
+        return {"status": "error", "message": "서버 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."}
