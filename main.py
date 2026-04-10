@@ -198,12 +198,13 @@ async def get_items_by_category(category: str):
             except (ValueError, TypeError):
                 formatted_price = str(raw_price)
 
-            # 프론트엔드 모바일 UX 향상을 위한 이름, 가격 추가 전송
+            # 프론트엔드 모바일 UX 향상을 위한 이름, 가격 및 필터링용 카테고리 추가 전송
             real_items.append({
                 "id": doc.id,
                 "name": data.get("name", "이름 없음"),
                 "price": formatted_price,
-                "image_url": image_url
+                "image_url": image_url,
+                "category": str(data.get("category", "")) # 🏁 신규: 프론트엔드 Set 필터 연동용 데이터
             })
             
         print(f"✅ Firebase 조회 완료: '{category}' 카테고리의 하단 텍스트형 {len(real_items)}개 아이템 전달.")
@@ -248,14 +249,27 @@ async def get_item_detail(item_id: str):
         # 사용자가 아직 'desc'를 DB에 넣지 않은 상태를 대비한 고급스러운 대체 텍스트
         fallback_desc = "amuredo만의 시그니처 감성이 돋보이는 모던 프리미엄 컬렉션입니다.\n미니멀하면서도 감각적인 디테일이 당신의 일상에 특별하고 세련된 포인트를 더해줍니다."
         
+        code_val = str(data.get("code", ""))
+        models = []
+        if code_val:
+            try:
+                code_doc = db.collection('code').document(code_val).get()
+                if code_doc.exists:
+                    code_data = code_doc.to_dict()
+                    # code 컬렉션의 'path' 속성이 배열이라고 가정하고 그대로 이관 (없으면 빈배열 반환)
+                    models = code_data.get("path", [])
+            except Exception as code_db_err:
+                print(f"🔥 모델(룩북) 이미지 컬렉션 호출 에러 발생: {code_db_err}")
+
         return {
             "id": doc.id,
             "name": data.get("name", "이름 없음"),
             "price": formatted_price,
             "paths": paths,       
             "sort": data.get("sort", "unclassified"),
-            # 사용자의 지시에 따라, DB 원본 형태(띄어쓰기 포함)를 그대로 보존하며 str 캐스팅만 수행
-            "code": str(data.get("code", "")),
+            "code": code_val,      
+            # 🏁 신규 추가: 상세 페이지 룩북 전용 모델 배열
+            "models": models,      
             # 네이버 구매 링크 파싱 (없을 경우 빈 문자열)
             "naver": str(data.get("naver", "")),
             # 상품 코멘트 (없을 경우 100자 내외 임시 대체 텍스트 반영)

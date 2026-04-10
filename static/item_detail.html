@@ -17,7 +17,16 @@
     <!-- 구글 폰트 'Dongle' 전용 (웹사이트 메인 폰트) -->
     <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@300;400;700&display=swap" rel="stylesheet">
     <!-- 외부 공통 스타일시트 연결 (캐시 무효화) -->
-    <link rel="stylesheet" href="/static/style.css?v=9.4">
+    <link rel="stylesheet" href="/static/style.css?v=10.1">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'AW-17793333010');
+    </script>
 </head>
 <body>
     <div class="app-container">
@@ -74,6 +83,16 @@
                 </div>
             </div>
             
+            <!-- 🏁 룩북(모델 사진) 전용 갤러리 룸 -->
+            <section class="lookbook-section" id="lookbookSection" style="display: none;">
+                <h3 class="lookbook-subtitle">룩북</h3>
+                <div class="lookbook-track-container">
+                    <div class="lookbook-track" id="lookbookTrack">
+                        <!-- JS가 서버에서 받은 models 배열을 토대로 모델 사진을 렌더링합니다 -->
+                    </div>
+                </div>
+            </section>
+
             <!-- 연관 상품(Same Code) 추천 최하단 갤러리 룸 -->
             <section class="related-items-section" id="relatedSection" style="display: none;">
                 <h3 class="related-subtitle">연관 아이템</h3>
@@ -101,7 +120,7 @@
     </div>
 
     <!-- 상세 페이지 로직 파일 (V버전 증가) -->
-    <script src="/static/itemDetail.js?v=7.1"></script>
+    <script src="/static/itemDetail.js?v=7.2"></script>
     
     <!-- 공통 메뉴 동작용 스크립트 -->
     <script>

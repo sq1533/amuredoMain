@@ -17,7 +17,16 @@
     <!-- 구글 폰트 'Dongle' 전용 (웹사이트 메인 폰트) -->
     <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@300;400;700&display=swap" rel="stylesheet">
     <!-- 외부 공통 스타일시트 연결 (캐시 무효화) -->
-    <link rel="stylesheet" href="/static/style.css?v=9.4">
+    <link rel="stylesheet" href="/static/style.css?v=9.8">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'AW-17793333010');
+    </script>
 </head>
 <body>
     <div class="app-container">
@@ -47,6 +56,14 @@
 
         <!-- 메인 콘텐츠 영역 (카테고리별 Item List 구현 구역) -->
         <main class="main-content" style="padding-top: 3rem; padding-bottom: 5rem;">
+            <!-- 🏁 카테고리 필터(조회하기) 컨테이너: 우측 정렬 -->
+            <div class="filter-container">
+                <label for="categoryFilter" class="filter-label">조회하기</label>
+                <select id="categoryFilter" class="filter-select">
+                    <!-- JS 코드가 Set() 추출 후 option 들을 자동 렌더링합니다 -->
+                </select>
+            </div>
+            
             <!-- 현재 페이지의 카테고리 타이틀 (JS가 자동으로 경로를 읽어와 주입) -->
             <h1 class="category-page-title" id="categoryTitle">Category</h1>
             
@@ -71,7 +88,7 @@
     </div>
 
     <!-- itemList용 라우팅 및 렌더링을 처리하는 자바스크립트 연결 (캐시 갱신) -->
-    <script src="/static/itemList.js?v=4.5"></script>
+    <script src="/static/itemList.js?v=4.6"></script>
     
     <!-- 공통 메뉴 동작용 스크립트: main.js의 역할을 카테고리 페이지에서도 사용할 수 있도록 탑재 -->
     <script>

@@ -62,6 +62,34 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             renderSwipeSlider(paths);
+
+            // 🏁 룩북(모델 사진) 갤러리 렌더링 로직 추가
+            const lookbookSection = document.getElementById("lookbookSection");
+            const lookbookTrack = document.getElementById("lookbookTrack");
+            const lookbookTrackContainer = document.querySelector(".lookbook-track-container");
+            const models = data.models || []; // 백엔드 통신으로 추가 전달받은 모델 path 배열
+
+            if (lookbookSection && lookbookTrack && models.length > 0) {
+                lookbookSection.style.display = 'block'; // 데이터가 있을 때만 룩북 공간 오픈
+                
+                models.forEach((imgUrl, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'lookbook-item';
+                    
+                    const imgEl = document.createElement('img');
+                    imgEl.src = imgUrl;
+                    imgEl.alt = `Lookbook 모델 이미지 ${index + 1}`;
+                    imgEl.loading = 'lazy'; // 여러장일 경우 트래픽 분산을 위한 lazy 옵션
+                    
+                    itemDiv.appendChild(imgEl);
+                    lookbookTrack.appendChild(itemDiv);
+                });
+
+                // PC 가로 스와이프 휠 바를 마우스로 잡고 끌 수 있도록 데스크탑 폴리필 적용
+                if (lookbookTrackContainer) {
+                    setupDesktopDrag(lookbookTrackContainer);
+                }
+            }
         })
         .catch(err => {
             console.error(err);

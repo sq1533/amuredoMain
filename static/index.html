@@ -18,7 +18,16 @@
     <!-- 구글 폰트 'Dongle' 전용 (웹사이트 메인 폰트) -->
     <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@300;400;700&display=swap" rel="stylesheet">
     <!-- 외부 스타일시트 연결 (캐시 무효화) -->
-    <link rel="stylesheet" href="/static/style.css?v=9.4">
+    <link rel="stylesheet" href="/static/style.css?v=9.7">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'AW-17793333010');
+    </script>
 </head>
 
 <body>
@@ -68,6 +77,8 @@
                         <!-- JS 코드가 API 통신 후 <img> 태그를 자동으로 채웁니다 -->
                     </div>
                 </div>
+                <!-- 🏁 배너 자동 전환 상태 표시 100% 진행 바 (Progress Navigation) -->
+                <div class="banner-progress-bar" id="bannerProgressBar"></div>
             </section>
 
             <!-- 브랜드 스토리 (Brand Story) 구역: 로고 및 철학 문구 -->
@@ -139,7 +150,7 @@
     </div>
 
     <!-- 로직 자바스크립트 스크립트 파일 연결 -->
-    <script src="/static/main.js?v=3.6"></script>
+    <script src="/static/main.js?v=4.1"></script>
 </body>
 
 </html>

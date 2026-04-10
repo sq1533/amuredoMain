@@ -17,16 +17,54 @@ document.addEventListener("DOMContentLoaded", () => {
     categoryTitle.textContent = currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1);
 
     // ==========================================
-    // 백엔드 API 요청 -> 카테고리 필터링 조회 전송
+    // 백엔드 API 요청 -> 카테고리 데이터 확보 및 필터 동기화
     // ==========================================
+    const categoryFilter = document.getElementById("categoryFilter");
+    let allFetchedItems = []; // 서버에서 불러온 원본 데이터를 보존할 광주리
+
     fetch(`/api/items?category=${currentCategory}`)
         .then(response => response.json())
         .then(data => {
-            const items = data.items;
-            if (items && items.length > 0) {
-                renderCategoryItems(items);
+            allFetchedItems = data.items || [];
+            
+            if (allFetchedItems.length > 0) {
+                // 1. 유일한(Unique) 하위 카테고리 키워드 추출 (Set)
+                const keywords = new Set();
+                allFetchedItems.forEach(item => {
+                    if (item.category) {
+                        keywords.add(item.category);
+                    }
+                });
+                
+                // 2. 드롭다운(Select) 옵션 초기화 및 렌더링
+                if (categoryFilter) {
+                    categoryFilter.innerHTML = '<option value="ALL">전체보기</option>';
+                    keywords.forEach(keyword => {
+                        const option = document.createElement("option");
+                        option.value = keyword;
+                        option.textContent = keyword;
+                        categoryFilter.appendChild(option);
+                    });
+                    
+                    // 3. 필터 선택 이벤트 바인딩 (클라이언트 사이드 실시간 정렬)
+                    categoryFilter.addEventListener('change', (e) => {
+                        const selectedValue = e.target.value;
+                        if (selectedValue === 'ALL') {
+                            renderCategoryItems(allFetchedItems); // 원상복구
+                        } else {
+                            // 사용자가 고른 키워드(category 문자열)와 동일한 상품만 필터링
+                            const filteredItems = allFetchedItems.filter(item => item.category === selectedValue);
+                            renderCategoryItems(filteredItems);
+                        }
+                    });
+                }
+
+                // 4. 최초 화면 그리기 (전체보기 상태)
+                renderCategoryItems(allFetchedItems);
             } else {
+                // 데이터 없는 경우 가이드 제공 및 필터 숨김
                 categoryGrid.innerHTML = '<p style="text-align:center; grid-column: 1 / -1; padding: 2rem;">해당 카테고리의 상품 데이터를 찾을 수 없습니다.</p>';
+                if(categoryFilter) categoryFilter.parentElement.style.display = 'none'; 
             }
         })
         .catch(error => {

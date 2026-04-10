@@ -66,12 +66,15 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Firebase API 배너 이미지 데이터를 불러오는 중 오류 발생:", error);
         });
 
-    // 2. 전달받은 이미지 URL 목록 데이터를 화면의 HTML 태그(<img>)로 만들어 출력시키는 함수입니다
+    // 2. 5초 자동슬라이드 진행바 연동 및 화면 렌더링 핵심 함수
     function renderBanner(paths) {
         bannerTrack.innerHTML = '';
         
+        // 🏁 배너 진행 상태창 컨테이너 서치
+        const bannerProgressBar = document.getElementById("bannerProgressBar");
+        if(bannerProgressBar) bannerProgressBar.innerHTML = '';
+        
         // [지능형 루프 핵심] 이미지 클로닝 (앞뒤에 하나씩 더 붙임)
-        // 구성: [마지막장 복제] - [1, 2, 3...] - [1번장 복제]
         const extendedPaths = [
             paths[paths.length - 1], 
             ...paths,                
@@ -85,18 +88,123 @@ document.addEventListener("DOMContentLoaded", () => {
             img.className = 'banner-img'; 
             bannerTrack.appendChild(img);
         });
+        
+        // 🏁 진행바의 개별 구획(Segments) 생성
+        const segments = [];
+        if (bannerProgressBar) {
+            paths.forEach((_, index) => {
+                const seg = document.createElement('div');
+                seg.className = 'progress-segment';
+                const fill = document.createElement('div');
+                fill.className = 'progress-fill';
+                seg.appendChild(fill);
+                bannerProgressBar.appendChild(seg);
+                
+                // 클릭 시 해당 슬라이드로 바로 넘어갈 수 있는 옵션 제공
+                seg.addEventListener('click', () => {
+                   const width = bannerTrack.offsetWidth;
+                   bannerTrack.scrollTo({ left: (index + 1) * width, behavior: 'smooth' });
+                });
+                segments.push(seg);
+            });
+        }
+        
+        // --- 5초 메인 모터(타이머) 및 진행바 연동 엔진 ---
+        let currentActualIndex = 0;
+        let autoSlideInterval = null;
+        
+        function updateProgress(index) {
+            segments.forEach(seg => {
+                seg.classList.remove('active');
+                const fill = seg.querySelector('.progress-fill');
+                
+                // 트랜지션 즉시 초기화 및 게이지 회수
+                fill.style.transition = 'none';
+                fill.style.width = '0%';
+            });
+            
+            // 지정된 구획 활성화 (5초 애니메이션 즉시 먹이기 픽스 적용)
+            if (segments[index]) {
+                const fill = segments[index].querySelector('.progress-fill');
+                // 모든게 0으로 강제 초기화된 것을 브라우저가 그리도록 리플로우 시킴(버그 픽스 코어)
+                void fill.offsetWidth; 
+                fill.style.transition = 'width 5000ms linear';
+                fill.style.width = '100%'; // CSS 오버라이딩을 막기 위해 여기서 명시적으로 100% 성장 지시
+                segments[index].classList.add('active');
+            }
+        }
+        
+        function slideNext() {
+            const width = bannerTrack.offsetWidth;
+            // 미세 스크롤 오차를 Math.round로 보정해 정확한 슬롯 장 파악
+            const currentSlot = Math.round(bannerTrack.scrollLeft / width);
+            bannerTrack.scrollTo({ left: (currentSlot + 1) * width, behavior: 'smooth' });
+        }
+        
+        function restartTimer(index) {
+            if (autoSlideInterval) clearInterval(autoSlideInterval);
+            currentActualIndex = index;
+            updateProgress(currentActualIndex); // 모터 가동과 동시에 0 -> 100 바 활성화
+            autoSlideInterval = setInterval(slideNext, 5000); // 5초 주기 강제 전진 보장
+        }
+        
+        // --- 스크롤 기반 루프 사일런트 워프 엔진 ---
+        let scrollTimeout;
+        bannerTrack.addEventListener('scroll', () => {
+            const width = bannerTrack.offsetWidth;
+            const scrollLeft = bannerTrack.scrollLeft;
+            
+            // 1. 맨 앞(끝장 복제), 맨 뒤(1번장 복제) 경계선 도달 시 눈속임 위치 복귀 (스무스 없앰)
+            if (scrollLeft <= 0) {
+                bannerTrack.style.scrollBehavior = 'auto';
+                bannerTrack.scrollLeft = paths.length * width;
+                setTimeout(() => { bannerTrack.style.scrollBehavior = 'smooth'; }, 10);
+            }
+            if (scrollLeft >= (paths.length + 1) * width - 1) {
+                bannerTrack.style.scrollBehavior = 'auto';
+                bannerTrack.scrollLeft = width;
+                setTimeout(() => { bannerTrack.style.scrollBehavior = 'smooth'; }, 10);
+            }
+            
+            // 2. 화면 이동 감지 시 текущие(현재) 배너 인덱스를 파악하고 진행 게이지 갱신 확인
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                let currentSlot = Math.round(bannerTrack.scrollLeft / width);
+                let actualIndex = currentSlot - 1;
+                
+                if (actualIndex < 0) actualIndex = paths.length - 1;
+                if (actualIndex >= paths.length) actualIndex = 0;
+                
+                // 페이지가 전환되었을 때 타이머 엔진 및 프로그레스바 초기화-재구동
+                if (actualIndex !== currentActualIndex) {
+                    restartTimer(actualIndex);
+                }
+            }, 60); // 휠이나 터치가 완전히 멈춘 걸 확인하는 유예 기준안
+        });
+        
+        // 유저 마우스 개입(터치, 드래그) 시 애니메이션 중단 (거슬리지 않게 배려)
+        const pauseAnimation = () => {
+            if (autoSlideInterval) clearInterval(autoSlideInterval);
+            segments.forEach(seg => {
+                seg.classList.remove('active');
+                const fill = seg.querySelector('.progress-fill');
+                fill.style.transition = 'none';
+                fill.style.width = '0%';
+            });
+        };
+        bannerTrack.addEventListener('mousedown', pauseAnimation);
+        bannerTrack.addEventListener('touchstart', pauseAnimation);
 
-        // 3. 초기 위치 설정 (두 번째 칸 - 원본 첫 번째 장)
-        // 렌더링 직후 너비 계산을 위해 최소한의 지연시간(50ms) 후 이동
+        // --- 초기 시작점 (Start Scene) ---
         setTimeout(() => {
             const width = bannerTrack.offsetWidth;
-            bannerTrack.scrollLeft = width;
+            // 0번 클론방 패스하고, 진짜 1번장으로 출발
+            bannerTrack.scrollLeft = width; 
             
-            // 무한 루프 감시 엔진 가동
-            setupInfiniteLoop(bannerTrack, paths.length);
+            restartTimer(0); // 0번째 배너 구동개시
         }, 50);
 
-        // 4. PC 데스크탑 환경을 위한 마우스 드래그(스와이프) 폴리필 부착
+        // PC 전용 드래그 호환 폴리필 장착
         setupDesktopDrag(bannerTrack);
     }
 
@@ -106,28 +214,6 @@ document.addEventListener("DOMContentLoaded", () => {
         setupDesktopDrag(track);
     });
 
-    // [지능형 루프 엔진] 스크롤 위치를 실시간 감시하여 경계선에서 '사일런트 워프' 수행
-    function setupInfiniteLoop(track, originalCount) {
-        track.addEventListener('scroll', () => {
-            const width = track.offsetWidth;
-            const scrollLeft = track.scrollLeft;
-            
-            // 1. 맨 앞(마지막장 복제본) 위치에 도달했을 때 -> 진짜 마지막장 위치로 순간 이동
-            if (scrollLeft <= 0) {
-                track.style.scrollBehavior = 'auto'; // 애니메이션 없이 점프
-                track.scrollLeft = originalCount * width;
-                setTimeout(() => { track.style.scrollBehavior = 'smooth'; }, 10);
-            }
-            
-            // 2. 맨 뒤(1번장 복제본) 위치에 도달했을 때 -> 진짜 1번장 위치로 순간 이동
-            // (originalCount + 1) 번째 칸이 마지막 클론 위치임
-            if (scrollLeft >= (originalCount + 1) * width - 1) {
-                track.style.scrollBehavior = 'auto';
-                track.scrollLeft = width;
-                setTimeout(() => { track.style.scrollBehavior = 'smooth'; }, 10);
-            }
-        });
-    }
     // 3. 메인 하단: 'Sunglasses Best' 아이템 카드 스와이퍼 생성 로직
     const sunglassesBestGrid = document.getElementById("sunglassesBestGrid");
     fetch('/api/items/sunglasses_best')
