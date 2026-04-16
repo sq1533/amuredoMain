@@ -251,15 +251,28 @@ async def get_item_detail(item_id: str):
         
         code_val = str(data.get("code", ""))
         models = []
+        
+        # 1. 일차적으로 개별 아이템(item) 컬렉션에 등록된 기존 desc를 가져옵니다.
+        final_desc = str(data.get("desc", ""))
+        
         if code_val:
             try:
                 code_doc = db.collection('code').document(code_val).get()
                 if code_doc.exists:
                     code_data = code_doc.to_dict()
-                    # code 컬렉션의 'path' 속성이 배열이라고 가정하고 그대로 이관 (없으면 빈배열 반환)
+                    # 룩북용 사진 배열 추출
                     models = code_data.get("path", [])
+                    
+                    # 🏁 신규 로직: code 컬렉션 서랍장에 공통 desc가 작성되어 있다면 이것을 '상품 코멘트'로 덮어씌웁니다.
+                    if "desc" in code_data and str(code_data["desc"]).strip():
+                        final_desc = str(code_data["desc"])
+                        
             except Exception as code_db_err:
-                print(f"🔥 모델(룩북) 이미지 컬렉션 호출 에러 발생: {code_db_err}")
+                print(f"🔥 모델(룩북) 및 코멘트 컬렉션 연동 에러 발생: {code_db_err}")
+
+        # 2. item, code 두 서랍장 모두 desc가 아예 비어있다면 대비용 텍스트를 할당합니다.
+        if not final_desc.strip():
+            final_desc = fallback_desc
 
         return {
             "id": doc.id,
@@ -268,12 +281,12 @@ async def get_item_detail(item_id: str):
             "paths": paths,       
             "sort": data.get("sort", "unclassified"),
             "code": code_val,      
-            # 🏁 신규 추가: 상세 페이지 룩북 전용 모델 배열
+            # 상세 페이지 룩북 전용 모델 배열
             "models": models,      
             # 네이버 구매 링크 파싱 (없을 경우 빈 문자열)
             "naver": str(data.get("naver", "")),
-            # 상품 코멘트 (없을 경우 100자 내외 임시 대체 텍스트 반영)
-            "desc": str(data.get("desc", fallback_desc))
+            # 🏁 업데이트: code 기반 통일화된 코멘트 출력
+            "desc": final_desc
         }
         
     except Exception as e:
@@ -329,24 +342,37 @@ async def get_related_items(item_id: str):
 @app.get("/api/banner")
 async def get_banner_images():
     """
-    메인 페이지 최상단 배너 스와이퍼에 들어갈 이미지 리스트를 조회합니다.
-    Firebase: 'banner' collection -> 'img' document -> 'paths' field (list)
+    메인 페이지 최상단 배너에 들어갈 이미지 리스트와 라우팅 URL 객체를 조회합니다.
+    Firebase: 'banner' collection -> banner1, banner2... docs -> 'path', 'url' 필드 추출
     """
     if db is None:
-        return {"paths": [], "error": "Firebase 연결 안됨"}
+        return {"banners": [], "error": "Firebase 연결 안됨"}
         
     try:
-        doc = db.collection('banner').document('img').get()
-        if not doc.exists:
-            return {"paths": [], "error": "배너 문서가 존재하지 않습니다."}
+        banner_docs = db.collection('banner').stream()
+        banners = []
+        
+        for doc in banner_docs:
+            data = doc.to_dict()
+            path_val = data.get("path", "")
+            url_val = data.get("url", "")
             
-        data = doc.to_dict()
-        paths = data.get("paths", [])
-        return {"paths": paths}
+            # DB의 None 타입 방어 및 공백 처리
+            if path_val is None: path_val = ""
+            if url_val is None: url_val = ""
+            
+            # 이미지가 존재하는 정상적인 문서만 필터링하여 담음
+            if str(path_val).strip():
+                banners.append({
+                    "path": str(path_val),
+                    "url": str(url_val)
+                })
+                
+        return {"banners": banners}
         
     except Exception as e:
         print(f"🔥 배너 데이터 호출 에러: {e}")
-        return {"paths": [], "error": str(e)}
+        return {"banners": [], "error": str(e)}
 
 @app.post("/api/telegram")
 async def send_telegram_msg():

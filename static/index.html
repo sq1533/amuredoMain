@@ -15,10 +15,10 @@
     <!-- 아무레도 브랜드 파비콘(Favicon) 설정 -->
     <link rel="icon" href="/static/img/icon.webp?v=1.0" type="image/webp">
     <link rel="apple-touch-icon" href="/static/img/icon.webp?v=1.0">
-    <!-- 구글 폰트 'Dongle' 전용 (웹사이트 메인 폰트) -->
-    <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <!-- 외부 스타일시트 연결 (캐시 무효화) -->
-    <link rel="stylesheet" href="/static/style.css?v=9.7">
+    <link rel="stylesheet" href="/static/style.css?v=12.0">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
     <script>
@@ -72,6 +72,19 @@
             <section class="banner-section">
                 <!-- 가로 폭 100%, 5:3 비율(높이 60%)을 유지하는 배너 컨테이너 -->
                 <div class="banner-container" id="bannerContainer">
+                    
+                    <!-- 🏁 신규: 모바일 친화적 양 끝단 100% 확장 터치 가능 네비게이션 -->
+                    <div class="banner-nav prev" id="bannerNavPrev" aria-label="이전 배너">
+                        <div class="nav-arrow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                        </div>
+                    </div>
+                    <div class="banner-nav next" id="bannerNavNext" aria-label="다음 배너">
+                        <div class="nav-arrow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </div>
+                    </div>
+
                     <!-- 이미지 리스트들이 들어갈 궤도 컨테이너 -->
                     <div class="banner-track" id="bannerTrack">
                         <!-- JS 코드가 API 통신 후 <img> 태그를 자동으로 채웁니다 -->
@@ -150,7 +163,7 @@
     </div>
 
     <!-- 로직 자바스크립트 스크립트 파일 연결 -->
-    <script src="/static/main.js?v=4.1"></script>
+    <script src="/static/main.js?v=4.3"></script>
 </body>
 
 </html>
