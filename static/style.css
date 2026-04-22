@@ -193,11 +193,18 @@ body {
 
 .banner-container {
     width: 100%;
-    /* 너비의 60% 높이 비율을 유지시키기 위해 종횡비를 5:3으로 강제 유지시킴 */
+    /* PC 환경 기본 가로형 종횡비 (5:3) */
     aspect-ratio: 5 / 3; 
     position: relative;
-    overflow: hidden; /* 영역 가로/세로 밖으로 넘쳐 흐르는 이전, 다음 이미지를 숨깁니다 */
+    overflow: hidden; 
     background-color: #f7f7f7;
+}
+
+/* 🏁 모바일 풀스크린 뷰 (화면을 꽉 채우는 3:4 세로형) */
+@media screen and (max-width: 640px) {
+    .banner-container {
+        aspect-ratio: 3 / 4; 
+    }
 }
 
 /* 여러 이미지 요소들을 감싸는 궤도 (사용자 임의 스와이프 원천 봉쇄) */
@@ -1484,6 +1491,37 @@ body {
     .submit-btn {
         width: 100%;
     }
+}
+
+/* ========= About 페이지 텍스트 요소 ========= */
+.about-hero-text h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff; /* 어두운 이미지 위 밝은 텍스트 */
+}
+
+.about-hero-text p {
+    font-size: 1.0rem;
+    color: #eee; /* 완전히 하얀색보다는 살짝 부드러운 밝은 회백색 */
+}
+
+.about-philosophy h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.philosophy-content p {
+    font-size: 1.0rem;
+    line-height: 1.6;
+    margin-bottom: 1.2rem;
+    color: #333;
+}
+
+.philosophy-content .signature-text {
+    font-size: 1.0rem;
+    color: #777;
+    margin-top: 2rem;
 }
 
 /* ========= 12. 공통 푸터 (Footer: 사업자 정보) ========= */
