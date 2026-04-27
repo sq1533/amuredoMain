@@ -47,23 +47,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     naverStoreBtn.style.display = 'inline-block';
                     naverStoreBtn.addEventListener("click", () => {
                         const storeUrl = data.naver;
-                        const encodedUrl = encodeURIComponent(storeUrl);
-                        
                         const isMobile = /android|ipad|iphone|ipod/i.test(navigator.userAgent);
 
                         if (isMobile) {
-                            // [모바일 공통] 안드로이드/iOS 모두 팝업(Chooser) 충돌을 막기 위해 타이머 방식 사용
-                            const clickedAt = +new Date();
-                            // 네이버 앱(인앱브라우저) 강제 호출 시도
-                            window.location.href = "naversearchapp://inappbrowser?url=" + encodedUrl;
-                            
-                            // 1초 후에도 현재 창에 머물러 있다면 (앱 미설치로 판단) 일반 스토어 웹링크로 이동
-                            setTimeout(() => {
-                                const now = +new Date();
-                                if (now - clickedAt < 1500) {
-                                    window.location.href = storeUrl;
-                                }
-                            }, 1000);
+                            // [모바일] 순수 웹 링크 이동 방식 (OS App Links/Universal Links 유도)
+                            // 스마트폰에 '네이버플러스 스토어 앱'이나 '네이버 앱'이 있다면 OS가 알아서 앱을 열어주며, 없으면 현재 창에서 웹으로 넘어갑니다.
+                            window.location.href = storeUrl;
                         } 
                         else {
                             // [PC 환경] 무조건 일반 웹 브라우저 새 창으로 이동
