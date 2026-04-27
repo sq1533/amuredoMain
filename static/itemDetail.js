@@ -46,7 +46,34 @@ document.addEventListener("DOMContentLoaded", () => {
                     // 데이터가 있으면(True) 화면에 표시하고 클릭 연동
                     naverStoreBtn.style.display = 'inline-block';
                     naverStoreBtn.addEventListener("click", () => {
-                        window.open(data.naver, '_blank'); // 파싱받은 외부 주소로 새 창 띄우기
+                        const storeUrl = data.naver;
+                        const encodedUrl = encodeURIComponent(storeUrl);
+                        
+                        const isAndroid = /android/i.test(navigator.userAgent);
+                        const isIOS = /ipad|iphone|ipod/i.test(navigator.userAgent);
+
+                        if (isAndroid) {
+                            // [안드로이드] intent 방식: 네이버 앱 호출 시도 후 없으면 브라우저 fallback 자동 이동
+                            const intentUrl = "intent://inappbrowser?url=" + encodedUrl + "#Intent;scheme=naversearchapp;package=com.nhn.android.search;S.browser_fallback_url=" + encodedUrl + ";end;";
+                            window.location.href = intentUrl;
+                        } 
+                        else if (isIOS) {
+                            // [아이폰] URL Scheme 호출 후 1초 지연 타이머로 앱 미설치 판단하여 웹 브라우저 이동
+                            const clickedAt = +new Date();
+                            window.location.href = "naversearchapp://inappbrowser?url=" + encodedUrl;
+                            
+                            setTimeout(() => {
+                                const now = +new Date();
+                                // 앱으로 전환되지 않아 현재 페이지에 머물러 있는 경우 (시간차 계산)
+                                if (now - clickedAt < 1500) {
+                                    window.location.href = storeUrl;
+                                }
+                            }, 1000);
+                        } 
+                        else {
+                            // [PC 환경] 무조건 일반 웹 브라우저 새 창으로 이동 (기존 로직)
+                            window.open(storeUrl, '_blank');
+                        }
                     });
                 } else {
                     // 없으면 버튼 숨김 (방어 코딩)
