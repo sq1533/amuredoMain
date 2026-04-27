@@ -70,9 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderBanner(banners) {
         bannerTrack.innerHTML = '';
         
-        // 🏁 배너 진행 상태창 컨테이너 및 엣지 화살표 버튼 서치
-        const bannerProgressBar = document.getElementById("bannerProgressBar");
-        if(bannerProgressBar) bannerProgressBar.innerHTML = '';
+        // 엣지 화살표 버튼 서치
         const btnPrev = document.getElementById("bannerNavPrev");
         const btnNext = document.getElementById("bannerNavNext");
         
@@ -103,38 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
         
         let currentIndex = 0;
         let autoSlideInterval = null;
-        const segments = [];
-        
-        // 🏁 진행바의 개별 구획(Segments) 생성
-        if (bannerProgressBar) {
-            banners.forEach((_, index) => {
-                const seg = document.createElement('div');
-                seg.className = 'progress-segment';
-                const fill = document.createElement('div');
-                fill.className = 'progress-fill';
-                seg.appendChild(fill);
-                bannerProgressBar.appendChild(seg);
-                segments.push(seg);
-            });
-        }
-        
-        // --- 게이지 꽉 채우기 시각화 엔진 ---
-        function updateProgress(index) {
-            segments.forEach(seg => {
-                seg.classList.remove('active');
-                const fill = seg.querySelector('.progress-fill');
-                fill.style.transition = 'none';
-                fill.style.width = '0%';
-            });
-            
-            if (segments[index]) {
-                const fill = segments[index].querySelector('.progress-fill');
-                void fill.offsetWidth; // 리플로우(강제 초기화 반영)
-                fill.style.transition = 'width 5000ms linear';
-                fill.style.width = '100%';
-                segments[index].classList.add('active');
-            }
-        }
         
         // --- 좌/우 이동의 통제 타워 (인스타 스토리 방식) ---
         function moveBanner(index) {
@@ -145,7 +111,6 @@ document.addEventListener("DOMContentLoaded", () => {
             // 기존 5초 루프 죽이고 현재 배너 기준 새로 5초 부여
             if (autoSlideInterval) clearInterval(autoSlideInterval);
             currentIndex = index;
-            updateProgress(currentIndex);
             autoSlideInterval = setInterval(slideNext, 5000);
         }
         
@@ -173,26 +138,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // setupDesktopDrag(bannerTrack); 부분 삭제 완료.
     }
 
-    /* 🏁 신규: 모든 베스트 섹션(선글라스/안경) 이미지 스와이프 배너 드래그 연결 */
-    const itemBestTracks = document.querySelectorAll(".best-banner-track");
-    itemBestTracks.forEach(track => {
-        setupDesktopDrag(track);
-    });
+    // (베스트 섹션 이미지 스와이프 코드 제거 완료 - 정적 그리드 방식 적용)
 
-    // 3. 메인 하단: 'Sunglasses Best' 아이템 카드 스와이퍼 생성 로직
-    const sunglassesBestGrid = document.getElementById("sunglassesBestGrid");
-    fetch('/api/items/sunglasses_best')
-        .then(response => response.json())
-        .then(data => {
-            const bestItems = data.items;
-            if (bestItems && bestItems.length > 0) {
-                renderItemsTrack(sunglassesBestGrid, bestItems);
-                setupDesktopDrag(sunglassesBestGrid);
-            }
-        })
-        .catch(error => console.error("Sunglasses Best 아이템 통신 오류:", error));
-
-    // 4. 메인 최하단: 'Glasses Best' 전용 상품 카드 스와이퍼 생성 로직
+    // 3. 메인 하단(상단부): 'Glasses Best' 전용 상품 3열 그리드 생성 로직
     const glassesBestGrid = document.getElementById("glassesBestGrid");
     fetch('/api/items/glasses_best')
         .then(response => response.json())
@@ -200,10 +148,23 @@ document.addEventListener("DOMContentLoaded", () => {
             const newItems = data.items;
             if (newItems && newItems.length > 0) {
                 renderItemsTrack(glassesBestGrid, newItems);
-                setupDesktopDrag(glassesBestGrid);
+                // setupDesktopDrag 삭제됨
             }
         })
         .catch(error => console.error("Glasses Best 아이템 통신 오류:", error));
+
+    // 4. 메인 최하단: 'Sunglasses Best' 아이템 3열 그리드 생성 로직
+    const sunglassesBestGrid = document.getElementById("sunglassesBestGrid");
+    fetch('/api/items/sunglasses_best')
+        .then(response => response.json())
+        .then(data => {
+            const bestItems = data.items;
+            if (bestItems && bestItems.length > 0) {
+                renderItemsTrack(sunglassesBestGrid, bestItems);
+                // setupDesktopDrag 삭제됨
+            }
+        })
+        .catch(error => console.error("Sunglasses Best 아이템 통신 오류:", error));
 
     /**
      * 상품 리스트를 받아서 지정된 컨테이너에 가로 스와이프용 카드를 생성하는 공용 함수

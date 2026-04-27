@@ -23,11 +23,12 @@ button, input, select, textarea {
 }
 
 body {
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* 전체 폰트를 'Dongle'로 통일 */
-    font-size: 16px; /* 거대했던 동글 폰트 기준값을 일반 웹표준(16px)으로 초기화 */
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 16px; 
     line-height: 1.2;
-    background-color: #f0f0f0; 
+    background-color: #fff; /* 풀와이드 배너의 자연스러운 연출을 위해 기본 배경을 화이트로 통일 */
     color: #222;
+    overflow-x: hidden; /* 가로 스크롤바 원천 차단 */
 }
 
 /* 
@@ -38,11 +39,8 @@ body {
     width: 100%;
     max-width: 1024px;
     margin: 0 auto;
-    background-color: #fff;
-    min-height: 100vh;
     position: relative;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05); /* 경계 구분을 위한 가벼운 그림자 부여 */
-    overflow-x: hidden; /* 혹시라도 자식의 거대한 이미지가 1024px 밖으로 화면을 찢고 나가는(가로 스크롤) 현상을 원천 차단 */
+    /* 분리된 컨테이너 구조이므로 개별 그림자나 별도 배경색은 제거하여 플랫하게 연결 */
 }
 
 /* ========= 2. 헤더 및 네비게이션 영역 ========= */
@@ -187,8 +185,9 @@ body {
 }
 
 /* ========= 3. 메인 배너 영역 (Main Banner) ========= */
-.banner-section {
-    width: 100%;
+.banner-section.full-width {
+    width: 100%; /* 브라우저 100% 폭 사용 */
+    position: relative;
 }
 
 .banner-container {
@@ -275,89 +274,71 @@ body {
     background-color: rgba(0, 0, 0, 0.6);
 }
 
-/* 🏁 신규: 메인 배너 하단 0px 밀착 진행 상태창 (Progress Navigation Bar) */
-.banner-progress-bar {
-    display: flex;
-    width: 100%;
-    height: 8px; /* 가시성 강화를 위해 4px -> 8px 로 두께 상향 */
-    background-color: transparent;
-    margin: 0;
-    padding: 0;
-}
-
-/* 개별 등분 구획 단위 */
-.progress-segment {
-    flex: 1; /* 구획 개수만큼 화면 전체 너비를 정확한 공배수로 분할 */
-    height: 100%;
-    background-color: #bbd4e5; /* 유저 요청: 켜지지 않은 상태를 밝은 파란색으로 지정 */
-    position: relative;
-    cursor: pointer;
-    margin-right: 1px; /* 구획간의 경계선(1px) 부여 */
-}
-.progress-segment:last-child {
-    margin-right: 0; 
-}
-
-/* 시간이 지나며 서서히 차오르는 액티브 딥블루 막대기 */
-.progress-fill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 0%; 
-    background-color: #0e3a5b; /* 시그니처 컬러 할당 */
-}
-
-/* JavaScript에서 active 클래스를 부여하면, 너비가 100%가 되기까지 5초의 시간을 태움 */
-.progress-segment.active .progress-fill {
-    width: 100%;
-    transition: width 5s linear; 
-}
+/* 프로그레스바 관련 코드 삭제 완료 */
 
 /* ========= 4. 브랜드 스토리 섹션 (Brand Story) ========= */
 .brand-story-section {
     width: 100%;
-    padding: 80px 20px;
+    padding: 80px 40px; /* 좌우 여백을 살짝 더 넓게 */
     background-color: #fff;
-    text-align: center;
+    
+    /* 🏁 신규: 2단 비대칭 레이아웃 (좌측 2/3, 우측 1/3) */
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+    gap: 60px; /* 좌우 콘텐츠 간 간격 */
+    
     /* 초기 상태: 애니메이션 실행 전 투명 및 아래 배치 */
     opacity: 0;
     transform: translateY(40px);
     transition: none; /* fade-in-section의 기본 트랜지션 대신 전용 애니메이션 사용 */
 }
 
-/* 로고 박스 디자인 */
-.brand-story-logo {
-    margin-bottom: 30px;
+/* 좌측 텍스트 래퍼 (2/3 영역) */
+.story-text-wrap {
+    flex: 2; /* 2의 비율을 가짐 */
+    text-align: left;
 }
 
-.brand-story-logo img {
-    max-width: 125px; /* 프리미엄 쇼핑몰의 세련된 크기 */
-    height: auto;
-    opacity: 0.85;
+/* 소제목 디자인 */
+.story-subtitle {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 2rem;
+    line-height: 1.4;
+    word-break: keep-all;
 }
 
-/* 브랜드 슬로건 텍스트 디자인 */
-.brand-story-text {
-    max-width: 850px;
-    margin: 0 auto;
-}
-
-.brand-story-text p {
-    font-size: 1.4rem; /* 프리텐다드 기준: 데스크탑 세련된 사이즈로 조율 */
-    line-height: 1.1;
-    color: #0e3a5b; /* 시그니처 블루는 유지 */
-    margin-bottom: 1.5rem;
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* 통일감 부여 */
+/* 본문 디자인 (기존 폰트 사이즈/스타일 유지, 좌측 정렬) */
+.story-body {
+    font-size: 1.4rem; 
+    line-height: 1.5;
+    color: #0e3a5b; /* 시그니처 블루 색상 유지 */
+    font-family: 'Pretendard', sans-serif;
     font-weight: 400;
     word-break: keep-all;
     letter-spacing: 0.8px;
 }
 
-/* 🏁 Bottom-Up 애니메이션 엔진 (신규 추가) */
+/* 우측 1:1 정방형 이미지 래퍼 (1/3 영역) */
+.story-image-wrap {
+    flex: 1; /* 1의 비율을 가짐 */
+    aspect-ratio: 1 / 1;
+    overflow: hidden; /* 이미지 튀어나가는 부분 잘라내기 */
+}
+
+.brand-story-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 1:1 상자에 이미지가 꽉 차도록 자동 리사이징 */
+    display: block;
+}
+
+/* 🏁 Bottom-Up 애니메이션 엔진 (기존 유지) */
 .brand-story-section.is-visible {
     animation: amuredoSlideUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    animation-delay: 0.1s; /* 스크롤 위치 도달 시 약간의 시차를 두고 등장 */
+    animation-delay: 0.1s; 
 }
 
 @keyframes amuredoSlideUp {
@@ -371,13 +352,42 @@ body {
     }
 }
 
-/* 모바일 전용 여백 조정 */
+/* 🏁 모바일 전용 반응형 (Stacking): 화면 폭 640px 이하 */
 @media screen and (max-width: 640px) {
+    /* 가로 배열을 깨고 세로 위아래 스태킹 모드로 변경 */
     .brand-story-section {
-        padding: 60px 1.5rem;
+        flex-direction: column;
+        padding: 60px 20px; /* 모바일 폭에 맞춰 좌우 여백 축소 */
+        gap: 30px; /* 위아래 간격 타이트하게 */
+        align-items: center; /* 자식 요소들을 교차축 중앙으로 정렬 */
     }
-    .brand-story-text p {
-        font-size: 1.05rem;
+    
+    /* 2:1 비율을 버리고 각각 적절한 크기로 중앙 배치 */
+    .story-text-wrap {
+        width: fit-content; /* 글자 너비만큼만 텍스트 상자 크기 축소 */
+        max-width: 100%; 
+        flex: none; 
+        text-align: left; /* 내부 텍스트는 원래대로 왼쪽 정렬 */
+        margin: 0 auto; /* 텍스트 상자 자체를 화면 정중앙으로 배치 */
+    }
+
+    .story-image-wrap {
+        width: 100%;
+        max-width: 400px; /* 이미지가 모바일에서 너무 거대해지는 것을 방지 (선택적) */
+        flex: none; 
+        margin: 0 auto; /* 이미지를 중앙으로 정렬 */
+    }
+    
+    /* 스마트폰에서 강제 줄바꿈 방지(nowrap) 및 잘림 방지 폰트 축소(clamp) */
+    .story-subtitle {
+        font-size: clamp(1rem, 4.8vw, 1.3rem); /* 화면이 좁아지면 1rem까지 유연하게 축소됨 */
+        margin-bottom: 1.5rem;
+        white-space: nowrap; /* 브라우저의 임의 줄바꿈을 절대 금지 */
+    }
+    
+    .story-body {
+        font-size: clamp(0.8rem, 4vw, 1.15rem); /* 화면이 좁아지면 0.8rem까지 유연하게 축소됨 */
+        white-space: nowrap; /* 브라우저의 임의 줄바꿈을 절대 금지 */
     }
 }
 
@@ -400,73 +410,117 @@ body {
     letter-spacing: 2.2px; /* 깔끔한 모던 쇼핑몰 연출 (자간 증가) */
 }
 
-/* 🏁 신규: 베스트 섹션 전용 2매 이미지 스와이프 배너 (600px 제한) */
-.best-banner-container {
-    max-width: 600px;
-    margin: 0 auto 2.5rem; /* 중앙 정렬 및 선글라스 그리드와의 간격 */
-    overflow: hidden;
-    border-radius: 8px; /* 모던한 라운딩 */
-}
-
-.best-banner-track {
+/* 🏁 신규: 2:2:1 비율 모델 화보 고정 배치 */
+.best-model-row {
     display: flex;
-    height: 100%;
+    gap: 15px; /* 사진과 텍스트 박스 사이 간격 */
+    margin-bottom: 3rem;
+}
+
+.model-images-track {
+    flex: 4; /* 전체 80% 영역을 차지 */
+    display: flex;
+    gap: 15px; /* 사진 2장 사이 간격 */
+}
+
+.model-img-wrap {
+    flex: 1; /* track 내부에서 각각 50% 분할 */
+}
+
+.model-img-wrap img {
     width: 100%;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    -ms-overflow-style: none; /* IE, Edge */
-}
-
-.best-banner-track::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
-}
-
-.best-banner-track.active-drag {
-    scroll-snap-type: none; /* 마우스 드래그 중 스냅 일시 해제 */
-    cursor: grabbing;
-}
-
-.best-banner-img {
-    width: 100%;
-    height: auto;
-    flex-shrink: 0;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
+    height: 100%; /* 높이를 꽉 채우게 수정 */
     object-fit: cover;
-    pointer-events: none;
+    display: block;
 }
 
-/* 아이템 가로 스와이프 그리드 배치 시스템 (1행 무한 둘러보기) */
-.item-grid-container {
-    display: flex; /* 가로 1행 배치를 위해 Flex 사용 */
-    flex-wrap: nowrap; /* 무조건 한 줄로만 배치 */
-    overflow-x: auto; /* 가로 스크롤 활성화 */
-    scroll-snap-type: x mandatory; /* 카드별 딱딱 끊어지는 스냅 부여 */
-    gap: 1.5rem; /* 각 상품 카드 사이의 공백(간격) */
-    padding: 0 10px 1rem 10px; /* 좌측 아이템 정렬 선 맞춤 및 하단 숨통 확보 */
-    scrollbar-width: none; /* 파이어폭스 스크롤바 숨김 */
-    -webkit-overflow-scrolling: touch;
+.model-text-wrap {
+    flex: 1; /* 20% 차지 */
+    background-color: transparent; /* 기존 회색(#f7f7f7) 제거 및 투명 처리 */
+    display: flex;
+    flex-direction: column; /* 세로 스태킹 */
+    align-items: flex-start; /* 왼쪽 정렬 */
+    justify-content: space-evenly; /* 상하단 및 아이템 사이 공간을 동일하게 균등 분배 */
+    padding: 2.5rem 2rem; /* 박스 안쪽 여백 확보 */
 }
 
-/* 크롬, 사파리 스크롤바 숨김 */
-.item-grid-container::-webkit-scrollbar {
-    display: none;
+/* 🏁 신규: 해쉬태그 텍스트 스타일 지정 */
+.hashtag-text {
+    color: #0e3a5b; /* 아무래도 시그니처 색상 */
+    font-size: 1.5rem; /* 사이즈 1.5rem으로 하향 조절 */
+    font-weight: bold; /* 두껍게 */
+    line-height: 1.2; /* 공간 분배는 부모 flex가 담당하므로 자체 줄간격은 타이트하게 묶음 */
+    text-align: left; 
+    letter-spacing: 0.5px;
+    width: 100%;
 }
 
-.item-grid-container.active-drag {
-    scroll-snap-type: none; /* 드래그 중인 경우 스냅 방해 해제 */
-    cursor: grabbing;
+/* 🏁 베스트 화보 모바일 반응형 (상하 스태킹, 스와이프, 해쉬태그 인라인) */
+@media screen and (max-width: 640px) {
+    .best-model-row {
+        flex-direction: column;
+        gap: 10px; /* 상하 배치 간격 */
+    }
+    
+    .model-images-track {
+        flex: none;
+        width: 100%;
+        overflow-x: auto; /* 모바일 가로 스와이프 허용 */
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none; /* 파이어폭스 스크롤바 숨김 */
+        -ms-overflow-style: none; /* IE, Edge */
+        -webkit-overflow-scrolling: touch;
+        gap: 0; /* 스와이프 시 화면에 딱 맞도록 간격 0 */
+    }
+    
+    .model-images-track::-webkit-scrollbar {
+        display: none; /* 크롬, 사파리 스크롤바 숨김 */
+    }
+
+    .model-img-wrap {
+        flex: 0 0 100%; /* 화면 100% 꽉 채우기 (3:1 배치 중 큰 비중) */
+        scroll-snap-align: start; /* 스와이프 시 고정 위치 */
+        scroll-snap-stop: always;
+    }
+
+    .model-text-wrap {
+        flex: none;
+        width: 100%;
+        flex-direction: row; /* 태그들을 이어서 나열 (가로 배치) */
+        flex-wrap: wrap; /* 너비가 좁으면 자연스럽게 밑으로 이어서 배치 */
+        justify-content: center; /* 가운데 정렬 */
+        padding: 1.5rem 1rem;
+        gap: 8px 12px; /* 태그 사이 간격 (상하 8px, 좌우 12px) */
+    }
+
+    .hashtag-text {
+        width: auto; /* 100% 점유율을 버리고 자신의 글자 크기만큼만 가짐 */
+        font-size: clamp(1rem, 4vw, 1.2rem); /* 모바일 최적화 */
+        white-space: nowrap; /* 개별 태그 내부에서는 글자가 쪼개지지 않도록 방어 */
+    }
+}
+
+/* 🏁 신규: 아이템 3열 고정 그리드 배치 시스템 (스와이프 불가) */
+.best-items-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3열로 정확하게 분할 */
+    gap: 2rem 1.5rem; /* 세로간격 2rem, 가로간격 1.5rem */
+    padding: 0 10px 2rem 10px;
+}
+
+/* 🏁 모바일 베스트 상품 그리드 2열 배치 (CSS 선언 우선순위를 위해 PC 밑에 위치) */
+@media screen and (max-width: 640px) {
+    .best-items-grid {
+        grid-template-columns: repeat(2, 1fr); /* 3열에서 2열로 강제 변경 */
+        gap: 1.5rem 1rem; /* 모바일에 맞게 카드 사이 간격 소폭 축소 */
+    }
 }
 
 /* 개별 아이템 카드 루트 */
 .item-card {
-    flex: 0 0 calc(45%); /* 모바일: 한 줄에 2개 정도 걸치도록 설정 */
     display: flex;
     flex-direction: column;
-    scroll-snap-align: center; /* 스냅 고정 포인트 */
-    min-width: 0; 
+    width: 100%; 
 }
 
 /* 1. 이미지 컨테이너 (정사각형 1:1 비율 강제 규격 유지) */
@@ -711,6 +765,7 @@ body {
 .detail-slide {
     flex: 0 0 100%; /* 무조건 화면 가로 너비 1칸 전부 꽉 채움 */
     scroll-snap-align: center; /* 터치를 멈추면 자석처럼 중앙으로 확 달라붙음 */
+    scroll-snap-stop: always; /* 어떠한 강도의 스와이프에도 무조건 1장씩만 넘어가도록 강력한 제동 걸기 */
     padding: 0 10px; /* 요구사항: 좌우 마진 느낌의 10px 공간 확보 */
 }
 
@@ -739,13 +794,13 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 8px;
+    gap: 12px; /* 도트가 커짐에 따라 여유 공간 확장 */
     margin-top: 1.5rem;
 }
 
 .detail-dot {
-    width: 8px;
-    height: 8px;
+    width: 12px; /* 기존 8px에서 12px로 사이즈 업 */
+    height: 12px; /* 기존 8px에서 12px로 사이즈 업 */
     border-radius: 50%;
     background-color: #ddd;
     border: none;
@@ -757,7 +812,7 @@ body {
 /* 활성화 된 닷 디자인 */
 .detail-dot.active {
     background-color: #111;
-    transform: scale(1.3); /* 살짝 커지면서 존재감 부각 */
+    transform: scale(1.4); /* 커진 도트 크기에 맞춰 강조 스케일 상향 */
 }
 
 /* 하단 상세 정보 텍스트 (기본 모바일: 중앙 렌더링) */
@@ -983,6 +1038,8 @@ body {
     height: 100%;
     object-fit: cover; /* 이미지가 박스에 꽉 들어차며 넘치는 부분 은폐 */
     display: block;
+    pointer-events: none; /* 유저 조작 제한: 사진 끌어당기기(드래그) 행위 원천 차단 */
+    user-select: none; /* 유저 조작 제한: 사진/영역 블록 씌우기 방지 */
 }
 
 /* 💻 데스크탑 / 태블릿 가로 모드 (768px 이상) -> Swipe 스크롤바 레이아웃 체인지 */
@@ -1002,23 +1059,23 @@ body {
         padding-bottom: 1.5rem; 
         
         /* Firefox 지원: 스크롤바 색상 및 두께 미리 지정 */
-        scrollbar-width: thin;
-        scrollbar-color: #0e3a5b #f0f0f0;
+        scrollbar-width: auto; /* 두껍게 설정되도록 유도 */
+        scrollbar-color: #111111 #e0e0e0; /* 강한 대비: 검정 손잡이, 회색 트랙 */
     }
     
     /* PC 브라우저(Chrome, Edge, Safari) 전용 휠 바 명시적 강제 출력 */
     .lookbook-track-container::-webkit-scrollbar {
-        height: 10px; /* 기존 6px이 너무 얇을 수 있으므로 시인성 상향 */
+        height: 14px; /* 슬라이드 바를 한눈에 알아볼 수 있도록 14px로 두께 상향 */
         -webkit-appearance: none;
     }
     .lookbook-track-container::-webkit-scrollbar-track {
-        background: #f0f0f0;
+        background: #e0e0e0; /* 밝은 회색 바탕으로 손잡이가 잘 보이게 설정 */
         border-radius: 10px;
     }
     .lookbook-track-container::-webkit-scrollbar-thumb {
-        background: #0e3a5b; /* 시그니처 모델 스크롤 */
+        background: #111111; /* 완전한 검정색으로 뚜렷하게 표시 */
         border-radius: 10px;
-        border: 2px solid #f0f0f0; /* 내부 여백 효과를 위한 보더 세팅 */
+        border: 3px solid #e0e0e0; /* 두꺼워진 만큼 주변 트랙 색상과 동일한 두꺼운 테두리를 넣어 세련된 여백 연출 */
     }
 
     .lookbook-track {
@@ -1548,11 +1605,29 @@ body {
 
 .footer-info p {
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    font-size: 0.8rem; /* 동글 폰트 특성상 1.2rem이 일반 폰트 12~13px 느낌 */
+    font-size: 0.8rem;
     color: #999999;
     margin-bottom: 0.3rem;
     line-height: 1.4;
     word-break: keep-all;
+}
+
+/* 🏁 푸터 이용약관 링크 */
+.footer-terms-wrap {
+    margin-bottom: 1.5rem !important; /* 아래 사업자 정보와 약간 띄우기 */
+}
+
+.footer-terms-link {
+    color: #888888; /* 사업자 텍스트와 비슷한 회색톤 (살짝 진하게) */
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: color 0.2s ease;
+}
+
+.footer-terms-link:hover {
+    color: #111; /* 마우스 오버 시 블랙으로 변해 클릭 유도 */
+    text-decoration: underline;
 }
 
 /* 모바일 푸터 대응 */
