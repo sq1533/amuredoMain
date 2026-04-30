@@ -36,23 +36,40 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 });
                 
-                // 2. 드롭다운(Select) 옵션 초기화 및 렌더링
+                // 2. 필터 탭(Tabs) 초기화 및 렌더링
                 if (categoryFilter) {
-                    categoryFilter.innerHTML = '<option value="ALL">전체보기</option>';
+                    categoryFilter.innerHTML = '';
+                    
+                    // '전체보기(all)' 버튼 생성
+                    const allBtn = document.createElement("button");
+                    allBtn.className = "filter-tab active";
+                    allBtn.textContent = "all";
+                    allBtn.setAttribute("data-value", "ALL");
+                    categoryFilter.appendChild(allBtn);
+
+                    // 각 키워드별 버튼 생성
                     keywords.forEach(keyword => {
-                        const option = document.createElement("option");
-                        option.value = keyword;
-                        option.textContent = keyword;
-                        categoryFilter.appendChild(option);
+                        const btn = document.createElement("button");
+                        btn.className = "filter-tab";
+                        btn.textContent = keyword.toLowerCase();
+                        btn.setAttribute("data-value", keyword);
+                        categoryFilter.appendChild(btn);
                     });
                     
-                    // 3. 필터 선택 이벤트 바인딩 (클라이언트 사이드 실시간 정렬)
-                    categoryFilter.addEventListener('change', (e) => {
-                        const selectedValue = e.target.value;
+                    // 3. 필터 클릭 이벤트 바인딩
+                    categoryFilter.addEventListener('click', (e) => {
+                        const target = e.target.closest('.filter-tab');
+                        if (!target) return;
+
+                        // 탭 활성화 스타일 전환
+                        const tabs = categoryFilter.querySelectorAll('.filter-tab');
+                        tabs.forEach(tab => tab.classList.remove('active'));
+                        target.classList.add('active');
+
+                        const selectedValue = target.getAttribute('data-value');
                         if (selectedValue === 'ALL') {
-                            renderCategoryItems(allFetchedItems); // 원상복구
+                            renderCategoryItems(allFetchedItems);
                         } else {
-                            // 사용자가 고른 키워드(category 문자열)와 동일한 상품만 필터링
                             const filteredItems = allFetchedItems.filter(item => item.category === selectedValue);
                             renderCategoryItems(filteredItems);
                         }

@@ -18,6 +18,16 @@ document.addEventListener("DOMContentLoaded", () => {
         navOverlay.classList.toggle("open");
     }
 
+    /* 🏁 신규: 스크롤 감지하여 헤더 배경색 토글 (오버레이 모드) */
+    const mainHeader = document.querySelector(".main-header");
+    window.addEventListener("scroll", () => {
+        if (window.scrollY > 50) {
+            mainHeader.classList.add("scrolled");
+        } else {
+            mainHeader.classList.remove("scrolled");
+        }
+    });
+
     // 모바일 햄버거 버튼 클릭 시 여는 이벤트 연결
     menuToggleBtn.addEventListener("click", toggleMenu);
     
@@ -45,98 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
     fadeElements.forEach(el => observer.observe(el));
 
     /* ====================================================
-       2. 메인 배너 슬라이드 캐러셀 로직 
-          (5초 자동 전환 / 이전·다음 마우스 수동 전환)
+       2. 메인 배너 슬라이드 캐러셀 로직 삭제됨 (단일 비디오 배너 전환)
        ==================================================== */
-       
-    const bannerTrack = document.getElementById("bannerTrack");
-    
-    // 1. 백엔드(FastAPI)의 Firebase 데이터 조회(임시) 엔드포인트에 요청을 보냅니다.
-    fetch('/api/banner')
-        .then(response => response.json())
-        .then(data => {
-            const banners = data.banners;
-            
-            // 불러온 배너 객체 배열(.banners)이 존재할 경우 화면 렌더링 시작
-            if (banners && banners.length > 0) {
-                renderBanner(banners);
-            }
-        })
-        .catch(error => {
-            console.error("Firebase API 배너 이미지 데이터를 불러오는 중 오류 발생:", error);
-        });
 
-    // 2. 메인 배너 화면 렌더링 핵심 함수 (스와이프리스 터치 라우팅)
-    function renderBanner(banners) {
-        bannerTrack.innerHTML = '';
-        
-        // 엣지 화살표 버튼 서치
-        const btnPrev = document.getElementById("bannerNavPrev");
-        const btnNext = document.getElementById("bannerNavNext");
-        
-        // 데이터가 없다면 그리기 중단
-        if (!banners || banners.length === 0) return;
-        const total = banners.length;
-
-        // 이미지 DOM 생성 (지저분한 무한 양끝 클로닝 로직 걷어냄)
-        banners.forEach((bannerObj, index) => {
-            const img = document.createElement('img');
-            img.src = bannerObj.path;
-            img.alt = `amuredo 메인 기획 배너 ${index}`;
-            img.className = 'banner-img'; 
-            
-            // 🏁 [완벽한 버튼 분리] 순수하게 '가운데 이미지 영역' 클릭 시에만 라우팅 이동
-            img.style.cursor = 'pointer'; 
-            img.addEventListener('click', () => {
-                const targetUrl = bannerObj.url;
-                if (!targetUrl || targetUrl.trim() === "") {
-                    // url 공백 Fallback 메인 귀환
-                    location.href = '/';
-                } else {
-                    location.href = targetUrl;
-                }
-            });
-            bannerTrack.appendChild(img);
-        });
-        
-        let currentIndex = 0;
-        let autoSlideInterval = null;
-        
-        // --- 좌/우 이동의 통제 타워 (인스타 스토리 방식) ---
-        function moveBanner(index) {
-            const width = bannerTrack.offsetWidth;
-            // 지정된 위치로 부드럽게 스크롤
-            bannerTrack.scrollTo({ left: index * width, behavior: 'smooth' });
-            
-            // 기존 5초 루프 죽이고 현재 배너 기준 새로 5초 부여
-            if (autoSlideInterval) clearInterval(autoSlideInterval);
-            currentIndex = index;
-            autoSlideInterval = setInterval(slideNext, 5000);
-        }
-        
-        function slideNext() {
-            let nextIndex = currentIndex + 1;
-            if (nextIndex >= total) nextIndex = 0; // 끝 도달 시 1번 배너로 리와인드 귀환
-            moveBanner(nextIndex);
-        }
-        
-        function slidePrev() {
-            let prevIndex = currentIndex - 1;
-            if (prevIndex < 0) prevIndex = total - 1; // 맨 앞 배너 도달 시 끝으로 이동
-            moveBanner(prevIndex);
-        }
-        
-        // 🏁 모바일 양끝 100% 터치 및 PC 화살표 버튼 클릭 이벤트 최종 매핑
-        if (btnPrev) btnPrev.addEventListener('click', slidePrev);
-        if (btnNext) btnNext.addEventListener('click', slideNext);
-
-        // --- 초기 시작점 (Start Scene) ---
-        // 1번장 출발
-        moveBanner(0);
-        
-        // 상단 최적화 배너는 이제 JS 드래그 코드가 개입하지 않도록 완전히 격리됩니다.
-        // setupDesktopDrag(bannerTrack); 부분 삭제 완료.
-    }
 
     // (베스트 섹션 이미지 스와이프 코드 제거 완료 - 정적 그리드 방식 적용)
 

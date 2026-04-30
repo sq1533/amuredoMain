@@ -9,21 +9,22 @@
     })(window,document,'script','dataLayer','GTM-P6STJHVH');</script>
     <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 아무레도 검색엔진 최적화(SEO) 및 SNS 공유 설정 -->
     <title>아무래도 안경</title>
     <meta name="description" content="분위기와 억양을 디자인을 디자인합니다. 아무래도 안경, 본질의 아름다움을 추구합니다">
-    <!-- 아무레도 검색엔진 최적화(SEO) 및 SNS 공유 설정 -->
     <meta property="og:title" content="아무래도 안경 공식 홈페이지">
     <meta property="og:description" content="분위기와 억양을 디자인을 디자인합니다. 아무래도 안경, 본질의 아름다움을 추구합니다">
     <meta property="og:image" content="/static/img/meta.webp">
     <meta property="og:type" content="website">
+
     <!-- 아무레도 브랜드 파비콘(Favicon) 설정 -->
     <link rel="icon" href="/static/img/icon.webp" type="image/webp">
     <link rel="apple-touch-icon" href="/static/img/icon.webp">
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <!-- 외부 스타일시트 -->
-    <link rel="stylesheet" href="/static/style.css?v=12.1">
+    <!-- 외부 스타일시트 연결 -->
+    <link rel="stylesheet" href="/static/style.css?v=14.32">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
     <script>
@@ -39,73 +40,85 @@
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P6STJHVH"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
-    <div class="app-container">
-        
-        <!-- 최상단 헤더(Header) 영역: 모든 페이지 공통 레이아웃 -->
-        <header class="main-header">
-            <div class="logo-wrapper">
-                <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
-            </div>
-            <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
-                <span class="hamburger-box"></span>
-            </button>
-            <nav class="page-nav" id="pageNav">
-                <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
-                <ul class="nav-links">
-                    <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunglasses</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/goggles'">Goggles</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/about'">about</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/contact'">문의하기</button></li>
-                </ul>
-            </nav>
-            <div class="nav-overlay" id="navOverlay"></div>
-        </header>
 
-        <!-- 문의하기 메인 컨텐츠 영역 -->
-        <main class="contact-main fade-in-section">
+    <!-- 최상단 헤더(Header) 영역: 모든 페이지 공통 레이아웃 -->
+    <header class="main-header">
+        <!-- PC 좌측 메뉴 -->
+        <nav class="pc-nav-left">
+            <button class="nav-switch-btn" onclick="location.href='/about'">About</button>
+            <button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button>
+        </nav>
+
+        <!-- 모바일 전용 햄버거 메뉴 버튼 -->
+        <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
+            <span class="hamburger-box"></span>
+        </button>
+
+        <!-- 중앙 로고 -->
+        <div class="logo-wrapper">
+            <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
+        </div>
+
+        <!-- PC 우측 메뉴 -->
+        <nav class="pc-nav-right">
+            <button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button>
+            <button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button>
+        </nav>
+
+        <!-- 모바일 네비게이션 드로어 -->
+        <nav class="page-nav" id="pageNav">
+            <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
+            <ul class="nav-links">
+                <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/about'">About</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button></li>
+            </ul>
+        </nav>
+
+        <div class="nav-overlay" id="navOverlay"></div>
+    </header>
+
+    <div class="app-container">
+        <!-- 메인 콘텐츠 영역 (문의하기 페이지) -->
+        <main class="main-content contact-main sub-page-main">
             <div class="contact-container">
-                <h1 class="contact-title">Contact Us</h1>
-                <p class="contact-subtitle">궁금하신 점이 있다면 언제든 문의해 주세요. 최대한 빠르게 답변 드리겠습니다.</p>
+                <h1 class="contact-title">Connect</h1>
+                <p class="contact-subtitle">아무래도에 대한 문의사항이나 협업 제안을 남겨주세요.</p>
                 
-                <form id="contactForm" class="contact-form" enctype="multipart/form-data">
-                    <!-- 1. 이메일 입력란 -->
+                <form id="contactForm" class="contact-form">
                     <div class="form-group">
-                        <label for="email">답변 받으실 이메일</label>
+                        <label for="email">이메일 주소</label>
                         <input type="email" id="email" name="email" placeholder="example@email.com" required>
                     </div>
 
-                    <!-- 2. 문의사항 입력란 -->
                     <div class="form-group">
                         <label for="message">문의 내용</label>
-                        <textarea id="message" name="message" rows="8" placeholder="문의하실 내용을 입력해주세요. (허용되지 않은 특수문자는 자동 필터링될 수 있습니다.)" required></textarea>
+                        <textarea id="message" name="message" rows="8" placeholder="내용을 입력해주세요." required></textarea>
                     </div>
 
-                    <!-- 3. 사진 첨부란 (최대 5개) -->
+                    <!-- 이미지 첨부 영역 (다중 선택 가능) -->
                     <div class="form-group">
-                        <label>사진 첨부 (최대 5장, 장당 2MB 이내)</label>
+                        <label>이미지 첨부 (최대 5장)</label>
                         <div class="file-upload-wrapper">
-                            <!-- 실제 input은 숨기고 커스텀 label로 트리거 -->
-                            <input type="file" id="images" name="images" accept=".jpg, .jpeg, .png, .webp" multiple style="display: none;">
-                            <label for="images" class="custom-file-label">첨부하기</label>
-                            
-                            <div class="file-preview-container" id="filePreview"></div>
-                            <p class="file-help-text">* 허용 확장자: jpg, jpeg, png, webp</p>
+                            <label for="images" class="custom-file-label">파일 선택</label>
+                            <input type="file" id="images" name="images" accept="image/*" multiple>
+                            <p class="file-help-text">JPG, PNG, WebP 형식의 이미지를 선택할 수 있습니다.</p>
+                            <div id="imagePreview" class="file-preview-container"></div>
                         </div>
                     </div>
 
-                    <!-- 4. 이메일 수집 동의 체크박스 -->
-                    <div class="form-group consent-group">
+                    <!-- 개인정보 수집 동의 -->
+                    <div class="consent-group">
                         <label class="checkbox-container">
-                            <input type="checkbox" id="consent" name="consent">
+                            개인정보 수집 및 이용에 동 de의합니다.
+                            <input type="checkbox" id="consent" required>
                             <span class="checkmark"></span>
-                            이메일 수집 및 이용에 동의합니다. (필수)
                         </label>
                     </div>
 
-                    <!-- 5. 전송 버튼 -->
                     <div class="form-submit-wrapper">
-                        <button type="submit" id="submitBtn" class="submit-btn" disabled>전송하기</button>
+                        <button type="submit" id="submitBtn" class="submit-btn" disabled>보내기</button>
                     </div>
                 </form>
             </div>
@@ -125,13 +138,14 @@
         </footer>
     </div>
 
-    <!-- 문의하기 전용 스크립트 연결 -->
-    <script src="/static/contact.js?v=1.0"></script>
+    <!-- Contact 페이지 로직 스크립트 (Firebase 연동 등) -->
+    <script src="/static/contact.js?v=2.1"></script>
+    
+    <!-- 공통 메뉴 동작용 스크립트 -->
     <script>
-        // 헤더 공통 로직 (기본 탑재)
         document.addEventListener("DOMContentLoaded", () => {
-            const menuBtn = document.getElementById("menuToggleBtn");
-            const closeBtn = document.getElementById("closeMenuBtn");
+            const menuToggleBtn = document.getElementById("menuToggleBtn");
+            const closeMenuBtn = document.getElementById("closeMenuBtn");
             const pageNav = document.getElementById("pageNav");
             const navOverlay = document.getElementById("navOverlay");
 
@@ -139,12 +153,10 @@
                 pageNav.classList.toggle("open");
                 navOverlay.classList.toggle("active");
             }
-            if(menuBtn) menuBtn.addEventListener("click", toggleMenu);
-            if(closeBtn) closeBtn.addEventListener("click", toggleMenu);
-            if(navOverlay) navOverlay.addEventListener("click", toggleMenu);
 
-            const fadeEl = document.querySelector(".fade-in-section");
-            setTimeout(() => { fadeEl.classList.add("is-visible"); }, 100);
+            if(menuToggleBtn) menuToggleBtn.addEventListener("click", toggleMenu);
+            if(closeMenuBtn) closeMenuBtn.addEventListener("click", toggleMenu);
+            if(navOverlay) navOverlay.addEventListener("click", toggleMenu);
         });
     </script>
 </body>

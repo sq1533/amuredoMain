@@ -24,7 +24,7 @@
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <!-- 외부 공통 스타일시트 연결 (캐시 무효화) -->
-    <link rel="stylesheet" href="/static/style.css?v=11.8">
+    <link rel="stylesheet" href="/static/style.css?v=14.32">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
     <script>
@@ -40,33 +40,48 @@
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P6STJHVH"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
-    <div class="app-container">
-        
-        <!-- 최상단 헤더(Header) 영역: 사이트 전역 공통 사용 -->
-        <header class="main-header">
-            <div class="logo-wrapper">
-                <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
-            </div>
-            
+    <!-- 최상단 헤더(Header) 영역: 사이트 전역 공통 사용 -->
+    <!-- 최상단 헤더(Header) 영역: 풀와이드 및 좌우 대칭 구조 -->
+    <header class="main-header">
+            <!-- PC 좌측 메뉴 -->
+            <nav class="pc-nav-left">
+                <button class="nav-switch-btn" onclick="location.href='/about'">About</button>
+                <button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button>
+            </nav>
+
+            <!-- 모바일 전용 햄버거 메뉴 버튼 -->
             <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
                 <span class="hamburger-box"></span>
             </button>
 
+            <!-- 중앙 로고 -->
+            <div class="logo-wrapper">
+                <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
+            </div>
+
+            <!-- PC 우측 메뉴 -->
+            <nav class="pc-nav-right">
+                <button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button>
+                <button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button>
+            </nav>
+
+            <!-- 모바일 네비게이션 드로어 -->
             <nav class="page-nav" id="pageNav">
                 <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
                 <ul class="nav-links">
-                    <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunglasses</button></li>
                     <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/goggles'">Goggles</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/about'">about</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/contact'">문의하기</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/about'">About</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button></li>
                 </ul>
             </nav>
+
             <div class="nav-overlay" id="navOverlay"></div>
         </header>
 
-        <!-- 메인 콘텐츠 영역 (상세 페이지) -->
-        <main class="main-content detail-content">
+        <div class="app-container">
+            <!-- 메인 콘텐츠 영역 (상세 페이지) -->
+            <main class="main-content detail-content sub-page-main">
             <!-- [추가] 모바일 1단 / PC 2단 배열을 위한 이미지 좌측 컨테이너 -->
             <div class="detail-left-column">
                 <!-- 좌우 마진 10px, Swipe가 되는 이미지 슬라이더 영역 -->

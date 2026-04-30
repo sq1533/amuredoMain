@@ -25,7 +25,7 @@
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <!-- 외부 스타일시트 연결 (캐시 무효화) -->
-    <link rel="stylesheet" href="/static/style.css?v=14.25">
+    <link rel="stylesheet" href="/static/style.css?v=14.32">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
     <script>
@@ -42,73 +42,84 @@
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P6STJHVH"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
-    <!-- 헤더 컨테이너 (1024px 제한) -->
-    <div class="app-container">
-        <!-- 최상단 헤더(Header) 영역: 로고 + 메뉴(네비게이션) -->
-        <header class="main-header">
-            <div class="logo-wrapper">
-                <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
-            </div>
+    <!-- 최상단 헤더(Header) 영역: 로고 + 메뉴(네비게이션) -->
+    <!-- 최상단 헤더(Header) 영역: 풀와이드 및 좌우 대칭 구조 -->
+    <header class="main-header">
+            <!-- PC 좌측 메뉴 -->
+            <nav class="pc-nav-left">
+                <button class="nav-switch-btn" onclick="location.href='/about'">About</button>
+                <button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button>
+            </nav>
 
-            <!-- 우측 모바일 전용 메뉴 버튼 -->
+            <!-- 모바일 전용 햄버거 메뉴 버튼 -->
             <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
                 <span class="hamburger-box"></span>
             </button>
 
-            <!-- 페이지 네비게이션 드로어 -->
+            <!-- 중앙 로고 -->
+            <div class="logo-wrapper">
+                <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
+            </div>
+
+            <!-- PC 우측 메뉴 -->
+            <nav class="pc-nav-right">
+                <button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button>
+                <button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button>
+            </nav>
+
+            <!-- 모바일 네비게이션 드로어 -->
             <nav class="page-nav" id="pageNav">
                 <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
                 <ul class="nav-links">
-                    <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunglasses</button></li>
                     <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/goggles'">Goggles</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/about'">about</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/contact'">문의하기</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/about'">About</button></li>
+                    <li><button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button></li>
                 </ul>
             </nav>
 
             <div class="nav-overlay" id="navOverlay"></div>
         </header>
-    </div> <!-- 헤더 컨테이너 종료 -->
-
-    <!-- 🏁 풀와이드 배너 영역 (컨테이너 밖으로 독립하여 100vw 사용) -->
+    
+    <!-- 🏁 풀와이드 배너 영역: 단일 비디오 배너 (상호작용 제거) -->
     <section class="banner-section full-width">
-                <!-- 가로 폭 100%, 5:3 비율(높이 60%)을 유지하는 배너 컨테이너 -->
-                <div class="banner-container" id="bannerContainer">
-                    
-                    <!-- 🏁 신규: 모바일 친화적 양 끝단 100% 확장 터치 가능 네비게이션 -->
-                    <div class="banner-nav prev" id="bannerNavPrev" aria-label="이전 배너">
-                        <div class="nav-arrow">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
-                        </div>
-                    </div>
-                    <div class="banner-nav next" id="bannerNavNext" aria-label="다음 배너">
-                        <div class="nav-arrow">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-                        </div>
-                    </div>
-
-                    <!-- 이미지 리스트들이 들어갈 궤도 컨테이너 -->
-                    <div class="banner-track" id="bannerTrack">
-                        <!-- JS 코드가 API 통신 후 <img> 태그를 자동으로 채웁니다 -->
-                    </div>
-                </div>
-                <!-- 하단 진행 상태바 삭제됨 -->
-            </section>
+        <div class="banner-container">
+            <!-- 비디오 배너: 로딩 중 포스터 이미지 노출, 자동재생, 음소거, 반복재생 -->
+            <video 
+                class="banner-video" 
+                autoplay 
+                muted 
+                loop 
+                playsinline 
+                poster="/static/img/banner_img_pc.jpg">
+                <source src="/static/img/banner_vod_pc.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </section>
 
     <!-- 하단 메인 콘텐츠 및 푸터 컨테이너 (1024px 제한) -->
     <div class="app-container">
         <main class="main-content">
             <!-- 브랜드 스토리 (Brand Story) 구역 -->
             <section class="brand-story-section fade-in-section">
-                <!-- 좌측 텍스트 래퍼 (전체 2/3 영역) -->
-                <div class="story-text-wrap">
-                    <h2 class="story-subtitle">일상을 넘어 당신의 시그니처가 될<br>데일리 아이웨어, 아무래도.</h2>
-                    <p class="story-body">아무래도는 타협하지 않는 품질과 정교한 디테일로<br>아이웨어의 본질에 집중합니다.<br>어떤 순간에도 묵묵히 당신의 품격을 대변하는<br>변치 않는 모던함을 추구합니다.<br>가벼운 유행 대신 깊이있는 세련됨을 선택하세요.</p>
+                <!-- 🏁 신규: 섹션 메인 헤더 (중앙 정렬 타이틀) -->
+                <div class="brand-story-header">
+                    <span class="eng-title">brand story</span>
+                    <h2 class="kor-title">브랜드 스토리</h2>
                 </div>
-                <!-- 우측 1:1 정방형 이미지 래퍼 (전체 1/3 영역) -->
-                <div class="story-image-wrap">
-                    <img src="/static/img/brandStory.webp" alt="amuredo Brand Story" class="brand-story-img">
+
+                <!-- 기존 텍스트와 이미지를 담는 플렉스 컨테이너 -->
+                <div class="story-flex-container">
+                    <!-- 좌측 텍스트 래퍼 (전체 2/3 영역) -->
+                    <div class="story-text-wrap">
+                        <h2 class="story-subtitle">일상을 넘어 당신의 시그니처가 될<br>데일리 아이웨어, 아무래도.</h2>
+                        <p class="story-body">아무래도는 타협하지 않는 품질과 정교한 디테일로<br>아이웨어의 본질에 집중합니다.<br>어떤 순간에도 묵묵히 당신의 품격을 대변하는<br>변치 않는 모던함을 추구합니다.<br>가벼운 유행 대신 깊이있는 세련됨을 선택하세요.</p>
+                    </div>
+                    <!-- 우측 1:1 정방형 이미지 래퍼 (전체 1/3 영역) -->
+                    <div class="story-image-wrap">
+                        <img src="/static/img/brandStory.webp" alt="amuredo Brand Story" class="brand-story-img">
+                    </div>
                 </div>
             </section>
 
@@ -184,8 +195,8 @@
         </footer>
     </div>
 
-    <!-- 공통 로직 자바스크립트 연결 (캐시 무효화 v5.1) -->
-    <script src="/static/main.js?v=5.1"></script>
+    <!-- 공통 로직 자바스크립트 연결 (캐시 무효화 v5.3) -->
+    <script src="/static/main.js?v=5.3"></script>
 </body>
 
 </html>

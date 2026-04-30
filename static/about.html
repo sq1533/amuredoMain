@@ -25,7 +25,7 @@
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <!-- 외부 스타일시트 연결 -->
-    <link rel="stylesheet" href="/static/style.css?v=12.3">
+    <link rel="stylesheet" href="/static/style.css?v=14.32">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
     <script>
@@ -41,35 +41,48 @@
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P6STJHVH"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
+    
+    <!-- 최상단 헤더(Header) 영역: 모든 페이지 공통 레이아웃 구조체 -->
+    <header class="main-header">
+        <!-- PC 좌측 메뉴 -->
+        <nav class="pc-nav-left">
+            <button class="nav-switch-btn" onclick="location.href='/about'">About</button>
+            <button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button>
+        </nav>
+
+        <!-- 모바일 전용 햄버거 메뉴 버튼 -->
+        <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
+            <span class="hamburger-box"></span>
+        </button>
+
+        <!-- 중앙 로고 -->
+        <div class="logo-wrapper">
+            <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
+        </div>
+
+        <!-- PC 우측 메뉴 -->
+        <nav class="pc-nav-right">
+            <button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button>
+            <button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button>
+        </nav>
+
+        <!-- 모바일 네비게이션 드로어 -->
+        <nav class="page-nav" id="pageNav">
+            <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
+            <ul class="nav-links">
+                <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/about'">About</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button></li>
+            </ul>
+        </nav>
+
+        <div class="nav-overlay" id="navOverlay"></div>
+    </header>
+
     <div class="app-container">
-        
-        <!-- 최상단 헤더(Header) 영역: 모든 페이지 공통 레이아웃 구조체 -->
-        <header class="main-header">
-            <div class="logo-wrapper">
-                <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
-            </div>
-
-            <!-- 모바일 전용 햄버거 메뉴 버튼 -->
-            <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
-                <span class="hamburger-box"></span>
-            </button>
-
-            <!-- 640px 이하 모바일 토스트 / 데스크탑 가로 나열 네비게이션 트리 -->
-            <nav class="page-nav" id="pageNav">
-                <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
-                <ul class="nav-links">
-                    <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunglasses</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/goggles'">Goggles</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/about'">about</button></li>
-                    <li><button class="nav-switch-btn" onclick="location.href='/contact'">문의하기</button></li>
-                </ul>
-            </nav>
-            <div class="nav-overlay" id="navOverlay"></div>
-        </header>
-
         <!-- About 메인 컨텐츠 영역 -->
-        <main class="about-main">
+        <main class="about-main sub-page-main">
             <!-- 1. 거대한 브랜드 히어로 이미지 배너 -->
             <section class="about-hero fade-in-section">
                 <!-- 가로 100%, 강렬한 흑백 대비 혹은 브랜드 심볼 사진 -->
@@ -84,16 +97,9 @@
             <section class="about-philosophy fade-in-section">
                 <h2>Our Story</h2>
                 <div class="philosophy-content">
-                    <p>
-                        amuredo는 단순한 시력 보조 도구를 넘어,<br> 
-                        개인의 분위기와 억양을 디자인하는 프리미엄 아이웨어 브랜드입니다.
-                    </p>
-                    <p>
-                        모든 실루엣의 곡선은 수많은 연구 끝에 탄생했으며, <br>
-                        빛의 반사와 그림자까지 고려하여 가장 우아한 형태를 만듭니다.<br>
-                        과도한 장식을 버리고, 오직 본질의 아름다움만을 추구합니다.
-                    </p>
-                    <p class="signature-text">- amuredo Design Studio</p>
+                    <p>아무래도는 타협하지 않는 품질과 정교한 디테일로 아이웨어의 본질에 집중합니다. 우리는 가벼운 유행 대신 시간이 흐를수록 깊어지는 세련됨을 추구하며, 당신의 일상 속에서 가장 조용하지만 강력한 시그니처가 되기를 원합니다.</p>
+                    <p>장인의 손길이 닿은 듯한 마감 처리와 인체공학적 설계를 통해 최상의 착용감을 선사하며, 현대적인 감각과 클래식한 우아함 사이의 완벽한 균형을 찾기 위해 끊임없이 연구합니다.</p>
+                    <p class="signature-text">Design for your aura, Amuredo.</p>
                 </div>
             </section>
         </main>
@@ -112,12 +118,12 @@
         </footer>
     </div>
 
-    <!-- 네비게이션 드로어 & 애니메이션 로직 -->
+    <!-- 공통 메뉴 및 애니메이션 동작용 스크립트 -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // 1. 공통 메뉴 동작 (open 상태 스위칭)
-            const menuBtn = document.getElementById("menuToggleBtn");
-            const closeBtn = document.getElementById("closeMenuBtn");
+            // 1. 메뉴 토글 로직
+            const menuToggleBtn = document.getElementById("menuToggleBtn");
+            const closeMenuBtn = document.getElementById("closeMenuBtn");
             const pageNav = document.getElementById("pageNav");
             const navOverlay = document.getElementById("navOverlay");
 
@@ -126,23 +132,24 @@
                 navOverlay.classList.toggle("active");
             }
 
-            if(menuBtn) menuBtn.addEventListener("click", toggleMenu);
-            if(closeBtn) closeBtn.addEventListener("click", toggleMenu);
+            if(menuToggleBtn) menuToggleBtn.addEventListener("click", toggleMenu);
+            if(closeMenuBtn) closeMenuBtn.addEventListener("click", toggleMenu);
             if(navOverlay) navOverlay.addEventListener("click", toggleMenu);
 
-            // 2. 부드러운 스크롤 페이드인(Fade-in) 마이크로 애니메이션 트래킹
-            const fadeElements = document.querySelectorAll(".fade-in-section");
-            const observer = new IntersectionObserver((entries, obs) => {
+            // 2. 스크롤 등장 애니메이션 로직 복구
+            const observerOptions = {
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        entry.target.classList.add("is-visible");
-                        obs.unobserve(entry.target); 
+                        entry.target.classList.add('is-visible');
                     }
                 });
-            }, { 
-                threshold: 0.2, // 20% 정도 뷰포트에 들어오면 작동
-            });
+            }, observerOptions);
 
+            const fadeElements = document.querySelectorAll('.fade-in-section');
             fadeElements.forEach(el => observer.observe(el));
         });
     </script>

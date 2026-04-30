@@ -339,41 +339,6 @@ async def get_related_items(item_id: str):
         print(f"🔥 연관 상품 조회 에러 발생: {e}")
         return {"items": [], "error": str(e)}
 
-@app.get("/api/banner")
-async def get_banner_images():
-    """
-    메인 페이지 최상단 배너에 들어갈 이미지 리스트와 라우팅 URL 객체를 조회합니다.
-    Firebase: 'banner' collection -> banner1, banner2... docs -> 'path', 'url' 필드 추출
-    """
-    if db is None:
-        return {"banners": [], "error": "Firebase 연결 안됨"}
-        
-    try:
-        banner_docs = db.collection('banner').stream()
-        banners = []
-        
-        for doc in banner_docs:
-            data = doc.to_dict()
-            path_val = data.get("path", "")
-            url_val = data.get("url", "")
-            
-            # DB의 None 타입 방어 및 공백 처리
-            if path_val is None: path_val = ""
-            if url_val is None: url_val = ""
-            
-            # 이미지가 존재하는 정상적인 문서만 필터링하여 담음
-            if str(path_val).strip():
-                banners.append({
-                    "path": str(path_val),
-                    "url": str(url_val)
-                })
-                
-        return {"banners": banners}
-        
-    except Exception as e:
-        print(f"🔥 배너 데이터 호출 에러: {e}")
-        return {"banners": [], "error": str(e)}
-
 @app.post("/api/telegram")
 async def send_telegram_msg():
     return {"status": "success", "message": "텔레그램 전송 API 뼈대입니다."}

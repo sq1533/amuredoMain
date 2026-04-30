@@ -43,62 +43,130 @@ body {
     /* 분리된 컨테이너 구조이므로 개별 그림자나 별도 배경색은 제거하여 플랫하게 연결 */
 }
 
-/* ========= 2. 헤더 및 네비게이션 영역 ========= */
+/* ========= 2. 헤더 및 네비게이션 영역 (풀와이드 & 좌우 대칭) ========= */
 .main-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
-    border-bottom: 2px solid #eaeaea; /* 헤더 구분선 */
+    padding: 1.5rem 2.5rem; 
+    border-bottom: 1px solid rgba(234, 234, 234, 0.3); 
+    
+    /* 🏁 오버레이 설정: 컨테이너 외부에서 독립적으로 전체 너비 사용 */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; /* 브라우저 전체 너비 */
+    z-index: 1000;
+    
+    background-color: transparent; 
+    transition: all 0.4s ease; 
 }
 
-/* 중앙 빈 공간은 flex: space-between 설정에 의해 가운데에 자동 발생하므로 생략 */
+/* 🏁 스크롤 시 상단 고정 및 배경색 활성화 */
+.main-header.scrolled {
+    position: fixed; 
+    left: 0;
+    width: 100%;
+    background-color: rgba(244, 243, 240, 0.95); 
+    padding: 1rem 2.5rem; 
+    border-bottom: 1px solid #eaeaea;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
 
-/* 로고 래퍼 (요청 사항에 따라 가로 너비 25% 비율 할당) */
+/* 헤더 텍스트 색상 최적화 (배너 위에서 잘 보이게) */
+.main-header .nav-switch-btn {
+    text-shadow: 0 0 10px rgba(255,255,255,0.5); /* 밝은 배경 대비 */
+}
+
+.main-header.scrolled .nav-switch-btn {
+    text-shadow: none;
+}
+
+/* PC 좌측 메뉴 */
+.pc-nav-left {
+    display: flex;
+    gap: 2.5rem;
+    flex: 1; 
+    justify-content: flex-start;
+}
+
+/* 중앙 로고 래퍼 (정중앙 픽스) */
 .logo-wrapper {
-    width: 25%;
-    /* aspect-ratio를 통해 브라우저가 자동으로 가로너비에 맞춰 
-       높이를 (가로의 1/2) 비율로 계산하여 유지시킵니다. (종횡비 2:1) */
-    aspect-ratio: 2 / 1; 
+    flex: 0 0 auto; 
+    width: 160px; 
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
 }
 
 .logo {
     width: 100%;
-    height: 100%;
-    object-fit: contain; /* 공간 안에서 비율이 깨지지 않게 맞춤설정 */
+    object-fit: contain;
 }
 
-/* PC 화면 (640px 초과 시) 기본 활성화 요소 세팅 */
-.menu-toggle-btn, .close-menu-btn, .nav-overlay {
-    display: none; /* 토글 햄버거 메뉴 및 배경색 어둡게 하는 영역은 숨킵니다 */
+/* PC 우측 메뉴 */
+.pc-nav-right {
+    display: flex;
+    gap: 2.5rem;
+    flex: 1; 
+    justify-content: flex-end;
 }
 
-.nav-links {
-    display: flex;         /* PC에서는 메뉴가 펼쳐진 상태로 나열됩니다 (가로 정렬) */
-    list-style: none;
-    gap: 1.5rem;          /* 각 전환 버튼들 사이를 띄웁니다 */
-}
-
+/* 공통 네비게이션 버튼 텍스트 (PC, 모바일 공통) */
 .nav-switch-btn {
     background: transparent;
     border: none;
-    font-size: 1.2rem; /* PC 환경: 사용자 요청에 따른 크기 축소 */
+    font-size: 1.2rem;
     font-weight: 600;
     cursor: pointer;
-    color: #333;
+    color: #222;
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
     transition: color 0.2s ease;
 }
 
 .nav-switch-btn:hover {
-    color: #4a90e2; /* 마우스 올렸을 때의 변화 컬러 */
+    color: #4a90e2; 
+}
+
+/* ========= 2.5 서브 페이지 공통 레이아웃 (여백 처리) ========= */
+/* 메인 페이지를 제외한 모든 서브 페이지의 본문 상단 여백 설정 (헤더 오버레이 대응) */
+.sub-page-main {
+    padding-top: 140px; /* PC 환경: 헤더 높이 + 여유 공간 */
+    padding-bottom: 5rem;
+    min-height: 80vh; /* 푸터가 너무 올라오지 않게 최소 높이 확보 */
+}
+
+@media screen and (max-width: 640px) {
+    .sub-page-main {
+        padding-top: 100px; /* 모바일 환경: 헤더 높이 대응 */
+    }
+}
+
+/* PC 화면 (640px 초과 시) 기본 비활성화 요소 세팅 */
+.menu-toggle-btn, .close-menu-btn, .nav-overlay, .page-nav {
+    display: none; 
 }
 
 /* 640px 이하 모바일 대응: 토스트 사이드 드로어 메뉴 처리 (왼쪽에서 넘어오는 방식) */
 @media (max-width: 640px) {
+    /* 모바일에서는 PC 좌우 메뉴 숨김, 모바일 서랍 컨테이너 활성화 */
+    .pc-nav-left, .pc-nav-right {
+        display: none !important;
+    }
+    .page-nav {
+        display: block; /* 숨겨져 있던 드로어 요소의 DOM을 활성화 */
+    }
+
+    .main-header {
+        justify-content: center; /* 모바일에서 로고 정중앙 배치 */
+        padding: 1rem 1.5rem; /* 모바일용 상하 패딩 축소 */
+    }
+
+    .logo-wrapper {
+        width: 140px; /* 모바일 환경에 맞춰 로고 폭 살짝 축소 */
+    }
+
     /* 모바일에서는 햄버거 토글 버튼(가로/세로 똑같은 정사각형 모양)만 노출 시킵니다 */
     .menu-toggle-btn {
         display: flex;
@@ -106,10 +174,12 @@ body {
         justify-content: center;
         width: 40px; 
         height: 40px; 
-        background-color: #222;
+        background-color: #E5E3DD; /* 배경색 기준 살짝 더 어두운 톤으로 변경 */
         border: none;
         border-radius: 4px;
         cursor: pointer;
+        position: absolute; /* 중앙 정렬된 로고와 간섭 없도록 우측에 절대 띄움 */
+        right: 1.5rem;
     }
     
     /* 햄버거 선(라인 아이콘) 디자인 */
@@ -117,7 +187,7 @@ body {
         display: block;
         width: 20px;
         height: 2px;
-        background-color: #fff;
+        background-color: #222; /* 어두운 아이콘 색상으로 변경 */
         position: relative;
     }
     .hamburger-box::before, .hamburger-box::after {
@@ -125,28 +195,29 @@ body {
         position: absolute;
         width: 100%;
         height: 2px;
-        background-color: #fff;
+        background-color: #222; /* 어두운 아이콘 색상으로 변경 */
         left: 0;
     }
     .hamburger-box::before { top: -6px; }
     .hamburger-box::after { bottom: -6px; }
 
-    /* 드로어 메뉴 창의 위치를 강제로 화면 왼쪽 밖(-300px)으로 뺌 (초기 상태 숨겨짐) */
+    /* 드로어 메뉴 창의 위치를 강제로 화면 오른쪽 밖(-300px)으로 뺌 (초기 상태 숨겨짐) */
     .page-nav {
         position: fixed;
         top: 0;
-        left: -300px; /* 창을 화면의 좌측 바깥쪽으로 숨킵니다 */
+        right: -300px; /* 창을 화면의 우측 바깥쪽으로 숨킵니다 (좌측->우측 반전) */
+        left: auto; /* 기존 left 속성 무효화 */
         width: 250px;
         height: 100%;
         background-color: #F4F3F0;
         z-index: 1000;
-        transition: left 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); /* 튀어나오는 슬라이드 애니메이션 효과 */
-        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        transition: right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); /* 우측에서 튀어나오는 슬라이드 애니메이션 효과 */
+        box-shadow: -2px 0 10px rgba(0,0,0,0.1); /* 그림자 방향도 반대로 수정 */
     }
     
-    /* JS에서 .open 클래스 활성화 시 원래 위치(left:0)로 튀어 나옴 */
+    /* JS에서 .open 클래스 활성화 시 원래 위치(right:0)로 튀어 나옴 */
     .page-nav.open {
-        left: 0; 
+        right: 0; 
     }
 
     .close-menu-btn {
@@ -163,6 +234,14 @@ body {
     .nav-links {
         flex-direction: column; /* 메뉴 항목 리스트를 세로 방향으로 정렬시킵니다 */
         padding: 0 1.5rem;
+        margin: 0;
+        list-style-type: none !important; /* 점(bullet) 강제 제거 */
+    }
+    
+    .nav-links li {
+        list-style-type: none !important; /* 점(bullet) 강제 제거 */
+        margin: 0;
+        padding: 0;
     }
 
     .nav-switch-btn {
@@ -184,10 +263,11 @@ body {
     }
 }
 
-/* ========= 3. 메인 배너 영역 (Main Banner) ========= */
+/* ========= 3. 메인 배너 영역 (Main Video Banner) ========= */
 .banner-section.full-width {
     width: 100%; /* 브라우저 100% 폭 사용 */
     position: relative;
+    overflow: hidden;
 }
 
 .banner-container {
@@ -196,82 +276,24 @@ body {
     aspect-ratio: 5 / 3; 
     position: relative;
     overflow: hidden; 
-    background-color: #f7f7f7;
+    background-color: #000; /* 영상 로딩 전 검은색 배경 */
 }
 
-/* 🏁 모바일 풀스크린 뷰 (화면을 꽉 채우는 3:4 세로형) */
+/* 🏁 모바일 풀스크린 뷰 (화면을 꽉 채우는 세로형) */
 @media screen and (max-width: 640px) {
     .banner-container {
-        aspect-ratio: 3 / 4; 
+        /* 고정 비율 대신 모바일 기기 화면 높이에 맞춤 */
+        height: 100dvh; 
+        aspect-ratio: auto; 
     }
 }
 
-/* 여러 이미지 요소들을 감싸는 궤도 (사용자 임의 스와이프 원천 봉쇄) */
-.banner-track {
-    display: flex;
-    height: 100%;
+/* 비디오 요소 스타일 (커버 모드로 영역을 꽉 채움) */
+.banner-video {
     width: 100%;
-    overflow: hidden; /* 시스템 휠/드래그 스크롤링 철벽 차단 */
-    scroll-behavior: smooth; /* JS scrollTo 시에만 부드럽게 이동 */
-}
-
-/* 화면 내부의 실제 배너 이미지 */
-.banner-img {
-    width: 100%; 
     height: 100%;
     object-fit: cover; 
-    flex-shrink: 0; 
-    -webkit-user-drag: none; /* 드래그 이미지 잔상 방지 (순수 클릭만 감지되게 세팅) */
-}
-
-/* 🏁 신규: 양 끝단 100% 넓이 투명 버튼 타겟 영역 (인스타 스토리 방식) */
-.banner-nav {
-    position: absolute;
-    top: 0;
-    width: 20%; /* 화면 양 끝 20% 공간을 버튼으로 할당 */
-    height: 100%;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    background-color: transparent; /* 배경 투명 */
-    -webkit-tap-highlight-color: transparent; /* 모바일 깜빡임 방지 */
-}
-.banner-nav.prev {
-    left: 0;
-    justify-content: flex-start;
-    padding-left: 2rem; /* 화면 끝에 바짝 붙지 않도록 적당히 띄움 */
-}
-.banner-nav.next {
-    right: 0;
-    justify-content: flex-end;
-    padding-right: 2rem;
-}
-
-/* 시각적인 단서: 반투명 블랙 원형 화살표 아이콘 */
-.nav-arrow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.8rem;
-    height: 2.8rem;
-    background-color: rgba(0, 0, 0, 0.15); /* 배너 사진을 가리지 않게 아주 연하게 */
-    color: white;
-    border-radius: 50%;
-    backdrop-filter: blur(4px);
-    opacity: 0.6; /* 평소엔 눈에 잘 띄지 않음 */
-    transition: all 0.3s ease;
-}
-.nav-arrow svg {
-    width: 1.2rem;
-    height: 1.2rem;
-}
-
-/* 엣지 호버/클릭 시 화살표가 선명해지며 동작 피드백 */
-.banner-nav:hover .nav-arrow,
-.banner-nav:active .nav-arrow {
-    opacity: 1;
-    background-color: rgba(0, 0, 0, 0.6);
+    display: block;
 }
 
 /* 프로그레스바 관련 코드 삭제 완료 */
@@ -279,19 +301,50 @@ body {
 /* ========= 4. 브랜드 스토리 섹션 (Brand Story) ========= */
 .brand-story-section {
     width: 100%;
-    padding: 80px 40px; /* 좌우 여백을 살짝 더 넓게 */
+    padding: 100px 40px; 
     background-color: #F4F3F0;
     
-    /* 🏁 신규: 2단 비대칭 레이아웃 (좌측 2/3, 우측 1/3) */
+    /* 🏁 상하 구조로 변경 (헤더 / 콘텐츠) */
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center; 
-    gap: 60px; /* 좌우 콘텐츠 간 간격 */
+    gap: 60px;
     
-    /* 초기 상태: 애니메이션 실행 전 투명 및 아래 배치 */
     opacity: 0;
     transform: translateY(40px);
-    transition: none; /* fade-in-section의 기본 트랜지션 대신 전용 애니메이션 사용 */
+    transition: none; 
+}
+
+/* 🏁 신규: 브랜드 스토리 섹션 헤더 (중앙 정렬) */
+.brand-story-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.brand-story-header .eng-title {
+    display: block;
+    font-size: 1.1rem;
+    color: #8b5e3c; /* 브라운 계열 색상 적용 */
+    text-transform: lowercase; /* 요청: 소문자 brand story */
+    letter-spacing: 3px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.brand-story-header .kor-title {
+    font-size: 1.8rem; /* 섹션의 명확한 타이틀로 강조 */
+    font-weight: 800;
+    color: #111;
+    margin: 0;
+}
+
+/* 기존 가로 배열을 담당할 컨테이너 */
+.story-flex-container {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 60px;
 }
 
 /* 좌측 텍스트 래퍼 (2/3 영역) */
@@ -354,12 +407,19 @@ body {
 
 /* 🏁 모바일 전용 반응형 (Stacking): 화면 폭 640px 이하 */
 @media screen and (max-width: 640px) {
-    /* 가로 배열을 깨고 세로 위아래 스태킹 모드로 변경 */
     .brand-story-section {
+        padding: 60px 20px; 
+        gap: 40px; 
+    }
+
+    /* 가로 배열을 깨고 세로 위아래 스태킹 모드로 변경 */
+    .story-flex-container {
         flex-direction: column;
-        padding: 60px 20px; /* 모바일 폭에 맞춰 좌우 여백 축소 */
-        gap: 30px; /* 위아래 간격 타이트하게 */
-        align-items: center; /* 자식 요소들을 교차축 중앙으로 정렬 */
+        gap: 30px; 
+    }
+    
+    .brand-story-header .kor-title {
+        font-size: 1.5rem; /* 모바일에서는 타이틀 크기 살짝 축소 */
     }
     
     /* 2:1 비율을 버리고 각각 적절한 크기로 중앙 배치 */
@@ -589,36 +649,75 @@ body {
 
 /* ========= 6. 상세 카테고리 (itemList) 전용 그리드 UI ========= */
 
-/* 🏁 상품 리스트 페이지 조회/필터 박스 영역 */
+/* 🏁 상품 리스트 페이지 조회/필터 박스 영역 (탭 형식) */
 .filter-container {
-    text-align: right; /* 요구사항: 우측 정렬 */
-    padding: 0 1.5rem; /* 그리드의 측면 여백과 시각적 안정감을 맞춤 */
-    margin-bottom: -1rem; /* 하단 타이틀과의 간격을 좁혀 밀착도 상향 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 3.5rem;
+    gap: 0.8rem;
+    padding: 0 1.5rem;
 }
 
 .filter-label {
-    font-size: 1.0rem; /* 메인 기준 폰트 크기 변경에 따른 동기화 */
-    color: #444;       
-    margin-right: 0.6rem;
+    font-size: 0.85rem;
+    color: #8b5e3c; /* 브랜드 브라운 컬러 */
+    text-transform: lowercase;
+    letter-spacing: 2.5px;
     font-weight: 500;
 }
 
-.filter-select {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.9rem; /* 메인 폰트 축소에 맞춰 사이즈 다운 */
-    font-family: inherit;
-    border: 1px solid #ccc; /* 깔끔하고 얇은 테두리 */
-    border-radius: 4px; /* 살짝 부드러운 박스 각도 */
-    background-color: #fff;
-    color: #111;
-    cursor: pointer;
-    outline: none;
-    transition: border-color 0.2s ease;
+.filter-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
 }
 
-.filter-select:focus,
-.filter-select:hover {
-    border-color: #0e3a5b; /* 마우스 오버 시 브랜드 색상 피드백 */
+.filter-tab {
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+    color: #999;
+    cursor: pointer;
+    text-transform: lowercase;
+    padding: 0.4rem 0;
+    transition: all 0.3s ease;
+    position: relative;
+    font-family: 'Pretendard', sans-serif;
+}
+
+.filter-tab:hover {
+    color: #111;
+}
+
+.filter-tab.active {
+    color: #111;
+    font-weight: 700;
+}
+
+/* 활성화된 탭 하단에 얇은 밑줄 */
+.filter-tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: #111;
+}
+
+/* 640px 이하 모바일 대응 */
+@media screen and (max-width: 640px) {
+    .filter-container {
+        margin-bottom: 2.5rem;
+    }
+    .filter-tabs {
+        gap: 1rem;
+    }
+    .filter-tab {
+        font-size: 1rem;
+    }
 }
 
 /* 페이지 상단 타이틀 (sunglasses 등) */
@@ -727,7 +826,6 @@ body {
 
 /* ========= 7. 상품 상세 페이지 (Item Detail) ========= */
 .detail-content {
-    padding-top: 3rem;
     padding-bottom: 5rem;
     background-color: #F4F3F0;
 }
@@ -1251,7 +1349,6 @@ body {
 }
 /* ========= 11. 문의하기(Contact Us) 페이지 전용 스타일 ========= */
 .contact-main {
-    padding-top: 5rem;
     padding-bottom: 8rem;
     background-color: #F4F3F0;
     min-height: 100vh;
@@ -1550,36 +1647,9 @@ body {
     }
 }
 
-/* ========= About 페이지 텍스트 요소 ========= */
-.about-hero-text h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #fff; /* 어두운 이미지 위 밝은 텍스트 */
-}
 
-.about-hero-text p {
-    font-size: 1.0rem;
-    color: #eee; /* 완전히 하얀색보다는 살짝 부드러운 밝은 회백색 */
-}
 
-.about-philosophy h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-}
 
-.philosophy-content p {
-    font-size: 1.0rem;
-    line-height: 1.6;
-    margin-bottom: 1.2rem;
-    color: #333;
-}
-
-.philosophy-content .signature-text {
-    font-size: 1.0rem;
-    color: #777;
-    margin-top: 2rem;
-}
 
 /* ========= 12. 공통 푸터 (Footer: 사업자 정보) ========= */
 .main-footer {
