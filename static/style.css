@@ -60,6 +60,18 @@ body {
     
     background-color: transparent; 
     transition: all 0.4s ease; 
+    
+    /* 🏁 핵심 수정: 헤더 컨테이너 자체는 클릭을 통과시켜 아래 요소(필터 버튼 등)가 클릭되게 함 */
+    pointer-events: none; 
+}
+
+/* 헤더 내부의 실제 클릭 가능한 요소들은 클릭을 허용 */
+.main-header .pc-nav-left,
+.main-header .pc-nav-right,
+.main-header .logo-wrapper,
+.main-header .menu-toggle-btn,
+.main-header .page-nav {
+    pointer-events: auto;
 }
 
 /* 🏁 스크롤 시 상단 고정 및 배경색 활성화 */
