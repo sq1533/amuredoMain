@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-P6STJHVH');</script>
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-P6STJHVH');</script>
     <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,23 +26,25 @@
     <link rel="icon" href="/static/img/icon.webp" type="image/webp">
     <link rel="apple-touch-icon" href="/static/img/icon.webp">
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <!-- 외부 스타일시트 연결 -->
     <link rel="stylesheet" href="/static/style.css?v=14.32">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
 
-      gtag('config', 'AW-17793333010');
+        gtag('config', 'AW-17793333010');
     </script>
 </head>
+
 <body>
     <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P6STJHVH"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P6STJHVH" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
 
     <!-- 최상단 헤더(Header) 영역: 모든 페이지 공통 레이아웃 -->
@@ -56,7 +62,8 @@
 
         <!-- 중앙 로고 -->
         <div class="logo-wrapper">
-            <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
+            <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;"
+                onclick="location.href='/'">
         </div>
 
         <!-- PC 우측 메뉴 -->
@@ -85,7 +92,7 @@
             <div class="contact-container">
                 <h1 class="contact-title">Connect</h1>
                 <p class="contact-subtitle">아무래도에 대한 문의사항이나 협업 제안을 남겨주세요.</p>
-                
+
                 <form id="contactForm" class="contact-form">
                     <div class="form-group">
                         <label for="email">이메일 주소</label>
@@ -111,7 +118,7 @@
                     <!-- 개인정보 수집 동의 -->
                     <div class="consent-group">
                         <label class="checkbox-container">
-                            개인정보 수집 및 이용에 동 de의합니다.
+                            개인정보 수집 및 이용에 동의합니다.
                             <input type="checkbox" id="consent" required>
                             <span class="checkmark"></span>
                         </label>
@@ -140,7 +147,7 @@
 
     <!-- Contact 페이지 로직 스크립트 (Firebase 연동 등) -->
     <script src="/static/contact.js?v=2.1"></script>
-    
+
     <!-- 공통 메뉴 동작용 스크립트 -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -154,10 +161,11 @@
                 navOverlay.classList.toggle("active");
             }
 
-            if(menuToggleBtn) menuToggleBtn.addEventListener("click", toggleMenu);
-            if(closeMenuBtn) closeMenuBtn.addEventListener("click", toggleMenu);
-            if(navOverlay) navOverlay.addEventListener("click", toggleMenu);
+            if (menuToggleBtn) menuToggleBtn.addEventListener("click", toggleMenu);
+            if (closeMenuBtn) closeMenuBtn.addEventListener("click", toggleMenu);
+            if (navOverlay) navOverlay.addEventListener("click", toggleMenu);
         });
     </script>
 </body>
+
 </html>

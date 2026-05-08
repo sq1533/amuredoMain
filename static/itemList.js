@@ -76,8 +76,43 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                 }
 
-                // 4. 최초 화면 그리기 (전체보기 상태)
-                renderCategoryItems(allFetchedItems);
+                // 4. URL 파라미터(?filter=...) 확인 및 자동 필터링 적용
+                const urlParams = new URLSearchParams(window.location.search);
+                const initialFilter = urlParams.get('filter');
+                let filterApplied = false;
+
+                if (initialFilter && categoryFilter) {
+                    const tabs = categoryFilter.querySelectorAll('.filter-tab');
+                    const cleanFilter = initialFilter.replace(/\s/g, '').toLowerCase(); // 공백 제거 후 비교용
+
+                    tabs.forEach(tab => {
+                        const val = tab.getAttribute('data-value') || "";
+                        const tabText = tab.textContent.trim().toLowerCase();
+                        
+                        // 데이터 값 또는 텍스트에서 공백을 제거하고 비교하여 매칭 확률을 극대화
+                        if (val.replace(/\s/g, '').toLowerCase() === cleanFilter || 
+                            tabText.replace(/\s/g, '') === cleanFilter) {
+                            
+                            // 탭 활성화 스타일 수동 적용 후 클릭 이벤트 발생
+                            tabs.forEach(t => t.classList.remove('active'));
+                            tab.classList.add('active');
+                            
+                            const selectedValue = tab.getAttribute('data-value');
+                            if (selectedValue === 'ALL') {
+                                renderCategoryItems(allFetchedItems);
+                            } else {
+                                const filteredItems = allFetchedItems.filter(item => item.category === selectedValue);
+                                renderCategoryItems(filteredItems);
+                            }
+                            filterApplied = true;
+                        }
+                    });
+                }
+
+                // 매칭된 필터가 없거나 파라미터가 없는 경우 기본 전체 상품 노출
+                if (!filterApplied) {
+                    renderCategoryItems(allFetchedItems);
+                }
             } else {
                 // 데이터 없는 경우 가이드 제공 및 필터 숨김
                 categoryGrid.innerHTML = '<p style="text-align:center; grid-column: 1 / -1; padding: 2rem;">해당 카테고리의 상품 데이터를 찾을 수 없습니다.</p>';

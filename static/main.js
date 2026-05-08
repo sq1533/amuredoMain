@@ -55,70 +55,155 @@ document.addEventListener("DOMContentLoaded", () => {
     fadeElements.forEach(el => observer.observe(el));
 
     /* ====================================================
-       2. 메인 배너 슬라이드 캐러셀 로직 삭제됨 (단일 비디오 배너 전환)
+       2. 메인 베스트 상품 탭(Tab) 전환 및 데이터 로딩 로직
        ==================================================== */
+    const bestTabs = document.querySelectorAll(".best-tab");
+    const bestItemsGrid = document.getElementById("bestItemsGrid");
+    const bestHashtags = document.getElementById("bestHashtags");
+    const bestMainBanner = document.getElementById("bestMainBanner");
+    
+    // 탭별 해시태그 정의
+    const hashtagData = {
+        focus: ["# 초경량 기어", "# 시각 노이즈 차단", "# 12g의 혁신", "# 오피스 셋업"],
+        meeting: ["# 프로페셔널", "# 신뢰의 완성", "# 비즈니스 에디션", "# 완벽한 핏"],
+        drive: ["# 시야 확보", "# 자외선 차단", "# 필드 워커", "# 야외 활동"],
+        holiday: ["# 바캉스 필수", "# 휴가 스타일링", "# 시선 집중", "# 휴일 컬렉션"]
+    };
 
-
-    // (베스트 섹션 이미지 스와이프 코드 제거 완료 - 정적 그리드 방식 적용)
-
-    // 3. 메인 하단(상단부): 'Glasses Best' 전용 상품 3열 그리드 생성 로직
-    const glassesBestGrid = document.getElementById("glassesBestGrid");
-    fetch('/api/items/glasses_best')
-        .then(response => response.json())
-        .then(data => {
-            const newItems = data.items;
-            if (newItems && newItems.length > 0) {
-                renderItemsTrack(glassesBestGrid, newItems);
-                // setupDesktopDrag 삭제됨
-            }
-        })
-        .catch(error => console.error("Glasses Best 아이템 통신 오류:", error));
-
-    // 4. 메인 최하단: 'Sunglasses Best' 아이템 3열 그리드 생성 로직
-    const sunglassesBestGrid = document.getElementById("sunglassesBestGrid");
-    fetch('/api/items/sunglasses_best')
-        .then(response => response.json())
-        .then(data => {
-            const bestItems = data.items;
-            if (bestItems && bestItems.length > 0) {
-                renderItemsTrack(sunglassesBestGrid, bestItems);
-                // setupDesktopDrag 삭제됨
-            }
-        })
-        .catch(error => console.error("Sunglasses Best 아이템 통신 오류:", error));
+    // 탭별 메인 화보 이미지 매칭
+    const bannerImageData = {
+        focus: "/static/img/main01.webp",
+        meeting: "/static/img/main02.webp",
+        drive: "/static/img/main03.webp",
+        holiday: "/static/img/main04.webp"
+    };
 
     /**
-     * 상품 리스트를 받아서 지정된 컨테이너에 가로 스와이프용 카드를 생성하는 공용 함수
+     * 특정 이벤트 타입의 베스트 아이템을 불러와 렌더링하는 함수
      */
-    function renderItemsTrack(container, items) {
+    function loadBestItems(eventType) {
+        fetch(`/api/items/best/${eventType}`)
+            .then(response => response.json())
+            .then(data => {
+                const items = data.items || [];
+                renderBestGearItems(bestItemsGrid, items);
+                
+                // 해시태그 업데이트
+                if (bestHashtags && hashtagData[eventType]) {
+                    bestHashtags.innerHTML = hashtagData[eventType]
+                        .map(tag => `<span class="hashtag-text">${tag}</span>`)
+                        .join("");
+                }
+
+                // 메인 화보 이미지 업데이트
+                if (bestMainBanner && bannerImageData[eventType]) {
+                    bestMainBanner.src = bannerImageData[eventType];
+                }
+            })
+            .catch(error => console.error(`Best Items(${eventType}) 통신 오류:`, error));
+    }
+
+    // 탭 클릭 이벤트 바인딩
+    bestTabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            // 활성화 스타일 전환
+            bestTabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            // 데이터 로드
+            const eventType = tab.getAttribute("data-event");
+            loadBestItems(eventType);
+        });
+    });
+
+    // 초기 로딩 (Focus 탭 기본 활성화)
+    loadBestItems("focus");
+
+    /* ====================================================
+       3. 브랜드 채널(About) URL 동적 바인딩 로직
+       ==================================================== */
+    const naverStoreLink = document.getElementById("naverStoreLink");
+    const naverBlogLink = document.getElementById("naverBlogLink");
+    const instagramLink = document.getElementById("instagramLink");
+
+    fetch('/api/about')
+        .then(response => response.json())
+        .then(data => {
+            if (data.naverStore) naverStoreLink.href = data.naverStore;
+            else naverStoreLink.style.display = 'none';
+
+            if (data.blog) naverBlogLink.href = data.blog;
+            else naverBlogLink.style.display = 'none';
+
+            if (data.instargram) instagramLink.href = data.instargram;
+            else instagramLink.style.display = 'none';
+        })
+        .catch(error => console.error("About 정보 로딩 실패:", error));
+
+    /**
+     * 상품 리스트를 받아서 가로형 '기어 카드' 레이아웃(이미지 2: 정보 1)으로 렌더링
+     */
+    function renderBestGearItems(container, items) {
         container.innerHTML = ''; 
+        
+        // 추천된 대로 상위 3개 아이템만 노출
+        const displayItems = items.slice(0, 3);
 
-        items.forEach(item => {
+        displayItems.forEach(item => {
             const card = document.createElement('article');
-            card.className = 'item-card';
+            card.className = 'best-gear-card';
 
-            const imgWrapper = document.createElement('div');
-            imgWrapper.className = 'item-image-wrapper';
-            imgWrapper.addEventListener('click', () => { location.href = `/item/${item.id}`; });
-
+            // 왼쪽: 이미지 영역 (비중 2)
+            const imgSide = document.createElement('div');
+            imgSide.className = 'gear-image-side';
+            imgSide.addEventListener('click', () => { location.href = `/item/${item.id}`; });
+            
             const img = document.createElement('img');
             img.src = item.image_url;
             img.alt = item.name;
-            img.className = 'item-image';
-            imgWrapper.appendChild(img);
+            imgSide.appendChild(img);
+
+            // 오른쪽: 정보 영역 (비중 1)
+            const infoSide = document.createElement('div');
+            infoSide.className = 'gear-info-side';
+
+            const specLabel = document.createElement('span');
+            specLabel.className = 'gear-spec-label';
+            specLabel.textContent = 'OFFICE GEAR SPEC';
 
             const nameEl = document.createElement('h3');
-            nameEl.className = 'item-name';
+            nameEl.className = 'gear-name';
             nameEl.textContent = item.name;
             nameEl.addEventListener('click', () => { location.href = `/item/${item.id}`; });
 
+            // 태그 정보 (소재/특징)
+            const tagsWrap = document.createElement('div');
+            tagsWrap.className = 'gear-tags';
+            const tags = item.category ? item.category.split(',') : ['Premium', 'Lightweight'];
+            tags.forEach(tag => {
+                const tagSpan = document.createElement('span');
+                tagSpan.className = 'gear-tag';
+                tagSpan.textContent = `# ${tag.trim()}`;
+                tagsWrap.appendChild(tagSpan);
+            });
+
             const priceEl = document.createElement('p');
-            priceEl.className = 'item-price';
+            priceEl.className = 'gear-price';
             priceEl.textContent = `₩ ${item.price}`;
 
-            card.appendChild(imgWrapper);
-            card.appendChild(nameEl);
-            card.appendChild(priceEl);
+            const actionBtn = document.createElement('a');
+            actionBtn.className = 'gear-action-btn';
+            actionBtn.href = `/item/${item.id}`;
+            actionBtn.textContent = '장비 상세보기';
+
+            infoSide.appendChild(specLabel);
+            infoSide.appendChild(nameEl);
+            infoSide.appendChild(tagsWrap);
+            infoSide.appendChild(priceEl);
+            infoSide.appendChild(actionBtn);
+
+            card.appendChild(imgSide);
+            card.appendChild(infoSide);
             container.appendChild(card);
         });
     }

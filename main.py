@@ -92,21 +92,21 @@ async def serve_contact_page():
 
 
 
-@app.get("/api/items/sunglasses_best")
-async def get_sunglasses_best_items():
+@app.get("/api/items/best/{event_type}")
+async def get_best_items(event_type: str):
     """
-    메인 페이지 'Sunglasses Best' 섹션에 들어갈 전용 아이템 리스트를 조회합니다.
-    Firebase: 'item' collection -> event == 'sunglasses_best' 필터링
+    메인 페이지의 'Productive Line-up' 섹션에 들어갈 아이템 리스트를 이벤트 타입별로 조회합니다.
+    event_type: focus, meeting, drive, holiday 등
     """
     if db is None:
         return {"items": [], "error": "Firebase 연동 불가"}
         
     try:
-        # event 필드 값이 'sunglasses_best'인 문서들만 스트림으로 불러옵니다.
-        best_docs = db.collection('item').where('event', '==', 'sunglasses_best').stream()
+        # 요청된 event_type 필드와 일치하는 문서들만 조회
+        docs = db.collection('item').where('event', '==', event_type).stream()
         
         real_items = []
-        for doc in best_docs:
+        for doc in docs:
             data = doc.to_dict()
             paths = data.get("paths", [])
             image_url = paths[0] if (paths and len(paths) > 0) else "https://via.placeholder.com/600x600.png?text=No+Image"
@@ -121,54 +121,14 @@ async def get_sunglasses_best_items():
                 "id": doc.id,
                 "name": data.get("name", "이름 없음"),
                 "price": formatted_price,
-                "image_url": image_url
+                "image_url": image_url,
+                "category": data.get("category", "") # 소재/특징 태그용
             })
             
         return {"items": real_items}
         
     except Exception as e:
-        print(f"🔥 Sunglasses Best 조회 에러 발생: {e}")
-        return {"items": [], "error": str(e)}
-
-@app.get("/api/items/glasses_best")
-async def get_glasses_best_items():
-    """
-    메인 페이지 하단 'Glasses Best' 섹션에 들어갈 전용 아이템 리스트를 조회합니다.
-    Firebase: 'item' collection -> event == 'glasses_best' 필터링
-    """
-    if db is None:
-        return {"items": [], "error": "Firebase 연동 불가"}
-        
-    try:
-        # event 필드 값이 'glasses_best'인 문서들만 스트림으로 불러옵니다.
-        new_docs = db.collection('item').where('event', '==', 'glasses_best').stream()
-        
-        real_items = []
-        for doc in new_docs:
-            data = doc.to_dict()
-            paths = data.get("paths", [])
-            # 첫 번째 이미지를 썸네일로 사용, 없으면 플레이스홀더 처리
-            image_url = paths[0] if (paths and len(paths) > 0) else "https://via.placeholder.com/600x600.png?text=No+Image"
-            
-            # 가격 천 단위 콤마 포맷팅 (예: 35000 -> 35,000)
-            raw_price = data.get("price", "0")
-            try:
-                formatted_price = f"{int(float(raw_price)):,}"
-            except (ValueError, TypeError):
-                formatted_price = str(raw_price)
-
-            real_items.append({
-                "id": doc.id,
-                "name": data.get("name", "이름 없음"),
-                "price": formatted_price,
-                "image_url": image_url
-            })
-            
-        return {"items": real_items}
-        
-    except Exception as e:
-        # 에러 발생 시 로그를 찍고 빈 리스트를 반환하여 프론트엔드 중단을 방지합니다.
-        print(f"🔥 Glasses Best 조회 에러 발생: {e}")
+        print(f"🔥 Best 아이템({event_type}) 조회 에러: {e}")
         return {"items": [], "error": str(e)}
 
 @app.get("/api/items")
@@ -290,8 +250,33 @@ async def get_item_detail(item_id: str):
         }
         
     except Exception as e:
-        print(f"🔥 상세 상품 조회 에러 발생: {e}")
+        print(f"🔥 상세 페이지 조회 에러 발생: {e}")
         return {"error": str(e), "status": 500}
+
+@app.get("/api/about")
+async def get_about_info():
+    """
+    브랜드 소셜 채널 및 스토어 URL 정보를 각각의 문서에서 조회합니다.
+    Firebase: 'about' collection -> 각 문서(naverStore, blog, instargram)의 'url' 필드
+    """
+    if db is None:
+        return {"naverStore": "", "blog": "", "instargram": ""}
+        
+    try:
+        # 각 문서를 병렬적으로 조회 (또는 순차 조회)
+        naver_doc = db.collection('about').document('naverStore').get()
+        blog_doc = db.collection('about').document('blog').get()
+        insta_doc = db.collection('about').document('instargram').get()
+        
+        return {
+            "naverStore": naver_doc.to_dict().get("url", "") if naver_doc.exists else "",
+            "blog": blog_doc.to_dict().get("url", "") if blog_doc.exists else "",
+            "instargram": insta_doc.to_dict().get("url", "") if insta_doc.exists else ""
+        }
+        
+    except Exception as e:
+        print(f"🔥 About 정보 상세 조회 에러: {e}")
+        return {"naverStore": "", "blog": "", "instargram": ""}
 @app.get("/api/items/{item_id}/related")
 async def get_related_items(item_id: str):
     """

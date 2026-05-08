@@ -101,77 +101,121 @@
     <!-- 하단 메인 콘텐츠 및 푸터 컨테이너 (1024px 제한) -->
     <div class="app-container">
         <main class="main-content">
-            <!-- 브랜드 스토리 (Brand Story) 구역 -->
+            <!-- 🏁 브랜드 스토리 (Gear Philosophy) 구역 -->
             <section class="brand-story-section fade-in-section">
-                <!-- 🏁 신규: 섹션 메인 헤더 (중앙 정렬 타이틀) -->
                 <div class="brand-story-header">
-                    <span class="eng-title">brand story</span>
-                    <h2 class="kor-title">브랜드 스토리</h2>
+                    <span class="eng-title">gear philosophy</span>
+                    <h2 class="kor-title">장비 철학</h2>
                 </div>
 
-                <!-- 기존 텍스트와 이미지를 담는 플렉스 컨테이너 -->
                 <div class="story-flex-container">
-                    <!-- 좌측 텍스트 래퍼 (전체 2/3 영역) -->
                     <div class="story-text-wrap">
-                        <h2 class="story-subtitle">일상을 넘어 당신의 시그니처가 될<br>데일리 아이웨어, 아무래도.</h2>
-                        <p class="story-body">아무래도는 타협하지 않는 품질과 정교한 디테일로<br>아이웨어의 본질에 집중합니다.<br>어떤 순간에도 묵묵히 당신의 품격을 대변하는<br>변치 않는 모던함을 추구합니다.<br>가벼운 유행 대신 깊이있는 세련됨을 선택하세요.</p>
+                        <h2 class="story-subtitle">업무의 해상도를 높이는<br>완벽한 오피스 기어, 아무래도.</h2>
+                        <p class="story-body">아무래도는 단순한 안경을 넘어,<br>몰입을 방해하는 시각적 소음을 차단하는 '기어'를 만듭니다.<br>장시간 모니터 앞에서도 변함없는 편안함과<br>당신의 데스크테리어를 완성하는 미니멀한 스펙을 경험하세요.<br>전문가들을 위한 최적의 밸런스를 설계합니다.</p>
                     </div>
-                    <!-- 우측 1:1 정방형 이미지 래퍼 (전체 1/3 영역) -->
                     <div class="story-image-wrap">
-                        <img src="/static/img/brandStory.webp" alt="amuredo Brand Story" class="brand-story-img">
+                        <img src="/static/img/brandStory.webp" alt="amuredo Gear Philosophy" class="brand-story-img">
                     </div>
                 </div>
             </section>
 
-            <!-- 안경 아이템 카드 (Glasses Best) 구역 -->
-            <section class="best-items-section glasses-best-section fade-in-section">
-                <!-- 서브 타이틀 '신규상품' -->
-                <h2 class="section-subtitle">Glasses Best</h2>
+            <!-- 🏁 통합 베스트 상품 영역 (Productive Line-up) -->
+            <section class="best-items-section fade-in-section">
+                <div class="brand-story-header" style="margin-bottom: 2rem;">
+                    <span class="eng-title">productive line-up</span>
+                    <h2 class="kor-title">워크스타일 큐레이션</h2>
+                </div>
 
-                <!-- 🏁 신규: 2:2:1 비율 모델 화보 고정 배치 -->
+                <!-- 탭 메뉴 (원형 기어 셀렉터 스타일) -->
+                <div class="best-tabs">
+                    <button class="best-tab active" data-event="focus">
+                        <span class="tab-icon">⊙</span>
+                        <span class="tab-text">Focus</span>
+                    </button>
+                    <button class="best-tab" data-event="meeting">
+                        <span class="tab-icon">◒</span>
+                        <span class="tab-text">Meet</span>
+                    </button>
+                    <button class="best-tab" data-event="drive">
+                        <span class="tab-icon">◈</span>
+                        <span class="tab-text">Drive</span>
+                    </button>
+                    <button class="best-tab" data-event="holiday">
+                        <span class="tab-icon">◇</span>
+                        <span class="tab-text">Day-off</span>
+                    </button>
+                </div>
+
+                <!-- 🏁 모델 화보 & 해시태그 (2:1 비율 단일 화보 구조) -->
                 <div class="best-model-row fade-in-section">
-                    <div class="model-images-track">
-                        <div class="model-img-wrap"><img src="/static/img/main03_glasses.webp" alt="Best Glasses Banner 1"></div>
-                        <div class="model-img-wrap"><img src="/static/img/main04_glasses.webp" alt="Best Glasses Banner 2"></div>
+                    <div class="model-single-img-wrap">
+                        <img src="/static/img/main01.webp" id="bestMainBanner" alt="Best Gear Concept Banner">
                     </div>
-                    <div class="model-text-wrap">
-                        <span class="hashtag-text"># 오피스 기어</span>
-                        <span class="hashtag-text"># 초경량</span>
-                        <span class="hashtag-text"># 사무실 필수</span>
-                        <span class="hashtag-text"># 프로패셔널</span>
-                        <span class="hashtag-text"># 눈 보호</span>
+                    <div class="model-text-wrap" id="bestHashtags">
+                        <span class="hashtag-text"># 초경량 기어</span>
+                        <span class="hashtag-text"># 시각 노이즈 차단</span>
+                        <span class="hashtag-text"># 12g의 혁신</span>
+                        <span class="hashtag-text"># 오피스 셋업</span>
                     </div>
                 </div>
 
-                <!-- 🏁 신규: 아이템 3열 고정 그리드 컨테이너 -->
-                <div class="best-items-grid" id="glassesBestGrid">
-                    <!-- JS 코드가 API에서 Glasses Best 품목을 불러와 카드를 자동으로 삽입합니다 -->
+                <!-- 아이템 3열 고정 그리드 -->
+                <div class="best-items-grid" id="bestItemsGrid">
+                    <!-- JS 코드가 선택된 탭의 데이터를 호출하여 삽입합니다 -->
                 </div>
             </section>
 
-            <!-- 선글라스 아이템 카드 (Sunglasses Best) 구역 -->
-            <section class="best-items-section sunglasses-best-section fade-in-section">
-                <!-- 서브 타이틀 'Best' -->
-                <h2 class="section-subtitle">Sunglasses Best</h2>
-
-                <!-- 🏁 신규: 2:2:1 비율 모델 화보 고정 배치 -->
-                <div class="best-model-row fade-in-section">
-                    <div class="model-images-track">
-                        <div class="model-img-wrap"><img src="/static/img/main01_sunglasses.webp" alt="Best Sunglasses Banner 1"></div>
-                        <div class="model-img-wrap"><img src="/static/img/main02_sunglasses.webp" alt="Best Sunglasses Banner 2"></div>
+            <!-- 🏁 하단 기획: Gear Checklist (업무 스타일 자가진단) -->
+            <section class="checklist-section fade-in-section">
+                <div class="brand-story-header">
+                    <span class="eng-title">gear checklist</span>
+                    <h2 class="kor-title">당신의 워크 스타일에 맞는 기어는?</h2>
+                </div>
+                
+                <div class="checklist-container">
+                    <div class="checklist-item" onclick="location.href='/glasses?filter=엔지니어'">
+                        <div class="check-icon">□</div>
+                        <div class="check-content">
+                            <h3>장시간 모니터 앞에 있는 개발자/기획자</h3>
+                            <p>가벼움과 편안함이 최우선이라면? <strong>#엔지니어</strong> 라인업</p>
+                        </div>
                     </div>
-                    <div class="model-text-wrap">
-                        <span class="hashtag-text"># 바캉스 패션</span>
-                        <span class="hashtag-text"># 데일리 선글라스</span>
-                        <span class="hashtag-text"># 홀리데이 시리즈</span>
-                        <span class="hashtag-text"># 시선집중</span>
-                        <span class="hashtag-text"># 휴가 컬렉션</span>
+                    <div class="checklist-item" onclick="location.href='/glasses?filter=오피스'">
+                        <div class="check-icon">□</div>
+                        <div class="check-content">
+                            <h3>클라이언트 미팅이 잦은 비즈니스맨</h3>
+                            <p>단정한 인상과 신뢰감이 필요하다면? <strong>#오피스</strong> 라인업</p>
+                        </div>
+                    </div>
+                    <div class="checklist-item" onclick="location.href='/sunglasses?filter=홀리데이'">
+                        <div class="check-icon">□</div>
+                        <div class="check-content">
+                            <h3>외근이 많고 이동이 잦은 필드 워커</h3>
+                            <p>강한 빛으로부터 시력을 보호해야 한다면? <strong>#홀리데이 포인트</strong> 라인업</p>
+                        </div>
                     </div>
                 </div>
+            </section>
+            <!-- 🏁 브랜드 채널 연결 (Connect with Amuredo) -->
+            <section class="brand-channels-section fade-in-section">
+                <div class="brand-story-header">
+                    <span class="eng-title">connect with us</span>
+                    <h2 class="kor-title">아무래도와 연결하기</h2>
+                </div>
 
-                <!-- 🏁 신규: 아이템 3열 고정 그리드 컨테이너 -->
-                <div class="best-items-grid" id="sunglassesBestGrid">
-                    <!-- JS 코드가 API에서 Sunglasses Best 품목을 불러와 카드를 자동으로 삽입합니다 -->
+                <div class="channels-container">
+                    <a href="#" id="naverStoreLink" target="_blank" class="channel-card">
+                        <div class="channel-icon">N</div>
+                        <span class="channel-name">Naver Store</span>
+                    </a>
+                    <a href="#" id="naverBlogLink" target="_blank" class="channel-card">
+                        <div class="channel-icon">B</div>
+                        <span class="channel-name">Official Blog</span>
+                    </a>
+                    <a href="#" id="instagramLink" target="_blank" class="channel-card">
+                        <div class="channel-icon">I</div>
+                        <span class="channel-name">Instagram</span>
+                    </a>
                 </div>
             </section>
         </main>
