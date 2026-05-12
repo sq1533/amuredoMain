@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도매 파트너 마이페이지 - 아무래도 안경</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=15.0">
+    <style>
+        .mypage-container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 40px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .mypage-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0e3a5b;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .info-group {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .info-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+        .password-section {
+            margin-top: 40px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #0e3a5b;
+        }
+        .feedback-text {
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+        .text-green { color: #28a745; }
+        .text-red { color: #dc3545; }
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #0e3a5b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .home-link {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            text-decoration: none;
+        }
+        .home-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <nav class="pc-nav-left">
+            <button class="nav-switch-btn" onclick="location.href='/about'">About</button>
+            <button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button>
+        </nav>
+        <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
+            <span class="hamburger-box"></span>
+        </button>
+        <div class="logo-wrapper">
+            <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
+        </div>
+        <nav class="pc-nav-right">
+            <button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button>
+            <button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button>
+            <button class="nav-switch-btn" onclick="location.href='/antioch'">Antioch</button>
+        </nav>
+        <nav class="page-nav" id="pageNav">
+            <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
+            <ul class="nav-links">
+                <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/antioch'">Antioch</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/about'">About</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button></li>
+            </ul>
+        </nav>
+        <div class="nav-overlay" id="navOverlay"></div>
+    </header>
+
+    <div class="mypage-container">
+        <h1 class="mypage-title">마이페이지</h1>
+        
+        <div class="info-group">
+            <div class="info-label">이메일 (ID)</div>
+            <div class="info-value" id="userEmail">로딩 중...</div>
+        </div>
+        <div class="info-group">
+            <div class="info-label">대표자명</div>
+            <div class="info-value" id="userName">로딩 중...</div>
+        </div>
+        <div class="info-group">
+            <div class="info-label">사업자 등록 번호</div>
+            <div class="info-value" id="userBizNum">로딩 중...</div>
+        </div>
+
+        <div class="password-section">
+            <h2 style="font-size: 1.3rem; margin-bottom: 20px; color: #0e3a5b;">비밀번호 변경</h2>
+            <form id="pwdChangeForm">
+                <div class="form-group">
+                    <label for="current_password">현재 비밀번호</label>
+                    <input type="password" id="current_password" name="current_password" placeholder="현재 비밀번호 입력" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_password">새 비밀번호 <span style="font-size: 0.8rem; font-weight: normal; color: #666;">(영문, 숫자 필수 / 6~12자리)</span></label>
+                    <input type="password" id="new_password" name="new_password" placeholder="새로운 비밀번호 입력" required>
+                    <div id="pwdRuleFeedback" class="feedback-text"></div>
+                </div>
+                <div class="form-group">
+                    <label for="new_password_confirm">새 비밀번호 확인</label>
+                    <input type="password" id="new_password_confirm" placeholder="새로운 비밀번호 재입력" required>
+                    <div id="pwdConfirmFeedback" class="feedback-text"></div>
+                </div>
+                <button type="submit" id="submitBtn" class="submit-btn">비밀번호 변경하기</button>
+            </form>
+        </div>
+        
+        <a href="javascript:history.back()" class="home-link">← 이전 페이지로 돌아가기</a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            // 1. 회원 정보 데이터 로드
+            try {
+                const res = await fetch("/api/user/me");
+                if (res.redirected) {
+                    location.href = res.url; // 비로그인 시 리다이렉트 처리
+                    return;
+                }
+                const data = await res.json();
+                if (data.status === "success") {
+                    document.getElementById("userEmail").textContent = data.user.email;
+                    document.getElementById("userName").textContent = data.user.name;
+                    
+                    // 사업자 번호 포맷 000-00-00000 으로 복원
+                    let biz = data.user.business_number;
+                    if (biz && biz.length === 10) {
+                        biz = biz.substring(0,3) + '-' + biz.substring(3,5) + '-' + biz.substring(5);
+                    }
+                    document.getElementById("userBizNum").textContent = biz;
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                console.error("정보 로드 실패", err);
+            }
+
+            // 2. 비밀번호 변경 폼 검증 로직
+            const pwdForm = document.getElementById("pwdChangeForm");
+            const newPwdInput = document.getElementById("new_password");
+            const confirmPwdInput = document.getElementById("new_password_confirm");
+            const ruleFeedback = document.getElementById("pwdRuleFeedback");
+            const matchFeedback = document.getElementById("pwdConfirmFeedback");
+            const submitBtn = document.getElementById("submitBtn");
+
+            const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*]{6,12}$/;
+
+            function checkRules() {
+                const pwd = newPwdInput.value;
+                ruleFeedback.style.display = "block";
+                if (!pwd) { ruleFeedback.style.display = "none"; return false; }
+                if (pwdRegex.test(pwd)) {
+                    ruleFeedback.textContent = "사용 가능한 비밀번호입니다.";
+                    ruleFeedback.className = "feedback-text text-green";
+                    return true;
+                } else {
+                    ruleFeedback.textContent = "영문/숫자 필수, 6~12자리, 특수문자는 !@#$%^&*만 가능합니다.";
+                    ruleFeedback.className = "feedback-text text-red";
+                    return false;
+                }
+            }
+
+            function checkMatch() {
+                const pwd = newPwdInput.value;
+                const confirm = confirmPwdInput.value;
+                matchFeedback.style.display = "block";
+                if (!confirm) { matchFeedback.style.display = "none"; return false; }
+                if (pwd === confirm) {
+                    matchFeedback.textContent = "비밀번호가 일치합니다.";
+                    matchFeedback.className = "feedback-text text-green";
+                    return true;
+                } else {
+                    matchFeedback.textContent = "비밀번호가 일치하지 않습니다.";
+                    matchFeedback.className = "feedback-text text-red";
+                    return false;
+                }
+            }
+
+            newPwdInput.addEventListener("input", () => { 
+                checkRules(); 
+                if (confirmPwdInput.value) checkMatch(); 
+            });
+            confirmPwdInput.addEventListener("input", checkMatch);
+
+            // 3. 비밀번호 변경 서버 제출
+            pwdForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                if (!checkRules() || !checkMatch()) {
+                    alert("새 비밀번호 규칙 및 일치 여부를 확인해 주세요.");
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = "변경 중...";
+
+                const formData = new FormData(pwdForm);
+                try {
+                    const res = await fetch("/api/user/change_password", {
+                        method: "POST",
+                        body: formData
+                    });
+                    const result = await res.json();
+                    alert(result.message);
+                    
+                    if (result.status === "success") {
+                        pwdForm.reset();
+                        ruleFeedback.style.display = "none";
+                        matchFeedback.style.display = "none";
+                    }
+                } catch (err) {
+                    alert("서버 오류가 발생했습니다. 다시 시도해주세요.");
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "비밀번호 변경하기";
+                }
+            });
+        });
+    </script>
+    <script>
+        // 🏁 공통 메뉴 동작용 스크립트
+        document.addEventListener("DOMContentLoaded", () => {
+            const menuToggleBtn = document.getElementById("menuToggleBtn");
+            const closeMenuBtn = document.getElementById("closeMenuBtn");
+            const pageNav = document.getElementById("pageNav");
+            const navOverlay = document.getElementById("navOverlay");
+
+            function toggleMenu() {
+                pageNav.classList.toggle("open");
+                navOverlay.classList.toggle("active");
+            }
+
+            if(menuToggleBtn) menuToggleBtn.addEventListener("click", toggleMenu);
+            if(closeMenuBtn) closeMenuBtn.addEventListener("click", toggleMenu);
+            if(navOverlay) navOverlay.addEventListener("click", toggleMenu);
+        });
+    </script>
+<script src="/static/globalWholesale.js?v=1.0"></script>
+</body>
+</html>

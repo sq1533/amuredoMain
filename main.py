@@ -7,20 +7,55 @@ from firebase_admin import credentials, firestore
 import requests
 import re
 import json
-from fastapi import File, UploadFile, Form
+from fastapi import File, UploadFile, Form, Request
 from typing import List
 from email_validator import validate_email, EmailNotValidError
+from starlette.middleware.sessions import SessionMiddleware
+from api.user import router as user_router
+from api.payment import router as payment_router
 
 app = FastAPI()
+
+# 🏁 세션 미들웨어 설정 및 보안 키 동적 로드
+import secrets
+
+session_config_path = os.path.join(os.path.dirname(__file__), "database", "session.json")
+try:
+    # 세션 키 파일이 없으면 강력한 무작위 키를 생성하여 저장 (서버 재시작 시 로그인 유지 목적)
+    if not os.path.exists(session_config_path):
+        os.makedirs(os.path.dirname(session_config_path), exist_ok=True)
+        with open(session_config_path, "w", encoding="utf-8") as f:
+            json.dump({"secret_key": secrets.token_hex(32)}, f, indent=4)
+            
+    with open(session_config_path, "r", encoding="utf-8") as f:
+        session_data = json.load(f)
+        session_secret = session_data.get("secret_key", secrets.token_hex(32))
+except Exception as e:
+    print(f"🔥 세션 키 로드 실패, 1회용 임시 키를 사용합니다 (재부팅 시 로그아웃 됨): {e}")
+    session_secret = secrets.token_hex(32)
+
+app.add_middleware(SessionMiddleware, secret_key=session_secret)
+
+# 🏁 API 라우터 등록
+app.include_router(user_router, prefix="/api/user", tags=["wholesale_user"])
+app.include_router(payment_router, prefix="/api/payment", tags=["wholesale_payment"])
 
 # ---------------------------------------------------------
 # Firebase Admin SDK 설정 및 DB 초기화
 # ---------------------------------------------------------
 cred_path = os.path.join(os.path.dirname(__file__), "database", "firebase.json")
+config_path = os.path.join(os.path.dirname(__file__), "database", "firebase_config.json")
 try:
     if not firebase_admin._apps:
         cred = credentials.Certificate(cred_path)
-        firebase_admin.initialize_app(cred)
+        
+        # RTDB URL 설정 파일 로드
+        db_options = {}
+        if os.path.exists(config_path):
+            with open(config_path, "r", encoding="utf-8") as cf:
+                db_options = json.load(cf)
+                
+        firebase_admin.initialize_app(cred, db_options)
     db = firestore.client()
 except Exception as e:
     print(f"🔥 Firebase 인증 파일 초기화 실패: {e}")
@@ -44,10 +79,61 @@ async def serve_frontend():
     with open(index_path, "r", encoding="utf-8") as f:
         return f.read()
 
+@app.get("/wholesale/mypage", response_class=HTMLResponse)
+async def serve_wholesale_mypage(request: Request):
+    if not request.session.get("is_wholesale"):
+        return RedirectResponse(url="/wholesale/login")
+    detail_path = os.path.join(static_dir, "wholesale_mypage.html")
+    if os.path.exists(detail_path):
+        with open(detail_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>준비 중입니다.</h1>", status_code=404)
+
+@app.get("/wholesale/cart", response_class=HTMLResponse)
+async def serve_wholesale_cart(request: Request):
+    if not request.session.get("is_wholesale"):
+        return RedirectResponse(url="/wholesale/login")
+    detail_path = os.path.join(static_dir, "wholesale_cart.html")
+    if os.path.exists(detail_path):
+        with open(detail_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>장바구니 화면을 찾을 수 없습니다.</h1>", status_code=404)
+
+@app.get("/wholesale/order", response_class=HTMLResponse)
+async def serve_wholesale_order(request: Request):
+    if not request.session.get("is_wholesale"):
+        return RedirectResponse(url="/wholesale/login")
+    detail_path = os.path.join(static_dir, "wholesale_order.html")
+    if os.path.exists(detail_path):
+        with open(detail_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>주문/결제 화면을 찾을 수 없습니다.</h1>", status_code=404)
+
+@app.get("/wholesale/success", response_class=HTMLResponse)
+async def serve_wholesale_success(request: Request):
+    if not request.session.get("is_wholesale"):
+        return RedirectResponse(url="/wholesale/login")
+    detail_path = os.path.join(static_dir, "wholesale_success.html")
+    if os.path.exists(detail_path):
+        with open(detail_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>결제 완료 화면을 찾을 수 없습니다.</h1>", status_code=404)
+
+@app.get("/wholesale/orders", response_class=HTMLResponse)
+async def serve_wholesale_orders(request: Request):
+    if not request.session.get("is_wholesale"):
+        return RedirectResponse(url="/wholesale/login")
+    detail_path = os.path.join(static_dir, "wholesale_orders.html")
+    if os.path.exists(detail_path):
+        with open(detail_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>주문 현황 화면을 찾을 수 없습니다.</h1>", status_code=404)
+
 @app.get("/sunglasses", response_class=HTMLResponse)
 @app.get("/glasses", response_class=HTMLResponse)
+@app.get("/antioch", response_class=HTMLResponse)
 @app.get("/goggles", response_class=HTMLResponse)
-async def serve_category_page():
+async def serve_category_page(request: Request):
     """
     프론트엔드 카테고리 전용 페이지 서빙 (itemList.html 반환)
     어떤 메뉴를 누르든 동일한 스켈레톤을 반환하고 JS가 분기합니다.
@@ -59,9 +145,26 @@ async def serve_category_page():
     with open(item_list_path, "r", encoding="utf-8") as f:
         return f.read()
 
+# 도매 전용 상품 상세 화면 HTML 서빙용 라우팅 (보안 게이트 작동)
+@app.get("/antioch/{item_id}", response_class=HTMLResponse)
+async def serve_antioch_detail_page(request: Request, item_id: str):
+    # (참고) 이전에는 여기서 서버 사이드 강제 리다이렉트를 했으나,
+    # 이제 프론트엔드 itemDetail.js의 예쁜 커스텀 팝업(403)을 보여주기 위해 HTML을 먼저 정상 서빙합니다.
+    # 데이터 탈취 보안은 API 단(/api/items/{item_id})에서 완벽히 방어 중입니다.
+    
+    detail_path = os.path.join(static_dir, "antioch_detail.html")
+    if os.path.exists(detail_path):
+        with open(detail_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>도매 상세 화면(antioch_detail.html)을 찾을 수 없습니다.</h1>", status_code=404)
+
 # 개별 상품 상세 화면 HTML 서빙용 프론트엔드 라우팅
 @app.get("/item/{item_id}", response_class=HTMLResponse)
-async def serve_item_detail_page(item_id: str):
+async def serve_item_detail_page(request: Request, item_id: str):
+    # 도매 회원이 로그인 상태로 일반 상품을 클릭했을 경우, 강제로 도매 전용 뷰로 리다이렉트
+    if request.session.get("is_wholesale"):
+        return RedirectResponse(url=f"/antioch/{item_id}")
+
     detail_path = os.path.join(static_dir, "item_detail.html")
     if os.path.exists(detail_path):
         with open(detail_path, "r", encoding="utf-8") as f:
@@ -86,6 +189,23 @@ async def serve_contact_page():
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>Contact 템플릿(contact.html)을 찾을 수 없습니다.</h1>", status_code=404)
 
+# 🏁 도매 전용 페이지 라우팅
+@app.get("/wholesale/register", response_class=HTMLResponse)
+async def serve_wholesale_register():
+    path = os.path.join(static_dir, "wholesale_register.html")
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>페이지를 찾을 수 없습니다.</h1>", status_code=404)
+
+@app.get("/wholesale/login", response_class=HTMLResponse)
+async def serve_wholesale_login():
+    path = os.path.join(static_dir, "wholesale_login.html")
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>페이지를 찾을 수 없습니다.</h1>", status_code=404)
+
 # ---------------------------------------------------------
 # 외부 데이터 통신용 API 엔드포인트
 # ---------------------------------------------------------
@@ -109,7 +229,7 @@ async def get_best_items(event_type: str):
         for doc in docs:
             data = doc.to_dict()
             paths = data.get("paths", [])
-            image_url = paths[0] if (paths and len(paths) > 0) else "https://via.placeholder.com/600x600.png?text=No+Image"
+            image_url = paths[0] if (paths and len(paths) > 0) else "/static/img/ready.webp"
             
             raw_price = data.get("price", "0")
             try:
@@ -149,7 +269,7 @@ async def get_items_by_category(category: str):
             data = doc.to_dict()
             paths = data.get("paths", [])
             # 사진이 없어도 안전하게 처리
-            image_url = paths[0] if (paths and len(paths) > 0) else "https://via.placeholder.com/600x600.png?text=No+Image"
+            image_url = paths[0] if (paths and len(paths) > 0) else "/static/img/ready.webp"
             
             # 가격(price) 필드에 회계 단위 쉼표(,) 추가 로직 적용
             raw_price = data.get("price", "0")
@@ -164,7 +284,8 @@ async def get_items_by_category(category: str):
                 "name": data.get("name", "이름 없음"),
                 "price": formatted_price,
                 "image_url": image_url,
-                "category": str(data.get("category", "")) # 🏁 신규: 프론트엔드 Set 필터 연동용 데이터
+                "category": str(data.get("category", "")), # 🏁 신규: 프론트엔드 Set 필터 연동용 데이터
+                "sort": data.get("sort", "") # 🏁 신규: 안티오크 상품 분기 처리를 위한 데이터
             })
             
         print(f"✅ Firebase 조회 완료: '{category}' 카테고리의 하단 텍스트형 {len(real_items)}개 아이템 전달.")
@@ -178,7 +299,7 @@ async def get_items_by_category(category: str):
 # 5. 아이템 상세 데이터(Item Detail) API
 # -------------------------------------------------------------
 @app.get("/api/items/{item_id}")
-async def get_item_detail(item_id: str):
+async def get_item_detail(request: Request, item_id: str):
     """
     개별 상품 정보(상세 이미지 전체 리스트 포함) 조회 엔드포인트
     """
@@ -194,11 +315,16 @@ async def get_item_detail(item_id: str):
             return {"error": "해당 상품을 찾을 수 없습니다.", "status": 404}
             
         data = doc.to_dict()
+        
+        # 🔒 강력한 백엔드 보안: 해당 상품이 'antioch' 도매용이고, 사용자가 도매 로그인을 안 했다면 데이터 탈취 차단
+        if data.get("sort") == "antioch" and not request.session.get("is_wholesale"):
+            return {"error": "도매 권한이 필요한 상품입니다. 로그인을 먼저 진행해 주세요.", "status": 403}
+
         paths = data.get("paths", [])
         
         # 만약 이미지가 아예 없다면 임시 이미지라도 할당
         if not paths:
-            paths = ["https://via.placeholder.com/600x600.png?text=No+Image"]
+            paths = ["/static/img/ready.webp"]
             
         raw_price = data.get("price", "0")
         try:
@@ -310,7 +436,7 @@ async def get_related_items(item_id: str):
                 
             data = doc.to_dict()
             paths = data.get("paths", [])
-            first_image = paths[0] if paths else "https://via.placeholder.com/600x600.png?text=No+Image"
+            first_image = paths[0] if paths else "/static/img/ready.webp"
             
             related_items.append({
                 "id": doc.id,

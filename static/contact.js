@@ -24,28 +24,30 @@ document.addEventListener("DOMContentLoaded", () => {
     emailInput.addEventListener("input", updateSubmitBtnState);
     messageInput.addEventListener("input", updateSubmitBtnState);
 
-    // 2. 미리보기 및 삭제 버튼 렌더링 함수
+    // 2. 파일명 리스트 렌더링 함수 (단순 파일명 표시 버전)
     function renderPreviews() {
         filePreview.innerHTML = ""; // 기존 UI 초기화
         
         selectedFiles.forEach((file, index) => {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const imgWrap = document.createElement("div");
-                imgWrap.className = "preview-item";
-                imgWrap.innerHTML = `
-                    <div class="btn-remove-file" data-index="${index}">✕</div>
-                    <img src="${event.target.result}" alt="Preview">
-                    <span class="file-name">${file.name}</span>
-                `;
-                filePreview.appendChild(imgWrap);
+            const itemWrap = document.createElement("div");
+            itemWrap.className = "file-info-item";
+            itemWrap.style.display = "flex";
+            itemWrap.style.alignItems = "center";
+            itemWrap.style.gap = "10px";
+            itemWrap.style.marginTop = "8px";
+            itemWrap.style.fontSize = "0.9rem";
+            itemWrap.style.color = "#555";
 
-                // 삭제 버튼 이벤트 연결
-                imgWrap.querySelector(".btn-remove-file").addEventListener("click", () => {
-                    removeFile(index);
-                });
-            };
-            reader.readAsDataURL(file);
+            itemWrap.innerHTML = `
+                <span class="file-name">${file.name}</span>
+                <span class="btn-remove-file" data-index="${index}" style="cursor:pointer; color:#ff4d4d; font-weight:bold;">✕</span>
+            `;
+            filePreview.appendChild(itemWrap);
+
+            // 삭제 버튼 이벤트 연결
+            itemWrap.querySelector(".btn-remove-file").addEventListener("click", () => {
+                removeFile(index);
+            });
         });
     }
 

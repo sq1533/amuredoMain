@@ -1,4 +1,17 @@
+# Firebase 및 텔레그램, 세션 보안 키 등 민감한 JSON 정보 제외
+database/*.json
+
+# 파이썬 가상환경 및 캐시 파일 제외
 __pycache__/
-database/
-static/img/
-.agent/
+*.py[cod]
+*$py.class
+env/
+venv/
+.venv/
+amuredo/
+static/img
+
+
+# OS 환경 파일 제외
+.DS_Store
+Thumbs.db

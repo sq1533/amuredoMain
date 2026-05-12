@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도매 결제 - 아무래도 안경</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=16.0">
+    <!-- 토스페이먼츠 결제위젯 SDK -->
+    <script src="https://js.tosspayments.com/v1/payment-widget"></script>
+    <!-- 카카오(다음) 우편번호 서비스 API -->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <style>
+        .order-container {
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 25px;
+            color: #666;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .back-link:hover { color: #0e3a5b; background: #e2e6ea; }
+        
+        .order-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 30px;
+        }
+        
+        /* 1행 요약 UI */
+        .summary-dashboard {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 1px solid #eaeaea;
+        }
+        .summary-block {
+            text-align: center;
+            flex: 1;
+        }
+        .summary-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .summary-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #333;
+        }
+        .summary-operator {
+            font-size: 1.5rem;
+            color: #ccc;
+            font-weight: 300;
+        }
+        .final-value {
+            color: #d32f2f;
+            font-size: 1.8rem;
+        }
+        
+        .payment-btn {
+            width: 100%;
+            padding: 18px;
+            background-color: #3182f6; /* 토스페이먼츠 브랜드 블루 */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(49, 130, 246, 0.2);
+            transition: background 0.3s;
+        }
+        .payment-btn:hover { background-color: #1b64da; }
+        
+        /* 배송지 입력 폼 UI */
+        .shipping-section {
+            background: #fff;
+            border: 1px solid #eaeaea;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .form-label {
+            width: 100px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+        }
+        .form-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus { border-color: #0e3a5b; }
+        .form-input[readonly] { background-color: #f8f9fa; cursor: not-allowed; }
+        
+        .address-search-btn {
+            padding: 12px 20px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background 0.2s;
+        }
+        .address-search-btn:hover { background: #000; }
+        
+        /* 모달 레이어 UI (카카오 주소검색용) */
+        #postcodeLayer {
+            display: none;
+            position: fixed;
+            overflow: hidden;
+            z-index: 10000;
+            -webkit-overflow-scrolling: touch;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border-radius: 12px;
+        }
+        #postcodeLayerCloseBtn {
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            z-index: 10001;
+            background: #333;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="order-container">
+        <a href="#" class="back-link" onclick="history.back(); return false;">← 장바구니로 돌아가기</a>
+        <h1 class="order-title">결제 진행</h1>
+        
+        <!-- 1행 요약 대시보드 -->
+        <div class="summary-dashboard">
+            <div class="summary-block">
+                <div class="summary-label">총 상품 금액</div>
+                <div class="summary-value" id="totalAmount">₩ 0</div>
+            </div>
+            <div class="summary-operator">-</div>
+            <div class="summary-block">
+                <div class="summary-label">할인 혜택</div>
+                <div class="summary-value">₩ 0</div>
+            </div>
+            <div class="summary-operator">=</div>
+            <div class="summary-block">
+                <div class="summary-label">최종 결제 금액</div>
+                <div class="summary-value final-value" id="finalAmount">₩ 0</div>
+            </div>
+        </div>
+
+        <!-- 🚚 배송지 입력 영역 -->
+        <div class="shipping-section">
+            <div class="section-title">배송지 정보</div>
+            
+            <!-- 1행: 수령인과 연락처 (1:1 비율) -->
+            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                <div style="flex: 1;">
+                    <div class="form-label" style="width: auto; margin-bottom: 5px;">수령인</div>
+                    <input type="text" id="recipientName" class="form-input" style="width: 100%; box-sizing: border-box;" placeholder="이름을 입력하세요">
+                </div>
+                <div style="flex: 1;">
+                    <div class="form-label" style="width: auto; margin-bottom: 5px;">연락처</div>
+                    <input type="text" id="recipientPhone" class="form-input" style="width: 100%; box-sizing: border-box;" placeholder="010-0000-0000">
+                </div>
+            </div>
+
+            <!-- 2행: 우편번호와 기본주소 (같은 행) -->
+            <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+                <div style="flex: 1;">
+                    <div class="form-label" style="width: auto; margin-bottom: 5px;">우편번호</div>
+                    <input type="text" id="postcode" class="form-input" style="width: 100%; box-sizing: border-box;" placeholder="우편번호" readonly>
+                </div>
+                <div style="flex: 2;">
+                    <div class="form-label" style="width: auto; margin-bottom: 5px;">기본 주소</div>
+                    <input type="text" id="address" class="form-input" style="width: 100%; box-sizing: border-box;" placeholder="기본 주소" readonly>
+                </div>
+            </div>
+
+            <!-- 3행: 주소찾기 버튼 (풀와이드 혹은 적절한 비율) -->
+            <div style="margin-bottom: 15px;">
+                <button type="button" class="address-search-btn" style="width: 100%; margin-left: 0; box-sizing: border-box;" onclick="openDaumPostcode()">우편번호 / 주소 찾기</button>
+            </div>
+
+            <!-- 4행: 상세 주소 -->
+            <div style="margin-bottom: 5px;">
+                <div class="form-label" style="width: auto; margin-bottom: 5px;">상세 주소</div>
+                <input type="text" id="detailAddress" class="form-input" style="width: 100%; box-sizing: border-box;" placeholder="나머지 상세 주소를 입력하세요">
+            </div>
+        </div>
+
+        <!-- 카카오 우편번호 검색 모달 레이어 -->
+        <div id="postcodeLayerWrapper" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;"></div>
+        <div id="postcodeLayer">
+            <button id="postcodeLayerCloseBtn" onclick="closeDaumPostcode()">✕</button>
+        </div>
+
+        <!-- 🏁 토스페이먼츠 결제 위젯 렌더링 영역 -->
+        <div id="payment-method"></div>
+        <div id="agreement"></div>
+        
+        <button class="payment-btn" id="payment-request-button">결제하기</button>
+    </div>
+
+    <script>
+        // 카카오 우편번호 레이어 제어 로직
+        const layerWrapper = document.getElementById('postcodeLayerWrapper');
+        const layer = document.getElementById('postcodeLayer');
+
+        function closeDaumPostcode() {
+            layer.style.display = 'none';
+            layerWrapper.style.display = 'none';
+        }
+
+        function openDaumPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+                    let addr = ''; // 주소 변수
+                    let extraAddr = ''; // 참고항목 변수
+
+                    //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                    if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                        addr = data.roadAddress;
+                    } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                        addr = data.jibunAddress;
+                    }
+
+                    // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                    document.getElementById('postcode').value = data.zonecode;
+                    document.getElementById("address").value = addr;
+                    
+                    // 커서를 상세주소 필드로 이동한다.
+                    document.getElementById("detailAddress").focus();
+
+                    // iframe을 넣은 element를 안보이게 한다.
+                    layer.style.display = 'none';
+                    layerWrapper.style.display = 'none';
+                },
+                width : '100%',
+                height : '100%',
+                maxSuggestItems : 5
+            }).embed(layer);
+
+            // iframe을 넣은 element를 보이게 한다.
+            layer.style.display = 'block';
+            layerWrapper.style.display = 'block';
+
+            // 레이어의 중앙 정렬
+            const width = 400; //우편번호서비스가 들어갈 element의 width
+            const height = 500; //우편번호서비스가 들어갈 element의 height
+            let borderWidth = 2; //샘플에서 사용하는 border의 두께
+
+            layer.style.width = width + 'px';
+            layer.style.height = height + 'px';
+            layer.style.border = borderWidth + 'px solid #0e3a5b';
+            
+            // 화면 중앙에 위치하도록 조정
+            layer.style.left = (((window.innerWidth || document.documentElement.clientWidth) - width)/2 - borderWidth) + 'px';
+            layer.style.top = (((window.innerHeight || document.documentElement.clientHeight) - height)/2 - borderWidth) + 'px';
+        }
+
+        // 창 크기가 변경될 때 모달 창 위치 다시 잡기
+        window.addEventListener('resize', () => {
+            if(layer.style.display === 'block') {
+                const width = 400;
+                const height = 500;
+                let borderWidth = 2;
+                layer.style.left = (((window.innerWidth || document.documentElement.clientWidth) - width)/2 - borderWidth) + 'px';
+                layer.style.top = (((window.innerHeight || document.documentElement.clientHeight) - height)/2 - borderWidth) + 'px';
+            }
+        });
+        
+        // 배경 클릭시 닫기
+        layerWrapper.addEventListener('click', closeDaumPostcode);
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            // 1. 장바구니 쿠키에서 장바구니 데이터 및 총액 도출
+            function getCart() {
+                const match = document.cookie.match(new RegExp('(^| )wholesale_cart=([^;]+)'));
+                if (match) {
+                    try { return JSON.parse(decodeURIComponent(match[2])); } 
+                    catch(e) { return []; }
+                }
+                return [];
+            }
+
+            const cart = getCart();
+            if (cart.length === 0) {
+                alert("결제할 상품이 없습니다.");
+                location.href = "/wholesale/cart";
+                return;
+            }
+
+            let amount = 0;
+            let orderName = "";
+            cart.forEach(item => { amount += (item.unit_price * item.quantity); });
+            
+            // 주문명 동적 생성 (예: "안티오크 안경 10개 외 2건")
+            if (cart.length === 1) {
+                orderName = `${cart[0].name} ${cart[0].quantity}개`;
+            } else {
+                orderName = `${cart[0].name} 외 ${cart.length - 1}건`;
+            }
+
+            function formatWon(num) {
+                return "₩ " + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            
+            document.getElementById("totalAmount").textContent = formatWon(amount);
+            document.getElementById("finalAmount").textContent = formatWon(amount);
+
+            // 2. 백엔드에서 결제 연동 클라이언트 키 확보
+            let clientKey = "";
+            try {
+                const res = await fetch("/api/payment/config");
+                const data = await res.json();
+                clientKey = data.client_key;
+                if(!clientKey) throw new Error("키 없음");
+            } catch (err) {
+                alert("결제 시스템 설정 오류입니다. 관리자에게 문의하세요.");
+                return;
+            }
+
+            // 2-1. 고객 세션 정보 가져와서 수령인 기본값 채우기
+            let customerEmailForToss = "b2b_customer@example.com";
+            try {
+                const userRes = await fetch("/api/user/status");
+                const userData = await userRes.json();
+                if(userData.user_name) {
+                    document.getElementById("recipientName").value = userData.user_name;
+                }
+                if(userData.user_email) {
+                    customerEmailForToss = userData.user_email;
+                }
+            } catch (err) {
+                console.error("고객 정보 로드 실패", err);
+            }
+
+            // 3. 토스페이먼츠 위젯 초기화
+            // 고객을 식별하는 고유 키. 익명/테스트용 난수 사용
+            const customerKey = "B2B_" + Math.random().toString(36).substring(2, 10);
+            const paymentWidget = PaymentWidget(clientKey, customerKey);
+
+            // 4. 결제창 UI 렌더링
+            const paymentMethodWidget = paymentWidget.renderPaymentMethods(
+                "#payment-method",
+                { value: amount },
+                { variantKey: "DEFAULT" }
+            );
+            
+            // 5. 약관 동의 UI 렌더링
+            paymentWidget.renderAgreement(
+                "#agreement",
+                { variantKey: "AGREEMENT" }
+            );
+
+            // 6. '결제하기' 버튼 클릭 이벤트 (유효성 검사 및 토스 서버로 결제 요청)
+            const button = document.getElementById("payment-request-button");
+            button.addEventListener("click", async () => {
+                
+                // 배송지 폼 유효성 검사
+                const rName = document.getElementById("recipientName").value.trim();
+                const rPhone = document.getElementById("recipientPhone").value.trim();
+                const postcode = document.getElementById("postcode").value.trim();
+                const address = document.getElementById("address").value.trim();
+                const detailAddress = document.getElementById("detailAddress").value.trim();
+
+                if(!rName) return alert("수령인을 입력해 주세요.");
+                if(!rPhone) return alert("연락처를 입력해 주세요.");
+                if(!postcode || !address) return alert("주소 찾기를 통해 주소를 입력해 주세요.");
+                if(!detailAddress) return alert("상세 주소를 입력해 주세요.");
+
+                // 토스 서버로 전달될 고유 주문번호 (영문/숫자/하이픈/언더바 허용)
+                const orderId = "ORD_" + new Date().getTime() + "_" + Math.random().toString(36).substring(2, 6);
+                
+                // [신규] 백엔드에 가주문(Pending Order) 정보 저장 (Option 1)
+                try {
+                    const pendingRes = await fetch("/api/payment/pending_order", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            orderId: orderId,
+                            orderName: orderName,
+                            amount: amount,
+                            cart: cart,
+                            customerName: rName,
+                            customerPhone: rPhone,
+                            customerEmail: customerEmailForToss,
+                            postcode: postcode,
+                            address: address,
+                            detailAddress: detailAddress
+                        })
+                    });
+                    const pendingData = await pendingRes.json();
+                    if(pendingData.status !== "success") throw new Error(pendingData.message || "가주문 생성 실패");
+                } catch (err) {
+                    console.error("가주문 생성 오류:", err);
+                    alert("주문 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+                    return;
+                }
+
+                try {
+                    await paymentWidget.requestPayment({
+                        orderId: orderId,
+                        orderName: orderName,
+                        customerName: rName, // 수령인 이름으로 결제자명 임시 셋팅
+                        customerEmail: customerEmailForToss, // 실제 가입된 도매 계정 이메일
+                        // 결제가 성공적으로 '가승인'되면 리다이렉트 될 URL
+                        successUrl: window.location.origin + "/api/payment/toss_success", 
+                        // 사용자가 창을 닫거나 결제에 실패하면 리다이렉트 될 URL
+                        failUrl: window.location.origin + "/api/payment/toss_fail",
+                    });
+                } catch (error) {
+                    if (error.code === 'USER_CANCEL') {
+                        // 고객이 결제창을 닫은 경우 무시
+                    } else {
+                        alert(error.message);
+                    }
+                }
+            });
+        });
+    </script>
+<script src="/static/globalWholesale.js?v=1.0"></script>
+</body>
+</html>

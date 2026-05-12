@@ -136,14 +136,18 @@ document.addEventListener("DOMContentLoaded", () => {
             // 이미지 래퍼 (정사각형 1:1 비율 세팅 구역)
             const imgWrapper = document.createElement('div');
             imgWrapper.className = 'category-image-wrapper';
-            // 사진 클릭 시 상세페이지 스위치 이동 로직 바인딩
+            // 사진 클릭 시 상세페이지 스위치 이동 로직 바인딩 (안티오크 여부 확인)
             imgWrapper.addEventListener('click', () => {
-                location.href = `/item/${item.id}`;
+                if (item.sort === 'antioch') {
+                    location.href = `/antioch/${item.id}`;
+                } else {
+                    location.href = `/item/${item.id}`;
+                }
             });
 
             // 썸네일 이미지 태그 생성 및 부착
             const img = document.createElement('img');
-            img.src = item.image_url; 
+            img.src = item.image_url || "/static/img/ready.webp"; 
             img.className = 'category-image';
             imgWrapper.appendChild(img);
 

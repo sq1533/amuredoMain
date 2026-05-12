@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도매 파트너 장바구니 - 아무래도 안경</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=16.0">
+    <style>
+        .cart-container {
+            max-width: 900px;
+            margin: 80px auto;
+            padding: 40px 20px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        }
+        .cart-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .cart-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border: 1px solid #eaeaea;
+            border-radius: 12px;
+            background: #fafafa;
+            transition: box-shadow 0.2s;
+        }
+        .cart-item:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .item-info {
+            flex: 1;
+        }
+        .item-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .item-price {
+            font-size: 0.95rem;
+            color: #666;
+        }
+        .item-controls {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .qty-box {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+        }
+        .qty-box button {
+            width: 35px;
+            height: 35px;
+            border: none;
+            background: #f8f9fa;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #333;
+            transition: background 0.2s;
+        }
+        .qty-box button:hover { background: #e2e6ea; }
+        .qty-box input {
+            width: 55px;
+            height: 35px;
+            text-align: center;
+            border: none;
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            font-size: 1.05rem;
+            font-weight: bold;
+            outline: none;
+            -moz-appearance: textfield;
+        }
+        .qty-box input::-webkit-inner-spin-button, 
+        .qty-box input::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        .item-total {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            min-width: 120px;
+            text-align: right;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+        .delete-btn:hover {
+            transform: scale(1.1);
+        }
+        .empty-cart {
+            text-align: center;
+            padding: 50px 0;
+            color: #888;
+            font-size: 1.1rem;
+        }
+        .summary-section {
+            border-top: 2px solid #0e3a5b;
+            padding-top: 30px;
+            text-align: right;
+        }
+        .summary-total {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #d32f2f;
+            margin-bottom: 20px;
+        }
+        .summary-total span {
+            color: #333;
+            font-size: 1.2rem;
+            margin-right: 15px;
+        }
+        .order-btn {
+            width: 100%;
+            padding: 18px;
+            background-color: #0e3a5b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-shadow: 0 4px 15px rgba(14, 58, 91, 0.2);
+        }
+        .order-btn:hover { background-color: #0b2d47; }
+        .home-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            text-decoration: none;
+        }
+        .home-link:hover { text-decoration: underline; }
+
+        /* 🏁 모바일 전용 UI 최적화 */
+        @media (max-width: 768px) {
+            .cart-container {
+                margin: 60px auto;
+                padding: 20px;
+                border-radius: 0;
+            }
+            .cart-title { font-size: 1.8rem; margin-bottom: 20px; }
+            
+            .cart-item {
+                display: grid;
+                grid-template-areas: 
+                    "info"
+                    "qty"
+                    "action";
+                gap: 15px;
+                padding: 20px;
+            }
+            .item-info { grid-area: info; }
+            .item-controls { 
+                display: contents; /* 자식 요소들을 그리드에 직접 배치 */
+            }
+            .qty-box { 
+                grid-area: qty; 
+                width: fit-content;
+            }
+            .item-total { 
+                grid-area: action; 
+                text-align: left !important;
+                min-width: auto !important;
+                font-size: 1.2rem;
+                align-self: center;
+            }
+            .delete-btn {
+                grid-area: action;
+                justify-self: end;
+                font-size: 1.8rem;
+                padding: 10px 0 10px 20px; /* 터치 영역 확보 및 우측 정렬 */
+            }
+            .summary-total {
+                font-size: 1.5rem;
+                text-align: center;
+            }
+            .summary-total span {
+                display: block;
+                margin-bottom: 10px;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <nav class="pc-nav-left">
+            <button class="nav-switch-btn" onclick="location.href='/about'">About</button>
+            <button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button>
+        </nav>
+        <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
+            <span class="hamburger-box"></span>
+        </button>
+        <div class="logo-wrapper">
+            <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
+        </div>
+        <nav class="pc-nav-right">
+            <button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button>
+            <button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button>
+            <button class="nav-switch-btn" onclick="location.href='/antioch'">Antioch</button>
+        </nav>
+        <nav class="page-nav" id="pageNav">
+            <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
+            <ul class="nav-links">
+                <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/antioch'">Antioch</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/about'">About</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button></li>
+            </ul>
+        </nav>
+        <div class="nav-overlay" id="navOverlay"></div>
+    </header>
+
+    <div class="cart-container">
+        <h1 class="cart-title">B2B 도매 장바구니</h1>
+        
+        <div class="cart-list" id="cartList">
+            <!-- 자바스크립트로 쿠키 데이터를 바탕으로 렌더링 됩니다. -->
+        </div>
+
+        <div class="summary-section" id="summarySection">
+            <div class="summary-total">
+                <span>최종 결제 예상 금액</span>
+                <span id="grandTotal">₩ 0</span>
+            </div>
+            <button class="order-btn" id="orderBtn">주문하기</button>
+        </div>
+        
+        <a href="javascript:history.back()" class="home-link">← 이전 페이지로 돌아가기</a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const cartList = document.getElementById("cartList");
+            const grandTotalEl = document.getElementById("grandTotal");
+            const summarySection = document.getElementById("summarySection");
+            const orderBtn = document.getElementById("orderBtn");
+
+            // 1. 쿠키에서 장바구니 데이터 불러오기
+            function getCart() {
+                const match = document.cookie.match(new RegExp('(^| )wholesale_cart=([^;]+)'));
+                if (match) {
+                    try {
+                        return JSON.parse(decodeURIComponent(match[2]));
+                    } catch(e) { return []; }
+                }
+                return [];
+            }
+
+            // 2. 쿠키에 장바구니 데이터 저장하기
+            function saveCart(cart) {
+                document.cookie = `wholesale_cart=${encodeURIComponent(JSON.stringify(cart))}; path=/; max-age=2592000`;
+            }
+
+            // 원화 포맷팅 함수
+            function formatWon(number) {
+                return "₩ " + number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            // 수량 포맷 제한 (10~200, 10단위)
+            function clampQuantity(val) {
+                let v = parseInt(val) || 0;
+                v = Math.round(v / 10) * 10;
+                if (v < 10) v = 10;
+                if (v > 200) v = 200;
+                return v;
+            }
+
+            // 전체 합계 계산 및 화면 업데이트
+            function updateGrandTotal(cart) {
+                let total = 0;
+                cart.forEach(item => {
+                    total += (item.unit_price * item.quantity);
+                });
+                grandTotalEl.textContent = formatWon(total);
+            }
+
+            // 장바구니 화면 렌더링
+            function renderCart() {
+                let cart = getCart();
+                cartList.innerHTML = "";
+
+                if (cart.length === 0) {
+                    cartList.innerHTML = `<div class="empty-cart">장바구니가 비어 있습니다.</div>`;
+                    summarySection.style.display = "none";
+                    return;
+                }
+
+                summarySection.style.display = "block";
+
+                cart.forEach((item, index) => {
+                    const row = document.createElement("div");
+                    row.className = "cart-item";
+
+                    row.innerHTML = `
+                        <div class="item-info">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-price">단가: ${formatWon(item.unit_price)}</div>
+                        </div>
+                        <div class="item-controls">
+                            <div class="qty-box">
+                                <button class="btn-minus" data-idx="${index}">-</button>
+                                <input type="number" class="qty-input" data-idx="${index}" value="${item.quantity}">
+                                <button class="btn-plus" data-idx="${index}">+</button>
+                            </div>
+                            <div class="item-total" id="total-${index}">${formatWon(item.unit_price * item.quantity)}</div>
+                            <button class="delete-btn" data-idx="${index}" title="상품 삭제">×</button>
+                        </div>
+                    `;
+                    cartList.appendChild(row);
+                });
+
+                updateGrandTotal(cart);
+                attachEvents();
+            }
+
+            // 각 요소에 이벤트 달기
+            function attachEvents() {
+                let cart = getCart();
+
+                // 수량 조절 및 삭제 로직
+                document.querySelectorAll(".btn-minus").forEach(btn => {
+                    btn.addEventListener("click", (e) => {
+                        const idx = e.target.getAttribute("data-idx");
+                        let newQty = clampQuantity(cart[idx].quantity - 10);
+                        updateItemQuantity(idx, newQty, cart);
+                    });
+                });
+
+                document.querySelectorAll(".btn-plus").forEach(btn => {
+                    btn.addEventListener("click", (e) => {
+                        const idx = e.target.getAttribute("data-idx");
+                        let newQty = clampQuantity(cart[idx].quantity + 10);
+                        updateItemQuantity(idx, newQty, cart);
+                    });
+                });
+
+                document.querySelectorAll(".qty-input").forEach(input => {
+                    input.addEventListener("blur", (e) => {
+                        const idx = e.target.getAttribute("data-idx");
+                        let newQty = clampQuantity(e.target.value);
+                        updateItemQuantity(idx, newQty, cart);
+                    });
+                    input.addEventListener("keydown", (e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            e.target.blur(); // 블러 이벤트를 발생시켜 포맷 적용
+                        }
+                    });
+                });
+
+                // 항목 삭제 (X 버튼)
+                document.querySelectorAll(".delete-btn").forEach(btn => {
+                    btn.addEventListener("click", (e) => {
+                        const idx = e.target.getAttribute("data-idx");
+                        const itemName = cart[idx].name;
+                        
+                        // [신규] 커스텀 삭제 확인 팝업 호출
+                        showDeleteModal(itemName, () => {
+                            cart.splice(idx, 1);
+                            saveCart(cart);
+                            renderCart();
+                        });
+                    });
+                });
+            }
+
+            // 🏁 장바구니 상품 삭제 커스텀 모달 로직
+            function showDeleteModal(itemName, onConfirm) {
+                // 기존 모달 제거
+                const oldModal = document.getElementById("deleteModal");
+                if (oldModal) oldModal.remove();
+
+                const modal = document.createElement("div");
+                modal.id = "deleteModal";
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0, 0, 0, 0.4);
+                    backdrop-filter: blur(5px);
+                    display: flex; align-items: center; justify-content: center;
+                    z-index: 10000;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                `;
+
+                modal.innerHTML = `
+                    <div style="
+                        background: #fff;
+                        padding: 40px;
+                        border-radius: 24px;
+                        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+                        text-align: center;
+                        max-width: 340px;
+                        width: 90%;
+                        transform: scale(0.9);
+                        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    ">
+                        <div style="font-size: 3.5rem; margin-bottom: 20px;">🗑️</div>
+                        <div style="font-size: 1.3rem; font-weight: 800; color: #333; margin-bottom: 10px;">상품을 삭제할까요?</div>
+                        <div style="font-size: 0.95rem; color: #888; margin-bottom: 30px; line-height: 1.5;">
+                            장바구니에서 [${itemName}] 상품을 정말로 삭제하시겠습니까?
+                        </div>
+                        <div style="display: flex; gap: 12px;">
+                            <button id="modalCancel" style="flex: 1; padding: 14px; border: 1px solid #ddd; background: #fff; color: #666; border-radius: 12px; font-weight: 600; cursor: pointer;">취소</button>
+                            <button id="modalConfirm" style="flex: 1; padding: 14px; border: none; background: #dc3545; color: #fff; border-radius: 12px; font-weight: 600; cursor: pointer;">삭제할게요</button>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+
+                // 애니메이션 적용
+                setTimeout(() => {
+                    modal.style.opacity = "1";
+                    modal.querySelector('div').style.transform = "scale(1)";
+                }, 10);
+
+                const closeModal = () => {
+                    modal.style.opacity = "0";
+                    modal.querySelector('div').style.transform = "scale(0.9)";
+                    setTimeout(() => modal.remove(), 300);
+                };
+
+                modal.querySelector("#modalCancel").onclick = closeModal;
+                modal.querySelector("#modalConfirm").onclick = () => {
+                    onConfirm();
+                    closeModal();
+                };
+                
+                // 배경 클릭 시 닫기
+                modal.onclick = (e) => { if(e.target === modal) closeModal(); };
+            }
+
+            // 개별 아이템 수량 업데이트 및 실시간 동기화
+            function updateItemQuantity(idx, newQty, cart) {
+                cart[idx].quantity = newQty;
+                cart[idx].total_price = cart[idx].unit_price * newQty;
+                saveCart(cart);
+                
+                // 화면 개별 업데이트 (전체 렌더링을 피하여 입력창 포커스가 유지되거나 부드럽게 넘어가도록 함)
+                const inputEl = document.querySelector(`.qty-input[data-idx="${idx}"]`);
+                if(inputEl) inputEl.value = newQty;
+                
+                const totalEl = document.getElementById(`total-${idx}`);
+                if(totalEl) totalEl.textContent = formatWon(cart[idx].total_price);
+                
+                updateGrandTotal(cart);
+            }
+
+            // 초기 렌더링
+            renderCart();
+
+            // 주문하기 버튼 클릭 시 결제 화면으로 이동
+            orderBtn.addEventListener("click", () => {
+                const cart = getCart();
+                if(cart.length === 0) return;
+                location.href = "/wholesale/order";
+            });
+        });
+    </script>
+    <script>
+        // 🏁 공통 메뉴 동작용 스크립트
+        document.addEventListener("DOMContentLoaded", () => {
+            const menuToggleBtn = document.getElementById("menuToggleBtn");
+            const closeMenuBtn = document.getElementById("closeMenuBtn");
+            const pageNav = document.getElementById("pageNav");
+            const navOverlay = document.getElementById("navOverlay");
+
+            function toggleMenu() {
+                pageNav.classList.toggle("open");
+                navOverlay.classList.toggle("active");
+            }
+
+            if(menuToggleBtn) menuToggleBtn.addEventListener("click", toggleMenu);
+            if(closeMenuBtn) closeMenuBtn.addEventListener("click", toggleMenu);
+            if(navOverlay) navOverlay.addEventListener("click", toggleMenu);
+        });
+    </script>
+<script src="/static/globalWholesale.js?v=1.0"></script>
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주문 현황 - 아무래도 안경</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=16.0">
+    <style>
+        .orders-container {
+            max-width: 1000px;
+            margin: 60px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #0e3a5b;
+            padding-bottom: 10px;
+        }
+        .order-card {
+            border: 1px solid #eaeaea;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+        .order-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .order-header {
+            padding: 20px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .order-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .order-date {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+        }
+        .order-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #333;
+        }
+        .order-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        .status-pending { background: #fff3cd; color: #856404; } /* 결제대기 */
+        .status-paid { background: #d4edda; color: #155724; }    /* 결제 완료 */
+        .status-preparing { background: #cce5ff; color: #004085; } /* 배송준비 */
+        .status-shipping { background: #e2e3e5; color: #383d41; }  /* 배송중 */
+        .status-complete { background: #d1ecf1; color: #0c5460; }  /* 배송완료 */
+        .status-cancel { background: #f8d7da; color: #721c24; }    /* 주문취소 */
+        .status-cancel-req { background: #e2e3e5; color: #383d41; border: 1px solid #ccc; } /* 취소 요청 완료 */
+        .status-exchange-req { background: #cfe2ff; color: #084298; border: 1px solid #b6d4fe; } /* 교환 요청 완료 */
+
+        .order-details {
+            display: none;
+            padding: 20px;
+            border-top: 1px solid #eaeaea;
+            background: #fff;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-section {
+            margin-bottom: 25px;
+        }
+        .detail-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .detail-table th, .detail-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .detail-table th {
+            background: #fcfcfc;
+            color: #666;
+            font-weight: 600;
+        }
+        .shipping-grid {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 10px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .shipping-label { color: #888; font-weight: 600; }
+        .shipping-value { color: #333; }
+
+        .no-orders {
+            text-align: center;
+            padding: 100px 0;
+            color: #999;
+        }
+        .home-link {
+            display: block;
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+        .home-link:hover { text-decoration: underline; }
+        .arrow-icon {
+            transition: transform 0.3s;
+        }
+        .active .arrow-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 🏁 모바일 전용 UI 최적화 */
+        @media (max-width: 768px) {
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 20px;
+                position: relative;
+            }
+            .order-info-main {
+                width: 100%;
+            }
+            .order-date {
+                font-size: 0.85rem;
+                margin-bottom: 4px;
+                display: block;
+            }
+            .order-name {
+                font-size: 1.05rem;
+                margin-bottom: 8px;
+                display: block;
+                width: 100%;
+                line-height: 1.4;
+            }
+            .order-status-badge {
+                align-self: flex-start;
+                margin-left: 0 !important;
+            }
+            .arrow-icon {
+                position: absolute;
+                right: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            .active .arrow-icon {
+                transform: translateY(-50%) rotate(180deg);
+            }
+
+            /* 상세 영역 간소화: 테이블 숨기고 금액만 강조 */
+            .mobile-only-total {
+                display: block !important;
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 12px;
+                text-align: center;
+                margin-bottom: 25px;
+                border: 1px solid #eee;
+            }
+            .detail-table {
+                display: none;
+            }
+        }
+
+        .mobile-only-total { display: none; }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <nav class="pc-nav-left">
+            <button class="nav-switch-btn" onclick="location.href='/about'">About</button>
+            <button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button>
+        </nav>
+        <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
+            <span class="hamburger-box"></span>
+        </button>
+        <div class="logo-wrapper">
+            <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
+        </div>
+        <nav class="pc-nav-right">
+            <button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button>
+            <button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button>
+            <button class="nav-switch-btn" onclick="location.href='/antioch'">Antioch</button>
+        </nav>
+        <nav class="page-nav" id="pageNav">
+            <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
+            <ul class="nav-links">
+                <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/antioch'">Antioch</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/about'">About</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button></li>
+            </ul>
+        </nav>
+        <div class="nav-overlay" id="navOverlay"></div>
+    </header>
+
+    <div class="orders-container">
+        <h1 class="page-title">주문 현황</h1>
+        <div id="ordersList">
+            <!-- 주문 내역이 여기에 동적으로 추가됩니다 -->
+            <div class="no-orders">주문 내역을 불러오는 중입니다...</div>
+        </div>
+
+        <!-- 하단 뒤로가기 링크 -->
+        <a href="javascript:history.back()" class="home-link">← 이전 페이지로 돌아가기</a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const ordersList = document.getElementById("ordersList");
+
+            try {
+                const res = await fetch("/api/payment/my_orders");
+                const orders = await res.json();
+
+                if (!orders || orders.length === 0) {
+                    ordersList.innerHTML = '<div class="no-orders">주문 내역이 없습니다.</div>';
+                    return;
+                }
+
+                ordersList.innerHTML = ""; // 초기화
+
+                orders.forEach(order => {
+                    const createdAt = new Date(order.createdAt);
+                    const dateStr = createdAt.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace('.', '');
+                    const timeStr = createdAt.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+                    // 상태별 클래스 지정
+                    let statusClass = "status-pending";
+                    if (order.status === "결제 완료") statusClass = "status-paid";
+                    else if (order.status === "배송준비") statusClass = "status-preparing";
+                    else if (order.status === "배송중") statusClass = "status-shipping";
+                    else if (order.status === "배송완료") statusClass = "status-complete";
+                    else if (order.status === "주문취소" || order.status === "환불 및 교환") statusClass = "status-cancel";
+                    else if (order.status === "취소 요청 완료") statusClass = "status-cancel-req";
+                    else if (order.status === "교환 요청 완료") statusClass = "status-exchange-req";
+
+                    const orderCard = document.createElement("div");
+                    orderCard.className = "order-card";
+                    
+                    // 활성: 결제 완료, 배송 준비, 배송중, 배송완료
+                    // 비활성: 완료, 환불 및 교환 완료, 취소 요청 완료, 교환 요청 완료
+                    const actionAllowedStatus = ["결제 완료", "배송 준비", "배송중", "배송완료"];
+                    const isActionAllowed = actionAllowedStatus.includes(order.status);
+
+                    orderCard.innerHTML = `
+                        <div class="order-header" onclick="toggleDetails(this)">
+                            <div class="order-info">
+                                <div class="order-date">${dateStr} <span style="font-weight:400; margin-left:5px;">${timeStr}</span></div>
+                                <div class="order-name">${order.orderName}</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <span class="order-status ${statusClass}">${order.status}</span>
+                                <span class="arrow-icon">▼</span>
+                            </div>
+                        </div>
+                        <div class="order-details">
+                            <div class="detail-section">
+                                <div class="detail-title">📦 주문 상품 정보</div>
+                                
+                                <!-- [모바일 전용] 총 결제 금액 요약 -->
+                                <div class="mobile-only-total">
+                                    <div style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">총 결제 금액</div>
+                                    <div style="font-size: 1.4rem; font-weight: 800; color: #d32f2f;">₩${order.amount.toLocaleString()}</div>
+                                </div>
+
+                                <table class="detail-table">
+                                    <thead>
+                                        <tr>
+                                            <th>상품명</th>
+                                            <th>단가</th>
+                                            <th>수량</th>
+                                            <th>소계</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${order.cart.map(item => `
+                                            <tr>
+                                                <td>${item.name}</td>
+                                                <td>₩${item.unit_price.toLocaleString()}</td>
+                                                <td>${item.quantity}개</td>
+                                                <td><strong>₩${(item.unit_price * item.quantity).toLocaleString()}</strong></td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                                <div style="text-align: right; padding: 15px; font-size: 1.1rem;" class="pc-only-total">
+                                    총 결제 금액: <strong style="color:#d32f2f; font-size: 1.3rem;">₩${order.amount.toLocaleString()}</strong>
+                                </div>
+                            </div>
+                            <div class="detail-section">
+                                <div class="detail-title">🚚 배송지 정보</div>
+                                <div class="shipping-grid">
+                                    <div class="shipping-label">수령인</div>
+                                    <div class="shipping-value">${order.customer.name}</div>
+                                    <div class="shipping-label">연락처</div>
+                                    <div class="shipping-value">${order.customer.phone}</div>
+                                    <div class="shipping-label">주소</div>
+                                    <div class="shipping-value">[${order.shipping.postcode}] ${order.shipping.address} ${order.shipping.detailAddress}</div>
+                                </div>
+                            </div>
+                            
+                            <!-- 취소/교환 요청 버튼 영역 -->
+                            <div style="margin-top: 20px; border-top: 1px dashed #eee; padding-top: 20px; text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
+                                <!-- 교환 요청 버튼 -->
+                                <button 
+                                    class="exchange-request-btn" 
+                                    onclick="requestExchange('${order.orderId}')"
+                                    ${!isActionAllowed ? 'disabled' : ''}
+                                    style="padding: 8px 16px; background: ${isActionAllowed ? '#fff' : '#f5f5f5'}; color: ${isActionAllowed ? '#084298' : '#bbb'}; border: 1px solid ${isActionAllowed ? '#084298' : '#ddd'}; border-radius: 6px; font-weight: 600; cursor: ${isActionAllowed ? 'pointer' : 'not-allowed'}; transition: all 0.2s;"
+                                    onmouseover="${isActionAllowed ? "this.style.background='#084298'; this.style.color='#fff'" : ""}"
+                                    onmouseout="${isActionAllowed ? "this.style.background='#fff'; this.style.color='#084298'" : ""}"
+                                >
+                                    교환 요청하기
+                                </button>
+
+                                <!-- 취소 요청 버튼 -->
+                                <button 
+                                    class="cancel-request-btn" 
+                                    onclick="requestCancel('${order.orderId}')"
+                                    ${!isActionAllowed ? 'disabled' : ''}
+                                    style="padding: 8px 16px; background: ${isActionAllowed ? '#fff' : '#f5f5f5'}; color: ${isActionAllowed ? '#d32f2f' : '#bbb'}; border: 1px solid ${isActionAllowed ? '#d32f2f' : '#ddd'}; border-radius: 6px; font-weight: 600; cursor: ${isActionAllowed ? 'pointer' : 'not-allowed'}; transition: all 0.2s;"
+                                    onmouseover="${isActionAllowed ? "this.style.background='#d32f2f'; this.style.color='#fff'" : ""}"
+                                    onmouseout="${isActionAllowed ? "this.style.background='#fff'; this.style.color='#d32f2f'" : ""}"
+                                >
+                                    취소 요청하기
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    ordersList.appendChild(orderCard);
+                });
+
+            } catch (err) {
+                console.error("주문 목록 로드 에러:", err);
+                ordersList.innerHTML = '<div class="no-orders">데이터를 불러오는 중 오류가 발생했습니다.</div>';
+            }
+        });
+
+        function toggleDetails(header) {
+            const card = header.parentElement;
+            const details = header.nextElementSibling;
+            const isActive = card.classList.contains("active");
+
+            if (isActive) {
+                card.classList.remove("active");
+                details.style.display = "none";
+            } else {
+                card.classList.add("active");
+                details.style.display = "block";
+            }
+        }
+
+        async function requestCancel(orderId) {
+            if (!confirm("정말로 이 주문의 취소를 요청하시겠습니까? 관리자 확인 후 처리가 진행됩니다.")) {
+                return;
+            }
+
+            try {
+                const res = await fetch("/api/payment/cancel_request", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ orderId: orderId })
+                });
+                const data = await res.json();
+                
+                if (data.status === "success") {
+                    alert(data.message);
+                    location.reload(); // 상태 업데이트를 위해 페이지 새로고침
+                } else {
+                    alert("취소 요청 중 오류가 발생했습니다: " + data.message);
+                }
+            } catch (err) {
+                console.error("취소 요청 에러:", err);
+                alert("서버 통신 중 오류가 발생했습니다.");
+            }
+        }
+
+        async function requestExchange(orderId) {
+            if (!confirm("정말로 이 주문의 교환을 요청하시겠습니까? 관리자 확인 후 처리가 진행됩니다.")) {
+                return;
+            }
+
+            try {
+                const res = await fetch("/api/payment/exchange_request", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ orderId: orderId })
+                });
+                const data = await res.json();
+                
+                if (data.status === "success") {
+                    alert(data.message);
+                    location.reload(); 
+                } else {
+                    alert("교환 요청 중 오류가 발생했습니다: " + data.message);
+                }
+            } catch (err) {
+                console.error("교환 요청 에러:", err);
+                alert("서버 통신 중 오류가 발생했습니다.");
+            }
+        }
+    </script>
+    <script>
+        // 🏁 공통 메뉴 동작용 스크립트
+        document.addEventListener("DOMContentLoaded", () => {
+            const menuToggleBtn = document.getElementById("menuToggleBtn");
+            const closeMenuBtn = document.getElementById("closeMenuBtn");
+            const pageNav = document.getElementById("pageNav");
+            const navOverlay = document.getElementById("navOverlay");
+
+            function toggleMenu() {
+                pageNav.classList.toggle("open");
+                navOverlay.classList.toggle("active");
+            }
+
+            if(menuToggleBtn) menuToggleBtn.addEventListener("click", toggleMenu);
+            if(closeMenuBtn) closeMenuBtn.addEventListener("click", toggleMenu);
+            if(navOverlay) navOverlay.addEventListener("click", toggleMenu);
+        });
+    </script>
+<script src="/static/globalWholesale.js?v=1.0"></script>
+</body>
+</html>
