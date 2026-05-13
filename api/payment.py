@@ -174,8 +174,10 @@ async def get_my_orders(request: Request):
         if not orders_dict:
             return []
             
-        # 딕셔너리 형태를 리스트로 변환 (최신순 정렬을 위해 생성일자 기준 내림차순)
-        orders_list = list(orders_dict.values())
+        # 🏁 [필터링] '결제대기' 상태인 주문은 리스트에 포함하지 않음
+        orders_list = [v for v in orders_dict.values() if v.get('status') != "결제대기"]
+        
+        # 최신순 정렬 (생성일자 기준 내림차순)
         orders_list.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
         
         return orders_list

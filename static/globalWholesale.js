@@ -1,12 +1,151 @@
+// 🏁 전역 유틸리티 함수: 금액 포맷팅 (3자리 콤마 + ₩)
+window.formatWon = function(num) {
+    if (num === undefined || num === null) return "₩ 0";
+    return "₩ " + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
 document.addEventListener("DOMContentLoaded", () => {
-    // 이미 메뉴가 존재하는지 확인 (중복 렌더링 방지)
+    // 🏁 전역 공통 헤더 주입 로직
+    const injectGlobalHeader = () => {
+        // 기존 헤더가 있으면 제거 (구식 헤더와의 충돌 방지)
+        const existingHeader = document.querySelector(".main-header");
+        if (existingHeader) existingHeader.remove();
+
+        const headerHTML = `
+            <style id="globalWholesaleStyles">
+                /* 🏁 전역 헤더 & 햄버거 메뉴 필수 스타일 */
+                .main-header {
+                    position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+                    background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+                    display: flex; justify-content: space-between; align-items: center;
+                    padding: 0 20px; z-index: 10000 !important; border-bottom: 1px solid #eee;
+                }
+                .logo { height: 30px; display: block; }
+                
+                /* PC 네비게이션 */
+                .pc-nav-left, .pc-nav-right { display: flex; gap: 20px; align-items: center; }
+                .nav-switch-btn { 
+                    background: none; border: none; font-size: 0.95rem; font-weight: 600; 
+                    color: #333; cursor: pointer; transition: color 0.2s;
+                }
+                .nav-switch-btn:hover { color: #0e3a5b; }
+
+                /* 햄버거 버튼 (강제 노출 설정) */
+                .menu-toggle-btn {
+                    display: none; background: none; border: none; cursor: pointer;
+                    padding: 10px; z-index: 10005 !important;
+                }
+                .hamburger-box {
+                    display: block; width: 24px; height: 2px; background: #333;
+                    position: relative; transition: background 0.3s;
+                }
+                .hamburger-box::before, .hamburger-box::after {
+                    content: ""; position: absolute; width: 24px; height: 2px; background: #333;
+                    left: 0; transition: all 0.3s;
+                }
+                .hamburger-box::before { top: -7px; }
+                .hamburger-box::after { top: 7px; }
+
+                /* 모바일 메뉴바 (전체 높이 및 배경 강제) */
+                .page-nav {
+                    position: fixed; top: 0; right: -100%; width: 280px; height: 100vh !important;
+                    background: #ffffff !important; z-index: 10010 !important; 
+                    transition: right 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+                    padding: 80px 0 40px 0; /* 좌우 패딩은 nav-links에서 조절 */
+                    box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+                    overflow-y: auto; /* 메뉴가 길어질 경우 스크롤 허용 */
+                    display: block !important;
+                }
+                .page-nav.open { right: 0 !important; }
+                
+                .nav-overlay {
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.5); z-index: 10008 !important; display: none; opacity: 0; transition: opacity 0.3s;
+                }
+                .nav-overlay.active { display: block; opacity: 1; }
+                
+                .close-menu-btn {
+                    position: absolute; top: 20px; right: 20px; font-size: 1.8rem;
+                    background: none; border: none; cursor: pointer; color: #333;
+                    padding: 10px; z-index: 10011;
+                }
+                .nav-links { 
+                    list-style: none; padding: 0 30px; margin: 0; 
+                    display: flex; flex-direction: column; gap: 5px; 
+                }
+                .nav-links li { width: 100%; }
+                .nav-links .nav-switch-btn {
+                    width: 100%; text-align: left; padding: 15px 10px;
+                    font-size: 1.1rem; border-bottom: 1px solid #f5f5f5;
+                }
+
+                /* 📱 모바일 반응형 처리 */
+                @media (max-width: 768px) {
+                    .pc-nav-left, .pc-nav-right { display: none !important; }
+                    .menu-toggle-btn { display: block !important; }
+                    .logo-wrapper { position: absolute; left: 50%; transform: translateX(-50%); }
+                }
+            </style>
+            <header class="main-header">
+                <nav class="pc-nav-left">
+                    <button class="nav-switch-btn" onclick="location.href='/about'">About</button>
+                    <button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button>
+                </nav>
+                <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
+                    <span class="hamburger-box"></span>
+                </button>
+                <div class="logo-wrapper">
+                    <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
+                </div>
+                <nav class="pc-nav-right">
+                    <button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button>
+                    <button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button>
+                    <button class="nav-switch-btn" onclick="location.href='/antioch'">Antioch</button>
+                </nav>
+                <nav class="page-nav" id="pageNav">
+                    <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
+                    <ul class="nav-links">
+                        <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
+                        <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
+                        <li><button class="nav-switch-btn" onclick="location.href='/antioch'">Antioch</button></li>
+                        <li><button class="nav-switch-btn" onclick="location.href='/about'">About</button></li>
+                        <li><button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button></li>
+                    </ul>
+                </nav>
+                <div class="nav-overlay" id="navOverlay"></div>
+            </header>
+        `;
+        document.body.insertAdjacentHTML("afterbegin", headerHTML);
+    };
+
+    injectGlobalHeader();
+
+    // 🏁 햄버거 메뉴 토글 이벤트 전역 바인딩
+    const bindMenuEvents = () => {
+        const menuBtn = document.getElementById("menuToggleBtn");
+        const closeBtn = document.getElementById("closeMenuBtn");
+        const pageNav = document.getElementById("pageNav");
+        const overlay = document.getElementById("navOverlay");
+
+        if (menuBtn && pageNav && overlay) {
+            const toggleMenu = () => {
+                pageNav.classList.toggle("open");
+                overlay.classList.toggle("active");
+            };
+            menuBtn.onclick = toggleMenu;
+            if (closeBtn) closeBtn.onclick = toggleMenu;
+            overlay.onclick = toggleMenu;
+        }
+    };
+    bindMenuEvents();
+
+    // 이미 메뉴 컨테이너가 존재하는지 확인 (중복 렌더링 방지)
     if (document.getElementById("globalWholesaleMenuContainer")) return;
 
     fetch("/api/user/status")
         .then(res => res.json())
         .then(data => {
             if (data.is_wholesale) {
-                // 🏁 1024px 외부 우측 스티키 플로팅 트랙 컨테이너 주입
                 const menuHTML = `
                     <div id="globalWholesaleMenuContainer" style="position: absolute; top: 0; left: 50%; margin-left: 530px; height: 100%; z-index: 900; pointer-events: none;">
                         <div class="wholesale-sticky-menu" style="position: sticky; top: 100px; width: 140px; background: #fff; padding: 20px 15px; border-radius: 12px; border: 1px solid #eaeaea; box-shadow: 0 8px 24px rgba(0,0,0,0.08); pointer-events: auto; animation: menuFadeIn 0.5s ease-out forwards;">
@@ -22,35 +161,67 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     </div>
                     
-                    <!-- 🏁 커스텀 로그아웃 팝업 (모달) UI -->
-                    <div id="customGlobalLogoutModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
-                        <div style="background: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); width: 320px; text-align: center; transform: translateY(-20px); animation: modalFadeIn 0.3s forwards;">
-                            <div style="font-size: 2.5rem; margin-bottom: 15px;">👋</div>
-                            <div style="font-size: 1.3rem; font-weight: 800; color: #0e3a5b; margin-bottom: 10px;">로그아웃 완료</div>
-                            <div style="font-size: 0.95rem; color: #666; margin-bottom: 30px; line-height: 1.5;">안전하게 로그아웃 되었습니다.<br>메인 화면으로 이동합니다.</div>
-                            <button id="globalModalConfirmBtn2" style="width: 100%; padding: 14px; background: #0e3a5b; color: white; border: none; border-radius: 8px; font-size: 1.05rem; font-weight: bold; cursor: pointer; transition: background 0.3s;">확인</button>
-                        </div>
-                    </div>
-
                     <style>
+                        .ws-modal-overlay {
+                            display: none;
+                            position: fixed;
+                            top: 0; left: 0;
+                            width: 100%; height: 100%;
+                            background: rgba(0,0,0,0.5);
+                            z-index: 11000;
+                            justify-content: center;
+                            align-items: center;
+                            backdrop-filter: blur(5px);
+                            -webkit-backdrop-filter: blur(5px);
+                        }
+                        .ws-modal-content {
+                            background: white;
+                            padding: 40px 30px;
+                            border-radius: 20px;
+                            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+                            width: 320px;
+                            text-align: center;
+                            transform: translateY(-20px);
+                            animation: wsModalFadeIn 0.3s forwards;
+                        }
+                        .ws-btn-primary {
+                            width: 100%;
+                            padding: 15px;
+                            background: #0e3a5b;
+                            color: white;
+                            border: none;
+                            border-radius: 10px;
+                            font-size: 1.1rem;
+                            font-weight: bold;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                        }
+                        .ws-btn-primary:hover { background: #0b2d47; transform: translateY(-2px); }
+
                         @keyframes menuFadeIn {
                             from { opacity: 0; transform: translateY(-10px); }
                             to { opacity: 1; transform: translateY(0); }
                         }
-                        @keyframes modalFadeIn {
+                        @keyframes wsModalFadeIn {
                             to { opacity: 1; transform: translateY(0); }
                         }
                     </style>
+
+                    <div id="customGlobalLogoutModal" class="ws-modal-overlay">
+                        <div class="ws-modal-content">
+                            <div style="font-size: 2.5rem; margin-bottom: 15px;">👋</div>
+                            <div style="font-size: 1.3rem; font-weight: 800; color: #0e3a5b; margin-bottom: 10px;">로그아웃 완료</div>
+                            <div style="font-size: 0.95rem; color: #666; margin-bottom: 30px; line-height: 1.5;">안전하게 로그아웃 되었습니다.<br>메인 화면으로 이동합니다.</div>
+                            <button id="globalModalConfirmBtn2" class="ws-btn-primary">확인</button>
+                        </div>
+                    </div>
                 `;
 
-                // .app-container 가 있으면 그 안에, 없으면 body 맨 끝에 주입
                 const appContainer = document.querySelector('.app-container') || document.body;
                 appContainer.insertAdjacentHTML("afterbegin", menuHTML);
 
-                // [신규] 모바일 드로어에도 퀵 메뉴 주입
                 injectMobileQuickMenu();
 
-                // 로그아웃 버튼 이벤트 리스너 바인딩
                 const logoutBtn = document.getElementById("globalLogoutBtn");
                 if (logoutBtn) {
                     logoutBtn.addEventListener("click", (e) => {
@@ -80,7 +251,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     reorganizeMobileMenu();
 
-    // 🏁 [추가] 모바일 환경에서 PC용 퀵바 숨김 처리
     const hideQuickStyle = document.createElement("style");
     hideQuickStyle.innerHTML = `
         @media (max-width: 1024px) {
@@ -93,7 +263,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const navLinks = document.querySelector(".nav-links");
         if (!navLinks) return;
 
-        // 1. Antioch 메뉴 찾기 및 Connect 뒤로 이동
         const links = Array.from(navLinks.querySelectorAll("li"));
         let antiochLi = null;
         let connectLi = null;
@@ -105,31 +274,25 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (antiochLi && connectLi) {
-            // 도매 섹션 헤더 생성
             const wholesaleHeader = document.createElement("li");
             wholesaleHeader.style.cssText = "margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; margin-bottom: 5px;";
             wholesaleHeader.innerHTML = `<span style="font-size: 0.75rem; color: #999; margin-left: 15px; letter-spacing: 1px; font-weight: 600;">도매</span>`;
             
-            // 기존 위치에서 제거 후 Connect 뒤에 삽입
             antiochLi.remove();
             connectLi.after(wholesaleHeader);
             wholesaleHeader.after(antiochLi);
             
-            // Antioch 버튼 스타일 살짝 조정 (간격)
             const antiochBtn = antiochLi.querySelector("button");
             if (antiochBtn) antiochBtn.style.marginTop = "0";
         }
     }
 
-    // 로그인 성공 시 호출되어 모바일 퀵 메뉴를 추가로 주입하는 함수
     function injectMobileQuickMenu() {
         const navLinks = document.querySelector(".nav-links");
         if (!navLinks) return;
 
-        // 이미 추가되었는지 확인
         if (document.getElementById("mobileQuickMenuSection")) return;
 
-        // Antioch 메뉴 찾기 (이후에 삽입하기 위함)
         const links = Array.from(navLinks.querySelectorAll("li"));
         let antiochLi = links.find(li => li.innerText.trim().toLowerCase().includes("antioch"));
 
@@ -138,7 +301,6 @@ document.addEventListener("DOMContentLoaded", () => {
             quickMenuLi.id = "mobileQuickMenuSection";
             quickMenuLi.style.cssText = "margin-top: 15px; border-top: 1px dashed #eee; padding-top: 20px; padding-bottom: 20px; padding-right: 20px;";
             
-            // PC 스타일과 동일한 버튼 UI 구성
             quickMenuLi.innerHTML = `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-left: 15px;">
                     <a href="/wholesale/cart" style="display: block; padding: 12px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 8px; text-align: center; font-size: 0.85rem; font-weight: 700; border: 1px solid #eee;">장바구니</a>
@@ -149,12 +311,10 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             antiochLi.after(quickMenuLi);
 
-            // 모바일 로그아웃 버튼 이벤트 바인딩
             const mobLogout = document.getElementById("mobileLogoutBtn");
             if (mobLogout) {
                 mobLogout.addEventListener("click", (e) => {
                     e.preventDefault();
-                    // PC 로그아웃 버튼과 동일한 모달 로직 트리거
                     const pcLogoutBtn = document.getElementById("globalLogoutBtn");
                     if (pcLogoutBtn) pcLogoutBtn.click();
                 });

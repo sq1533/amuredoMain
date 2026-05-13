@@ -213,34 +213,7 @@
     </style>
 </head>
 <body>
-    <header class="main-header">
-        <nav class="pc-nav-left">
-            <button class="nav-switch-btn" onclick="location.href='/about'">About</button>
-            <button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button>
-        </nav>
-        <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
-            <span class="hamburger-box"></span>
-        </button>
-        <div class="logo-wrapper">
-            <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
-        </div>
-        <nav class="pc-nav-right">
-            <button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button>
-            <button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button>
-            <button class="nav-switch-btn" onclick="location.href='/antioch'">Antioch</button>
-        </nav>
-        <nav class="page-nav" id="pageNav">
-            <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
-            <ul class="nav-links">
-                <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
-                <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
-                <li><button class="nav-switch-btn" onclick="location.href='/antioch'">Antioch</button></li>
-                <li><button class="nav-switch-btn" onclick="location.href='/about'">About</button></li>
-                <li><button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button></li>
-            </ul>
-        </nav>
-        <div class="nav-overlay" id="navOverlay"></div>
-    </header>
+    <!-- [다이어트] <header> 태그가 삭제되었습니다. globalWholesale.js에서 자동 주입됩니다. -->
 
     <div class="cart-container">
         <h1 class="cart-title">B2B 도매 장바구니</h1>
@@ -283,10 +256,7 @@
                 document.cookie = `wholesale_cart=${encodeURIComponent(JSON.stringify(cart))}; path=/; max-age=2592000`;
             }
 
-            // 원화 포맷팅 함수
-            function formatWon(number) {
-                return "₩ " + number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            }
+            // 전역 window.formatWon 사용 (로컬 함수 삭제)
 
             // 수량 포맷 제한 (10~200, 10단위)
             function clampQuantity(val) {
@@ -404,29 +374,11 @@
 
                 const modal = document.createElement("div");
                 modal.id = "deleteModal";
-                modal.style.cssText = `
-                    position: fixed;
-                    top: 0; left: 0; width: 100%; height: 100%;
-                    background: rgba(0, 0, 0, 0.4);
-                    backdrop-filter: blur(5px);
-                    display: flex; align-items: center; justify-content: center;
-                    z-index: 10000;
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
-                `;
+                modal.className = "ws-modal-overlay";
+                modal.style.display = "flex"; // 클래스 기본값이 none이므로 flex로 변경
 
                 modal.innerHTML = `
-                    <div style="
-                        background: #fff;
-                        padding: 40px;
-                        border-radius: 24px;
-                        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-                        text-align: center;
-                        max-width: 340px;
-                        width: 90%;
-                        transform: scale(0.9);
-                        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                    ">
+                    <div class="ws-modal-content">
                         <div style="font-size: 3.5rem; margin-bottom: 20px;">🗑️</div>
                         <div style="font-size: 1.3rem; font-weight: 800; color: #333; margin-bottom: 10px;">상품을 삭제할까요?</div>
                         <div style="font-size: 0.95rem; color: #888; margin-bottom: 30px; line-height: 1.5;">
@@ -441,15 +393,8 @@
 
                 document.body.appendChild(modal);
 
-                // 애니메이션 적용
-                setTimeout(() => {
-                    modal.style.opacity = "1";
-                    modal.querySelector('div').style.transform = "scale(1)";
-                }, 10);
-
                 const closeModal = () => {
                     modal.style.opacity = "0";
-                    modal.querySelector('div').style.transform = "scale(0.9)";
                     setTimeout(() => modal.remove(), 300);
                 };
 
@@ -488,24 +433,6 @@
                 if(cart.length === 0) return;
                 location.href = "/wholesale/order";
             });
-        });
-    </script>
-    <script>
-        // 🏁 공통 메뉴 동작용 스크립트
-        document.addEventListener("DOMContentLoaded", () => {
-            const menuToggleBtn = document.getElementById("menuToggleBtn");
-            const closeMenuBtn = document.getElementById("closeMenuBtn");
-            const pageNav = document.getElementById("pageNav");
-            const navOverlay = document.getElementById("navOverlay");
-
-            function toggleMenu() {
-                pageNav.classList.toggle("open");
-                navOverlay.classList.toggle("active");
-            }
-
-            if(menuToggleBtn) menuToggleBtn.addEventListener("click", toggleMenu);
-            if(closeMenuBtn) closeMenuBtn.addEventListener("click", toggleMenu);
-            if(navOverlay) navOverlay.addEventListener("click", toggleMenu);
         });
     </script>
 <script src="/static/globalWholesale.js?v=1.0"></script>
