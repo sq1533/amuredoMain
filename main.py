@@ -34,7 +34,7 @@ except Exception as e:
     print(f"🔥 세션 키 로드 실패, 1회용 임시 키를 사용합니다 (재부팅 시 로그아웃 됨): {e}")
     session_secret = secrets.token_hex(32)
 
-app.add_middleware(SessionMiddleware, secret_key=session_secret)
+app.add_middleware(SessionMiddleware, secret_key=session_secret, https_only=True)
 
 # 🏁 API 라우터 등록
 app.include_router(user_router, prefix="/api/user", tags=["wholesale_user"])
