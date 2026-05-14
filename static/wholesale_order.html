@@ -135,45 +135,46 @@
         }
         .address-search-btn:hover { background: #000; }
         
-        #postcodeLayer {
-            display: none;
-            position: fixed;
-            z-index: 10000;
-            -webkit-overflow-scrolling: touch;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            border-radius: 12px;
-        }
         #postcodeLayerCloseBtn {
             cursor: pointer;
             position: absolute;
-            right: 0px;
-            top: -45px;
-            z-index: 10001;
-            background: #0e3a5b;
+            right: 10px;
+            top: 10px;
+            z-index: 10006;
+            background: rgba(0,0,0,0.5);
             color: white;
             border: none;
-            width: 35px;
-            height: 35px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
         @media (max-width: 768px) {
+            .order-container { padding: 20px 15px; margin: 40px auto; }
+            .order-title { font-size: 1.5rem; margin-bottom: 20px; }
             .form-row { grid-template-columns: 1fr; gap: 0; }
-            .summary-dashboard { flex-direction: column; gap: 15px; padding: 20px; align-items: stretch; }
+            .summary-dashboard { flex-direction: column; gap: 10px; padding: 15px 20px; align-items: stretch; }
             .summary-operator { display: none; }
             .summary-block {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 10px 0;
-                border-bottom: 1px dashed #ddd;
+                padding: 12px 0;
+                border-bottom: 1px dashed #eee;
             }
             .summary-block:last-child { border-bottom: none; padding-top: 15px; border-top: 1px solid #eee; }
+            
+            /* 텍스트 크기 축소 (줄바꿈 방지) */
+            .summary-label { font-size: 0.85rem; margin-bottom: 0; }
+            .summary-value { font-size: 1.1rem; }
+            .final-value { font-size: 1.3rem; }
+            
+            .ws-card { padding: 20px; }
+            .section-title { font-size: 1.1rem; margin-bottom: 20px; }
         }
     </style>
 </head>
@@ -254,8 +255,8 @@
         </div>
     </div>
 
-    <div id="postcodeLayerWrapper" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; backdrop-filter: blur(5px);">
-        <div id="postcodeLayer">
+    <div id="postcodeLayerWrapper" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10005; backdrop-filter: blur(5px); justify-content: center; align-items: center;">
+        <div id="postcodeLayer" style="position: relative; background: #fff; overflow: hidden;">
             <button id="postcodeLayerCloseBtn" onclick="closeDaumPostcode()">✕</button>
         </div>
     </div>
@@ -265,7 +266,6 @@
         const layer = document.getElementById('postcodeLayer');
 
         function closeDaumPostcode() {
-            layer.style.display = 'none';
             layerWrapper.style.display = 'none';
         }
 
@@ -282,6 +282,13 @@
         }
 
         function openDaumPostcode() {
+            // 1. 먼저 레이어를 화면에 노출 (Flex)
+            layerWrapper.style.display = 'flex';
+            
+            // 2. 현재 화면 크기에 맞게 컨테이너 크기 조절
+            updateLayerPosition();
+
+            // 3. 노출된 컨테이너 안에 주소 검색창 임베딩 (순서 중요)
             new daum.Postcode({
                 oncomplete: function(data) {
                     let addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
@@ -292,23 +299,17 @@
                 },
                 width : '100%', height : '100%'
             }).embed(layer);
-
-            layerWrapper.style.display = 'block';
-            layer.style.display = 'block';
-            updateLayerPosition();
         }
 
         function updateLayerPosition(){
-            const width = window.innerWidth > 768 ? 600 : window.innerWidth;
-            const height = 480;
+            const isMobile = window.innerWidth <= 768;
+            const width = isMobile ? window.innerWidth : 600;
+            const height = isMobile ? 450 : 480; // 모바일에서는 높이를 약간 줄여 안정감 확보
+
             layer.style.width = width + 'px';
             layer.style.height = height + 'px';
-            if(window.innerWidth > 768) {
-                layer.style.left = ((window.innerWidth - width) / 2) + 'px';
-                layer.style.top = ((window.innerHeight - height) / 2) + 'px';
-            } else {
-                layer.style.left = '0px'; layer.style.top = '60px'; layer.style.width = '100%'; layer.style.borderRadius = '0';
-            }
+            layer.style.borderRadius = isMobile ? '0' : '12px';
+            layer.style.boxShadow = '0 10px 40px rgba(0,0,0,0.3)';
         }
         window.addEventListener('resize', updateLayerPosition);
 

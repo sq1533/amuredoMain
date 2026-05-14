@@ -175,30 +175,37 @@
                 grid-template-areas: 
                     "info"
                     "qty"
-                    "action";
+                    "total";
                 gap: 15px;
-                padding: 20px;
+                padding: 25px 20px; /* 상단 여백 추가 */
+                position: relative; /* 삭제 버튼 절대 위치 기준 */
             }
             .item-info { grid-area: info; }
             .item-controls { 
-                display: contents; /* 자식 요소들을 그리드에 직접 배치 */
+                display: contents; 
             }
             .qty-box { 
                 grid-area: qty; 
                 width: fit-content;
             }
             .item-total { 
-                grid-area: action; 
-                text-align: left !important;
+                grid-area: total; 
+                text-align: right !important; /* 모바일에서도 가격은 우측 정렬 */
                 min-width: auto !important;
-                font-size: 1.2rem;
-                align-self: center;
+                font-size: 1.3rem;
+                padding-top: 10px;
+                border-top: 1px dashed #eee; /* 구분선 추가 */
             }
             .delete-btn {
-                grid-area: action;
-                justify-self: end;
-                font-size: 1.8rem;
-                padding: 10px 0 10px 20px; /* 터치 영역 확보 및 우측 정렬 */
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                font-size: 1.6rem;
+                color: #ccc; /* 평상시엔 연하게 */
+                padding: 5px;
+            }
+            .delete-btn:hover, .delete-btn:active {
+                color: #dc3545; /* 클릭 시 강조 */
             }
             .summary-total {
                 font-size: 1.5rem;
