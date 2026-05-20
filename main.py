@@ -213,7 +213,7 @@ async def serve_wholesale_login():
 
 
 @app.get("/api/items/best/{event_type}")
-async def get_best_items(event_type: str):
+async def get_best_items(request: Request, event_type: str):
     """
     메인 페이지의 'Productive Line-up' 섹션에 들어갈 아이템 리스트를 이벤트 타입별로 조회합니다.
     event_type: focus, meeting, drive, holiday 등
@@ -225,6 +225,8 @@ async def get_best_items(event_type: str):
         # 요청된 event_type 필드와 일치하는 문서들만 조회
         docs = db.collection('item').where('event', '==', event_type).stream()
         
+        is_wholesale = request.session.get("is_wholesale", False)
+        
         real_items = []
         for doc in docs:
             data = doc.to_dict()
@@ -232,6 +234,9 @@ async def get_best_items(event_type: str):
             image_url = paths[0] if (paths and len(paths) > 0) else "/static/img/ready.webp"
             
             raw_price = data.get("price", "0")
+            if is_wholesale and "wsPrice" in data:
+                raw_price = data.get("wsPrice", raw_price)
+                
             try:
                 formatted_price = f"{int(float(raw_price)):,}"
             except (ValueError, TypeError):
@@ -252,7 +257,7 @@ async def get_best_items(event_type: str):
         return {"items": [], "error": str(e)}
 
 @app.get("/api/items")
-async def get_items_by_category(category: str):
+async def get_items_by_category(request: Request, category: str):
     """
     카테고리(sort) 전용 조회 엔드포인트
     특정 sort 값(sunglasses 등)과 내부 파싱(paths[0]), 그리고 하단 미니멀 텍스트를 위한 name, price 전송
@@ -264,6 +269,8 @@ async def get_items_by_category(category: str):
         # sort 필드값이 요쳥된 카테고리와 일치하는 문서들만 조회
         docs = db.collection('item').where('sort', '==', category).stream()
         
+        is_wholesale = request.session.get("is_wholesale", False)
+        
         real_items = []
         for doc in docs:
             data = doc.to_dict()
@@ -273,6 +280,9 @@ async def get_items_by_category(category: str):
             
             # 가격(price) 필드에 회계 단위 쉼표(,) 추가 로직 적용
             raw_price = data.get("price", "0")
+            if is_wholesale and "wsPrice" in data:
+                raw_price = data.get("wsPrice", raw_price)
+                
             try:
                 formatted_price = f"{int(float(raw_price)):,}"
             except (ValueError, TypeError):
@@ -316,9 +326,7 @@ async def get_item_detail(request: Request, item_id: str):
             
         data = doc.to_dict()
         
-        # 🔒 강력한 백엔드 보안: 해당 상품이 'antioch' 도매용이고, 사용자가 도매 로그인을 안 했다면 데이터 탈취 차단
-        if data.get("sort") == "antioch" and not request.session.get("is_wholesale"):
-            return {"error": "도매 권한이 필요한 상품입니다. 로그인을 먼저 진행해 주세요.", "status": 403}
+
 
         paths = data.get("paths", [])
         
@@ -326,7 +334,11 @@ async def get_item_detail(request: Request, item_id: str):
         if not paths:
             paths = ["/static/img/ready.webp"]
             
+        is_wholesale = request.session.get("is_wholesale", False)
         raw_price = data.get("price", "0")
+        if is_wholesale and "wsPrice" in data:
+            raw_price = data.get("wsPrice", raw_price)
+            
         try:
             formatted_price = f"{int(float(raw_price)):,}"
         except (ValueError, TypeError):

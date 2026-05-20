@@ -18,47 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(res => res.json())
         .then(data => {
             if (data.error) {
-                if (data.status === 403) {
-                    let modal = document.getElementById('customGlobalModal');
-                    if (!modal) {
-                        document.body.insertAdjacentHTML('beforeend', `
-                            <div id="customGlobalModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
-                                <div style="background: white; padding: 40px 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); width: 340px; text-align: center; transform: translateY(-20px); animation: modalFadeIn 0.3s forwards;">
-                                    <div style="font-size: 2.8rem; margin-bottom: 15px;">🔒</div>
-                                    <div style="font-size: 1.35rem; font-weight: 800; color: #0e3a5b; margin-bottom: 12px;">B2B 전용 상품</div>
-                                    <div style="font-size: 0.95rem; color: #666; margin-bottom: 30px; line-height: 1.6; word-break: keep-all;">${data.error}</div>
-                                    <div style="display: flex; gap: 10px;">
-                                        <button id="globalModalCloseBtn" style="flex: 1; padding: 14px; background: #f1f3f5; color: #555; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s;">돌아가기</button>
-                                        <button id="globalModalConfirmBtn" style="flex: 1; padding: 14px; background: #0e3a5b; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s;">로그인 하기</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <style>
-                                @keyframes modalFadeIn {
-                                    to { opacity: 1; transform: translateY(0); }
-                                }
-                                #globalModalConfirmBtn:hover { background: #0a2a44 !important; }
-                                #globalModalCloseBtn:hover { background: #e2e6ea !important; }
-                            </style>
-                        `);
-                        modal = document.getElementById('customGlobalModal');
-                    }
-                    modal.style.display = 'flex';
-                    
-                    document.getElementById('globalModalConfirmBtn').addEventListener('click', () => {
-                        location.href = "/wholesale/login";
-                    });
-                    document.getElementById('globalModalCloseBtn').addEventListener('click', () => {
-                        modal.style.display = 'none';
-                        // 이전 페이지로 돌아가기 (만약 직접 URL 쳐서 들어왔다면 메인으로)
-                        if(document.referrer) {
-                            history.back();
-                        } else {
-                            location.href = "/";
-                        }
-                    });
-                    return;
-                }
                 sliderTrack.innerHTML = `<p style="padding: 2rem;">${data.error}</p>`;
                 return;
             }
