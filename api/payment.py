@@ -89,7 +89,7 @@ async def toss_success_callback(request: Request, paymentKey: str, orderId: str,
     """
     email = request.session.get("user_id")
     if not email:
-        return RedirectResponse(url="/wholesale/login")
+        return RedirectResponse(url="/login")
         
     try:
         safe_email = sanitize_email(email)

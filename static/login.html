@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 아무레도 검색엔진 최적화(SEO) 및 SNS 공유 설정 -->
+    <title>통합 로그인 - 아무래도 안경</title>
+    <meta name="description" content="분위기와 억양을 디자인을 디자인합니다. 아무래도 안경, 본질의 아름다움을 추구합니다">
+    <link rel="icon" href="/static/img/icon.webp" type="image/webp">
+    <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=14.32">
+    <style>
+        .login-container {
+            max-width: 440px;
+            margin: 150px auto;
+            padding: 40px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(14, 58, 91, 0.06);
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden; /* 배경 파도가 박스 밖으로 튀어나가지 않도록 제한 */
+            z-index: 1; /* 가상 요소 배경 위에 글자들이 올바르게 뜨도록 제어 */
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        
+        /* 🏁 이중 오버레이: 블루/회색 배경 슬라이더 공통 스타일 */
+        .login-bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* 인풋창과 글자들 뒤에 위치 */
+            /* 파도의 물결 속도감 제어를 위한 정밀 가속도 곡선 탑재 */
+            transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        
+        /* 1) 사장님 전환용 블루 오버레이 (왼쪽 대기) */
+        .bg-blue {
+            background: #0e3a5b;
+            transform: translateX(-100%);
+        }
+        
+        /* 2) 일반고객 전환용 연회색 오버레이 (오른쪽 대기) */
+        .bg-white {
+            background: #F7F7F7;
+            transform: translateX(100%);
+        }
+
+        .login-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 8px;
+            text-align: center;
+            letter-spacing: -0.5px;
+            transition: color 0.4s ease;
+        }
+        .login-subtitle {
+            font-size: 0.95rem;
+            color: #777;
+            margin-bottom: 35px;
+            text-align: center;
+            word-break: keep-all;
+            line-height: 1.5;
+            transition: color 0.4s ease;
+        }
+        
+        /* 🏁 상단 이중 로그인 탭 스위치 스타일 */
+        .login-tabs {
+            display: flex;
+            border-bottom: 2px solid #eaeaea;
+            margin-bottom: 30px;
+            position: relative;
+            transition: border-color 0.4s ease;
+        }
+        .login-tab {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 16px 0;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #bbb;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2.5px;
+        }
+        .login-tab:hover {
+            color: #555;
+        }
+        .login-tab.active {
+            color: #0e3a5b;
+            border-bottom-color: #0e3a5b;
+        }
+
+        /* 🏁 1. 고객 로그인 패널 스타일 (1행 2열 원형 소셜 가입) */
+        .customer-panel {
+            background: #F7F7F7;
+            border-radius: 12px;
+            padding: 40px 20px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px; /* 원형 버튼 간의 간격 */
+            animation: panelFadeIn 0.4s ease-out forwards;
+        }
+        
+        /* 동그란 소셜 원형 단추 */
+        .sns-circle-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+        
+        /* 네이버: 녹색 원형 */
+        .btn-naver {
+            background: #03a94d;
+        }
+        .btn-naver:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 24px rgba(3, 169, 77, 0.35);
+        }
+        
+        /* 카카오: 노란색 원형 */
+        .btn-kakao {
+            background: #fee500;
+        }
+        .btn-kakao:hover {
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 8px 24px rgba(254, 229, 0, 0.4);
+        }
+        
+        /* 내장형 SVG 아이콘 */
+        .sns-svg-icon {
+            width: 26px;
+            height: 26px;
+            fill: currentColor;
+            display: block;
+        }
+
+        /* 🏁 2. 사장님 로그인 패널 스타일 */
+        .wholesale-panel {
+            animation: panelFadeIn 0.4s ease-out forwards;
+        }
+        .form-group {
+            margin-bottom: 22px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px; /* 라벨과 인풋 박스 간의 여백 유지 */
+            font-weight: 700;
+            color: #0e3a5b; /* 기본 딥 블루 컬러 */
+            font-size: 0.95rem;
+            transition: color 0.4s ease;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1px solid #eaeaea;
+            background-color: #F7F7F7; /* 인풋 박스 배경 지정 */
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: #333;
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #0e3a5b;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(14, 58, 91, 0.1);
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: #0e3a5b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(14, 58, 91, 0.2);
+        }
+        .submit-btn:hover {
+            background: #0b2d47;
+            transform: translateY(-2px);
+        }
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        .register-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: color 0.4s ease;
+        }
+        .register-link:hover {
+            color: #0e3a5b;
+            text-decoration: underline;
+        }
+
+        /* ============================================================= */
+        /* 🏁 [사장님 로그인] 활성화 시 딥 블루 컨테이너 & #F7F7F7 텍스트 테마 */
+        /* ============================================================= */
+        .login-container.wholesale-active {
+            box-shadow: 0 25px 60px rgba(14, 58, 91, 0.25);
+        }
+        .login-container.wholesale-active .login-title,
+        .login-container.wholesale-active .login-subtitle,
+        .login-container.wholesale-active .form-group label,
+        .login-container.wholesale-active .register-link {
+            color: #F7F7F7 !important; /* 딥 블루 배경 위에 서는 연회색 반전 처리 */
+        }
+        .login-container.wholesale-active .login-tabs {
+            border-bottom-color: rgba(247, 247, 247, 0.2);
+        }
+        .login-container.wholesale-active .login-tab {
+            color: rgba(247, 247, 247, 0.45);
+        }
+        .login-container.wholesale-active .login-tab:hover {
+            color: #F7F7F7;
+        }
+        .login-container.wholesale-active .login-tab.active {
+            color: #F7F7F7 !important;
+            border-bottom-color: #F7F7F7 !important;
+        }
+        .login-container.wholesale-active .form-group input:focus {
+            border-color: #F7F7F7;
+            box-shadow: 0 0 0 3px rgba(247, 247, 247, 0.25);
+        }
+        .login-container.wholesale-active .submit-btn {
+            background: #F7F7F7; /* 파란 배경 위에서 극명하게 대조되는 화이트/연회색 버튼 */
+            color: #0e3a5b;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+        .login-container.wholesale-active .submit-btn:hover {
+            background: #ffffff;
+            color: #0b2d47;
+        }
+
+        @keyframes panelFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 📱 모바일 디바이스 최적화 여백 */
+        @media (max-width: 500px) {
+            .login-container {
+                margin: 90px 15px 40px 15px; /* 상단 플로팅 메뉴바(70px) 고려하여 90px로 수정 */
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="loginContainer">
+        <!-- 🏁 파도 애니메이션을 품을 이중 오버레이 슬라이더 레이어 -->
+        <div class="login-bg-overlay bg-blue" id="loginBgOverlay"></div>
+        <div class="login-bg-overlay bg-white" id="loginBgOverlayWhite"></div>
+
+        <h1 class="login-title">amuredo</h1>
+        <p class="login-subtitle">아무래도 안경 통합 로그인 센터에 오신 것을 환영합니다.</p>
+
+        <!-- 🏁 상단 전환 탭 버튼 2행 스위치 -->
+        <div class="login-tabs">
+            <button class="login-tab active" id="tabCustomer">고객 로그인</button>
+            <button class="login-tab" id="tabWholesale">사장님 로그인</button>
+        </div>
+
+        <!-- 🏁 [Panel 1] 일반 고객용 SNS 로그인 카드 패널 (1행 2열 원형 구조) -->
+        <div class="customer-panel" id="panelCustomer">
+            <!-- 네이버: 녹색 원 + 'N' 마크 내장형 SVG -->
+            <button class="sns-circle-btn btn-naver" id="naverLoginBtn" title="네이버로 로그인">
+                <svg class="sns-svg-icon" viewBox="0 0 24 24" style="color: #ffffff;">
+                    <path d="M16.2 2H22v20h-5.8L7.8 8.8V22H2V2h5.8l8.4 13.2V2z"/>
+                </svg>
+            </button>
+            
+            <!-- 카카오: 노란색 원 + '말풍선' 마크 내장형 SVG -->
+            <button class="sns-circle-btn btn-kakao" id="kakaoLoginBtn" title="카카오로 로그인">
+                <svg class="sns-svg-icon" viewBox="0 0 24 24" style="color: #191919;">
+                    <path d="M12 3c-4.97 0-9 3.185-9 7.115 0 2.502 1.637 4.702 4.14 5.926l-.826 3.037c-.092.342.115.342.247.256l3.585-2.385c.607.085 1.226.131 1.854.131 4.97 0 9-3.186 9-7.115C21 6.185 16.97 3 12 3z"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- 🏁 [Panel 2] 사장님 로그인 카드 패널 -->
+        <div class="wholesale-panel" id="panelWholesale" style="display: none;">
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">이메일</label>
+                    <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+                </div>
+                <button type="submit" id="submitBtn" class="submit-btn">로그인</button>
+            </form>
+        </div>
+
+        <a href="/register" class="register-link">아직 회원이 아니신가요? 가입 신청하기</a>
+    </div>
+
+    <!-- 🏁 커스텀 팝업 (모달) UI -->
+    <div id="customModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
+        <div style="background: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); width: 320px; text-align: center; transform: translateY(-20px); animation: modalFadeIn 0.3s forwards;">
+            <div id="modalIcon" style="font-size: 2.5rem; margin-bottom: 15px;">👋</div>
+            <div id="modalTitle" style="font-size: 1.3rem; font-weight: 800; color: #0e3a5b; margin-bottom: 10px;">알림</div>
+            <div id="modalMessage" style="font-size: 0.95rem; color: #666; margin-bottom: 30px; line-height: 1.5; word-break: keep-all;">메시지 내용</div>
+            <button id="modalConfirmBtn" style="width: 100%; padding: 14px; background: #0e3a5b; color: white; border: none; border-radius: 8px; font-size: 1.05rem; font-weight: bold; cursor: pointer; transition: background 0.3s;">확인</button>
+        </div>
+    </div>
+    <style>
+        @keyframes modalFadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // 🏁 1. 상단 이중 가입 탭 스위칭 & 완벽한 상반 방향 파도(Wave-Fill) 슬라이더 제어
+            const tabCustomer = document.getElementById("tabCustomer");
+            const tabWholesale = document.getElementById("tabWholesale");
+            const panelCustomer = document.getElementById("panelCustomer");
+            const panelWholesale = document.getElementById("panelWholesale");
+            const registerContainer = document.getElementById("loginContainer");
+            const registerBgOverlay = document.getElementById("loginBgOverlay");
+            const registerBgOverlayWhite = document.getElementById("loginBgOverlayWhite");
+            const registerSubtitle = document.querySelector(".login-subtitle");
+
+            tabCustomer.addEventListener("click", () => {
+                if (!tabCustomer.classList.contains("active")) {
+                    tabCustomer.classList.add("active");
+                    tabWholesale.classList.remove("active");
+                    
+                    // 1) 웅장한 흰색 파도가 오른쪽에서 왼쪽으로 촥 차오르도록 설정
+                    registerBgOverlayWhite.style.transition = "transform 0.6s cubic-bezier(0.77, 0, 0.175, 1)";
+                    registerBgOverlayWhite.style.transform = "translateX(0%)";
+                    
+                    // 2) 600ms 뒤 모션이 완전히 완료되면 패널 전환 및 두 슬라이더 원점 무효화 리셋 단행
+                    setTimeout(() => {
+                        // 컨테이너 사장님용 블루 테마 해제 (파도가 다 덮은 후 안전하게 제거)
+                        registerContainer.classList.remove("wholesale-active");
+                        
+                        panelCustomer.style.display = "flex";
+                        panelWholesale.style.display = "none";
+                        registerSubtitle.textContent = "아무래도 안경 통합 로그인 센터에 오신 것을 환영합니다.";
+                        
+                        // 트랜지션 해제 상태로 조용히 원복
+                        registerBgOverlay.style.transition = "none";
+                        registerBgOverlay.style.transform = "translateX(-100%)"; // 블루는 다시 왼쪽 대기
+                        
+                        registerBgOverlayWhite.style.transition = "none";
+                        registerBgOverlayWhite.style.transform = "translateX(100%)"; // 화이트는 다시 오른쪽 대기
+                    }, 600);
+                }
+            });
+
+            tabWholesale.addEventListener("click", () => {
+                if (!tabWholesale.classList.contains("active")) {
+                    tabWholesale.classList.add("active");
+                    tabCustomer.classList.remove("active");
+                    
+                    // 1) 파란 물결 오버레이가 왼쪽에서 오른쪽으로 촥 덮치며 차오르도록 설정
+                    registerBgOverlay.style.transition = "transform 0.6s cubic-bezier(0.77, 0, 0.175, 1)";
+                    
+                    // 2) 약간의 딜레이를 주어 리셋 트랜지션 무효화가 끝난 후 렌더링되도록 보장
+                    setTimeout(() => {
+                        registerContainer.classList.add("wholesale-active");
+                        registerBgOverlay.style.transform = "translateX(0%)";
+                    }, 30);
+                    
+                    // 3) 패널 전환 처리
+                    panelCustomer.style.display = "none";
+                    panelWholesale.style.display = "block";
+                    registerSubtitle.textContent = "도매 파트너 전용 로그인 페이지입니다.";
+                }
+            });
+
+            // 🏁 2. 소셜 간편 로그인 버튼 동작 바인딩
+            const naverLoginBtn = document.getElementById("naverLoginBtn");
+            const kakaoLoginBtn = document.getElementById("kakaoLoginBtn");
+
+            naverLoginBtn.addEventListener("click", () => {
+                showModal('error', '네이버 로그인', "네이버 간편 로그인 서비스 준비 중입니다. 소셜 로그인 기능 도입과 함께 가동됩니다.");
+            });
+
+            kakaoLoginBtn.addEventListener("click", () => {
+                showModal('error', '카카오 로그인', "카카오 간편 로그인 서비스 준비 중입니다. 소셜 로그인 기능 도입과 함께 가동됩니다.");
+            });
+
+            // 🏁 3. 사장님(도매) 로그인 컨트롤러
+            // 팝업 컨트롤 함수
+            function showModal(type, title, message, callback) {
+                const modal = document.getElementById('customModal');
+                const icon = document.getElementById('modalIcon');
+                const titleEl = document.getElementById('modalTitle');
+                const messageEl = document.getElementById('modalMessage');
+                const confirmBtn = document.getElementById('modalConfirmBtn');
+
+                if (type === 'success') {
+                    icon.textContent = '🎉';
+                    titleEl.style.color = '#0e3a5b';
+                    confirmBtn.style.background = '#0e3a5b';
+                } else {
+                    icon.textContent = '🚨';
+                    titleEl.style.color = '#d32f2f';
+                    confirmBtn.style.background = '#d32f2f';
+                }
+
+                titleEl.textContent = title;
+                messageEl.innerHTML = message;
+                modal.style.display = 'flex';
+
+                const newBtn = confirmBtn.cloneNode(true);
+                confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+
+                newBtn.addEventListener('click', () => {
+                    modal.style.display = 'none';
+                    if (callback) callback();
+                });
+            }
+
+            document.getElementById("loginForm").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const submitBtn = document.getElementById("submitBtn");
+                submitBtn.disabled = true;
+                submitBtn.innerText = "로그인 중...";
+
+                const formData = new FormData(e.target);
+
+                try {
+                    const response = await fetch("/api/user/login", {
+                        method: "POST",
+                        body: formData
+                    });
+                    const result = await response.json();
+
+                    if (result.status === "success") {
+                        showModal('success', '로그인 성공', result.message, () => {
+                            location.href = "/antioch"; // 도매 전용 페이지로 이동
+                        });
+                    } else {
+                        showModal('error', '로그인 실패', result.message);
+                    }
+                } catch (error) {
+                    showModal('error', '시스템 오류', '서버 통신 중 오류가 발생했습니다.');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "로그인";
+                }
+            });
+        });
+    </script>
+<script src="/static/globalWholesale.js?v=1.1"></script>
+</body>
+</html>

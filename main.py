@@ -82,7 +82,7 @@ async def serve_frontend():
 @app.get("/wholesale/mypage", response_class=HTMLResponse)
 async def serve_wholesale_mypage(request: Request):
     if not request.session.get("is_wholesale"):
-        return RedirectResponse(url="/wholesale/login")
+        return RedirectResponse(url="/login")
     detail_path = os.path.join(static_dir, "wholesale_mypage.html")
     if os.path.exists(detail_path):
         with open(detail_path, "r", encoding="utf-8") as f:
@@ -92,7 +92,7 @@ async def serve_wholesale_mypage(request: Request):
 @app.get("/wholesale/cart", response_class=HTMLResponse)
 async def serve_wholesale_cart(request: Request):
     if not request.session.get("is_wholesale"):
-        return RedirectResponse(url="/wholesale/login")
+        return RedirectResponse(url="/login")
     detail_path = os.path.join(static_dir, "wholesale_cart.html")
     if os.path.exists(detail_path):
         with open(detail_path, "r", encoding="utf-8") as f:
@@ -102,7 +102,7 @@ async def serve_wholesale_cart(request: Request):
 @app.get("/wholesale/order", response_class=HTMLResponse)
 async def serve_wholesale_order(request: Request):
     if not request.session.get("is_wholesale"):
-        return RedirectResponse(url="/wholesale/login")
+        return RedirectResponse(url="/login")
     detail_path = os.path.join(static_dir, "wholesale_order.html")
     if os.path.exists(detail_path):
         with open(detail_path, "r", encoding="utf-8") as f:
@@ -112,7 +112,7 @@ async def serve_wholesale_order(request: Request):
 @app.get("/wholesale/success", response_class=HTMLResponse)
 async def serve_wholesale_success(request: Request):
     if not request.session.get("is_wholesale"):
-        return RedirectResponse(url="/wholesale/login")
+        return RedirectResponse(url="/login")
     detail_path = os.path.join(static_dir, "wholesale_success.html")
     if os.path.exists(detail_path):
         with open(detail_path, "r", encoding="utf-8") as f:
@@ -122,7 +122,7 @@ async def serve_wholesale_success(request: Request):
 @app.get("/wholesale/orders", response_class=HTMLResponse)
 async def serve_wholesale_orders(request: Request):
     if not request.session.get("is_wholesale"):
-        return RedirectResponse(url="/wholesale/login")
+        return RedirectResponse(url="/login")
     detail_path = os.path.join(static_dir, "wholesale_orders.html")
     if os.path.exists(detail_path):
         with open(detail_path, "r", encoding="utf-8") as f:
@@ -189,18 +189,18 @@ async def serve_contact_page():
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>Contact 템플릿(contact.html)을 찾을 수 없습니다.</h1>", status_code=404)
 
-# 🏁 도매 전용 페이지 라우팅
-@app.get("/wholesale/register", response_class=HTMLResponse)
-async def serve_wholesale_register():
-    path = os.path.join(static_dir, "wholesale_register.html")
+# 🏁 통합 회원가입 및 로그인 페이지 라우팅
+@app.get("/register", response_class=HTMLResponse)
+async def serve_register():
+    path = os.path.join(static_dir, "register.html")
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>페이지를 찾을 수 없습니다.</h1>", status_code=404)
 
-@app.get("/wholesale/login", response_class=HTMLResponse)
-async def serve_wholesale_login():
-    path = os.path.join(static_dir, "wholesale_login.html")
+@app.get("/login", response_class=HTMLResponse)
+async def serve_login():
+    path = os.path.join(static_dir, "login.html")
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())

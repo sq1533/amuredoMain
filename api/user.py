@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException
+from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException, Response
 from firebase_admin import firestore
 import requests
 import os
@@ -107,10 +107,12 @@ async def check_wholesale_status(request: Request):
     모든 페이지에서 비동기로 로그인 상태를 확인하기 위한 가벼운 API
     (DB 통신 없이 세션 쿠키만 복호화하므로 서버 부하 제로)
     """
-    is_wholesale = request.session.get("is_wholesale", False)
+    user_role = request.session.get("user_role", "guest")
+    is_wholesale = (user_role == "wholesale")
     user_name = request.session.get("user_name", "")
     user_email = request.session.get("user_id", "")
     return {
+        "user_role": user_role,
         "is_wholesale": is_wholesale,
         "user_name": user_name,
         "user_email": user_email
@@ -119,6 +121,7 @@ async def check_wholesale_status(request: Request):
 @router.post("/login")
 async def login_wholesale(
     request: Request,
+    response: Response,
     email: str = Form(...),
     password: str = Form(...)
 ):
@@ -153,7 +156,11 @@ async def login_wholesale(
         # 3. 세션 기록
         request.session["user_id"] = email
         request.session["user_name"] = user_data.get("name")
+        request.session["user_role"] = "wholesale"
         request.session["is_wholesale"] = True
+
+        # 하이브리드 캐싱을 위한 비보안 등급 식별 쿠키 굽기 (유효기간 30일)
+        response.set_cookie(key="amuredo_role", value="wholesale", path="/", max_age=2592000)
 
         return {"status": "success", "message": f"{user_data.get('name')}님, 환영합니다."}
 
@@ -162,8 +169,9 @@ async def login_wholesale(
         return {"status": "error", "message": str(e)}
 
 @router.get("/logout")
-async def logout_wholesale(request: Request):
+async def logout_wholesale(request: Request, response: Response):
     request.session.clear()
+    response.delete_cookie(key="amuredo_role", path="/")
     return {"status": "success", "message": "로그아웃 되었습니다."}
 
 # 회원 정보 조회 (마이페이지용)

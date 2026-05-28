@@ -154,7 +154,7 @@
         }
 
         @media (max-width: 768px) {
-            .order-container { padding: 20px 15px; margin: 40px auto; }
+            .order-container { padding: 20px 15px; margin: 90px auto 40px auto; } /* 상단 플로팅 메뉴바(70px) 고려하여 90px로 수정 */
             .order-title { font-size: 1.5rem; margin-bottom: 20px; }
             .form-row { grid-template-columns: 1fr; gap: 0; }
             .summary-dashboard { flex-direction: column; gap: 10px; padding: 15px 20px; align-items: stretch; }
@@ -449,6 +449,6 @@
             if (urlParams.get('status') === 'fail') showCancelModal(urlParams.get('message') || "결제에 실패했습니다.");
         });
     </script>
-<script src="/static/globalWholesale.js?v=1.0"></script>
+<script src="/static/globalWholesale.js?v=1.1"></script>
 </body>
 </html>
