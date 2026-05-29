@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');
+
 /* 기본 리셋 */
 * {
     box-sizing: border-box;
@@ -1065,7 +1067,8 @@ body {
 }
 
 .about-philosophy h2 {
-    font-size: 2.0rem;
+    font-size: 1.5rem;
+    font-family: 'Nanum Myeongjo', serif;
     font-weight: 700;
     color: #111;
     margin-bottom: 3.5rem;
@@ -1084,7 +1087,8 @@ body {
 }
 
 .philosophy-content p {
-    font-size: 1.5rem;
+    font-size: 1.0rem;
+    font-family: 'Nanum Myeongjo', serif;
     line-height: 2; /* 넉넉한 줄간격 허용 */
     color: #444;
     margin-bottom: 2.2rem;
@@ -1455,7 +1459,7 @@ body {
     text-align: center !important;
 }
 
-.custom-file-label:hover {
+.contact-form .custom-file-label:hover {
     background-color: #1a4f7e;
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(14, 58, 91, 0.3);
@@ -2002,5 +2006,397 @@ body {
         font-size: 0.8rem;
     }
 }
+
+/* =============================================================
+   🏁 파트너 안경점(Partners) 검색 페이지 전용 프리미엄 디자인 시스템
+   ============================================================= */
+
+.partner-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1.5rem 5rem 1.5rem;
+}
+
+.partner-header-section {
+    text-align: center;
+    margin-bottom: 3.5rem;
+}
+
+.partner-title {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0e3a5b;
+    margin-bottom: 1.2rem;
+    letter-spacing: -0.5px;
+}
+
+.partner-subtitle {
+    font-size: 1rem;
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+    word-break: keep-all;
+    font-weight: 400;
+}
+
+/* Glassmorphism 지역 선택 카드 */
+.partner-filter-section {
+    margin-bottom: 2rem;
+}
+
+.filter-glass-card {
+    display: flex;
+    gap: 2rem;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(14, 58, 91, 0.04);
+}
+
+.filter-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.filter-group .filter-label {
+    font-size: 0.85rem;
+    color: #8b5e3c;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: left;
+}
+
+.select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.select-wrapper::after {
+    content: "▼";
+    font-size: 0.65rem;
+    color: #8b5e3c;
+    position: absolute;
+    right: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: transform 0.2s ease;
+}
+
+.premium-select {
+    width: 100%;
+    padding: 0.9rem 2.5rem 0.9rem 1.2rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #222;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.premium-select:hover:not(:disabled) {
+    border-color: #0e3a5b;
+    box-shadow: 0 4px 15px rgba(14, 58, 91, 0.05);
+}
+
+.premium-select:focus {
+    border-color: #0e3a5b;
+    box-shadow: 0 0 0 3px rgba(14, 58, 91, 0.1);
+}
+
+.premium-select:disabled {
+    background-color: #f5f5f5;
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+/* 결과 상태바 */
+.partner-status-bar {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+    text-align: right;
+    font-weight: 500;
+}
+
+.count-highlight {
+    color: #0e3a5b;
+    font-weight: 800;
+    font-size: 1rem;
+}
+
+/* 로더 */
+.partner-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 0;
+    color: #666;
+    gap: 1.2rem;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(14, 58, 91, 0.1);
+    border-top: 3px solid #0e3a5b;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 매장 카드 그리드 */
+.partner-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.8rem;
+    margin-top: 1rem;
+}
+
+.partner-card {
+    background: #ffffff;
+    border: 1px solid #eaeaea;
+    border-radius: 16px;
+    padding: 2.2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    opacity: 0;
+    transform: translateY(30px);
+    animation: cardFadeIn 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes cardFadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 3D Lift 인터랙션 호버 */
+.partner-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(14, 58, 91, 0.18);
+    box-shadow: 0 16px 36px rgba(14, 58, 91, 0.08);
+}
+
+.partner-card .card-badge {
+    align-self: flex-start;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #0e3a5b;
+    background: rgba(14, 58, 91, 0.06);
+    padding: 0.35rem 0.7rem;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    margin-bottom: 1.2rem;
+}
+
+.partner-card .card-name {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 1.2rem;
+    line-height: 1.4;
+    text-align: left;
+}
+
+.partner-card .card-divider {
+    height: 1px;
+    background-color: #f1f0ec;
+    margin-bottom: 1.2rem;
+}
+
+.partner-card .card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.partner-card .info-item {
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.partner-card .info-icon {
+    font-size: 1rem;
+    color: #8b5e3c;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.partner-card .info-text {
+    word-break: keep-all;
+}
+
+/* 전화 걸기 인터랙션 디자인 */
+.partner-card .tel-link {
+    color: #0e3a5b;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px dotted #0e3a5b;
+    padding-bottom: 1px;
+}
+
+.partner-card .tel-link:hover {
+    color: #4a90e2;
+    border-bottom-color: #4a90e2;
+}
+
+.partner-card .mobile-call-tag {
+    font-size: 0.7rem;
+    background-color: rgba(74, 144, 226, 0.08);
+    color: #4a90e2;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 700;
+    display: none; /* PC에서는 기본적으로 숨김 */
+}
+
+/* 빈 화면 안내 */
+.partner-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 2rem;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px dashed #eaeaea;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.005);
+}
+
+.partner-empty-state .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.partner-empty-state h3 {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.8rem;
+}
+
+.partner-empty-state p {
+    font-size: 0.9rem;
+    color: #777;
+    margin-bottom: 1.8rem;
+}
+
+.reset-filter-btn {
+    padding: 0.8rem 2rem;
+    background: #0e3a5b;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(14, 58, 91, 0.15);
+    transition: all 0.3s ease;
+}
+
+.reset-filter-btn:hover {
+    background: #0b2d47;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(14, 58, 91, 0.25);
+}
+
+.reset-filter-btn:active {
+    transform: translateY(0);
+}
+
+/* 📱 반응형 분기 처리 */
+@media screen and (max-width: 768px) {
+    .partner-title {
+        font-size: 2rem;
+    }
+    
+    .filter-glass-card {
+        flex-direction: column;
+        gap: 1.2rem;
+        padding: 1.5rem;
+    }
+    
+    .partner-grid {
+        grid-template-columns: 1fr; /* 모바일에서는 1열 그리드로 시원하게 노출 */
+        gap: 1.5rem;
+    }
+    
+    .partner-card {
+        padding: 1.8rem;
+        min-height: auto;
+    }
+    
+    /* 모바일 환경에서는 직접 통화 기능 강조 */
+    .partner-card .mobile-call-tag {
+        display: inline-block;
+    }
+
+    /* 모바일 환경에서는 길찾기 지도 연결 태그도 강조 */
+    .partner-card .route-tag {
+        display: inline-block;
+    }
+}
+
+.partner-card .route-link {
+    color: #8b5e3c;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px dotted #8b5e3c;
+    padding-bottom: 1px;
+}
+
+.partner-card .route-link:hover {
+    color: #0e3a5b;
+    border-bottom-color: #0e3a5b;
+}
+
+.partner-card .route-tag {
+    font-size: 0.7rem;
+    background-color: rgba(139, 94, 60, 0.08);
+    color: #8b5e3c;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 700;
+    display: none; /* PC에서는 기본적으로 숨김 */
+}
+
 
 

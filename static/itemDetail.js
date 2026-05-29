@@ -39,29 +39,32 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            // 네이버 스마트스토어 외부 전환 버튼 로직
-            const naverStoreBtn = document.getElementById("naverStoreBtn");
-            if (naverStoreBtn) {
-                if (data.naver && data.naver.trim() !== "") {
-                    // 데이터가 있으면(True) 화면에 표시하고 클릭 연동
-                    naverStoreBtn.style.display = 'inline-block';
-                    naverStoreBtn.addEventListener("click", () => {
-                        const storeUrl = data.naver;
-                        const isMobile = /android|ipad|iphone|ipod/i.test(navigator.userAgent);
+            // 🏁 [요청사항 1 & 2] 네이버 스마트스토어 버튼 제거 및 장바구니 담기 버튼 탑재
+            const cartAddBtn = document.getElementById("cartAddBtn");
+            if (cartAddBtn) {
+                // 일반고객 상세페이지에서는 항상 장바구니 담기 버튼을 노출시킵니다
+                cartAddBtn.style.display = 'block';
+                cartAddBtn.addEventListener("click", () => {
+                    const firstImg = (paths && paths.length > 0) ? paths[0] : "/static/img/ready.webp";
+                    addToCart(itemId, data.name, firstImg);
+                });
+            }
 
-                        if (isMobile) {
-                            // [모바일] 순수 웹 링크 이동 방식 (OS App Links/Universal Links 유도)
-                            // 스마트폰에 '네이버플러스 스토어 앱'이나 '네이버 앱'이 있다면 OS가 알아서 앱을 열어주며, 없으면 현재 창에서 웹으로 넘어갑니다.
-                            window.location.href = storeUrl;
-                        } 
-                        else {
-                            // [PC 환경] 무조건 일반 웹 브라우저 새 창으로 이동
-                            window.open(storeUrl, '_blank');
-                        }
-                    });
+            // 🏁 [요청사항 3] 상세 이미지 섹터 동적 렌더링
+            const detailImagesSection = document.getElementById("detailImagesSection");
+            const detailProductImg = document.getElementById("detailProductImg");
+
+            if (detailImagesSection) {
+                detailImagesSection.style.display = 'block'; // 상세 이미지 섹션 노출 개시
+                
+                // Firestore 의 item > {itemID} > details 데이터 연동 (아직 없으면 임시 빈 공간 처리)
+                if (data.details && data.details.trim() !== "") {
+                    detailProductImg.src = data.details;
+                    detailProductImg.style.display = 'block';
                 } else {
-                    // 없으면 버튼 숨김 (방어 코딩)
-                    naverStoreBtn.style.display = 'none';
+                    // 상품별 고유 상세 이미지가 아직 생성되지 않은 상태이면 공간만 비워둠
+                    detailProductImg.removeAttribute('src');
+                    detailProductImg.style.display = 'none';
                 }
             }
 
@@ -259,5 +262,65 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(err => {
                 console.error("연관 상품 호출 에러:", err);
             });
+    }
+
+    // 🏁 추후 일반 장바구니 연동을 위한 백엔드 API 스켈레톤 및 라이브 쿠키 연동 함수
+    function addToCart(itemId, itemName, itemImage) {
+        // 🏁 비로그인(Guest) 상태일 때 장바구니 담기 원천 차단
+        const roleMatch = document.cookie.match(new RegExp('(^| )amuredo_role=([^;]+)'));
+        const role = roleMatch ? decodeURIComponent(roleMatch[2]) : "guest";
+        
+        if (role === "guest") {
+            const confirmLogin = confirm("장바구니 기능은 로그인 후 이용하실 수 있습니다.\n로그인 화면으로 이동할까요?");
+            if (confirmLogin) {
+                window.location.href = "/login";
+            }
+            return;
+        }
+
+        // 1. 쿠키에서 장바구니 읽기
+        let cart = [];
+        const match = document.cookie.match(new RegExp('(^| )general_cart=([^;]+)'));
+        if (match) {
+            try {
+                cart = JSON.parse(decodeURIComponent(match[2]));
+            } catch(e) {
+                cart = [];
+            }
+        }
+        
+        // 2. 중복 담기 방지
+        const exists = cart.find(item => item.id === itemId);
+        if (exists) {
+            alert("이미 장바구니에 담겨 있는 안경입니다.");
+            return;
+        }
+        
+        // 3. 상품 데이터 칩 추가 (쿠키 용량 과부하 방지를 위해 ID만 보존)
+        cart.push({
+            id: itemId
+        });
+        
+        // 4. 쿠키 저장
+        document.cookie = `general_cart=${encodeURIComponent(JSON.stringify(cart))}; path=/; max-age=2592000`;
+        
+        // 5. Firebase RTDB에 실시간 즉시 동기화 수행
+        fetch('/api/user/cart/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cart: cart })
+        })
+        .then(res => res.json())
+        .then(syncData => {
+            if (syncData.status === 'success') {
+                // 세션 스토리지의 초깃값도 새 상태로 동기화 갱신
+                sessionStorage.setItem("initialCartState", JSON.stringify(cart));
+            }
+        })
+        .catch(err => {
+            console.error("장바구니 DB 동기화 실패:", err);
+        });
+        
+        alert(`'${itemName}' 상품이 장바구니에 담겼습니다.`);
     }
 });

@@ -24,7 +24,7 @@
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <!-- 외부 공통 스타일시트 연결 (캐시 무효화) -->
-    <link rel="stylesheet" href="/static/style.css?v=14.32">
+    <link rel="stylesheet" href="/static/style.css?v=21.0">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
     <script>
@@ -34,6 +34,46 @@
 
       gtag('config', 'AW-17793333010');
     </script>
+    <!-- 🏁 일반 장바구니 버튼 & 상세 이미지 섹션 전용 미니멀 프리미엄 스타일 -->
+    <style>
+        .cart-add-btn {
+            width: 100%;
+            padding: 16px;
+            background: #0e3a5b; /* 브랜드 시그니처 블루 */
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(14, 58, 91, 0.15);
+            margin-top: 15px;
+            text-align: center;
+        }
+        .cart-add-btn:hover {
+            background: #0b2d47;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(14, 58, 91, 0.25);
+        }
+        .cart-add-btn:active {
+            transform: translateY(0);
+        }
+        .detail-images-section {
+            margin-top: 60px;
+            margin-bottom: 40px;
+            width: 100%;
+        }
+        /* 이미지 로딩 전 빈 공간 플레이스홀더를 부드러운 연회색 배경으로 UX 보호 */
+        .detail-images-container img {
+            background-color: #f7f7f7;
+            min-height: 200px; /* 로딩 전 레이아웃 붕괴 방지 */
+            transition: opacity 0.3s ease;
+        }
+        .detail-images-container img[src=""] {
+            display: none !important; /* 아직 주소가 주어지지 않은 개별 이미지는 레이아웃에서 조용히 숨김 */
+        }
+    </style>
 </head>
 <body>
     <!-- Google Tag Manager (noscript) -->
@@ -105,9 +145,9 @@
                 <!-- 상품 코멘트 (인용 디자인용 컨테이너) -->
                 <div class="detail-item-desc" id="detailItemDesc" style="display: none;"></div>
                 
-                <!-- 네이버 스마트스토어 외부 전환 구매 버튼 영역 -->
-                <div class="naver-btn-wrapper" id="naverBtnWrapper">
-                    <button class="naver-store-btn" id="naverStoreBtn" style="display: none;">네이버에서 구매하기</button>
+                <!-- 장바구니 담기 버튼 영역 -->
+                <div class="cart-btn-wrapper" id="cartBtnWrapper">
+                    <button class="cart-add-btn" id="cartAddBtn" style="display: none;">장바구니 담기</button>
                 </div>
             </div>
             
@@ -118,6 +158,18 @@
                     <div class="lookbook-track" id="lookbookTrack">
                         <!-- JS가 서버에서 받은 models 배열을 토대로 모델 사진을 렌더링합니다 -->
                     </div>
+                </div>
+            </section>
+
+            <!-- 🏁 상품 상세 이미지 섹션 (공통 1 - 상품별 고유상세 - 공통 2) -->
+            <section class="detail-images-section" id="detailImagesSection" style="display: none;">
+                <div class="detail-images-container" style="max-width: 800px; margin: 40px auto; padding: 0;">
+                    <!-- 파트 1: 공통 이미지 1 -->
+                    <img id="detailCommonImg1" src="/static/img/detail_common_1.webp" alt="안내 정보 1" loading="lazy" style="width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;">
+                    <!-- 파트 2: 상품별 고유 상세 이미지 (동적 URL 바인딩) -->
+                    <img id="detailProductImg" src="" alt="상품 상세 정보" loading="lazy" style="width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;">
+                    <!-- 파트 3: 공통 이미지 2 -->
+                    <img id="detailCommonImg2" src="/static/img/detail_common_2.webp" alt="안내 정보 2" loading="lazy" style="width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;">
                 </div>
             </section>
 
@@ -148,7 +200,7 @@
     </div>
 
     <!-- 상세 페이지 로직 파일 (V버전 증가) -->
-    <script src="/static/itemDetail.js?v=7.6"></script>
+    <script src="/static/itemDetail.js?v=9.3"></script>
     
     <!-- 공통 메뉴 동작용 스크립트 -->
     <script>
@@ -168,6 +220,6 @@
             if(navOverlay) navOverlay.addEventListener("click", toggleMenu);
         });
     </script>
-<script src="/static/globalWholesale.js?v=1.0"></script>
+<script src="/static/globalWholesale.js?v=3.3"></script>
 </body>
 </html>

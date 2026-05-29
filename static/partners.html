@@ -14,22 +14,27 @@
     <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 아무레도 검색엔진 최적화(SEO) 및 SNS 공유 설정 -->
-    <title>아무래도 안경</title>
-    <meta name="description" content="분위기와 억양을 디자인을 디자인합니다. 아무래도 안경, 본질의 아름다움을 추구합니다">
-    <meta property="og:title" content="아무래도 안경 공식 홈페이지">
-    <meta property="og:description" content="분위기와 억양을 디자인을 디자인합니다. 아무래도 안경, 본질의 아름다움을 추구합니다">
+    
+    <!-- 아무래도 검색엔진 최적화(SEO) 및 SNS 공유 설정 -->
+    <title>공식 파트너 안경점 | 아무래도 안경</title>
+    <meta name="description" content="아무래도 안경의 공식 파트너 안경점을 지역별로 간편하게 찾아보세요. 본질의 아름다움을 추구합니다.">
+    <meta property="og:title" content="아무래도 안경 공식 파트너 안경점 안내">
+    <meta property="og:description" content="아무래도 안경의 공식 파트너 안경점을 지역별로 간편하게 찾아보세요. 본질의 아름다움을 추구합니다.">
     <meta property="og:image" content="/static/img/meta.webp">
     <meta property="og:type" content="website">
 
-    <!-- 아무레도 브랜드 파비콘(Favicon) 설정 -->
+    <!-- 아무래도 브랜드 파비콘(Favicon) 설정 -->
     <link rel="icon" href="/static/img/icon.webp" type="image/webp">
     <link rel="apple-touch-icon" href="/static/img/icon.webp">
-    <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
+    
+    <!-- 전역 메인 폰트: 프리텐다드(Pretendard) & 나눔명조(Nanum Myeongjo) 연결 -->
     <link rel="stylesheet" as="style" crossorigin
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+    
     <!-- 외부 스타일시트 연결 -->
     <link rel="stylesheet" href="/static/style.css?v=21.0">
+    
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
     <script>
@@ -47,11 +52,12 @@
             style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
 
-    <!-- 최상단 헤더(Header) 영역: 모든 페이지 공통 레이아웃 -->
+    <!-- 최상단 헤더(Header) 영역: 모든 페이지 공통 레이아웃 (globalWholesale.js가 동적으로 주입 및 리빌드함) -->
     <header class="main-header">
         <!-- PC 좌측 메뉴 -->
         <nav class="pc-nav-left">
             <button class="nav-switch-btn" onclick="location.href='/about'">About</button>
+            <button class="nav-switch-btn" onclick="location.href='/partners'">Partners</button>
             <button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button>
         </nav>
 
@@ -81,6 +87,7 @@
                 <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
                 <li><button class="nav-switch-btn" onclick="location.href='/antioch'">Antioch</button></li>
                 <li><button class="nav-switch-btn" onclick="location.href='/about'">About</button></li>
+                <li><button class="nav-switch-btn" onclick="location.href='/partners'">Partners</button></li>
                 <li><button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button></li>
             </ul>
         </nav>
@@ -89,47 +96,59 @@
     </header>
 
     <div class="app-container">
-        <!-- 메인 콘텐츠 영역 (문의하기 페이지) -->
-        <main class="main-content contact-main sub-page-main">
-            <div class="contact-container">
-                <h1 class="contact-title">Connect</h1>
-                <p class="contact-subtitle">아무래도에 대한 문의사항이나 협업 제안을 남겨주세요.</p>
+        <!-- 메인 콘텐츠 영역 (파트너 안경점 조회 페이지) -->
+        <main class="main-content partner-main sub-page-main" style="padding-top: 100px;">
+            <div class="partner-container">
+                <div class="partner-header-section">
+                    <h1 class="partner-title">Official Partners</h1>
+                    <p class="partner-subtitle">아무래도 안경의 정품 컬렉션을 만나보실 수 있는 전국 공식 파트너 안경점 리스트입니다.</p>
+                </div>
 
-                <form id="contactForm" class="contact-form">
-                    <div class="form-group">
-                        <label for="email">이메일 주소</label>
-                        <input type="email" id="email" name="email" placeholder="example@email.com" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="message">문의 내용</label>
-                        <textarea id="message" name="message" rows="8" placeholder="내용을 입력해주세요." required></textarea>
-                    </div>
-
-                    <!-- 이미지 첨부 영역 (다중 선택 가능) -->
-                    <div class="form-group">
-                        <label>이미지 첨부 (최대 5장)</label>
-                        <div class="file-upload-wrapper">
-                            <label for="images" class="custom-file-label">파일 선택</label>
-                            <input type="file" id="images" name="images" accept="image/*" multiple>
-                            <p class="file-help-text">JPG, PNG, WebP 형식의 이미지를 선택할 수 있습니다.</p>
-                            <div id="filePreview" class="file-preview-container"></div>
+                <!-- 프리미엄 2단 필터 컨트롤러 영역 -->
+                <div class="partner-filter-section">
+                    <div class="filter-glass-card">
+                        <div class="filter-group">
+                            <label for="citySelect" class="filter-label">시 / 도</label>
+                            <div class="select-wrapper">
+                                <select id="citySelect" class="premium-select">
+                                    <option value="">시/도 전체</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label for="countrySelect" class="filter-label">구 / 군</label>
+                            <div class="select-wrapper">
+                                <select id="countrySelect" class="premium-select" disabled>
+                                    <option value="">구/군 전체</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- 개인정보 수집 동의 -->
-                    <div class="consent-group">
-                        <label class="checkbox-container">
-                            개인정보 수집 및 이용에 동의합니다.
-                            <input type="checkbox" id="consent" required>
-                            <span class="checkmark"></span>
-                        </label>
-                    </div>
+                <!-- 파트너 매장 결과 현황바 -->
+                <div class="partner-status-bar">
+                    총 <span id="partnerCount" class="count-highlight">0</span>개의 파트너 안경점이 등록되어 있습니다.
+                </div>
 
-                    <div class="form-submit-wrapper">
-                        <button type="submit" id="submitBtn" class="submit-btn" disabled>보내기</button>
-                    </div>
-                </form>
+                <!-- 로딩 스피너 -->
+                <div id="partnerLoader" class="partner-loader">
+                    <div class="spinner"></div>
+                    <p>파트너 안경점 정보를 불러오고 있습니다...</p>
+                </div>
+
+                <!-- 안경점 목록 그리드 섹션 -->
+                <div id="partnerGrid" class="partner-grid" style="display: none;">
+                    <!-- 동적 카드 렌더링 영역 -->
+                </div>
+
+                <!-- 검색 결과가 없을 경우 노출되는 안내 메시지 -->
+                <div id="partnerEmptyState" class="partner-empty-state" style="display: none;">
+                    <div class="empty-icon">📍</div>
+                    <h3>선택하신 지역에 등록된 파트너 매장이 없습니다.</h3>
+                    <p>다른 지역을 선택하시거나 전국 파트너 매장 목록을 확인해 주세요.</p>
+                    <button id="resetFilterBtn" class="reset-filter-btn">전체 매장 보기</button>
+                </div>
             </div>
         </main>
 
@@ -147,8 +166,8 @@
         </footer>
     </div>
 
-    <!-- Contact 페이지 로직 스크립트 (Firebase 연동 등) -->
-    <script src="/static/contact.js?v=2.1"></script>
+    <!-- 파트너 안경점 로직 스크립트 -->
+    <script src="/static/partners.js?v=9.5"></script>
 
     <!-- 공통 메뉴 동작용 스크립트 -->
     <script>
@@ -168,7 +187,7 @@
             if (navOverlay) navOverlay.addEventListener("click", toggleMenu);
         });
     </script>
-<script src="/static/globalWholesale.js?v=3.3"></script>
+    <script src="/static/globalWholesale.js?v=3.3"></script>
 </body>
 
 </html>

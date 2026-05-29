@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 아무레도 검색엔진 최적화(SEO) 및 SNS 공유 설정 -->
+    <title>장바구니 - 아무래도 안경</title>
+    <meta name="description" content="분위기와 억양을 디자인을 디자인합니다. 아무래도 안경, 본질의 아름다움을 추구합니다">
+    <link rel="icon" href="/static/img/icon.webp" type="image/webp">
+    <link rel="apple-touch-icon" href="/static/img/icon.webp">
+    
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <style>
+        .cart-container {
+            max-width: 900px;
+            margin: 80px auto;
+            padding: 40px 20px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            box-sizing: border-box;
+        }
+        .cart-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 30px;
+            text-align: center;
+            letter-spacing: -0.5px;
+        }
+        .cart-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        /* 🏁 미니멀 가로 플렉스 1줄 정렬 카드 디자인 */
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 25px;
+            border: 1px solid #eaeaea;
+            border-radius: 12px;
+            background: #fafafa;
+            transition: all 0.25s ease;
+            position: relative;
+            box-sizing: border-box;
+        }
+        .cart-item:hover {
+            box-shadow: 0 6px 20px rgba(14, 58, 91, 0.05);
+            border-color: #0e3a5b;
+        }
+        /* 🏁 체크박스 커스텀 */
+        .item-checkbox {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #0e3a5b;
+            margin: 0;
+            flex-shrink: 0;
+        }
+        /* 🏁 썸네일 고해상도 이미지 */
+        .item-thumb {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            background-color: #eee;
+            border: 1px solid #eaeaea;
+            flex-shrink: 0;
+        }
+        .item-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #333;
+            flex: 1;
+            word-break: keep-all;
+            line-height: 1.4;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 1.6rem;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .delete-btn:hover {
+            color: #dc3545;
+            transform: scale(1.1);
+        }
+        .empty-cart {
+            text-align: center;
+            padding: 60px 0;
+            color: #888;
+            font-size: 1.1rem;
+        }
+        /* 🏁 5개 제한 선택 예약 요약 영역 */
+        .summary-section {
+            border-top: 2px solid #0e3a5b;
+            padding-top: 30px;
+        }
+        .summary-total {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 18px;
+        }
+        .summary-total span.count-num {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #0e3a5b;
+        }
+        .order-btn {
+            width: 100%;
+            padding: 18px;
+            background-color: #0e3a5b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(14, 58, 91, 0.2);
+            text-align: center;
+        }
+        .order-btn:hover { 
+            background-color: #0b2d47; 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(14, 58, 91, 0.3);
+        }
+        .order-btn:active {
+            transform: translateY(0);
+        }
+        .order-btn:disabled {
+            background-color: #ccc;
+            color: #fff;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        .home-link {
+            display: inline-block;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .home-link:hover { 
+            color: #0e3a5b;
+            text-decoration: underline; 
+        }
+
+        /* 🏁 토스트 알림 메세지 스타일 */
+        .toast-msg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(14, 58, 91, 0.95);
+            color: #fff;
+            padding: 18px 28px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            z-index: 1000000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            text-align: center;
+            line-height: 1.5;
+            word-break: keep-all;
+        }
+        .toast-msg.show {
+            opacity: 1;
+        }
+
+        /* 🏁 📱 모바일 디바이스 최적화 (여백 및 삭제버튼 위치 조절) */
+        @media (max-width: 768px) {
+            .cart-container {
+                margin: 90px 15px 40px 15px;
+                padding: 25px 15px;
+                border-radius: 12px;
+            }
+            .cart-title { font-size: 1.8rem; margin-bottom: 20px; }
+            .cart-item {
+                padding: 15px;
+                gap: 12px;
+            }
+            .item-thumb {
+                width: 60px;
+                height: 60px;
+            }
+            .item-name {
+                font-size: 1.05rem;
+            }
+            .delete-btn {
+                font-size: 1.4rem;
+                padding: 3px;
+            }
+            .summary-total {
+                font-size: 1.05rem;
+            }
+            .summary-total span.count-num {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- [다이어트] <header> 태그 자동 생략. globalWholesale.js에서 주입 -->
+
+    <div class="cart-container">
+        <h1 class="cart-title">장바구니</h1>
+        
+        <div class="cart-list" id="cartList">
+            <!-- JS 동적 로드 데이터 적재 존 -->
+        </div>
+
+        <div class="summary-section" id="summarySection" style="display: none;">
+            <div class="summary-total">
+                <span>선택된 피팅 예약 안경</span>
+                <div>
+                    <span id="selectedCount" class="count-num">0</span>
+                    <span class="count-num" style="color: #aaa; font-weight: normal; font-size: 1.25rem;"> / 5개</span>
+                </div>
+            </div>
+            <button class="order-btn" id="reserveBtn" disabled>매장 피팅 예약하기</button>
+        </div>
+        
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 30px; align-items: center; box-sizing: border-box;">
+            <a href="/glasses" class="home-link" style="color: #0e3a5b; font-weight: 700;">← 계속 쇼핑하기</a>
+            <span style="color: #eee; font-size: 0.8rem;">|</span>
+            <a href="javascript:history.back()" class="home-link">이전 페이지로 돌아가기</a>
+        </div>
+    </div>
+
+    <!-- 🏁 토스트 안내 메세지 돔 구조 -->
+    <div id="toastMsg" class="toast-msg"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const cartList = document.getElementById("cartList");
+            const selectedCountEl = document.getElementById("selectedCount");
+            const summarySection = document.getElementById("summarySection");
+            const reserveBtn = document.getElementById("reserveBtn");
+            const toastEl = document.getElementById("toastMsg");
+
+            let selectedItemIds = new Set(); // 현재 피팅 예약에 선택된 상품 ID 세트
+
+            // 1. 쿠키에서 일반 장바구니 데이터 로드
+            function getCart() {
+                const match = document.cookie.match(new RegExp('(^| )general_cart=([^;]+)'));
+                if (match) {
+                    try {
+                        return JSON.parse(decodeURIComponent(match[2]));
+                    } catch(e) { return []; }
+                }
+                return [];
+            }
+
+            // 2. 쿠키에 일반 장바구니 데이터 저장 및 즉시 RTDB 동기화
+            function saveCart(cart) {
+                document.cookie = `general_cart=${encodeURIComponent(JSON.stringify(cart))}; path=/; max-age=2592000`;
+                
+                // Firebase RTDB에 최신 장바구니 상태 동시 전송
+                fetch('/api/user/cart/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cart: cart })
+                })
+                .then(res => res.json())
+                .then(syncData => {
+                    if (syncData.status === 'success') {
+                        // 세션 스토리지의 초깃값도 새 상태로 갱신 (Dirty Checking 기준선 최신화)
+                        sessionStorage.setItem("initialCartState", JSON.stringify(cart));
+                    }
+                })
+                .catch(err => {
+                    console.error("장바구니 DB 동기화 실패:", err);
+                });
+            }
+
+            // 3. 미적감각을 담은 토스트 피드백 메시지 노출 함수
+            function showToast(message) {
+                toastEl.innerHTML = message;
+                toastEl.classList.add("show");
+                
+                // 2.5초 노출 후 스르륵 페이드 아웃
+                setTimeout(() => {
+                    toastEl.classList.remove("show");
+                }, 2500);
+            }
+
+            // 4. 예약 신청 상태바 및 활성화 제어
+            function updateSelectedIndicator(cart) {
+                selectedCountEl.textContent = selectedItemIds.size;
+                
+                // 1개라도 선택되었을 때만 예약 버튼 활성화
+                if (selectedItemIds.size > 0) {
+                    reserveBtn.removeAttribute("disabled");
+                } else {
+                    reserveBtn.setAttribute("disabled", "true");
+                }
+            }
+
+            // 5. 일반 장바구니 렌더링 메인 엔진
+            // 5. 일반 장바구니 렌더링 메인 엔진 (초경량 쿠키 ID 기반 동적 로딩)
+            function renderCart() {
+                const cart = getCart();
+                cartList.innerHTML = "";
+
+                if (cart.length === 0) {
+                    cartList.innerHTML = `<div class="empty-cart">장바구니가 비어 있습니다.</div>`;
+                    summarySection.style.display = "none";
+                    return;
+                }
+
+                summarySection.style.display = "block";
+
+                // 최초 렌더링 시: 5개 이하로 담겼다면 전체 자동체크, 5개보다 많다면 상위 5개만 자동체크 제안 적용
+                if (selectedItemIds.size === 0) {
+                    const initialLimit = Math.min(cart.length, 5);
+                    for (let i = 0; i < initialLimit; i++) {
+                        selectedItemIds.add(cart[i].id);
+                    }
+                }
+
+                // 🏁 로딩 스켈레톤 노출
+                cartList.innerHTML = `<div style="text-align: center; padding: 50px 0; color: #888; font-size: 1.05rem;">장바구니 상품을 불러오고 있습니다...</div>`;
+
+                // 🏁 병렬로 모든 상품 정보(이름, 고해상도 고유 주소) 동적 패치 실행
+                const fetchPromises = cart.map(item =>
+                    fetch(`/api/items/${item.id}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.error) throw new Error(data.error);
+                            return {
+                                id: item.id,
+                                name: data.name || "이름 없는 상품",
+                                image: (data.paths && data.paths.length > 0) ? data.paths[0] : "/static/img/ready.webp"
+                            };
+                        })
+                        .catch(err => {
+                            console.error(`상품(${item.id}) 상세 조회 실패:`, err);
+                            return {
+                                id: item.id,
+                                name: "안경 상품",
+                                image: "/static/img/ready.webp"
+                            };
+                        })
+                );
+
+                Promise.all(fetchPromises).then(richCart => {
+                    cartList.innerHTML = ""; // 로딩 제거
+
+                    richCart.forEach((item, index) => {
+                        const row = document.createElement("div");
+                        row.className = "cart-item";
+
+                        const isChecked = selectedItemIds.has(item.id) ? "checked" : "";
+                        const imgUrl = item.image;
+
+                        row.innerHTML = `
+                            <input type="checkbox" class="item-checkbox" data-idx="${index}" data-id="${item.id}" ${isChecked}>
+                            <img class="item-thumb" src="${imgUrl}" alt="${item.name}">
+                            <div class="item-name">${item.name}</div>
+                            <button class="delete-btn" data-idx="${index}" title="상품 삭제">×</button>
+                        `;
+                        cartList.appendChild(row);
+                    });
+
+                    updateSelectedIndicator(cart);
+                    attachEvents(richCart);
+                });
+            }
+
+            // 6. 각 컨트롤러 이벤트 할당 및 5개 예약 한도 철통 방어
+            function attachEvents(richCart) {
+                const cart = getCart();
+
+                // 체크박스 클릭 핸들러 (5개 한도 정밀 제어)
+                document.querySelectorAll(".item-checkbox").forEach(box => {
+                    box.addEventListener("change", (e) => {
+                        const itemId = e.target.getAttribute("data-id");
+                        
+                        if (e.target.checked) {
+                            // 5개 한도 체크
+                            if (selectedItemIds.size >= 5) {
+                                e.preventDefault();
+                                e.target.checked = false; // 체크 복구
+                                showToast("안경사 1:1 집중 피팅 컨설팅을 위해<br>1회 매장 방문 시 최대 5개까지만 예약이 가능합니다.");
+                                return;
+                            }
+                            selectedItemIds.add(itemId);
+                        } else {
+                            selectedItemIds.delete(itemId);
+                        }
+                        
+                        updateSelectedIndicator(cart);
+                    });
+                });
+
+                // 항목 삭제 컨트롤러 (X 버튼 클릭 시 세련된 작별 모달 기동)
+                document.querySelectorAll(".delete-btn").forEach(btn => {
+                    btn.addEventListener("click", (e) => {
+                        const idx = e.target.getAttribute("data-idx");
+                        const item = richCart[idx]; // 데이터 무결성을 위해 동적 매핑 데이터 참조
+                        
+                        showDeleteModal(item.name, () => {
+                            // 셋에서 제거 및 리스트 가공
+                            selectedItemIds.delete(item.id);
+                            cart.splice(idx, 1);
+                            saveCart(cart);
+                            renderCart();
+                        });
+                    });
+                });
+            }
+
+            // 7. 일반 장바구니 전용 프리미엄 삭제 모달창
+            function showDeleteModal(itemName, onConfirm) {
+                const oldModal = document.getElementById("deleteModal");
+                if (oldModal) oldModal.remove();
+ 
+                const modal = document.createElement("div");
+                modal.id = "deleteModal";
+                modal.className = "ws-modal-overlay";
+                modal.style.display = "flex";
+ 
+                modal.innerHTML = `
+                     <div class="ws-modal-content" style="transform: translateY(0); opacity: 1; padding: 35px 30px; border-radius: 16px; box-shadow: 0 20px 50px rgba(14, 58, 91, 0.2); width: 320px; box-sizing: border-box; text-align: center;">
+                         <div style="font-size: 3.5rem; margin-bottom: 15px;">🗑️</div>
+                         <div style="font-size: 1.25rem; font-weight: 800; color: #0e3a5b; margin-bottom: 10px; letter-spacing: -0.5px;">상품을 삭제할까요?</div>
+                         <div style="font-size: 0.95rem; color: #666; margin-bottom: 28px; line-height: 1.5; word-break: keep-all;">
+                             장바구니에서 [${itemName}] 상품을 정말로 삭제하시겠습니까?
+                         </div>
+                         <div style="display: flex; gap: 10px;">
+                             <button id="modalCancel" style="flex: 1; padding: 13px; border: 1px solid #ddd; background: #fff; color: #666; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;">취소</button>
+                             <button id="modalConfirm" style="flex: 1; padding: 13px; border: none; background: #dc3545; color: #fff; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;">삭제</button>
+                         </div>
+                     </div>
+                `;
+ 
+                document.body.appendChild(modal);
+ 
+                const closeModal = () => {
+                    modal.style.opacity = "0";
+                    setTimeout(() => modal.remove(), 250);
+                };
+ 
+                modal.querySelector("#modalCancel").onclick = closeModal;
+                modal.querySelector("#modalConfirm").onclick = () => {
+                    onConfirm();
+                    closeModal();
+                };
+                 
+                modal.onclick = (e) => { if(e.target === modal) closeModal(); };
+            }
+
+            // 초기 로딩 구동
+            renderCart();
+
+            // 8. 매장 피팅 예약하기 클릭 시 파라미터를 안고 예약서로 이동
+            reserveBtn.addEventListener("click", () => {
+                const cart = getCart();
+                const selectedItems = cart.filter(item => selectedItemIds.has(item.id));
+                if (selectedItems.length === 0) return;
+                
+                // 선택된 상품 ID 목록 수집
+                const selectedIds = selectedItems.map(item => item.id).join(",");
+                
+                // 추후 구축될 일반 예약 신청서 경로(/general/reserve 등)로 선택된 아이템 정보 토스
+                showToast("예약 신청서로 이동합니다...");
+                setTimeout(() => {
+                    location.href = `/general/reserve?items=${encodeURIComponent(selectedIds)}`;
+                }, 1000);
+            });
+        });
+    </script>
+<script src="/static/globalWholesale.js?v=3.3"></script>
+</body>
+</html>

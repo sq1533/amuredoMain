@@ -76,7 +76,7 @@ async def serve_frontend():
     if not os.path.exists(index_path):
         return "<h1>index.html 파일이 아직 생성되지 않았습니다.</h1>"
         
-    with open(index_path, "r", encoding="utf-8") as f:
+    with open(index_path, "r", encoding="utf-8", errors="replace") as f:
         return f.read()
 
 @app.get("/wholesale/mypage", response_class=HTMLResponse)
@@ -85,9 +85,20 @@ async def serve_wholesale_mypage(request: Request):
         return RedirectResponse(url="/login")
     detail_path = os.path.join(static_dir, "wholesale_mypage.html")
     if os.path.exists(detail_path):
-        with open(detail_path, "r", encoding="utf-8") as f:
+        with open(detail_path, "r", encoding="utf-8", errors="replace") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>준비 중입니다.</h1>", status_code=404)
+
+@app.get("/general/cart", response_class=HTMLResponse)
+async def serve_general_cart(request: Request):
+    user_role = request.session.get("user_role", "guest")
+    if user_role == "guest":
+        return RedirectResponse(url="/login")
+    detail_path = os.path.join(static_dir, "general_cart.html")
+    if os.path.exists(detail_path):
+        with open(detail_path, "r", encoding="utf-8", errors="replace") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>장바구니 화면을 찾을 수 없습니다.</h1>", status_code=404)
 
 @app.get("/wholesale/cart", response_class=HTMLResponse)
 async def serve_wholesale_cart(request: Request):
@@ -95,7 +106,7 @@ async def serve_wholesale_cart(request: Request):
         return RedirectResponse(url="/login")
     detail_path = os.path.join(static_dir, "wholesale_cart.html")
     if os.path.exists(detail_path):
-        with open(detail_path, "r", encoding="utf-8") as f:
+        with open(detail_path, "r", encoding="utf-8", errors="replace") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>장바구니 화면을 찾을 수 없습니다.</h1>", status_code=404)
 
@@ -105,7 +116,7 @@ async def serve_wholesale_order(request: Request):
         return RedirectResponse(url="/login")
     detail_path = os.path.join(static_dir, "wholesale_order.html")
     if os.path.exists(detail_path):
-        with open(detail_path, "r", encoding="utf-8") as f:
+        with open(detail_path, "r", encoding="utf-8", errors="replace") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>주문/결제 화면을 찾을 수 없습니다.</h1>", status_code=404)
 
@@ -115,7 +126,7 @@ async def serve_wholesale_success(request: Request):
         return RedirectResponse(url="/login")
     detail_path = os.path.join(static_dir, "wholesale_success.html")
     if os.path.exists(detail_path):
-        with open(detail_path, "r", encoding="utf-8") as f:
+        with open(detail_path, "r", encoding="utf-8", errors="replace") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>결제 완료 화면을 찾을 수 없습니다.</h1>", status_code=404)
 
@@ -125,7 +136,7 @@ async def serve_wholesale_orders(request: Request):
         return RedirectResponse(url="/login")
     detail_path = os.path.join(static_dir, "wholesale_orders.html")
     if os.path.exists(detail_path):
-        with open(detail_path, "r", encoding="utf-8") as f:
+        with open(detail_path, "r", encoding="utf-8", errors="replace") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>주문 현황 화면을 찾을 수 없습니다.</h1>", status_code=404)
 
@@ -142,7 +153,7 @@ async def serve_category_page(request: Request):
     if not os.path.exists(item_list_path):
         return "<h1>itemList.html 파일이 생성되지 않았습니다.</h1>"
         
-    with open(item_list_path, "r", encoding="utf-8") as f:
+    with open(item_list_path, "r", encoding="utf-8", errors="replace") as f:
         return f.read()
 
 # 도매 전용 상품 상세 화면 HTML 서빙용 라우팅 (보안 게이트 작동)
@@ -154,7 +165,7 @@ async def serve_antioch_detail_page(request: Request, item_id: str):
     
     detail_path = os.path.join(static_dir, "antioch_detail.html")
     if os.path.exists(detail_path):
-        with open(detail_path, "r", encoding="utf-8") as f:
+        with open(detail_path, "r", encoding="utf-8", errors="replace") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>도매 상세 화면(antioch_detail.html)을 찾을 수 없습니다.</h1>", status_code=404)
 
@@ -167,7 +178,7 @@ async def serve_item_detail_page(request: Request, item_id: str):
 
     detail_path = os.path.join(static_dir, "item_detail.html")
     if os.path.exists(detail_path):
-        with open(detail_path, "r", encoding="utf-8") as f:
+        with open(detail_path, "r", encoding="utf-8", errors="replace") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>상세 화면 템플릿(item_detail.html)을 찾을 수 없습니다.</h1>", status_code=404)
 
@@ -176,7 +187,7 @@ async def serve_item_detail_page(request: Request, item_id: str):
 async def serve_about_page():
     about_path = os.path.join(static_dir, "about.html")
     if os.path.exists(about_path):
-        with open(about_path, "r", encoding="utf-8") as f:
+        with open(about_path, "r", encoding="utf-8", errors="replace") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>About 템플릿(about.html)을 찾을 수 없습니다.</h1>", status_code=404)
 
@@ -185,16 +196,25 @@ async def serve_about_page():
 async def serve_contact_page():
     contact_path = os.path.join(static_dir, "contact.html")
     if os.path.exists(contact_path):
-        with open(contact_path, "r", encoding="utf-8") as f:
+        with open(contact_path, "r", encoding="utf-8", errors="replace") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>Contact 템플릿(contact.html)을 찾을 수 없습니다.</h1>", status_code=404)
+
+# 파트너 안경점(Partners) 화면 HTML 서빙용 프론트엔드 라우팅
+@app.get("/partners", response_class=HTMLResponse)
+async def serve_partners_page():
+    partners_path = os.path.join(static_dir, "partners.html")
+    if os.path.exists(partners_path):
+        with open(partners_path, "r", encoding="utf-8", errors="replace") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>Partners 템플릿(partners.html)을 찾을 수 없습니다.</h1>", status_code=404)
 
 # 🏁 통합 회원가입 및 로그인 페이지 라우팅
 @app.get("/register", response_class=HTMLResponse)
 async def serve_register():
     path = os.path.join(static_dir, "register.html")
     if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, "r", encoding="utf-8", errors="replace") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>페이지를 찾을 수 없습니다.</h1>", status_code=404)
 
@@ -202,7 +222,7 @@ async def serve_register():
 async def serve_login():
     path = os.path.join(static_dir, "login.html")
     if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, "r", encoding="utf-8", errors="replace") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>페이지를 찾을 수 없습니다.</h1>", status_code=404)
 

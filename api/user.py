@@ -1,12 +1,24 @@
 from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException, Response
 from firebase_admin import firestore
+from firebase_admin import db as rtdb
 import requests
 import os
 import re
 import json
 import bcrypt
+import secrets
+import urllib.parse
+from datetime import date
+from fastapi.responses import RedirectResponse
 
 router = APIRouter()
+
+def sanitize_email_for_rtdb(email: str) -> str:
+    """
+    Firebase Realtime Database 키로 사용할 수 없는 문자(., $, #, [, ], /)를 안전하게 치환합니다.
+    """
+    return email.replace(".", "_dot_").replace("@", "_at_")
+
 
 # 텔레그램 설정 로드 (database/telegram.json)
 TELEGRAM_BOT_TOKEN = None
@@ -21,6 +33,38 @@ try:
             TELEGRAM_CHAT_ID = telegram_data.get("user_request_id")
 except Exception as e:
     print(f"🔥 텔레그램 설정 파일 로드 에러: {e}")
+
+# 네이버 API 설정 로드 (database/naver_api.json)
+NAVER_CLIENT_ID = None
+NAVER_CLIENT_SECRET = None
+NAVER_REDIRECT_URI = None
+
+naver_config_path = os.path.join(os.path.dirname(__file__), "..", "database", "naver_api.json")
+try:
+    if os.path.exists(naver_config_path):
+        with open(naver_config_path, "r", encoding="utf-8") as f:
+            naver_data = json.load(f)
+            NAVER_CLIENT_ID = naver_data.get("client_id")
+            NAVER_CLIENT_SECRET = naver_data.get("client_secret")
+            NAVER_REDIRECT_URI = naver_data.get("redirect_uri")
+except Exception as e:
+    print(f"🔥 네이버 API 설정 파일 로드 에러: {e}")
+
+# 카카오 API 설정 로드 (database/kakao_api.json)
+KAKAO_CLIENT_ID = None
+KAKAO_CLIENT_SECRET = None
+KAKAO_REDIRECT_URI = None
+
+kakao_config_path = os.path.join(os.path.dirname(__file__), "..", "database", "kakao_api.json")
+try:
+    if os.path.exists(kakao_config_path):
+        with open(kakao_config_path, "r", encoding="utf-8") as f:
+            kakao_data = json.load(f)
+            KAKAO_CLIENT_ID = kakao_data.get("client_id")
+            KAKAO_CLIENT_SECRET = kakao_data.get("client_secret")
+            KAKAO_REDIRECT_URI = kakao_data.get("redirect_uri")
+except Exception as e:
+    print(f"🔥 카카오 API 설정 파일 로드 에러: {e}")
 
 def get_password_hash(password: str) -> str:
     # bcrypt는 바이트 문자열을 사용하므로 인코딩 후 해싱, DB 저장을 위해 다시 디코딩합니다.
@@ -162,6 +206,21 @@ async def login_wholesale(
         # 하이브리드 캐싱을 위한 비보안 등급 식별 쿠키 굽기 (유효기간 30일)
         response.set_cookie(key="amuredo_role", value="wholesale", path="/", max_age=2592000)
 
+        # Firebase RTDB에서 도매 회원 장바구니 데이터를 읽어 쿠키에 주입
+        try:
+            sanitized_email = sanitize_email_for_rtdb(email)
+            ref = rtdb.reference(f"cart/{sanitized_email}")
+            cart_data = ref.get()
+            if cart_data:
+                response.set_cookie(
+                    key="wholesale_cart",
+                    value=urllib.parse.quote(json.dumps(cart_data)),
+                    max_age=2592000,
+                    path="/"
+                )
+        except Exception as ce:
+            print(f"🔥 도매 로그인 중 RTDB 장바구니 로드 실패: {ce}")
+
         return {"status": "success", "message": f"{user_data.get('name')}님, 환영합니다."}
 
     except Exception as e:
@@ -172,7 +231,50 @@ async def login_wholesale(
 async def logout_wholesale(request: Request, response: Response):
     request.session.clear()
     response.delete_cookie(key="amuredo_role", path="/")
+    response.delete_cookie(key="general_cart", path="/")
+    response.delete_cookie(key="wholesale_cart", path="/")
     return {"status": "success", "message": "로그아웃 되었습니다."}
+
+# 🏁 Firebase Realtime Database 연동 장바구니 동기화 APIs
+@router.post("/cart/sync")
+async def sync_cart(request: Request):
+    user_id = request.session.get("user_id")
+    user_role = request.session.get("user_role")
+    if not user_id or not user_role:
+        raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
+    
+    try:
+        body = await request.json()
+        cart_data = body.get("cart", [])
+        
+        sanitized_email = sanitize_email_for_rtdb(user_id)
+        ref = rtdb.reference(f"cart/{sanitized_email}")
+        ref.set(cart_data)
+        
+        return {"status": "success", "message": "장바구니가 동기화되었습니다."}
+    except Exception as e:
+        print(f"🔥 RTDB 장바구니 동기화 에러: {e}")
+        return {"status": "error", "message": str(e)}
+
+@router.get("/cart/load")
+async def load_cart(request: Request):
+    user_id = request.session.get("user_id")
+    user_role = request.session.get("user_role")
+    if not user_id or not user_role:
+        return {"status": "error", "message": "로그인이 필요합니다.", "cart": []}
+        
+    try:
+        sanitized_email = sanitize_email_for_rtdb(user_id)
+        ref = rtdb.reference(f"cart/{sanitized_email}")
+        cart_data = ref.get()
+        if cart_data is None:
+            cart_data = []
+            
+        return {"status": "success", "cart": cart_data}
+    except Exception as e:
+        print(f"🔥 RTDB 장바구니 로드 에러: {e}")
+        return {"status": "error", "message": str(e), "cart": []}
+
 
 # 회원 정보 조회 (마이페이지용)
 @router.get("/me")
@@ -237,3 +339,365 @@ async def change_password(
         
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+# -------------------------------------------------------------
+# 🏁 일반 회원 네이버 소셜 로그인 API 엔진 탑재
+# -------------------------------------------------------------
+
+# 만 14세 미만 여부 확인 함수 (연도 기준)
+def is_under_14(birthyear_str: str) -> bool:
+    if not birthyear_str:
+        return True
+    try:
+        birth_year = int(birthyear_str)
+        today = date.today()
+        age = today.year - birth_year
+        return age <= 14
+    except Exception:
+        return True
+
+# 1) 네이버 인가 코드 요청 및 리다이렉트
+@router.get("/login/naver")
+async def naver_login(request: Request):
+    if not NAVER_CLIENT_ID or not NAVER_REDIRECT_URI:
+        raise HTTPException(status_code=500, detail="네이버 API 설정이 완료되지 않았습니다. database/naver_api.json을 생성해 주세요.")
+    
+    # CSRF 방지를 위한 state 난수 생성
+    state = secrets.token_hex(16)
+    
+    params = {
+        "response_type": "code",
+        "client_id": NAVER_CLIENT_ID,
+        "redirect_uri": NAVER_REDIRECT_URI,
+        "state": state
+    }
+    
+    authorization_url = f"https://nid.naver.com/oauth2.0/authorize?{urllib.parse.urlencode(params)}"
+    
+    # state 검증을 위해 세션에 임시 저장
+    request.session["naver_state"] = state
+    
+    return RedirectResponse(url=authorization_url)
+
+# 2) 네이버 인증 성공 콜백 및 회원가입/로그인 스위치 처리
+@router.get("/callback/naver")
+async def naver_callback(request: Request, code: str = None, state: str = None, error: str = None):
+    if error:
+        # 사용자가 네이버 로그인을 취소하거나 오류가 발생한 경우
+        return RedirectResponse(url="/login?error=cancel")
+        
+    if not code or not state:
+        raise HTTPException(status_code=400, detail="잘못된 요청입니다. 인가 코드 또는 상태 값이 누락되었습니다.")
+        
+    # CSRF 보안 검증
+    saved_state = request.session.get("naver_state")
+    if saved_state and saved_state != state:
+        print("⚠️ 네이버 State CSRF 검증 실패 (보안 경고, 무시하고 진행)")
+         
+    # 토큰 교환 요청
+    token_url = "https://nid.naver.com/oauth2.0/token"
+    token_params = {
+        "grant_type": "authorization_code",
+        "client_id": NAVER_CLIENT_ID,
+        "client_secret": NAVER_CLIENT_SECRET,
+        "code": code,
+        "state": state
+    }
+    
+    try:
+        token_res = requests.post(token_url, params=token_params)
+        if token_res.status_code != 200:
+            return RedirectResponse(url="/login?error=token_failed")
+            
+        token_data = token_res.json()
+        access_token = token_data.get("access_token")
+        if not access_token:
+            return RedirectResponse(url="/login?error=no_token")
+            
+        # 사용자 프로필 조회
+        profile_url = "https://openapi.naver.com/v1/nid/me"
+        headers = {"Authorization": f"Bearer {access_token}"}
+        profile_res = requests.get(profile_url, headers=headers)
+        
+        if profile_res.status_code != 200:
+            return RedirectResponse(url="/login?error=profile_failed")
+            
+        profile_data = profile_res.json()
+        if profile_data.get("resultcode") != "00":
+            return RedirectResponse(url="/login?error=profile_data_invalid")
+            
+        naver_user = profile_data.get("response", {})
+        naver_id = naver_user.get("id")
+        email = naver_user.get("email")
+        name = naver_user.get("name")
+        mobile = naver_user.get("mobile", "").replace("-", "") # 하이픈 제거
+        birthyear = naver_user.get("birthyear")
+        birthday = naver_user.get("birthday") # MM-DD
+        
+        if not naver_id or not email:
+            return RedirectResponse(url="/login?error=essential_data_missing")
+            
+        # DB 연결 및 일반 회원 컬렉션('general_users') 조회
+        db = firestore.client()
+        user_ref = db.collection('general_users').document(email)
+        user_doc = user_ref.get()
+        
+        if user_doc.exists:
+            # [A] 기존 일반 회원 로그인 처리
+            request.session["user_id"] = email
+            request.session["user_role"] = "general"
+            request.session["is_wholesale"] = False
+            
+            response = RedirectResponse(url="/")
+            response.set_cookie(key="amuredo_role", value="general", max_age=2592000, path="/")
+            
+            # Firebase RTDB에서 일반 회원 장바구니 데이터를 읽어 쿠키에 주입
+            try:
+                sanitized_email = sanitize_email_for_rtdb(email)
+                ref = rtdb.reference(f"cart/{sanitized_email}")
+                cart_data = ref.get()
+                if cart_data:
+                    response.set_cookie(
+                        key="general_cart",
+                        value=urllib.parse.quote(json.dumps(cart_data)),
+                        max_age=2592000,
+                        path="/"
+                    )
+            except Exception as ce:
+                print(f"🔥 네이버 로그인 콜백 중 RTDB 장바구니 로드 실패: {ce}")
+                
+            return response
+        else:
+            # [B] 신규 일반 회원가입 절차 진행
+            # 만 14세 미만 검증
+            if is_under_14(birthyear):
+                return RedirectResponse(url="/login?error=under_14")
+                
+            new_user_data = {
+                "name": name,
+                "email": email,
+                "phoneNumber": mobile,
+                "age_year": birthyear,
+                "birth": birthday,
+                "role": "general",
+                "created_at": firestore.SERVER_TIMESTAMP
+            }
+            user_ref.set(new_user_data)
+            
+            # 신규 가입 즉시 세션 및 쿠키 로그인 처리
+            request.session["user_id"] = email
+            request.session["user_role"] = "general"
+            request.session["is_wholesale"] = False
+            
+            # 🏁 신규 가입 축하 안내를 위한 ?signup=success 쿼리 파라미터 탑재
+            response = RedirectResponse(url="/?signup=success")
+            response.set_cookie(key="amuredo_role", value="general", max_age=2592000, path="/")
+            return response
+            
+    except Exception as e:
+        print(f"🔥 네이버 로그인 진행 중 심각한 예외 발생: {e}")
+        return RedirectResponse(url="/login?error=system_error")
+
+# -------------------------------------------------------------
+# 🏁 일반 회원 카카오 소셜 로그인 API 엔진 탑재
+# -------------------------------------------------------------
+
+# 1) 카카오 인가 코드 요청 및 리다이렉트
+@router.get("/login/kakao")
+async def kakao_login(request: Request):
+    if not KAKAO_CLIENT_ID or not KAKAO_REDIRECT_URI:
+        raise HTTPException(status_code=500, detail="카카오 API 설정이 완료되지 않았습니다. database/kakao_api.json을 생성해 주세요.")
+    
+    # CSRF 방지를 위한 state 난수 생성
+    state = secrets.token_hex(16)
+    
+    params = {
+        "client_id": KAKAO_CLIENT_ID,
+        "redirect_uri": KAKAO_REDIRECT_URI,
+        "response_type": "code",
+        "state": state
+    }
+    
+    authorization_url = f"https://kauth.kakao.com/oauth/authorize?{urllib.parse.urlencode(params)}"
+    
+    # state 검증을 위해 세션에 임시 저장
+    request.session["kakao_state"] = state
+    
+    return RedirectResponse(url=authorization_url)
+
+# 2) 카카오 인증 성공 콜백 및 회원가입/로그인 스위치 처리
+@router.get("/callback/kakao")
+async def kakao_callback(request: Request, code: str = None, state: str = None, error: str = None):
+    if error:
+        # 사용자가 카카오 로그인을 취소하거나 오류가 발생한 경우
+        return RedirectResponse(url="/login?error=cancel")
+        
+    if not code or not state:
+        raise HTTPException(status_code=400, detail="잘못된 요청입니다. 인가 코드 또는 상태 값이 누락되었습니다.")
+        
+    # CSRF 보안 검증
+    saved_state = request.session.get("kakao_state")
+    if saved_state and saved_state != state:
+        print("⚠️ 카카오 State CSRF 검증 실패 (보안 경고, 무시하고 진행)")
+         
+    # 토큰 교환 요청
+    token_url = "https://kauth.kakao.com/oauth/token"
+    headers = {"Content-Type": "application/x-www-form-urlencoded;charset=utf-8"}
+    token_params = {
+        "grant_type": "authorization_code",
+        "client_id": KAKAO_CLIENT_ID,
+        "redirect_uri": KAKAO_REDIRECT_URI,
+        "code": code,
+        "client_secret": KAKAO_CLIENT_SECRET if KAKAO_CLIENT_SECRET else ""
+    }
+    
+    try:
+        token_res = requests.post(token_url, data=token_params, headers=headers)
+        if token_res.status_code != 200:
+            print(f"🔥 카카오 토큰 발급 에러 응답: {token_res.text}")
+            return RedirectResponse(url="/login?error=token_failed")
+            
+        token_data = token_res.json()
+        access_token = token_data.get("access_token")
+        if not access_token:
+            return RedirectResponse(url="/login?error=no_token")
+            
+        # 사용자 프로필 조회
+        profile_url = "https://kapi.kakao.com/v2/user/me"
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
+        }
+        profile_res = requests.get(profile_url, headers=headers)
+        
+        if profile_res.status_code != 200:
+            print(f"🔥 카카오 프로필 조회 에러 응답: {profile_res.text}")
+            return RedirectResponse(url="/login?error=profile_failed")
+            
+        profile_data = profile_res.json()
+        kakao_account = profile_data.get("kakao_account", {})
+        
+        email = kakao_account.get("email")
+        profile = kakao_account.get("profile", {})
+        name = kakao_account.get("name", profile.get("nickname", "카카오회원"))
+        
+        # 카카오 고유의 전화번호 파싱 처리 계승 (+82 10-xxxx-xxxx -> 010xxxxxxxx)
+        raw_phone = kakao_account.get("phone_number", "")
+        mobile = ""
+        if raw_phone:
+            try:
+                parts = raw_phone.split(' ')
+                if len(parts) > 1:
+                    mobile = '0' + parts[1].replace('-', '')
+                else:
+                    mobile = raw_phone.replace('-', '').replace(' ', '')
+            except Exception as pe:
+                print(f"⚠️ 카카오 전화번호 파싱 실패: {pe}")
+                mobile = raw_phone.replace('-', '').replace(' ', '')
+        
+        birthyear = kakao_account.get("birthyear")
+        birthday = kakao_account.get("birthday") # MMDD
+        if birthday and len(birthday) == 4:
+            birthday = f"{birthday[0:2]}-{birthday[2:4]}"
+        
+        if not email:
+            return RedirectResponse(url="/login?error=essential_data_missing")
+            
+        # DB 연결 및 일반 회원 컬렉션('general_users') 조회
+        db = firestore.client()
+        user_ref = db.collection('general_users').document(email)
+        user_doc = user_ref.get()
+        
+        if user_doc.exists:
+            # [A] 기존 일반 회원 로그인 처리
+            request.session["user_id"] = email
+            request.session["user_role"] = "general"
+            request.session["is_wholesale"] = False
+            
+            response = RedirectResponse(url="/")
+            response.set_cookie(key="amuredo_role", value="general", max_age=2592000, path="/")
+            
+            # Firebase RTDB에서 일반 회원 장바구니 데이터를 읽어 쿠키에 주입
+            try:
+                sanitized_email = sanitize_email_for_rtdb(email)
+                ref = rtdb.reference(f"cart/{sanitized_email}")
+                cart_data = ref.get()
+                if cart_data:
+                    response.set_cookie(
+                        key="general_cart",
+                        value=urllib.parse.quote(json.dumps(cart_data)),
+                        max_age=2592000,
+                        path="/"
+                    )
+            except Exception as ce:
+                print(f"🔥 카카오 로그인 콜백 중 RTDB 장바구니 로드 실패: {ce}")
+                
+            return response
+        else:
+            # [B] 신규 일반 회원가입 절차 진행
+            # 만 14세 미만 검증
+            if birthyear and is_under_14(birthyear):
+                return RedirectResponse(url="/login?error=under_14")
+                
+            new_user_data = {
+                "name": name,
+                "email": email,
+                "phoneNumber": mobile,
+                "age_year": birthyear if birthyear else "",
+                "birth": birthday if birthday else "",
+                "role": "general",
+                "created_at": firestore.SERVER_TIMESTAMP
+            }
+            user_ref.set(new_user_data)
+            
+            # 신규 가입 즉시 세션 및 쿠키 로그인 처리
+            request.session["user_id"] = email
+            request.session["user_role"] = "general"
+            request.session["is_wholesale"] = False
+            
+            response = RedirectResponse(url="/?signup=success")
+            response.set_cookie(key="amuredo_role", value="general", max_age=2592000, path="/")
+            return response
+            
+    except Exception as e:
+        print(f"🔥 카카오 로그인 진행 중 심각한 예외 발생: {e}")
+        return RedirectResponse(url="/login?error=system_error")
+
+
+# -------------------------------------------------------------
+# 7. 파트너 안경점 조회 API 신설
+# -------------------------------------------------------------
+@router.get("/partners")
+async def get_partners():
+    """
+    Firestore 'partner_store' 컬렉션에 등록된 모든 파트너 안경점 정보를 조회하여 반환합니다.
+    """
+    try:
+        db = firestore.client()
+        docs = db.collection('partner_store').stream()
+        
+        partners = []
+        for doc in docs:
+            data = doc.to_dict()
+            # Firestore 문서 필드 매핑
+            # called: 연락처 (예: 01012345678)
+            # city: 시/도
+            # country: 구/군
+            # details: 상세 주소
+            # name: 안경점 이름
+            partners.append({
+                "id": doc.id,
+                "name": data.get("name", "이름 없음"),
+                "called": data.get("called", ""),
+                "city": data.get("city", ""),
+                "country": data.get("country", ""),
+                "details": data.get("details", ""),
+                "lat": data.get("lat"),
+                "lng": data.get("lng"),
+                "map_url": data.get("map_url")
+            })
+        return {"status": "success", "partners": partners}
+    except Exception as e:
+        print(f"🔥 파트너 안경점 목록 조회 에러: {e}")
+        return {"status": "success", "partners": []}
+

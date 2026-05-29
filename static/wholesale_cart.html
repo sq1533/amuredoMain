@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>도매 파트너 장바구니 - 아무래도 안경</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=16.0">
+    <link rel="stylesheet" href="/static/style.css?v=21.0">
     <style>
         .cart-container {
             max-width: 900px;
@@ -258,9 +258,26 @@
                 return [];
             }
 
-            // 2. 쿠키에 장바구니 데이터 저장하기
+            // 2. 쿠키에 장바구니 데이터 저장 및 즉시 RTDB 동기화
             function saveCart(cart) {
                 document.cookie = `wholesale_cart=${encodeURIComponent(JSON.stringify(cart))}; path=/; max-age=2592000`;
+                
+                // Firebase RTDB에 최신 장바구니 상태 동시 전송
+                fetch('/api/user/cart/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cart: cart })
+                })
+                .then(res => res.json())
+                .then(syncData => {
+                    if (syncData.status === 'success') {
+                        // 세션 스토리지의 초깃값도 새 상태로 갱신 (Dirty Checking 기준선 최신화)
+                        sessionStorage.setItem("initialCartState", JSON.stringify(cart));
+                    }
+                })
+                .catch(err => {
+                    console.error("도매 장바구니 DB 동기화 실패:", err);
+                });
             }
 
             // 전역 window.formatWon 사용 (로컬 함수 삭제)
@@ -442,6 +459,6 @@
             });
         });
     </script>
-<script src="/static/globalWholesale.js?v=1.1"></script>
+<script src="/static/globalWholesale.js?v=3.3"></script>
 </body>
 </html>

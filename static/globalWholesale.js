@@ -89,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <header class="main-header">
                 <nav class="pc-nav-left">
                     <button class="nav-switch-btn" onclick="location.href='/about'">About</button>
+                    <button class="nav-switch-btn" onclick="location.href='/partners'">Partners</button>
                     <button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button>
                 </nav>
                 <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
@@ -109,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
                         <li><button class="nav-switch-btn" onclick="location.href='/antioch'">Antioch</button></li>
                         <li><button class="nav-switch-btn" onclick="location.href='/about'">About</button></li>
+                        <li><button class="nav-switch-btn" onclick="location.href='/partners'">Partners</button></li>
                         <li><button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button></li>
                     </ul>
                 </nav>
@@ -169,6 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <li><a href="/wholesale/cart" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">장바구니</a></li>
                 <li><a href="/wholesale/orders" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">주문현황</a></li>
                 <li><a href="/wholesale/mypage" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">마이페이지</a></li>
+                <li><a href="/partners" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">파트너 안경점</a></li>
                 <li><a href="#" class="globalLogoutBtnTrigger" style="display: block; padding: 10px 5px; background: #fff1f1; color: #d32f2f; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#ffe5e5'" onmouseout="this.style.background='#fff1f1'">로그아웃</a></li>
             `;
             bottomNavHTML = `
@@ -180,13 +183,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     <img src="/static/img/order.svg" alt="Orders" style="width:24px;height:24px;opacity:0.7;">
                     <span>주문현황</span>
                 </a>
+                <a href="/partners" class="nav-item">
+                    <img src="/static/img/partner.svg" alt="Partners" style="width:24px;height:24px;opacity:0.7;">
+                    <span>파트너 안경점</span>
+                </a>
                 <a href="/wholesale/mypage" class="nav-item">
                     <img src="/static/img/my_page.svg" alt="Mypage" style="width:24px;height:24px;opacity:0.7;">
                     <span>마이페이지</span>
-                </a>
-                <a href="#" class="nav-item globalLogoutBtnTrigger">
-                    <img src="/static/img/logout.svg" alt="Logout" style="width:24px;height:24px;opacity:0.7;">
-                    <span style="color: #d32f2f;">로그아웃</span>
                 </a>
             `;
         } else if (role === "general") {
@@ -195,6 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <li><a href="/general/cart" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">장바구니</a></li>
                 <li><a href="/general/reservations" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">예약확인</a></li>
                 <li><a href="/general/mypage" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">마이페이지</a></li>
+                <li><a href="/partners" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">파트너 안경점</a></li>
                 <li><a href="#" class="globalLogoutBtnTrigger" style="display: block; padding: 10px 5px; background: #fff1f1; color: #d32f2f; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#ffe5e5'" onmouseout="this.style.background='#fff1f1'">로그아웃</a></li>
             `;
             bottomNavHTML = `
@@ -206,13 +210,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     <img src="/static/img/order.svg" alt="Reservations" style="width:24px;height:24px;opacity:0.7;">
                     <span>예약확인</span>
                 </a>
+                <a href="/partners" class="nav-item">
+                    <img src="/static/img/partner.svg" alt="Partners" style="width:24px;height:24px;opacity:0.7;">
+                    <span>파트너 안경점</span>
+                </a>
                 <a href="/general/mypage" class="nav-item">
                     <img src="/static/img/my_page.svg" alt="Mypage" style="width:24px;height:24px;opacity:0.7;">
                     <span>마이페이지</span>
-                </a>
-                <a href="#" class="nav-item globalLogoutBtnTrigger">
-                    <img src="/static/img/logout.svg" alt="Logout" style="width:24px;height:24px;opacity:0.7;">
-                    <span style="color: #d32f2f;">로그아웃</span>
                 </a>
             `;
         } else { // guest (비로그인 상태)
@@ -220,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
             menuItemsHTML = `
                 <li><a href="/login" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">로그인</a></li>
                 <li><a href="/register" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">회원가입</a></li>
-                <li><a href="/contact" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">파트너 안경점</a></li>
+                <li><a href="/partners" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">파트너 안경점</a></li>
                 <li><a href="/contact" style="display: block; padding: 10px 5px; background: #0e3a5b; color: #fff; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#0b2d47'" onmouseout="this.style.background='#0e3a5b'">입점 문의</a></li>
             `;
             bottomNavHTML = `
@@ -232,7 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <img src="/static/img/order.svg" alt="Register" style="width:24px;height:24px;opacity:0.7;">
                     <span>회원가입</span>
                 </a>
-                <a href="/contact" class="nav-item">
+                <a href="/partners" class="nav-item">
                     <img src="/static/img/partner.svg" alt="Partners" style="width:24px;height:24px;opacity:0.7;">
                     <span>안경점 안내</span>
                 </a>
@@ -341,23 +345,96 @@ document.addEventListener("DOMContentLoaded", () => {
         const appContainer = document.querySelector('.app-container') || document.body;
         appContainer.insertAdjacentHTML("afterbegin", menuHTML);
 
+        // 🏁 장바구니 초깃값 백업 (Dirty Checking용)
+        const backupInitialCart = (role) => {
+            if (role === "guest") {
+                sessionStorage.removeItem("initialCartState");
+                return;
+            }
+            if (sessionStorage.getItem("initialCartState")) return;
+            
+            const cookieName = role === "wholesale" ? "wholesale_cart" : "general_cart";
+            const match = document.cookie.match(new RegExp('(^| )' + cookieName + '=([^;]+)'));
+            let cart = [];
+            if (match) {
+                try {
+                    cart = JSON.parse(decodeURIComponent(match[2]));
+                } catch(e) { cart = []; }
+            }
+            sessionStorage.setItem("initialCartState", JSON.stringify(cart));
+        };
+
         // 로그아웃 이벤트 전동 바인딩
         document.querySelectorAll(".globalLogoutBtnTrigger").forEach(btn => {
             btn.addEventListener("click", (e) => {
                 e.preventDefault();
-                fetch('/api/user/logout')
+                
+                const role = getRoleFromCookie();
+                const cookieName = role === "wholesale" ? "wholesale_cart" : "general_cart";
+                
+                // 1. 현재 쿠키 데이터 읽기
+                const match = document.cookie.match(new RegExp('(^| )' + cookieName + '=([^;]+)'));
+                let currentCart = [];
+                if (match) {
+                    try {
+                        currentCart = JSON.parse(decodeURIComponent(match[2]));
+                    } catch(err) { currentCart = []; }
+                }
+                
+                // 2. 백업된 초깃값 읽기
+                let initialCart = [];
+                const backup = sessionStorage.getItem("initialCartState");
+                if (backup) {
+                    try {
+                        initialCart = JSON.parse(backup);
+                    } catch(err) { initialCart = []; }
+                }
+                
+                // 3. Dirty Checking (내용 및 순서 비교)
+                const isDirty = JSON.stringify(currentCart) !== JSON.stringify(initialCart);
+                
+                const performLogout = () => {
+                    fetch('/api/user/logout')
+                        .then(res => res.json())
+                        .then(logoutData => {
+                            if(logoutData.status === 'success') {
+                                sessionStorage.removeItem("initialCartState");
+                                const modal = document.getElementById('customGlobalLogoutModal');
+                                if (modal) {
+                                    modal.style.display = 'flex';
+                                    document.getElementById('globalModalConfirmBtn2').onclick = () => {
+                                        window.location.href = '/';
+                                    };
+                                } else {
+                                    window.location.href = '/';
+                                }
+                            }
+                        });
+                };
+                
+                if (isDirty && role !== "guest") {
+                    // 변경사항이 있을 때만 서버에 동기화 API 호출
+                    fetch('/api/user/cart/sync', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ cart: currentCart })
+                    })
                     .then(res => res.json())
-                    .then(logoutData => {
-                        if(logoutData.status === 'success') {
-                            const modal = document.getElementById('customGlobalLogoutModal');
-                            modal.style.display = 'flex';
-                            document.getElementById('globalModalConfirmBtn2').onclick = () => {
-                                window.location.href = '/';
-                            };
-                        }
+                    .then(syncData => {
+                        performLogout();
+                    })
+                    .catch(err => {
+                        console.error("로그아웃 전 장바구니 동기화 실패:", err);
+                        performLogout(); // 에러 발생 시에도 안전하게 로그아웃 진행
                     });
+                } else {
+                    performLogout();
+                }
             });
         });
+        
+        // 초기 로딩 시 즉각 백업 실행
+        backupInitialCart(role);
     };
 
     // 1단계: 쿠키 값 기준으로 지연 없이 즉각 선제 렌더링
@@ -381,6 +458,51 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch(err => {
             console.error("로그인 상태 백그라운드 확인 오류:", err);
         });
+
+    // 🏁 회원가입 완료 미니멀 팝업 모듈 (이모티콘/버튼 없이 1.5초 노출 후 메인페이지 자동 전환)
+    const checkSignupSuccess = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('signup') === 'success') {
+            const oldModal = document.getElementById("globalSignupSuccessModal");
+            if (oldModal) oldModal.remove();
+
+            // 텍스트 정의 및 개행(\n) 반영
+            const contentText = "아무래도 안경 회원가입이\n완료되었습니다.";
+
+            // 기존 .ws-modal-overlay 의 display: none 속성이 영향을 주지 않도록 인라인 스타일을 통해 display: flex !important 와 absolute 레이아웃을 강력하게 강제합니다.
+            const signupModalHTML = `
+                <div id="globalSignupSuccessModal" style="display: flex !important; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 999999 !important; justify-content: center; align-items: center; opacity: 1; transition: opacity 0.4s ease;">
+                    <div style="background: #ffffff; padding: 35px 45px; border-radius: 16px; width: 300px; text-align: center; box-shadow: 0 20px 50px rgba(14, 58, 91, 0.15); animation: wsModalFadeIn 0.3s forwards; box-sizing: border-box;">
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #0e3a5b; margin-bottom: 14px; text-align: center; letter-spacing: -0.5px;">
+                            회원가입 완료
+                        </div>
+                        <div style="font-size: 0.95rem; color: #555; line-height: 1.6; text-align: center; white-space: pre-line; word-break: keep-all;">${contentText}</div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML("beforeend", signupModalHTML);
+
+            // 1.5초(1500ms) 동안 띄운 후 페이드아웃 효과와 함께 메인페이지(/)로 자동 이동(switch)
+            setTimeout(() => {
+                const modal = document.getElementById("globalSignupSuccessModal");
+                if (modal) {
+                    modal.style.opacity = "0";
+                    setTimeout(() => {
+                        modal.remove();
+                        // 🏁 현재 페이지가 이미 메인이면 페이지 리로드 없이 깔끔하게 URL 파라미터만 정리
+                        if (window.location.pathname === "/") {
+                            window.history.replaceState({}, document.title, "/");
+                        } else {
+                            window.location.href = "/"; // 메인 페이지로 이동하면서 URL 쿼리 파라미터 완전 정화
+                        }
+                    }, 400);
+                } else {
+                    window.location.href = "/";
+                }
+            }, 1500);
+        }
+    };
+    checkSignupSuccess();
 
     // 🏁 모바일 메뉴 재구조화 함수 (Antioch 이동 및 도매 섹션 처리)
     function reorganizeMobileMenu(isWholesale) {
