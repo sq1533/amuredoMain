@@ -178,24 +178,30 @@
             background-color: #fff;
             box-shadow: 0 0 0 3px rgba(14, 58, 91, 0.1);
         }
-        .file-upload-wrapper {
-            position: relative;
-            margin-top: 10px;
+        .file-header-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 8px;
         }
         .custom-file-label {
-            display: flex;
+            display: inline-flex;
             justify-content: center;
             align-items: center;
-            padding: 12px 20px;
+            padding: 8px 16px;
             background: #F7F7F7;
             color: #0e3a5b;
             border: 1px solid #eaeaea;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 700;
             transition: all 0.25s ease;
             text-align: center;
+            white-space: nowrap;
+            box-sizing: border-box;
+            line-height: 1; /* 폰트 고유의 상하 쏠림 현상을 방지하고 중앙 정렬을 강제 */
+            vertical-align: middle;
         }
         .custom-file-label:hover {
             background: #eef3f7;
@@ -379,12 +385,12 @@
                     <input type="text" id="business_number" name="business_number" placeholder="000-00-00000" required>
                 </div>
                 <div class="form-group">
-                    <label>사업자 등록증 첨부</label>
-                    <div class="file-upload-wrapper">
+                    <div class="file-header-wrapper">
+                        <label style="margin-bottom: 0; white-space: nowrap;">사업자 등록증 첨부</label>
                         <label for="images" class="custom-file-label">파일 선택</label>
                         <input type="file" id="images" name="business_license" accept="image/*" required>
-                        <div id="filePreview" class="file-preview-container"></div>
                     </div>
+                    <div id="filePreview" class="file-preview-container" style="margin-top: 5px;"></div>
                 </div>
                 <button type="submit" id="submitBtn" class="submit-btn">가입 신청하기</button>
             </form>
@@ -612,6 +618,6 @@
             });
         });
     </script>
-<script src="/static/globalWholesale.js?v=3.3"></script>
+<script src="/static/globalWholesale.js?v=3.4"></script>
 </body>
 </html>

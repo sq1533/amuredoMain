@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 아무레도 검색엔진 최적화(SEO) 및 SNS 공유 설정 -->
+    <title>예약 완료 - 아무래도 안경</title>
+    <meta name="description" content="분위기와 억양을 디자인을 디자인합니다. 아무래도 안경, 본질의 아름다움을 추구합니다">
+    <link rel="icon" href="/static/img/icon.webp" type="image/webp">
+    <link rel="apple-touch-icon" href="/static/img/icon.webp">
+    
+    <!-- 전역 메인 폰트 Pretendard 연결 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <!-- 에어비앤비 Lottie 애니메이션 웹 플레이어 라이브러리 추가 -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        .success-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 200px);
+            padding: 120px 20px 80px 20px;
+            box-sizing: border-box;
+            background: #fafafa;
+        }
+        .success-card {
+            max-width: 600px;
+            width: 100%;
+            background: #fff;
+            border-radius: 16px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 50px rgba(14, 58, 91, 0.04);
+            border: 1px solid #eaeaea;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        
+        /* 로티 아이콘 전용 프레임 */
+        .lottie-container {
+            width: 130px;
+            height: 130px;
+            margin: 0 auto 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 텍스트 스타일링 */
+        .success-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 25px;
+            letter-spacing: -0.5px;
+        }
+        
+        /* 예약 세부 정보 렌더 박스 */
+        .details-box {
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 22px 25px;
+            margin-bottom: 30px;
+            text-align: left;
+            box-sizing: border-box;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+        .detail-label {
+            font-weight: 700;
+            color: #777;
+            width: 90px;
+            flex-shrink: 0;
+        }
+        .detail-value {
+            color: #333;
+            font-weight: 800;
+        }
+        .detail-value.highlight {
+            color: #0e3a5b;
+        }
+        
+        /* 보조 정보 메세지 */
+        .info-desc {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 35px;
+            word-break: keep-all;
+        }
+        
+        /* 버튼 정렬 수평 레이아웃 */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .btn-base {
+            flex: 1;
+            padding: 16px 0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+        .btn-outline {
+            background: #fff;
+            color: #0e3a5b;
+            border: 1px solid #0e3a5b;
+        }
+        .btn-outline:hover {
+            background: #f4f7f9;
+            transform: translateY(-1px);
+        }
+        .btn-fill {
+            background: #0e3a5b;
+            color: #fff;
+            border: 1px solid #0e3a5b;
+            box-shadow: 0 4px 10px rgba(14, 58, 91, 0.1);
+        }
+        .btn-fill:hover {
+            background: #0b2d47;
+            border-color: #0b2d47;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(14, 58, 91, 0.2);
+        }
+
+        /* 📱 모바일 디바이스 수직 최적화 */
+        @media (max-width: 600px) {
+            .success-wrapper {
+                padding: 100px 15px 60px 15px;
+                min-height: calc(100vh - 150px);
+            }
+            .success-card {
+                padding: 40px 20px;
+            }
+            .success-title {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+            .details-box {
+                padding: 18px 20px;
+            }
+            .detail-row {
+                font-size: 0.9rem;
+            }
+            .btn-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .btn-base {
+                width: 100%;
+                padding: 15px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- <header>는 globalWholesale.js가 동적으로 삽입합니다. -->
+
+    <div class="success-wrapper">
+        <div class="success-card">
+            
+            <!-- 🏁 1. 아이콘: 사용자가 준비해주신 로티 파일 (circle.json) 적용 -->
+            <div class="lottie-container">
+                <lottie-player 
+                    src="/static/img/circle.json" 
+                    background="transparent" 
+                    speed="1.2" 
+                    style="width: 130px; height: 130px;" 
+                    loop 
+                    autoplay>
+                </lottie-player>
+            </div>
+            
+            <!-- 🏁 2. 안내 메세지 -->
+            <h1 class="success-title">예약이 정상적으로 진행되었습니다.</h1>
+            
+            <div class="details-box">
+                <div class="detail-row">
+                    <span class="detail-label">예약 번호</span>
+                    <span class="detail-value highlight" id="detailBookingId">B260530-0000</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">예약 매장</span>
+                    <span class="detail-value" id="detailStoreName">매장 로드 중...</span>
+                </div>
+            </div>
+            
+            <p class="info-desc">
+                예약하신 안경 목록은 매장 방문 시 안경사 1:1 전문 피팅 서비스에 활용됩니다. 영업일 기준 2~3일 내에 상품 준비가 완료되면 등록하신 연락처로 별도의 알림을 보내드리겠습니다.
+            </p>
+            
+            <!-- 🏁 3. 버튼 2개 -->
+            <div class="btn-group">
+                <a href="/" class="btn-base btn-outline">쇼핑 계속하기</a>
+                <a href="/general/bookings" class="btn-base btn-fill">예약 확인하기</a>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- 푸터는 globalWholesale.js가 동적으로 주입합니다. -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const bookingIdEl = document.getElementById("detailBookingId");
+            const storeNameEl = document.getElementById("detailStoreName");
+
+            // URL 쿼리 파라미터에서 데이터 추출
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookingId = urlParams.get("booking_id");
+            const storeName = urlParams.get("store");
+
+            if (bookingId) {
+                bookingIdEl.textContent = bookingId;
+            } else {
+                bookingIdEl.textContent = "확인 불가";
+            }
+
+            if (storeName) {
+                storeNameEl.textContent = decodeURIComponent(storeName);
+            } else {
+                storeNameEl.textContent = "미선택 매장";
+            }
+        });
+    </script>
+    <script src="/static/globalWholesale.js?v=3.4"></script>
+</body>
+</html>

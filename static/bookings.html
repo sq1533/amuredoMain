@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 아무레도 검색엔진 최적화(SEO) 및 SNS 공유 설정 -->
+    <title>예약 확인 - 아무래도 안경</title>
+    <meta name="description" content="분위기와 억양을 디자인을 디자인합니다. 아무래도 안경, 본질의 아름다움을 추구합니다">
+    <link rel="icon" href="/static/img/icon.webp" type="image/webp">
+    <link rel="apple-touch-icon" href="/static/img/icon.webp">
+    
+    <!-- 전역 메인 폰트 Pretendard 연결 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <style>
+        .bookings-wrapper {
+            max-width: 900px;
+            margin: 110px auto 60px auto;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .bookings-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 12px;
+            text-align: center;
+            letter-spacing: -0.5px;
+        }
+        .bookings-subtitle {
+            font-size: 1rem;
+            color: #666;
+            text-align: center;
+            margin-bottom: 45px;
+            letter-spacing: -0.2px;
+        }
+        
+        /* 로딩 스피너 및 빈 상태(Empty State) 스타일 */
+        .loading-state, .empty-state {
+            background: #fff;
+            border-radius: 16px;
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(14, 58, 91, 0.03);
+            border: 1px solid #eaeaea;
+            box-sizing: border-box;
+        }
+        .empty-icon {
+            font-size: 3rem;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+        .empty-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 25px;
+        }
+        .btn-go-shop {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #0e3a5b;
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.95rem;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.25s ease;
+        }
+        .btn-go-shop:hover {
+            background: #0b2d47;
+            transform: translateY(-1px);
+        }
+
+        /* 🏁 익스펜더(아코디언) 카드 스타일 */
+        .expander-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .expander-card {
+            background: #fff;
+            border: 1px solid #eaeaea;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(14, 58, 91, 0.02);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .expander-card:hover {
+            box-shadow: 0 12px 35px rgba(14, 58, 91, 0.05);
+            border-color: #0e3a5b;
+        }
+        
+        /* 취소된 예약은 흐리게 시인성 제한 */
+        .expander-card.cancelled {
+            opacity: 0.65;
+        }
+        .expander-card.cancelled:hover {
+            box-shadow: none;
+            border-color: #eaeaea;
+        }
+
+        /* 아코디언 헤더 */
+        .expander-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 30px;
+            cursor: pointer;
+            user-select: none;
+            background: #fff;
+            transition: background 0.25s ease;
+        }
+        .expander-header:hover {
+            background: #fafafa;
+        }
+        .expander-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: left;
+        }
+        .expander-store {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            letter-spacing: -0.3px;
+        }
+        .expander-summary {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #666;
+        }
+        
+        /* 화살표 아이콘 */
+        .chevron-icon {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: #0e3a5b;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .expander-card.open .chevron-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 아코디언 내용 영역 (CSS max-height Transition 적용) */
+        .expander-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #fdfdfd;
+            border-top: 0 solid #eee;
+        }
+        .expander-card.open .expander-content {
+            border-top-width: 1px;
+            /* 자바스크립트에서 실제 높이를 동적으로 주입하여 스무스하게 전개 */
+        }
+        .expander-content-inner {
+            padding: 30px;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .section-sub {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 15px;
+            letter-spacing: -0.2px;
+            border-left: 3px solid #0e3a5b;
+            padding-left: 8px;
+        }
+
+        /* 날짜 및 정보 박스 */
+        .info-panel {
+            background: #fafafa;
+            border: 1px solid #eaeaea;
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .info-date-val {
+            font-weight: 800;
+            color: #333;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            background: #eef7fe;
+            color: #0e3a5b;
+        }
+        .status-badge.cancelled-badge {
+            background: #ffebeb;
+            color: #d9534f;
+        }
+
+        /* 🏁 예약 상품 리스트 디자인 */
+        .goods-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .goods-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 12px 18px;
+            box-sizing: border-box;
+        }
+        .goods-img {
+            width: 54px;
+            height: 54px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            background: #fafafa;
+            flex-shrink: 0;
+        }
+        .goods-info-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .goods-name {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #333;
+        }
+        .goods-cat-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #0e3a5b;
+            background: #eef7fe;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            align-self: flex-start;
+        }
+
+        /* 액션 버튼 그룹 */
+        .card-action-bar {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            border-top: 1px dashed #eee;
+            padding-top: 20px;
+        }
+        .btn-action {
+            padding: 11px 22px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-action-modify {
+            background: #f4f7f9;
+            color: #0e3a5b;
+            border: 1px solid #0e3a5b;
+        }
+        .btn-action-modify:hover {
+            background: #eef3f7;
+            transform: translateY(-1px);
+        }
+        .btn-action-cancel {
+            background: #fff;
+            color: #d9534f;
+            border: 1px solid #d9534f;
+        }
+        .btn-action-cancel:hover {
+            background: #fff5f5;
+            transform: translateY(-1px);
+        }
+
+        /* 전역 오버레이 로딩 */
+        #cancelLoadingOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .cancel-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #eaeaea;
+            border-top: 5px solid #d9534f;
+            border-radius: 50%;
+            animation: cancel-spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes cancel-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 📱 모바일 디바이스 최적화 */
+        @media (max-width: 768px) {
+            .bookings-wrapper {
+                margin: 95px auto 40px auto;
+            }
+            .bookings-title {
+                font-size: 1.7rem;
+            }
+            .bookings-subtitle {
+                font-size: 0.9rem;
+                margin-bottom: 30px;
+            }
+            .expander-header {
+                padding: 18px 20px;
+            }
+            .expander-store {
+                font-size: 1.1rem;
+            }
+            .expander-summary {
+                font-size: 0.85rem;
+            }
+            .expander-content-inner {
+                padding: 20px;
+            }
+            .info-panel {
+                padding: 14px 16px;
+                font-size: 0.85rem;
+            }
+            .goods-row {
+                padding: 10px 12px;
+                gap: 12px;
+            }
+            .goods-img {
+                width: 46px;
+                height: 46px;
+            }
+            .goods-name {
+                font-size: 0.85rem;
+            }
+            .card-action-bar {
+                justify-content: stretch;
+            }
+            .btn-action {
+                flex: 1;
+                text-align: center;
+                font-size: 0.85rem;
+                padding: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- <header>는 globalWholesale.js가 동적으로 주입합니다. -->
+
+    <div class="bookings-wrapper">
+        <h1 class="bookings-title">나의 예약 확인</h1>
+        <p class="bookings-subtitle">매장 피팅 예약 목록 및 상세 내역을 실시간으로 확인하실 수 있습니다.</p>
+
+        <!-- 동적 렌더링 컨테이너 -->
+        <div id="bookingsContainer">
+            <!-- 🏁 로딩 대기 상태 -->
+            <div class="loading-state">
+                <div class="booking-spinner" style="width: 40px; height: 40px; border: 4px solid #eaeaea; border-top: 4px solid #0e3a5b; border-radius: 50%; animation: cancel-spin 1s linear infinite; margin: 0 auto 15px auto;"></div>
+                <p style="color: #666; font-weight: 700;">예약 데이터를 비동기 조회 중입니다...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏁 취소 진행 중 전체화면 잠금 안내 오버레이 -->
+    <div id="cancelLoadingOverlay">
+        <div class="cancel-spinner"></div>
+        <p style="font-size: 1.15rem; font-weight: 700; color: #d9534f; letter-spacing: -0.3px; text-align: center; margin: 0 20px; line-height: 1.5; word-break: keep-all;">고객님의 피팅 예약을 취소 처리 중입니다.<br>잠시만 기다려 주세요...</p>
+    </div>
+
+    <!-- 푸터는 globalWholesale.js가 동적으로 주입합니다. -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById("bookingsContainer");
+            const cancelOverlay = document.getElementById("cancelLoadingOverlay");
+
+            // 날짜 변환 함수 (YYYY-MM-DDTHH:MM:SS -> YY-MM-DD)
+            function formatYYMMDD(isoString) {
+                if (!isoString) return "확인 불가";
+                try {
+                    const d = new Date(isoString);
+                    const yy = String(d.getFullYear()).slice(-2);
+                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                    const dd = String(d.getDate()).padStart(2, '0');
+                    return `${yy}-${mm}-${dd}`;
+                } catch (e) {
+                    return "확인 불가";
+                }
+            }
+
+            // 1. 예약 정보 및 병렬 안경 상세 정보 패치 빌더
+            function loadBookingsList() {
+                container.innerHTML = `
+                    <div class="loading-state">
+                        <div class="booking-spinner" style="width: 40px; height: 40px; border: 4px solid #eaeaea; border-top: 4px solid #0e3a5b; border-radius: 50%; animation: cancel-spin 1s linear infinite; margin: 0 auto 15px auto;"></div>
+                        <p style="color: #666; font-weight: 700;">예약 데이터를 비동기 조회 중입니다...</p>
+                    </div>
+                `;
+
+                fetch("/api/payment/my_bookings")
+                .then(res => res.json())
+                .then(async bookings => {
+                    if (!bookings || bookings.length === 0) {
+                        renderEmptyState();
+                        return;
+                    }
+
+                    container.innerHTML = ""; // 기존 스피너 제거
+                    const listWrapper = document.createElement("div");
+                    listWrapper.className = "expander-list";
+
+                    // 예약 목록을 돌며 각각의 아코디언 빌드
+                    for (const booking of bookings) {
+                        const isCancelled = (booking.status === "예약 취소");
+                        const card = document.createElement("div");
+                        card.className = `expander-card ${isCancelled ? 'cancelled' : ''}`;
+                        card.id = `card-${booking.bookingId}`;
+
+                        // 예약에 포함된 아이템 목록
+                        const itemsArr = booking.items || [];
+                        
+                        // 병렬로 상품 세부 정보 썸네일 패치
+                        let firstItemName = "안경 상품";
+                        let itemsDetails = [];
+                        if (itemsArr.length > 0) {
+                            try {
+                                const fetchPromises = itemsArr.map(id => 
+                                    fetch(`/api/items/${id}`).then(r => r.json())
+                                );
+                                const fetchedItems = await Promise.all(fetchPromises);
+                                
+                                fetchedItems.forEach((item, idx) => {
+                                    if (item && !item.error) {
+                                        itemsDetails.push({
+                                            name: item.name || "안경 상품",
+                                            image: (item.paths && item.paths[0]) ? item.paths[0] : "/static/img/ready.webp",
+                                            category: item.category || ""
+                                        });
+                                    } else {
+                                        itemsDetails.push({
+                                            name: `안경 상품 (${itemsArr[idx]})`,
+                                            image: "/static/img/ready.webp",
+                                            category: ""
+                                        });
+                                    }
+                                });
+
+                                if (itemsDetails.length > 0) {
+                                    firstItemName = itemsDetails[0].name;
+                                }
+                            } catch (err) {
+                                console.error("안경 세부 정보 로드 에러:", err);
+                            }
+                        }
+
+                        const summaryText = `${firstItemName} 포함 총 ${itemsArr.length}개`;
+
+                        card.innerHTML = `
+                            <div class="expander-header">
+                                <div class="expander-header-left">
+                                    <span class="expander-store">${booking.storeName}</span>
+                                    <span class="expander-summary">${summaryText}</span>
+                                </div>
+                                <svg class="chevron-icon" viewBox="0 0 24 24">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="expander-content">
+                                <div class="expander-content-inner">
+                                    <div class="section-sub">예약 상세 안내</div>
+                                    <div class="info-panel">
+                                        <div>예약 일자: <span class="info-date-val">${formatYYMMDD(booking.createdAt)}</span></div>
+                                        <span class="status-badge ${isCancelled ? 'cancelled-badge' : ''}">${booking.status}</span>
+                                    </div>
+                                    
+                                    <div class="section-sub">예약 상품</div>
+                                    <div class="goods-list">
+                                        ${itemsDetails.map(item => `
+                                            <div class="goods-row">
+                                                <img src="${item.image}" alt="${item.name}" class="goods-img">
+                                                <div class="goods-info-wrap">
+                                                    <span class="goods-name">${item.name}</span>
+                                                    ${item.category ? `<span class="goods-cat-tag">${item.category}</span>` : ''}
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+
+                                    ${!isCancelled ? `
+                                        <div class="card-action-bar">
+                                            <button class="btn-action btn-action-modify" data-id="${booking.bookingId}">예약 수정</button>
+                                            <button class="btn-action btn-action-cancel" data-id="${booking.bookingId}">예약 취소</button>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `;
+
+                        listWrapper.appendChild(card);
+
+                        // 아코디언 클릭 이벤트 연결
+                        const header = card.querySelector(".expander-header");
+                        const content = card.querySelector(".expander-content");
+                        
+                        header.addEventListener("click", () => {
+                            const isOpen = card.classList.contains("open");
+                            
+                            // 모든 다른 카드를 닫음 (아코디언 기본 동작)
+                            document.querySelectorAll(".expander-card").forEach(c => {
+                                if (c !== card) {
+                                    c.classList.remove("open");
+                                    c.querySelector(".expander-content").style.maxHeight = null;
+                                }
+                            });
+
+                            if (isOpen) {
+                                card.classList.remove("open");
+                                content.style.maxHeight = null;
+                            } else {
+                                card.classList.add("open");
+                                content.style.maxHeight = content.scrollHeight + "px";
+                            }
+                        });
+
+                        // 🏁 액션 버튼 이벤트 연결
+                        if (!isCancelled) {
+                            const btnModify = card.querySelector(".btn-action-modify");
+                            const btnCancel = card.querySelector(".btn-action-cancel");
+
+                            // 예약 수정: Connect(/contact) 페이지 이동
+                            btnModify.addEventListener("click", (e) => {
+                                e.stopPropagation(); // 헤더 토글 이벤트 방지
+                                location.href = `/contact?modify_booking=${booking.bookingId}`;
+                            });
+
+                            // 예약 취소: 비동기 API 통신 연동
+                            btnCancel.addEventListener("click", (e) => {
+                                e.stopPropagation(); // 헤더 토글 이벤트 방지
+                                if (confirm("정말로 이 예약을 취소하시겠습니까?\n취소 후에는 복구가 불가합니다.")) {
+                                    executeCancel(booking.bookingId);
+                                }
+                            });
+                        }
+                    }
+
+                    container.appendChild(listWrapper);
+                })
+                .catch(err => {
+                    console.error("예약 내역 로드 중 예외 발생:", err);
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">⚠️</div>
+                            <div class="empty-text">예약 데이터를 가져오지 못했습니다.</div>
+                            <p style="color: #666; margin-bottom: 20px;">서버와의 연결 상태를 확인하고 잠시 후 다시 로드해 주세요.</p>
+                            <button onclick="location.reload()" class="btn-go-shop" style="border:none; cursor:pointer;">다시 시도하기</button>
+                        </div>
+                    `;
+                });
+            }
+
+            // 2. 예약 취소 비동기 API 전송 모듈
+            function executeCancel(bookingId) {
+                cancelOverlay.style.display = "flex";
+
+                fetch(`/api/payment/booking/${bookingId}/cancel`, {
+                    method: "POST"
+                })
+                .then(res => res.json())
+                .then(data => {
+                    cancelOverlay.style.display = "none";
+                    if (data.status === "success") {
+                        alert("예약이 정상적으로 취소 처리되었습니다.");
+                        loadBookingsList(); // 리스트 새로고침
+                    } else {
+                        alert(`취소 실패: ${data.message}`);
+                    }
+                })
+                .catch(err => {
+                    cancelOverlay.style.display = "none";
+                    console.error("취소 전송 에러:", err);
+                    alert("서버와 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+                });
+            }
+
+            // 빈 목록 상태 렌더러
+            function renderEmptyState() {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📅</div>
+                        <div class="empty-text">예약하신 내역이 존재하지 않습니다.</div>
+                        <p style="color: #666; margin-bottom: 25px; line-height:1.5;">아무래도 안경의 품격 있는 1:1 맞춤 피팅 예약을 진행해 보세요.</p>
+                        <a href="/" class="btn-go-shop">안경 둘러보기</a>
+                    </div>
+                `;
+            }
+
+            // 초기 실행
+            loadBookingsList();
+        });
+    </script>
+    <script src="/static/globalWholesale.js?v=3.4"></script>
+</body>
+</html>

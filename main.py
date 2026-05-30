@@ -5,7 +5,6 @@ import os
 import firebase_admin
 from firebase_admin import credentials, firestore
 import requests
-import re
 import json
 from fastapi import File, UploadFile, Form, Request
 from typing import List
@@ -156,13 +155,13 @@ async def serve_category_page(request: Request):
     with open(item_list_path, "r", encoding="utf-8", errors="replace") as f:
         return f.read()
 
-# 도매 전용 상품 상세 화면 HTML 서빙용 라우팅 (보안 게이트 작동)
+# 도매 전용 상품 상세 화면 HTML 서빙용 라우팅 (보안 게이트 작동 및 강제 우회 적용)
 @app.get("/antioch/{item_id}", response_class=HTMLResponse)
 async def serve_antioch_detail_page(request: Request, item_id: str):
-    # (참고) 이전에는 여기서 서버 사이드 강제 리다이렉트를 했으나,
-    # 이제 프론트엔드 itemDetail.js의 예쁜 커스텀 팝업(403)을 보여주기 위해 HTML을 먼저 정상 서빙합니다.
-    # 데이터 탈취 보안은 API 단(/api/items/{item_id})에서 완벽히 방어 중입니다.
-    
+    # [🏁 보정] 도매 고객 로그인 상태가 아니라면, 강제로 일반 상세 페이지로 리다이렉트!
+    if not request.session.get("is_wholesale"):
+        return RedirectResponse(url=f"/item/{item_id}")
+        
     detail_path = os.path.join(static_dir, "antioch_detail.html")
     if os.path.exists(detail_path):
         with open(detail_path, "r", encoding="utf-8", errors="replace") as f:
@@ -208,6 +207,49 @@ async def serve_partners_page():
         with open(partners_path, "r", encoding="utf-8", errors="replace") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>Partners 템플릿(partners.html)을 찾을 수 없습니다.</h1>", status_code=404)
+
+# 🏁 매장 피팅 예약하기(Reserve) 화면 HTML 서빙용 프론트엔드 라우팅
+@app.get("/general/reserve", response_class=HTMLResponse)
+async def serve_reserve_page():
+    reserve_path = os.path.join(static_dir, "reserve.html")
+    if os.path.exists(reserve_path):
+        with open(reserve_path, "r", encoding="utf-8", errors="replace") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>예약하기 템플릿(reserve.html)을 찾을 수 없습니다.</h1>", status_code=404)
+
+# 🏁 매장 피팅 예약 완료(Booking Success) 화면 HTML 서빙용 프론트엔드 라우팅
+@app.get("/general/booking_success", response_class=HTMLResponse)
+async def serve_booking_success_page():
+    success_path = os.path.join(static_dir, "booking_success.html")
+    if os.path.exists(success_path):
+        with open(success_path, "r", encoding="utf-8", errors="replace") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>예약 완료 템플릿(booking_success.html)을 찾을 수 없습니다.</h1>", status_code=404)
+
+# 🏁 매장 피팅 예약 확인(Bookings) 화면 HTML 서빙용 프론트엔드 라우팅 (보안 게이트 적용)
+@app.get("/general/bookings", response_class=HTMLResponse)
+async def serve_bookings_page(request: Request):
+    if not request.session.get("user_id"):
+        return RedirectResponse(url="/login")
+    bookings_path = os.path.join(static_dir, "bookings.html")
+    if os.path.exists(bookings_path):
+        with open(bookings_path, "r", encoding="utf-8", errors="replace") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>예약 확인 템플릿(bookings.html)을 찾을 수 없습니다.</h1>", status_code=404)
+
+# 🏁 일반 회원 마이페이지(Mypage) 화면 HTML 서빙용 프론트엔드 라우팅 (보안 게이트 적용)
+@app.get("/general/mypage", response_class=HTMLResponse)
+async def serve_general_mypage_page(request: Request):
+    if not request.session.get("user_id"):
+        return RedirectResponse(url="/login")
+    mypage_path = os.path.join(static_dir, "general_mypage.html")
+    if os.path.exists(mypage_path):
+        with open(mypage_path, "r", encoding="utf-8", errors="replace") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>마이페이지 템플릿(general_mypage.html)을 찾을 수 없습니다.</h1>", status_code=404)
+
+
+
 
 # 🏁 통합 회원가입 및 로그인 페이지 라우팅
 @app.get("/register", response_class=HTMLResponse)
@@ -314,8 +356,7 @@ async def get_items_by_category(request: Request, category: str):
                 "name": data.get("name", "이름 없음"),
                 "price": formatted_price,
                 "image_url": image_url,
-                "category": str(data.get("category", "")), # 🏁 신규: 프론트엔드 Set 필터 연동용 데이터
-                "sort": data.get("sort", "") # 🏁 신규: 안티오크 상품 분기 처리를 위한 데이터
+                "category": str(data.get("category", "")) # 🏁 신규: 프론트엔드 Set 필터 연동용 데이터
             })
             
         print(f"✅ Firebase 조회 완료: '{category}' 카테고리의 하단 텍스트형 {len(real_items)}개 아이템 전달.")
@@ -482,9 +523,7 @@ async def get_related_items(item_id: str):
         print(f"🔥 연관 상품 조회 에러 발생: {e}")
         return {"items": [], "error": str(e)}
 
-@app.post("/api/telegram")
-async def send_telegram_msg():
-    return {"status": "success", "message": "텔레그램 전송 API 뼈대입니다."}
+
 
 @app.get("/api/promotions")
 async def get_promotions():

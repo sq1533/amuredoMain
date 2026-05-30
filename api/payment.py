@@ -272,3 +272,208 @@ async def request_order_exchange(request: Request):
     except Exception as e:
         print(f"🔥 교환 요청 처리 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+# -------------------------------------------------------------
+# 🏁 일반 매장 피팅 예약 확정 API 엔진 탑재
+# -------------------------------------------------------------
+@router.post("/booking")
+async def create_booking(request: Request):
+    """
+    일반 고객 또는 도매 고객의 오프라인 안경점 피팅 예약을 최종 확정합니다.
+    1. Firebase RTDB 'booking/{safe_email}/{booking_id}' 노드에 예약 정보를 저장합니다.
+    2. 텔레그램 bot_token 및 user_request_id 채널을 통해 신규 예약 알림 메시지를 발송합니다.
+    """
+    email = request.session.get("user_id")
+    user_role = request.session.get("user_role", "guest")
+    if not email:
+        return JSONResponse(status_code=403, content={"status": "error", "message": "권한 없음. 로그인이 필요합니다."})
+    
+    try:
+        body = await request.json()
+        items = body.get("items", [])
+        store_name = body.get("storeName", "")
+        
+        if not items or not store_name:
+            return JSONResponse(status_code=400, content={"status": "error", "message": "필수 데이터 누락"})
+            
+        safe_email = sanitize_email(email)
+        
+        # 🏁 고유 예약 ID 생성 (B + 년월일시분초 + 무작위 3자리)
+        import random
+        now = datetime.now()
+        booking_id = f"B{now.strftime('%y%m%d%H%M%S')}{random.randint(100, 999)}"
+        
+        # 🏁 Firestore에서 예약자 실명 및 연락처 연동
+        from firebase_admin import firestore
+        db_fs = firestore.client()
+        
+        customer_name = "알 수 없음"
+        customer_phone = "알 수 없음"
+        
+        if user_role == "general":
+            user_doc = db_fs.collection("general_users").document(email).get()
+            if user_doc.exists:
+                ud = user_doc.to_dict()
+                customer_name = ud.get("name", "일반 고객")
+                customer_phone = ud.get("phoneNumber", "연락처 미등록")
+        elif user_role == "wholesale":
+            user_doc = db_fs.collection("wholesale_users").document(email).get()
+            if user_doc.exists:
+                ud = user_doc.to_dict()
+                customer_name = ud.get("name", "도매 고객")
+                customer_phone = ud.get("business_number", "사업자 회원")
+        
+        # 🏁 첫 번째 안경 아이템 이름을 백엔드에서 직접 조회하여 요약 생성
+        first_item_name = "안경 상품"
+        if len(items) > 0:
+            try:
+                item_doc = db_fs.collection("item").document(items[0]).get()
+                if item_doc.exists:
+                    first_item_name = item_doc.to_dict().get("name", "안경 상품")
+            except Exception as ie:
+                print(f"🔥 예약 상품 정보 연동 중 에러: {ie}")
+                
+        goods_summary = f"{first_item_name} 포함 총 {len(items)}개"
+        
+        # 🏁 1. Firebase RTDB 예약 노드 추가
+        ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
+        ref.set({
+            "bookingId": booking_id,
+            "items": items,
+            "storeName": store_name,
+            "customerName": customer_name,
+            "customerPhone": customer_phone,
+            "customerEmail": email,
+            "status": "예약 완료",
+            "createdAt": now.isoformat()
+        })
+        
+        # 🏁 2. 텔레그램 user_request_id 채널로 메시지 전송
+        tg_message = (
+            f"📅 <b>[신규 매장 피팅 예약 접수]</b>\n\n"
+            f"<b>예약번호:</b> {booking_id}\n"
+            f"<b>예약고객:</b> {customer_name} ({email})\n"
+            f"<b>연락처:</b> {customer_phone}\n"
+            f"<b>예약매장:</b> {store_name}\n"
+            f"<b>예약상품:</b> {goods_summary}\n"
+            f"<b>예약일시:</b> {now.strftime('%Y-%m-%d %H:%M:%S')}\n"
+        )
+        
+        # database/telegram.json 로드하여 user_request_id 획득
+        tg_request_chat_id = ""
+        if os.path.exists(tg_path):
+            with open(tg_path, "r", encoding="utf-8") as f:
+                tg_data = json.load(f)
+                tg_request_chat_id = tg_data.get("user_request_id", "")
+                
+        if tg_request_chat_id:
+            send_telegram_message(tg_request_chat_id, tg_message)
+            
+        return {"status": "success", "bookingId": booking_id}
+        
+    except Exception as e:
+        print(f"🔥 매장 피팅 예약 처리 중 에러: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+# -------------------------------------------------------------
+# 🏁 일반 매장 피팅 예약 조회 및 취소 API 엔진 탑재
+# -------------------------------------------------------------
+@router.get("/my_bookings")
+async def get_my_bookings(request: Request):
+    """
+    현재 로그인한 고객의 오프라인 안경점 피팅 예약 내역 목록을 RTDB에서 조회합니다.
+    """
+    email = request.session.get("user_id")
+    if not email:
+        return JSONResponse(status_code=403, content={"status": "error", "message": "로그인이 필요합니다."})
+        
+    try:
+        safe_email = sanitize_email(email)
+        ref = rtdb.reference(f'booking/{safe_email}')
+        bookings_dict = ref.get()
+        
+        if not bookings_dict:
+            return []
+            
+        # 🏁 리스트로 전환 및 생성일시 기준 내림차순(최신순) 정렬
+        bookings_list = list(bookings_dict.values())
+        bookings_list.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
+        
+        return bookings_list
+    except Exception as e:
+        print(f"🔥 내 예약 목록 로드 에러: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+@router.post("/booking/{booking_id}/cancel")
+async def cancel_booking(request: Request, booking_id: str):
+    """
+    고객의 오프라인 안경점 피팅 예약을 취소합니다.
+    1. RTDB의 예약 데이터 상태를 '예약 취소'로 업데이트합니다. (고객 이력 보존 목적)
+    2. 텔레그램 bot_token 및 user_cancel_id 채널을 통해 취소 알림을 발송합니다.
+    """
+    email = request.session.get("user_id")
+    if not email:
+        return JSONResponse(status_code=403, content={"status": "error", "message": "로그인이 필요합니다."})
+        
+    try:
+        safe_email = sanitize_email(email)
+        
+        # 🏁 RTDB에서 기존 예약 정보 조회
+        ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
+        booking_data = ref.get()
+        
+        if not booking_data:
+            return JSONResponse(status_code=404, content={"status": "error", "message": "예약 내역을 찾을 수 없습니다."})
+            
+        # 🏁 1. DB의 예약 상태를 '예약 취소'로 업데이트
+        ref.update({
+            "status": "예약 취소",
+            "cancelledAt": datetime.now().isoformat()
+        })
+        
+        # 🏁 2. 텔레그램 user_cancel_id 채널로 취소 알림 발송
+        customer_name = booking_data.get("customerName", "알 수 없음")
+        customer_phone = booking_data.get("customerPhone", "알 수 없음")
+        store_name = booking_data.get("storeName", "미선택 매장")
+        
+        # 첫 상품명 조회를 시도하여 요약 생성
+        from firebase_admin import firestore
+        db_fs = firestore.client()
+        items = booking_data.get("items", [])
+        first_item_name = "안경 상품"
+        if len(items) > 0:
+            try:
+                item_doc = db_fs.collection("item").document(items[0]).get()
+                if item_doc.exists:
+                    first_item_name = item_doc.to_dict().get("name", "안경 상품")
+            except Exception:
+                pass
+        goods_summary = f"{first_item_name} 포함 총 {len(items)}개"
+        
+        tg_message = (
+            f"🚨 <b>[매장 피팅 예약 취소 알림]</b>\n\n"
+            f"<b>예약번호:</b> {booking_id}\n"
+            f"<b>예약고객:</b> {customer_name} ({email})\n"
+            f"<b>연락처:</b> {customer_phone}\n"
+            f"<b>예약매장:</b> {store_name}\n"
+            f"<b>예약상품:</b> {goods_summary}\n"
+            f"<b>취소일시:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        )
+        
+        # database/telegram.json 로드하여 user_cancel_id 획득
+        tg_cancel_chat_id = ""
+        if os.path.exists(tg_path):
+            with open(tg_path, "r", encoding="utf-8") as f:
+                tg_data = json.load(f)
+                tg_cancel_chat_id = tg_data.get("user_cancel_id", "")
+                
+        if tg_cancel_chat_id:
+            send_telegram_message(tg_cancel_chat_id, tg_message)
+            
+        return {"status": "success", "message": "예약이 성공적으로 취소되었습니다."}
+        
+    except Exception as e:
+        print(f"🔥 매장 피팅 예약 취소 에러: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+

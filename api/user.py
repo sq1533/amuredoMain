@@ -170,18 +170,30 @@ async def login_wholesale(
     password: str = Form(...)
 ):
     try:
+        # 0. 이메일 형식 검사 (보안 강화를 위한 첫 번째 관문)
+        email_regex = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+        if not re.match(email_regex, email):
+            return {"status": "error", "message": "이메일 또는 비밀번호를 확인해 주세요."}
+
         # DB 호출 지연
         db = firestore.client()
         
         user_ref = db.collection('wholesale_users').document(email)
         user_doc = user_ref.get()
 
+        # 보안 강화: 가입되지 않은 이메일의 경우도 비밀번호 오류와 동일한 통합 메시지 반환
         if not user_doc.exists:
-            return {"status": "error", "message": "가입되지 않은 이메일입니다."}
+            return {"status": "error", "message": "이메일 또는 비밀번호를 확인해 주세요."}
 
         user_data = user_doc.to_dict()
+        db_password = user_data.get("password", "")
 
-        # 1. 승인 여부 및 상태별 메시지 처리
+        # 1. 비밀번호 체크 (순수 bcrypt 사용) - 계정 상태 정보 누출을 방지하기 위해 비밀번호 검증을 최선행 처리
+        # 입력된 비밀번호와 DB의 해시를 바이트로 변환하여 비교
+        if not bcrypt.checkpw(password.encode('utf-8'), db_password.encode('utf-8')):
+            return {"status": "error", "message": "이메일 또는 비밀번호를 확인해 주세요."}
+
+        # 2. 비밀번호가 일치할 때만 승인 상태 및 보류 여부 검증 (무차별 대입을 통한 가입/승인 상태 유추 차단)
         user_status = user_data.get("status")
         if user_status == "pending":
             return {"status": "error", "message": "관리자 승인 대기중입니다."}
@@ -190,12 +202,6 @@ async def login_wholesale(
         elif user_status != "approved":
             # 만약 알 수 없는 상태값이 들어있을 경우의 방어 로직
             return {"status": "error", "message": "현재 계정을 사용할 수 없는 상태입니다."}
-
-        # 2. 비밀번호 체크 (순수 bcrypt 사용)
-        db_password = user_data.get("password", "")
-        # 입력된 비밀번호와 DB의 해시를 바이트로 변환하여 비교
-        if not bcrypt.checkpw(password.encode('utf-8'), db_password.encode('utf-8')):
-            return {"status": "error", "message": "비밀번호가 일치하지 않습니다."}
 
         # 3. 세션 기록
         request.session["user_id"] = email
@@ -358,10 +364,14 @@ def is_under_14(birthyear_str: str) -> bool:
 
 # 1) 네이버 인가 코드 요청 및 리다이렉트
 @router.get("/login/naver")
-async def naver_login(request: Request):
+async def naver_login(request: Request, next: str = None):
     if not NAVER_CLIENT_ID or not NAVER_REDIRECT_URI:
         raise HTTPException(status_code=500, detail="네이버 API 설정이 완료되지 않았습니다. database/naver_api.json을 생성해 주세요.")
     
+    # 이전 페이지 경로 기억
+    if next:
+        request.session["social_next"] = next
+
     # CSRF 방지를 위한 state 난수 생성
     state = secrets.token_hex(16)
     
@@ -442,13 +452,17 @@ async def naver_callback(request: Request, code: str = None, state: str = None, 
         user_ref = db.collection('general_users').document(email)
         user_doc = user_ref.get()
         
+        # 세션에서 마지막 방문 페이지 획득 및 제거
+        next_url = request.session.pop("social_next", None)
+        
         if user_doc.exists:
             # [A] 기존 일반 회원 로그인 처리
             request.session["user_id"] = email
             request.session["user_role"] = "general"
             request.session["is_wholesale"] = False
             
-            response = RedirectResponse(url="/")
+            target_url = next_url if next_url else "/"
+            response = RedirectResponse(url=target_url)
             response.set_cookie(key="amuredo_role", value="general", max_age=2592000, path="/")
             
             # Firebase RTDB에서 일반 회원 장바구니 데이터를 읽어 쿠키에 주입
@@ -480,6 +494,7 @@ async def naver_callback(request: Request, code: str = None, state: str = None, 
                 "age_year": birthyear,
                 "birth": birthday,
                 "role": "general",
+                "provider": "naver",
                 "created_at": firestore.SERVER_TIMESTAMP
             }
             user_ref.set(new_user_data)
@@ -489,8 +504,13 @@ async def naver_callback(request: Request, code: str = None, state: str = None, 
             request.session["user_role"] = "general"
             request.session["is_wholesale"] = False
             
-            # 🏁 신규 가입 축하 안내를 위한 ?signup=success 쿼리 파라미터 탑재
-            response = RedirectResponse(url="/?signup=success")
+            # 이전 주소가 있다면 가입 성공 파라미터를 결합, 없으면 홈으로 보냄
+            if next_url:
+                target_url = next_url + ("&signup=success" if "?" in next_url else "?signup=success")
+            else:
+                target_url = "/?signup=success"
+                
+            response = RedirectResponse(url=target_url)
             response.set_cookie(key="amuredo_role", value="general", max_age=2592000, path="/")
             return response
             
@@ -504,10 +524,14 @@ async def naver_callback(request: Request, code: str = None, state: str = None, 
 
 # 1) 카카오 인가 코드 요청 및 리다이렉트
 @router.get("/login/kakao")
-async def kakao_login(request: Request):
+async def kakao_login(request: Request, next: str = None):
     if not KAKAO_CLIENT_ID or not KAKAO_REDIRECT_URI:
         raise HTTPException(status_code=500, detail="카카오 API 설정이 완료되지 않았습니다. database/kakao_api.json을 생성해 주세요.")
     
+    # 이전 페이지 경로 기억
+    if next:
+        request.session["social_next"] = next
+
     # CSRF 방지를 위한 state 난수 생성
     state = secrets.token_hex(16)
     
@@ -608,13 +632,17 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
         user_ref = db.collection('general_users').document(email)
         user_doc = user_ref.get()
         
+        # 세션에서 마지막 방문 페이지 획득 및 제거
+        next_url = request.session.pop("social_next", None)
+        
         if user_doc.exists:
             # [A] 기존 일반 회원 로그인 처리
             request.session["user_id"] = email
             request.session["user_role"] = "general"
             request.session["is_wholesale"] = False
             
-            response = RedirectResponse(url="/")
+            target_url = next_url if next_url else "/"
+            response = RedirectResponse(url=target_url)
             response.set_cookie(key="amuredo_role", value="general", max_age=2592000, path="/")
             
             # Firebase RTDB에서 일반 회원 장바구니 데이터를 읽어 쿠키에 주입
@@ -646,6 +674,7 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
                 "age_year": birthyear if birthyear else "",
                 "birth": birthday if birthday else "",
                 "role": "general",
+                "provider": "kakao",
                 "created_at": firestore.SERVER_TIMESTAMP
             }
             user_ref.set(new_user_data)
@@ -655,7 +684,13 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
             request.session["user_role"] = "general"
             request.session["is_wholesale"] = False
             
-            response = RedirectResponse(url="/?signup=success")
+            # 이전 주소가 있다면 가입 성공 파라미터를 결합, 없으면 홈으로 보냄
+            if next_url:
+                target_url = next_url + ("&signup=success" if "?" in next_url else "?signup=success")
+            else:
+                target_url = "/?signup=success"
+                
+            response = RedirectResponse(url=target_url)
             response.set_cookie(key="amuredo_role", value="general", max_age=2592000, path="/")
             return response
             
@@ -700,4 +735,51 @@ async def get_partners():
     except Exception as e:
         print(f"🔥 파트너 안경점 목록 조회 에러: {e}")
         return {"status": "success", "partners": []}
+
+# -------------------------------------------------------------
+# 🏁 일반 소셜 로그인 고객의 마이페이지 데이터 조회 API 엔진 탑재
+# -------------------------------------------------------------
+from fastapi.responses import JSONResponse
+
+@router.get("/general/me")
+async def get_general_user_info(request: Request):
+    """
+    일반 소셜 로그인 고객의 마이페이지 연동용 정보(이메일, 연락처, 소셜가입제공자)를 Firestore에서 가져옵니다.
+    """
+    email = request.session.get("user_id")
+    user_role = request.session.get("user_role", "guest")
+    if not email or user_role != "general":
+        return JSONResponse(status_code=403, content={"status": "error", "message": "권한이 없습니다. 일반 고객 로그인이 필요합니다."})
+        
+    try:
+        db_fs = firestore.client()
+        user_doc = db_fs.collection("general_users").document(email).get()
+        
+        if not user_doc.exists:
+            return JSONResponse(status_code=404, content={"status": "error", "message": "회원 정보를 찾을 수 없습니다."})
+            
+        user_data = user_doc.to_dict()
+        
+        # 🏁 지능형 가입 경로(Provider) 감지 알고리즘
+        provider = user_data.get("provider", "")
+        if not provider:
+            # Fallback: 이메일 도메인 분석
+            if "naver.com" in email.lower():
+                provider = "naver"
+            else:
+                provider = "kakao"
+                
+        return {
+            "status": "success",
+            "user": {
+                "email": email,
+                "name": user_data.get("name", "고객님"),
+                "phoneNumber": user_data.get("phoneNumber", "연락처 미등록"),
+                "provider": provider
+            }
+        }
+    except Exception as e:
+        print(f"🔥 일반 회원 정보 로드 에러: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
 

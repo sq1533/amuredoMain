@@ -110,7 +110,7 @@
             animation: panelFadeIn 0.4s ease-out forwards;
         }
         
-        /* 동그란 소셜 원형 단추 */
+        /* 동그란 소셜 원형 단추 (투명 배경 및 섀도우 걷어내기) */
         .sns-circle-btn {
             width: 64px;
             height: 64px;
@@ -121,25 +121,26 @@
             align-items: center;
             justify-content: center;
             transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            background: transparent;
+            box-shadow: none;
         }
         
-        /* 네이버: 녹색 원형 */
+        /* 네이버 버튼 스타일 조정 */
         .btn-naver {
-            background: #03a94d;
+            background: transparent;
         }
         .btn-naver:hover {
-            transform: scale(1.1) rotate(5deg);
-            box-shadow: 0 8px 24px rgba(3, 169, 77, 0.35);
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: none;
         }
         
-        /* 카카오: 노란색 원형 */
+        /* 카카오 버튼 스타일 조정 */
         .btn-kakao {
-            background: #fee500;
+            background: transparent;
         }
         .btn-kakao:hover {
-            transform: scale(1.1) rotate(-5deg);
-            box-shadow: 0 8px 24px rgba(254, 229, 0, 0.4);
+            transform: scale(1.15) rotate(-5deg);
+            box-shadow: none;
         }
         
         /* 내장형 SVG 아이콘 */
@@ -292,18 +293,14 @@
 
         <!-- 🏁 [Panel 1] 일반 고객용 SNS 로그인 카드 패널 (1행 2열 원형 구조) -->
         <div class="customer-panel" id="panelCustomer">
-            <!-- 네이버: 녹색 원 + 'N' 마크 내장형 SVG -->
+            <!-- 네이버: 녹색 원 + 준비된 naver.svg 공식 로고 연동 -->
             <button class="sns-circle-btn btn-naver" id="naverLoginBtn" title="네이버로 로그인">
-                <svg class="sns-svg-icon" viewBox="0 0 24 24" style="color: #ffffff;">
-                    <path d="M16.2 2H22v20h-5.8L7.8 8.8V22H2V2h5.8l8.4 13.2V2z"/>
-                </svg>
+                <img src="/static/img/naver.svg" alt="Naver Login" class="sns-svg-icon" style="width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box;">
             </button>
             
-            <!-- 카카오: 노란색 원 + '말풍선' 마크 내장형 SVG -->
+            <!-- 카카오: 노란색 원 + 준비된 kakao.svg 공식 로고 연동 -->
             <button class="sns-circle-btn btn-kakao" id="kakaoLoginBtn" title="카카오로 로그인">
-                <svg class="sns-svg-icon" viewBox="0 0 24 24" style="color: #191919;">
-                    <path d="M12 3c-4.97 0-9 3.185-9 7.115 0 2.502 1.637 4.702 4.14 5.926l-.826 3.037c-.092.342.115.342.247.256l3.585-2.385c.607.085 1.226.131 1.854.131 4.97 0 9-3.186 9-7.115C21 6.185 16.97 3 12 3z"/>
-                </svg>
+                <img src="/static/img/kakao.svg" alt="Kakao Login" class="sns-svg-icon" style="width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box;">
             </button>
         </div>
 
@@ -342,6 +339,22 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            // 🏁 0. 로그인 전 마지막 방문 페이지(Referrer) 감지 및 임시 저장 (로그인/회원가입 제외)
+            const referrer = document.referrer;
+            if (referrer && !referrer.includes("/login") && !referrer.includes("/register")) {
+                try {
+                    const refUrl = new URL(referrer);
+                    // 같은 도메인일 때만 패스+쿼리를 따서 세션에 보관
+                    if (refUrl.host === window.location.host) {
+                        sessionStorage.setItem("login_redirect_to", refUrl.pathname + refUrl.search);
+                    }
+                } catch (e) {
+                    if (!referrer.startsWith("http")) {
+                        sessionStorage.setItem("login_redirect_to", referrer);
+                    }
+                }
+            }
+
             // 🏁 1. 상단 이중 가입 탭 스위칭 & 완벽한 상반 방향 파도(Wave-Fill) 슬라이더 제어
             const tabCustomer = document.getElementById("tabCustomer");
             const tabWholesale = document.getElementById("tabWholesale");
@@ -401,16 +414,18 @@
                 }
             });
 
-            // 🏁 2. 소셜 간편 로그인 버튼 동작 바인딩
+            // 🏁 2. 소셜 간편 로그인 버튼 동작 바인딩 (이전 마지막 페이지 경로 전송)
             const naverLoginBtn = document.getElementById("naverLoginBtn");
             const kakaoLoginBtn = document.getElementById("kakaoLoginBtn");
 
             naverLoginBtn.addEventListener("click", () => {
-                location.href = "/api/user/login/naver";
+                const next = sessionStorage.getItem("login_redirect_to") || "";
+                location.href = `/api/user/login/naver?next=${encodeURIComponent(next)}`;
             });
 
             kakaoLoginBtn.addEventListener("click", () => {
-                location.href = "/api/user/login/kakao";
+                const next = sessionStorage.getItem("login_redirect_to") || "";
+                location.href = `/api/user/login/kakao?next=${encodeURIComponent(next)}`;
             });
 
             // 🏁 네이버 로그인 쿼리스트링 에러 핸들러 탑재
@@ -479,7 +494,14 @@
 
                     if (result.status === "success") {
                         showModal('success', '로그인 성공', result.message, () => {
-                            location.href = "/antioch"; // 도매 전용 페이지로 이동
+                            // 마지막 방문 페이지로 복귀
+                            const redirectTo = sessionStorage.getItem("login_redirect_to");
+                            if (redirectTo) {
+                                sessionStorage.removeItem("login_redirect_to"); // 메모리 비우기
+                                location.href = redirectTo;
+                            } else {
+                                location.href = "/antioch"; // 도매 전용 페이지로 이동
+                            }
                         });
                     } else {
                         showModal('error', '로그인 실패', result.message);
@@ -493,6 +515,6 @@
             });
         });
     </script>
-<script src="/static/globalWholesale.js?v=3.3"></script>
+<script src="/static/globalWholesale.js?v=3.4"></script>
 </body>
 </html>

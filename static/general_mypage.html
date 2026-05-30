@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-P6STJHVH');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 아무레도 검색엔진 최적화(SEO) 및 SNS 공유 설정 -->
+    <title>마이페이지 - 아무래도 안경</title>
+    <meta name="description" content="분위기와 억양을 디자인을 디자인합니다. 아무래도 안경, 본질의 아름다움을 추구합니다">
+    <link rel="icon" href="/static/img/icon.webp" type="image/webp">
+    <link rel="apple-touch-icon" href="/static/img/icon.webp">
+    
+    <!-- 전역 메인 폰트 Pretendard 연결 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <style>
+        .mypage-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 200px);
+            padding: 120px 20px 80px 20px;
+            box-sizing: border-box;
+            background: #fafafa;
+        }
+        .mypage-card {
+            max-width: 550px;
+            width: 100%;
+            background: #fff;
+            border-radius: 16px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 50px rgba(14, 58, 91, 0.04);
+            border: 1px solid #eaeaea;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        
+        /* 🏁 소셜 제공자 공식 SVG 로고 영역 */
+        .provider-logo-container {
+            width: 54px;
+            height: 54px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .provider-logo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .user-greeting {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 35px;
+            letter-spacing: -0.5px;
+        }
+        .user-greeting span {
+            color: #777;
+            font-weight: 500;
+            font-size: 1.3rem;
+            margin-left: 2px;
+        }
+
+        /* 🏁 회원정보 패널 */
+        .info-panel-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+        .info-panel-row {
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 18px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-sizing: border-box;
+        }
+        .info-label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #777;
+            letter-spacing: -0.1px;
+        }
+        .info-value {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #333;
+            letter-spacing: -0.2px;
+            word-break: break-all;
+        }
+
+        /* 🏁 버튼 수직 배치 그룹 */
+        .action-button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .btn-mypage-action {
+            width: 100%;
+            padding: 16px 0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            border: none;
+            box-sizing: border-box;
+            display: block;
+        }
+        .btn-mypage-logout {
+            background: #0e3a5b;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(14, 58, 91, 0.1);
+        }
+        .btn-mypage-logout:hover {
+            background: #0b2d47;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(14, 58, 91, 0.2);
+        }
+        .btn-mypage-withdraw {
+            background: #fff;
+            color: #d9534f;
+            border: 1px solid #d9534f;
+        }
+        .btn-mypage-withdraw:hover {
+            background: #fff5f5;
+            transform: translateY(-1px);
+        }
+
+        /* 📱 모바일 대응 */
+        @media (max-width: 600px) {
+            .mypage-wrapper {
+                padding: 100px 15px 60px 15px;
+                min-height: calc(100vh - 150px);
+            }
+            .mypage-card {
+                padding: 40px 20px;
+            }
+            .user-greeting {
+                font-size: 1.35rem;
+                margin-bottom: 25px;
+            }
+            .info-panel-row {
+                padding: 14px 18px;
+            }
+            .info-value {
+                font-size: 0.95rem;
+            }
+            .btn-mypage-action {
+                padding: 14px 0;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P6STJHVH" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <!-- <header>는 globalWholesale.js가 동적으로 삽입합니다. -->
+
+    <div class="mypage-wrapper">
+        <div class="mypage-card">
+            
+            <!-- 🏁 1. 가입 경로 소셜 공식 svg 로고 아이콘 -->
+            <div class="provider-logo-container" id="providerLogoContainer">
+                <!-- Javascript가 여기에 naver.svg 또는 kakao.svg 이미지를 동적 인젝션합니다. -->
+            </div>
+            
+            <h1 class="user-greeting" id="userGreeting">로딩 중...<span>님</span></h1>
+            
+            <!-- 🏁 2. 회원 상세 정보 패널 (이메일, 연락처) -->
+            <div class="info-panel-list">
+                <div class="info-panel-row">
+                    <span class="info-label">이메일 주소</span>
+                    <span class="info-value" id="infoEmail">이메일을 조회 중입니다...</span>
+                </div>
+                <div class="info-panel-row">
+                    <span class="info-label">연락처</span>
+                    <span class="info-value" id="infoPhone">연락처를 조회 중입니다...</span>
+                </div>
+            </div>
+            
+            <!-- 🏁 3. 하단 액션 버튼 그룹 (수직 정렬) -->
+            <div class="action-button-group">
+                <button class="btn-mypage-action btn-mypage-logout" id="btnLogout">로그아웃</button>
+                <button class="btn-mypage-action btn-mypage-withdraw" id="btnWithdraw">회원탈퇴</button>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- 푸터는 globalWholesale.js가 동적으로 주입합니다. -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const providerLogoContainer = document.getElementById("providerLogoContainer");
+            const userGreetingEl = document.getElementById("userGreeting");
+            const infoEmailEl = document.getElementById("infoEmail");
+            const infoPhoneEl = document.getElementById("infoPhone");
+            const btnLogout = document.getElementById("btnLogout");
+            const btnWithdraw = document.getElementById("btnWithdraw");
+
+            // 전화번호에 하이픈(-)을 정밀하게 삽입해주는 뷰티 포맷터
+            function formatPhoneNumber(numStr) {
+                if (!numStr) return "등록 없음";
+                const clean = numStr.replace(/[^0-9]/g, ""); // 숫자 외 제거
+                if (clean.length === 11) {
+                    return `${clean.slice(0, 3)}-${clean.slice(3, 7)}-${clean.slice(7)}`;
+                } else if (clean.length === 10) {
+                    if (clean.startsWith("02")) {
+                        return `${clean.slice(0, 2)}-${clean.slice(2, 6)}-${clean.slice(6)}`;
+                    }
+                    return `${clean.slice(0, 3)}-${clean.slice(3, 6)}-${clean.slice(6)}`;
+                }
+                return numStr; // 기타 길이는 원형 그대로 반환
+            }
+
+            // 1. 회원 정보 비동기 로딩
+            fetch("/api/user/general/me")
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success" && data.user) {
+                        const user = data.user;
+                        
+                        // 성함 노출
+                        userGreetingEl.innerHTML = `${user.name}<span>님</span>`;
+                        
+                        // 이메일 및 하이픈 연락처 주입
+                        infoEmailEl.textContent = user.email;
+                        infoPhoneEl.textContent = formatPhoneNumber(user.phoneNumber);
+                        
+                        // 소셜 가입 경로 svg 로고 인젝션
+                        const provider = user.provider ? user.provider.toLowerCase() : "naver";
+                        const img = document.createElement("img");
+                        img.className = "provider-logo";
+                        if (provider === "naver") {
+                            img.src = "/static/img/naver.svg";
+                            img.alt = "Naver Connected";
+                        } else {
+                            img.src = "/static/img/kakao.svg";
+                            img.alt = "Kakao Connected";
+                        }
+                        providerLogoContainer.appendChild(img);
+                    } else {
+                        throw new Error(data.message || "데이터 에러");
+                    }
+                })
+                .catch(err => {
+                    console.error("마이페이지 로드 실패:", err);
+                    alert("회원 정보를 불러오지 못했습니다. 다시 로그인해 주세요.");
+                    location.href = "/login";
+                });
+
+            // 2. 실시간 로그아웃 기동
+            btnLogout.addEventListener("click", () => {
+                if (confirm("로그아웃 하시겠습니까?")) {
+                    fetch("/api/user/logout")
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.status === "success") {
+                                location.href = "/"; // 메인 홈으로 안전하게 튕겨보내기
+                            } else {
+                                alert("로그아웃 처리 중 에러가 발생했습니다.");
+                            }
+                        })
+                        .catch(err => {
+                            console.error("로그아웃 에러:", err);
+                            location.href = "/";
+                        });
+                }
+            });
+
+            // 3. 회원탈퇴 보류 처리 안내 팝업
+            btnWithdraw.addEventListener("click", () => {
+                alert("회원탈퇴 서비스는 현재 본사 고객센터를 통해 개별 접수 처리 중입니다.\n입점 제안 및 Connect(문의하기) 채널을 이용해 문의 주시면 전담 부서를 통해 신속하게 도움을 드리겠습니다.");
+            });
+        });
+    </script>
+    <script src="/static/globalWholesale.js?v=3.4"></script>
+</body>
+</html>

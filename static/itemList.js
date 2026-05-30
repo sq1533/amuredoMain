@@ -136,13 +136,9 @@ document.addEventListener("DOMContentLoaded", () => {
             // 이미지 래퍼 (정사각형 1:1 비율 세팅 구역)
             const imgWrapper = document.createElement('div');
             imgWrapper.className = 'category-image-wrapper';
-            // 사진 클릭 시 상세페이지 스위치 이동 로직 바인딩 (안티오크 여부 확인)
+            // 사진 클릭 시 상세페이지 스위치 이동 로직 바인딩 (백엔드 대칭 리다이렉트 필터가 있으므로 일괄 /item으로 이동)
             imgWrapper.addEventListener('click', () => {
-                if (item.sort === 'antioch') {
-                    location.href = `/antioch/${item.id}`;
-                } else {
-                    location.href = `/item/${item.id}`;
-                }
+                location.href = `/item/${item.id}`;
             });
 
             // 썸네일 이미지 태그 생성 및 부착

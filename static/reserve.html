@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 아무레도 검색엔진 최적화(SEO) 및 SNS 공유 설정 -->
+    <title>매장 피팅 예약하기 - 아무래도 안경</title>
+    <meta name="description" content="분위기와 억양을 디자인을 디자인합니다. 아무래도 안경, 본질의 아름다움을 추구합니다">
+    <link rel="icon" href="/static/img/icon.webp" type="image/webp">
+    <link rel="apple-touch-icon" href="/static/img/icon.webp">
+    
+    <!-- 전역 메인 폰트 Pretendard 연결 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <!-- 🏁 에어비앤비 Lottie 애니메이션 웹 플레이어 라이브러리 추가 -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        .reserve-container {
+            max-width: 900px;
+            margin: 100px auto 60px auto;
+            padding: 45px 30px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(14, 58, 91, 0.04);
+            box-sizing: border-box;
+        }
+        .reserve-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 40px;
+            text-align: center;
+            letter-spacing: -0.5px;
+        }
+        
+        /* 🏁 1. 서비스 소개 섹션 (1행 3열 반응형 키워드 카드) */
+        .intro-section {
+            margin-bottom: 45px;
+        }
+        .intro-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .intro-card {
+            background: #fafafa;
+            border: 1px solid #eaeaea;
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            box-sizing: border-box;
+            transition: all 0.25s ease;
+        }
+        .intro-card:hover {
+            transform: translateY(-3px);
+            border-color: #0e3a5b;
+            box-shadow: 0 6px 15px rgba(14, 58, 91, 0.04);
+        }
+        /* Lottie 벡터 동적 애니메이션 아이콘용 전용 스타일 */
+        .intro-lottie-icon {
+            width: 58px; /* Lottie 고유의 여백 감안하여 58px로 미려하게 설정 */
+            height: 58px;
+            margin: 0 auto 15px auto;
+            display: block;
+        }
+        .card-keyword {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 10px;
+            letter-spacing: -0.3px;
+        }
+        .card-desc {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+            word-break: keep-all;
+        }
+
+        /* 공통 서브헤더 */
+        .section-subtitle {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 15px;
+            border-left: 4px solid #0e3a5b;
+            padding-left: 10px;
+            text-align: left; /* PC/모바일 전 환경에서 완벽한 왼쪽 정렬 보장 */
+        }
+
+        /* 🏁 2. 예약 상품 정보 연동 영역 */
+        .goods-section {
+            margin-bottom: 40px;
+        }
+        .goods-info-box {
+            background: #fafafa;
+            border: 1px solid #eaeaea;
+            border-radius: 12px;
+            padding: 22px 25px;
+            box-sizing: border-box;
+        }
+        .goods-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #333;
+            letter-spacing: -0.3px;
+        }
+
+        /* 🏁 3. 예약 장소 선정하기 영역 */
+        .place-section {
+            margin-bottom: 50px;
+        }
+        .place-row-wrapper {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            width: 100%;
+        }
+        .place-info-box {
+            flex: 2;
+            background: #fafafa;
+            border: 1px solid #eaeaea;
+            border-radius: 12px;
+            padding: 20px 25px;
+            box-sizing: border-box;
+            min-height: 58px;
+            display: flex;
+            align-items: center;
+        }
+        .place-text {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #777; /* 미지정 시 장소를 선택해 주세요 안내 회색 */
+            letter-spacing: -0.3px;
+        }
+        .place-text.selected {
+            color: #0e3a5b; /* 장소 선정 시 딥블루 굵게 반전 */
+            font-weight: 800;
+        }
+        .place-select-btn {
+            flex: 1;
+            padding: 19px 0;
+            background-color: #0e3a5b;
+            color: #fff;
+            border: 1px solid #0e3a5b;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(14, 58, 91, 0.1);
+        }
+        .place-select-btn:hover {
+            background-color: #0b2d47;
+            border-color: #0b2d47;
+            transform: translateY(-1px);
+        }
+
+        /* 🏁 4. 최종 예약하기 버튼 및 0.5rem 회색 상세 안내문 */
+        .submit-section {
+            text-align: center;
+        }
+        .reserve-submit-btn {
+            width: 400px;
+            padding: 18px 0;
+            background-color: #0e3a5b;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(14, 58, 91, 0.15);
+            display: block;
+            margin: 0 auto 20px auto;
+        }
+        .reserve-submit-btn:hover {
+            background-color: #0b2d47;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(14, 58, 91, 0.25);
+        }
+        .reserve-submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* 🏁 유저 요청: 0.7rem 회색 상세 안내문 */
+        .policy-notice-container {
+            margin-top: 20px;
+            text-align: left; /* 왼쪽 정렬 강제 */
+            line-height: 1.6;
+            max-width: 550px; /* 너무 넓게 퍼지지 않도록 안정적인 가로폭 제한 */
+            margin-left: auto;
+            margin-right: auto; /* 버튼 영역과의 시각적 밸런스를 위한 가운데 중심 좌측정렬 */
+        }
+        .policy-notice-text {
+            font-size: 0.7rem; /* 0.5rem에서 0.7rem으로 상향 */
+            color: #888;
+            margin: 4px 0;
+            letter-spacing: -0.2px;
+            word-break: keep-all;
+            display: block;
+        }
+
+        /* 🏁 📱 모바일 디바이스(768px 이하) 수직 1열 정렬 및 버튼 최적화 */
+        @media (max-width: 768px) {
+            .reserve-container {
+                margin: 90px 15px 40px 15px;
+                padding: 30px 20px;
+                border-radius: 12px;
+            }
+            .reserve-title {
+                font-size: 1.7rem;
+                margin-bottom: 30px;
+            }
+            
+            /* 서비스 소개 카드 수직 3행 1열 */
+            .intro-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .intro-card {
+                padding: 20px 15px;
+                display: flex;
+                flex-direction: column;
+                align-items: center; /* 카드 요소 세로 정렬 */
+            }
+            .icon-placeholder {
+                margin: 0 0 10px 0; /* 마진 정리 */
+            }
+            .card-keyword {
+                font-size: 1.05rem;
+            }
+            .card-desc {
+                font-size: 0.85rem;
+            }
+
+            /* 예약 장소 선정하기 수직 2열 분할 */
+            .place-row-wrapper {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+            .place-info-box {
+                width: 100%;
+                min-height: 52px;
+                padding: 15px 20px;
+            }
+            .place-select-btn {
+                width: 100%;
+                padding: 15px 0;
+            }
+
+            /* 최종 예약하기 버튼 반응형 */
+            .reserve-submit-btn {
+                width: 100%; /* 모바일에서는 400px 대신 100% 가로 폭으로 편안하게 확장 */
+                max-width: 400px;
+                font-size: 1.1rem;
+                padding: 16px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- <header>는 globalWholesale.js가 동적 로딩 및 삽입합니다. -->
+
+    <div class="reserve-container">
+        <h1 class="reserve-title">매장 피팅 예약</h1>
+
+        <!-- 🏁 1. 서비스 소개 섹션 -->
+        <div class="intro-section">
+            <div class="intro-grid">
+                <!-- 카드 1 -->
+                <div class="intro-card">
+                    <lottie-player src="/static/img/calendar.json" background="transparent" speed="1" class="intro-lottie-icon" loop autoplay></lottie-player>
+                    <h3 class="card-keyword">마음껏 예약하기</h3>
+                    <p class="card-desc">예약은 언제, 어디서든 무료니까</p>
+                </div>
+                <!-- 카드 2 -->
+                <div class="intro-card">
+                    <lottie-player src="/static/img/search.json" background="transparent" speed="1" class="intro-lottie-icon" loop autoplay></lottie-player>
+                    <h3 class="card-keyword">상품 비교하며 살펴보기</h3>
+                    <p class="card-desc">최대 5개의 상품을 비교할 수 있으니까</p>
+                </div>
+                <!-- 카드 3 -->
+                <div class="intro-card">
+                    <lottie-player src="/static/img/gift.json" background="transparent" speed="1" class="intro-lottie-icon" loop autoplay></lottie-player>
+                    <h3 class="card-keyword">현장에서 바로 구매</h3>
+                    <p class="card-desc">새상품을 현장에서 바로 가져갈 수 있으니까</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🏁 2. 예약 상품 정보 연동 섹션 -->
+        <div class="goods-section">
+            <h2 class="section-subtitle">예약 신청 안경</h2>
+            <div class="goods-info-box">
+                <div class="goods-text" id="goodsText">예약 신청 안경 정보를 불러오고 있습니다...</div>
+            </div>
+        </div>
+
+        <!-- 🏁 3. 예약 장소 선정하기 섹션 -->
+        <div class="place-section">
+            <h2 class="section-subtitle">예약 장소 선택</h2>
+            <div class="place-row-wrapper">
+                <div class="place-info-box">
+                    <div class="place-text" id="placeText">장소를 선택해 주세요</div>
+                </div>
+                <button class="place-select-btn" id="placeSelectBtn">어디서 만날까요?</button>
+            </div>
+        </div>
+
+        <!-- 🏁 4. 최종 예약하기 버튼 및 주의 안내사항 -->
+        <div class="submit-section">
+            <button class="reserve-submit-btn" id="submitReserveBtn" disabled>예약 확정하기</button>
+            
+            <!-- 🏁 유저 요청: 0.5rem 회색 안내 문구 2행 -->
+            <div class="policy-notice-container">
+                <span class="policy-notice-text">· 파트너 안경점에서 상품 준비까지 영업일 기준 약 2~3일이 소요될 수 있습니다. 준비가 완료되면 고객님의 연락처로 안내될 예정입니다.</span>
+                <span class="policy-notice-text">· 안내 후 7일 내 미방문(노쇼) 시, 예약이 제한될 수 있습니다.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏁 예약 진행 중 안내 풀스크린 오버레이 -->
+    <div id="bookingLoadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; flex-direction: column;">
+        <div class="booking-spinner" style="width: 50px; height: 50px; border: 5px solid #eaeaea; border-top: 5px solid #0e3a5b; border-radius: 50%; animation: booking-spin 1s linear infinite; margin-bottom: 20px;"></div>
+        <p style="font-size: 1.15rem; font-weight: 700; color: #0e3a5b; letter-spacing: -0.3px; text-align: center; margin: 0 20px; line-height: 1.5; word-break: keep-all;">고객님의 소중한 예약을 진행 중입니다.<br>잠시만 기다려 주세요...</p>
+    </div>
+    
+    <style>
+        @keyframes booking-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <!-- 푸터는 globalWholesale.js가 동적으로 주입합니다. -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const goodsTextEl = document.getElementById("goodsText");
+            const placeTextEl = document.getElementById("placeText");
+            const placeSelectBtn = document.getElementById("placeSelectBtn");
+            const submitReserveBtn = document.getElementById("submitReserveBtn");
+            const loadingOverlay = document.getElementById("bookingLoadingOverlay");
+
+            // 1. URL 쿼리 파라미터에서 넘어온 items 파싱
+            const urlParams = new URLSearchParams(window.location.search);
+            const itemsParam = urlParams.get("items");
+            const placeIdParam = urlParams.get("place_id");
+            const placeNameParam = urlParams.get("place_name");
+
+            if (!itemsParam) {
+                goodsTextEl.textContent = "선택된 예약 안경 정보가 없습니다.";
+                goodsTextEl.style.color = "#dc3545";
+                return;
+            }
+
+            const itemsArr = itemsParam.split(",").filter(Boolean);
+            const totalCount = itemsArr.length;
+
+            if (totalCount === 0) {
+                goodsTextEl.textContent = "선택된 예약 안경 정보가 없습니다.";
+                goodsTextEl.style.color = "#dc3545";
+                return;
+            }
+
+            // 2. 가장 첫 번째 안경 아이템의 ID로 이름을 비동기 조회
+            const firstItemId = itemsArr[0];
+            fetch(`/api/items/${firstItemId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error || !data.name) {
+                        goodsTextEl.textContent = `안경 상품 외 총 ${totalCount}개`;
+                    } else {
+                        goodsTextEl.textContent = `${data.name} 포함 총 ${totalCount}개`;
+                    }
+                })
+                .catch(err => {
+                    console.error("첫 번째 상품명 패치 에러:", err);
+                    goodsTextEl.textContent = `안경 상품 외 총 ${totalCount}개`;
+                });
+
+            // 3. 예약 장소가 지정되어 복귀했는지 확인 및 렌더링
+            if (placeIdParam && placeNameParam) {
+                placeTextEl.textContent = decodeURIComponent(placeNameParam);
+                placeTextEl.classList.add("selected"); // 파란색 굵게 렌더링
+                submitReserveBtn.removeAttribute("disabled"); // 최종 확정 버튼 활성화
+            }
+
+            // 4. '어디서 만날까요?' 버튼 스위칭 동작 (선택 모드 파라미터 전달)
+            placeSelectBtn.addEventListener("click", () => {
+                location.href = `/partners?mode=select&items=${encodeURIComponent(itemsParam)}`;
+            });
+
+            // 5. 예약 신청 최종 동작 제어 (비동기 연동 고도화)
+            submitReserveBtn.addEventListener("click", () => {
+                const targetStore = placeTextEl.textContent;
+                
+                // 로딩 오버레이 실행 및 중복 방지
+                loadingOverlay.style.display = "flex";
+                submitReserveBtn.setAttribute("disabled", "true");
+                placeSelectBtn.setAttribute("disabled", "true");
+
+                // 백엔드 예약 확정 API 호출
+                fetch("/api/payment/booking", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        items: itemsArr,
+                        storeName: targetStore
+                    })
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error("예약 서버 통신 실패");
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.status === "success") {
+                        // 예약 확정 후 장바구니에서 예약된 상품들은 비워주는 세련된 후처리 진행
+                        let generalCart = [];
+                        const match = document.cookie.match(new RegExp('(^| )general_cart=([^;]+)'));
+                        if (match) {
+                            try {
+                                generalCart = JSON.parse(decodeURIComponent(match[2]));
+                            } catch(e) { generalCart = []; }
+                        }
+                        
+                        // 예약된 상품 제외한 장바구니 리스트로 갱신
+                        const reservedIdsSet = new Set(itemsArr);
+                        const updatedCart = generalCart.filter(item => !reservedIdsSet.has(item.id));
+                        
+                        // 쿠키 갱신 및 RTDB 동기화
+                        document.cookie = `general_cart=${encodeURIComponent(JSON.stringify(updatedCart))}; path=/; max-age=2592000`;
+                        
+                        fetch('/api/user/cart/sync', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ cart: updatedCart })
+                        })
+                        .then(() => {
+                            // 예약 완료 페이지로 최종 이동
+                            location.href = `/general/booking_success?booking_id=${data.bookingId}&store=${encodeURIComponent(targetStore)}`;
+                        })
+                        .catch(err => {
+                            console.error("RTDB 동기화 에러(비보호 후처리 무시 진행):", err);
+                            location.href = `/general/booking_success?booking_id=${data.bookingId}&store=${encodeURIComponent(targetStore)}`;
+                        });
+                    } else {
+                        throw new Error(data.message || "예약 정보 저장 에러");
+                    }
+                })
+                .catch(err => {
+                    console.error("예약 오류:", err);
+                    alert(`예약 중 에러가 발생했습니다: ${err.message}\n관리자에게 문의해 주세요.`);
+                    
+                    // 에러 발생 시 UI 잠금 해제 및 오버레이 클로즈
+                    loadingOverlay.style.display = "none";
+                    submitReserveBtn.removeAttribute("disabled");
+                    placeSelectBtn.removeAttribute("disabled");
+                });
+            });
+        });
+    </script>
+    <script src="/static/globalWholesale.js?v=3.4"></script>
+</body>
+</html>

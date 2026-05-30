@@ -24,6 +24,33 @@ document.addEventListener("DOMContentLoaded", () => {
     emailInput.addEventListener("input", updateSubmitBtnState);
     messageInput.addEventListener("input", updateSubmitBtnState);
 
+    // 🏁 [신규] 로그인 이메일 자동 삽입 및 예약 수정 템플릿 연동 엔진
+    const urlParams = new URLSearchParams(window.location.search);
+    const modifyBookingId = urlParams.get("modify_booking");
+
+    fetch("/api/user/status")
+        .then(res => res.json())
+        .then(data => {
+            // 로그인 상태인 경우 이메일 자동 주입 (Auto-fill)
+            if (data.user_email) {
+                emailInput.value = data.user_email;
+                // 이메일이 입력되었으므로 제출 가능 상태 갱신
+                updateSubmitBtnState();
+            }
+            
+            // 만약 예약 확인 페이지에서 '예약 수정' 클릭으로 들어온 경우
+            if (modifyBookingId) {
+                messageInput.value = `[매장 피팅 예약 수정 요청]\n- 예약번호: ${modifyBookingId}\n- 수정 요청 세부 사항 (매장/품목/일정 변경 등):\n  `;
+                messageInput.focus();
+                
+                // 가이드 양식이 채워졌으므로 즉시 폼 활성화 트리거
+                updateSubmitBtnState();
+            }
+        })
+        .catch(err => {
+            console.error("로그인 상태 로드 실패 (비로그인 모드로 동작):", err);
+        });
+
     // 2. 파일명 리스트 렌더링 함수 (단순 파일명 표시 버전)
     function renderPreviews() {
         filePreview.innerHTML = ""; // 기존 UI 초기화

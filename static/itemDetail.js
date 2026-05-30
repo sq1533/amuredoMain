@@ -45,8 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 // 일반고객 상세페이지에서는 항상 장바구니 담기 버튼을 노출시킵니다
                 cartAddBtn.style.display = 'block';
                 cartAddBtn.addEventListener("click", () => {
-                    const firstImg = (paths && paths.length > 0) ? paths[0] : "/static/img/ready.webp";
-                    addToCart(itemId, data.name, firstImg);
+                    addToCart(itemId, data.name);
                 });
             }
 
@@ -265,7 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 🏁 추후 일반 장바구니 연동을 위한 백엔드 API 스켈레톤 및 라이브 쿠키 연동 함수
-    function addToCart(itemId, itemName, itemImage) {
+    function addToCart(itemId, itemName) {
         // 🏁 비로그인(Guest) 상태일 때 장바구니 담기 원천 차단
         const roleMatch = document.cookie.match(new RegExp('(^| )amuredo_role=([^;]+)'));
         const role = roleMatch ? decodeURIComponent(roleMatch[2]) : "guest";
