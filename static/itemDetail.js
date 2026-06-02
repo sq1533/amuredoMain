@@ -49,21 +49,52 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
 
-            // 🏁 [요청사항 3] 상세 이미지 섹터 동적 렌더링
+            // 🏁 [수정] 통합 상세 이미지 섹션 동적 렌더링 (details -> models -> info)
             const detailImagesSection = document.getElementById("detailImagesSection");
             const detailProductImg = document.getElementById("detailProductImg");
+            const detailModelImagesContainer = document.getElementById("detailModelImagesContainer");
+            const detailInfoImg = document.getElementById("detailInfoImg");
 
             if (detailImagesSection) {
                 detailImagesSection.style.display = 'block'; // 상세 이미지 섹션 노출 개시
                 
-                // Firestore 의 item > {itemID} > details 데이터 연동 (아직 없으면 임시 빈 공간 처리)
+                // 1) 상품별 고유 상세 이미지
                 if (data.details && data.details.trim() !== "") {
                     detailProductImg.src = data.details;
                     detailProductImg.style.display = 'block';
                 } else {
-                    // 상품별 고유 상세 이미지가 아직 생성되지 않은 상태이면 공간만 비워둠
                     detailProductImg.removeAttribute('src');
                     detailProductImg.style.display = 'none';
+                }
+
+                // 2) 모델 이미지 리스트 (세로 스크롤 나열)
+                if (detailModelImagesContainer) {
+                    detailModelImagesContainer.innerHTML = "";
+                    const models = data.models || [];
+                    if (models.length > 0) {
+                        models.forEach((imgUrl, index) => {
+                            const imgEl = document.createElement('img');
+                            imgEl.src = imgUrl;
+                            imgEl.alt = `모델 이미지 ${index + 1}`;
+                            imgEl.loading = 'lazy';
+                            imgEl.style.cssText = "width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;";
+                            detailModelImagesContainer.appendChild(imgEl);
+                        });
+                        detailModelImagesContainer.style.display = 'block';
+                    } else {
+                        detailModelImagesContainer.style.display = 'none';
+                    }
+                }
+
+                // 3) info 이미지
+                if (detailInfoImg) {
+                    if (data.info && data.info.trim() !== "") {
+                        detailInfoImg.src = data.info;
+                        detailInfoImg.style.display = 'block';
+                    } else {
+                        detailInfoImg.removeAttribute('src');
+                        detailInfoImg.style.display = 'none';
+                    }
                 }
             }
 
@@ -75,34 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             renderSwipeSlider(paths);
-
-            // 🏁 룩북(모델 사진) 갤러리 렌더링 로직 추가
-            const lookbookSection = document.getElementById("lookbookSection");
-            const lookbookTrack = document.getElementById("lookbookTrack");
-            const lookbookTrackContainer = document.querySelector(".lookbook-track-container");
-            const models = data.models || []; // 백엔드 통신으로 추가 전달받은 모델 path 배열
-
-            if (lookbookSection && lookbookTrack && models.length > 0) {
-                lookbookSection.style.display = 'block'; // 데이터가 있을 때만 룩북 공간 오픈
-                
-                models.forEach((imgUrl, index) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'lookbook-item';
-                    
-                    const imgEl = document.createElement('img');
-                    imgEl.src = imgUrl;
-                    imgEl.alt = `Lookbook 모델 이미지 ${index + 1}`;
-                    imgEl.loading = 'lazy'; // 여러장일 경우 트래픽 분산을 위한 lazy 옵션
-                    
-                    itemDiv.appendChild(imgEl);
-                    lookbookTrack.appendChild(itemDiv);
-                });
-
-                // PC 가로 스와이프 휠 바를 마우스로 잡고 끌 수 있도록 데스크탑 폴리필 적용
-                if (lookbookTrackContainer) {
-                    setupDesktopDrag(lookbookTrackContainer);
-                }
-            }
         })
         .catch(err => {
             console.error(err);

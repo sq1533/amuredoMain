@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 import os
+import re
 import firebase_admin
 from firebase_admin import credentials, firestore
 import requests
@@ -410,6 +411,7 @@ async def get_item_detail(request: Request, item_id: str):
         
         code_val = str(data.get("code", ""))
         models = []
+        info_val = ""
         
         # 1. 일차적으로 개별 아이템(item) 컬렉션에 등록된 기존 desc를 가져옵니다.
         final_desc = str(data.get("desc", ""))
@@ -419,8 +421,10 @@ async def get_item_detail(request: Request, item_id: str):
                 code_doc = db.collection('code').document(code_val).get()
                 if code_doc.exists:
                     code_data = code_doc.to_dict()
-                    # 룩북용 사진 배열 추출
-                    models = code_data.get("path", [])
+                    # 룩북용 사진 배열 추출 (models 우선, 없으면 path)
+                    models = code_data.get("models", code_data.get("path", []))
+                    # info 이미지 추출
+                    info_val = code_data.get("info", "")
                     
                     # 🏁 신규 로직: code 컬렉션 서랍장에 공통 desc가 작성되어 있다면 이것을 '상품 코멘트'로 덮어씌웁니다.
                     if "desc" in code_data and str(code_data["desc"]).strip():
@@ -442,6 +446,10 @@ async def get_item_detail(request: Request, item_id: str):
             "code": code_val,      
             # 상세 페이지 룩북 전용 모델 배열
             "models": models,      
+            # 상세 이미지 데이터 추가
+            "details": data.get("details", ""),
+            # code 문서의 info 필드 추가
+            "info": info_val,
             # 네이버 구매 링크 파싱 (없을 경우 빈 문자열)
             "naver": str(data.get("naver", "")),
             # 🏁 업데이트: code 기반 통일화된 코멘트 출력

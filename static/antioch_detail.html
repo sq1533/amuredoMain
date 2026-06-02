@@ -121,17 +121,7 @@
                 </div>
             </div>
             
-            <!-- 🏁 룩북(모델 사진) 전용 갤러리 룸 -->
-            <section class="lookbook-section" id="lookbookSection" style="display: none;">
-                <h3 class="lookbook-subtitle">룩북</h3>
-                <div class="lookbook-track-container">
-                    <div class="lookbook-track" id="lookbookTrack">
-                        <!-- JS가 서버에서 받은 models 배열을 토대로 모델 사진을 렌더링합니다 -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- 연관 상품(Same Code) 추천 최하단 갤러리 룸 -->
+            <!-- 연관 상품(Same Code) 추천 갤러리 룸 -->
             <section class="related-items-section" id="relatedSection" style="display: none;">
                 <h3 class="related-subtitle">연관 아이템</h3>
                 <!-- 가로 무한 스와이퍼 가능 존 -->
@@ -139,6 +129,26 @@
                     <div class="related-track" id="relatedTrack">
                         <!-- JS가 연관 상품별 카드를 생성하여 이곳에 append -->
                     </div>
+                </div>
+            </section>
+
+            <!-- 🏁 상품 상세 이미지 섹션 (룩북 + 상세이미지 통합) -->
+            <section class="detail-images-section" id="detailImagesSection" style="display: none;">
+                <div class="detail-images-container" style="max-width: 800px; margin: 40px auto; padding: 0;">
+                    <!-- 파트 1: 공통 이미지 1 -->
+                    <img id="detailCommonImg1" src="/static/img/detail_common_1.webp" alt="안내 정보 1" loading="lazy" style="width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;">
+                    
+                    <!-- 파트 2: 상품별 고유 상세 이미지 (동적 URL 바인딩) -->
+                    <img id="detailProductImg" src="" alt="상품 상세 정보" loading="lazy" style="width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;">
+                    
+                    <!-- 파트 3: 모델 이미지 리스트 (동적 JS 바인딩) -->
+                    <div id="detailModelImagesContainer" style="width: 100%; margin: 0; padding: 0;"></div>
+                    
+                    <!-- 파트 4: info 이미지 (동적 URL 바인딩) -->
+                    <img id="detailInfoImg" src="" alt="공통 정보 이미지" loading="lazy" style="width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;">
+                    
+                    <!-- 파트 5: 공통 이미지 2 -->
+                    <img id="detailCommonImg2" src="/static/img/detail_common_2.webp" alt="안내 정보 2" loading="lazy" style="width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;">
                 </div>
             </section>
         </main>
@@ -160,7 +170,7 @@
 
 
     <!-- 상세 페이지 로직 파일 (V버전 증가) -->
-    <script src="/static/itemDetail.js?v=9.3"></script>
+    <script src="/static/itemDetail.js?v=10.0"></script>
     
     <!-- 공통 메뉴 동작용 스크립트 -->
     <script>
