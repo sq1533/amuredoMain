@@ -245,6 +245,7 @@
             outline: none;
             transition: border-color 0.2s;
             font-family: inherit;
+            box-sizing: border-box;
         }
         .location-input-group input:focus {
             border-color: #0e3a5b;
@@ -504,6 +505,40 @@
             .partner-empty, .partner-loader {
                 grid-column: span 1;
             }
+            
+            /* 모바일 주소 입력란 피팅 */
+            .address-search-wrapper {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+            }
+            #btnSearchAddress {
+                padding: 14px 0 !important;
+                width: 100% !important;
+                box-sizing: border-box;
+            }
+            #addressInput {
+                width: 100% !important;
+            }
+            
+            /* 모바일 검색 모달 피팅 */
+            .modal-content {
+                padding: 25px 20px !important;
+                width: 95% !important;
+                max-height: 90vh !important;
+            }
+            .modal-search-box {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+            .modal-search-btn {
+                padding: 14px 0 !important;
+                width: 100% !important;
+                box-sizing: border-box;
+            }
+            .modal-search-input {
+                width: 100% !important;
+            }
         }
 
         /* 🏁 원하는 안경점 검색 모달 팝업 스타일 */
@@ -575,6 +610,7 @@
             outline: none;
             transition: border-color 0.2s;
             font-family: inherit;
+            box-sizing: border-box;
         }
         .modal-search-input:focus {
             border-color: #0e3a5b;
@@ -589,6 +625,7 @@
             font-size: 1rem;
             cursor: pointer;
             transition: background 0.2s, transform 0.1s;
+            box-sizing: border-box;
         }
         .modal-search-btn:hover {
             background-color: #0b2d47;
@@ -718,7 +755,7 @@
                             <div class="location-form">
                                 <div class="location-input-group">
                                     <label for="addressInput">방문 주소</label>
-                                    <div style="display: flex; gap: 8px;">
+                                    <div class="address-search-wrapper" style="display: flex; gap: 8px;">
                                         <input type="text" id="addressInput" placeholder="우측 주소 검색 버튼을 눌러주세요" readonly style="flex: 1; background-color: #fafafa; cursor: pointer;" required>
                                         <button type="button" id="btnSearchAddress" style="padding: 0 16px; background-color: #0e3a5b; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.2s;">주소 검색</button>
                                     </div>
