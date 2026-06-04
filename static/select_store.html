@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>매장 및 스케줄 선택 - 아무래도 안경</title>
+    <link rel="icon" href="/static/img/icon.webp" type="image/webp">
+    <link rel="apple-touch-icon" href="/static/img/icon.webp">
+    
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <!-- 카카오 우편번호 서비스 SDK 추가 -->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <style>
+        .select-container {
+            max-width: 900px;
+            margin: 100px auto 60px auto;
+            padding: 40px 30px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(14, 58, 91, 0.04);
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        /* 🏁 2개 탭 버튼 영역 */
+        .select-tabs {
+            display: flex;
+            border-bottom: 2px solid #eaeaea;
+            margin-bottom: 35px;
+            gap: 10px;
+        }
+        .select-tab-btn {
+            flex: 1;
+            padding: 16px 10px;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #888;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .select-tab-btn.active {
+            color: #0e3a5b;
+            font-weight: 800;
+        }
+        .select-tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #0e3a5b;
+            border-radius: 2px;
+        }
+        
+        /* 🏁 탭 패널 컨테이너 */
+        .tab-panel {
+            display: none;
+        }
+        .tab-panel.active {
+            display: block;
+            animation: panelFadeIn 0.4s ease-out forwards;
+        }
+        @keyframes panelFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ================= 탭 1: 희망 장소/시간 선택 스타일 ================= */
+        .visit-slider-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            min-height: 480px;
+        }
+        .visit-slider-track {
+            display: flex;
+            width: 200%; /* 2단계 구성을 가로로 배치 */
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .visit-step {
+            width: 50%;
+            box-sizing: border-box;
+            padding: 0 10px;
+        }
+        
+        /* 캘린더 격자 */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-weight: 800;
+            color: #0e3a5b;
+            font-size: 1.2rem;
+            padding: 0 5px;
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .calendar-days div:first-child { color: #d9534f; } /* 일요일 빨간색 */
+        .calendar-days div:last-child { color: #0275d8; }  /* 토요일 파란색 */
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+        .calendar-cell {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            color: #333;
+        }
+        .calendar-cell.empty {
+            cursor: default;
+            background: none !important;
+        }
+        .calendar-cell.sunday { color: #d9534f; }
+        .calendar-cell.saturday { color: #0275d8; }
+        .calendar-cell.disabled {
+            color: #ccc !important;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .calendar-cell:hover:not(.disabled):not(.empty) {
+            background-color: #f1f3f5;
+        }
+        .calendar-cell.selected {
+            background-color: #0e3a5b !important;
+            color: #fff !important;
+            box-shadow: 0 4px 10px rgba(14, 58, 91, 0.25);
+        }
+        
+        /* 시간 아코디언 (Expander) */
+        .time-expander {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, margin-top 0.3s ease;
+            border-top: 1px dashed #eee;
+            margin-top: 0;
+        }
+        .time-expander.open {
+            max-height: 400px;
+            margin-top: 25px;
+            padding-top: 15px;
+        }
+        .time-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 15px;
+        }
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .time-cell {
+            padding: 14px 0;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            background-color: #fff;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #555;
+        }
+        .time-cell.disabled {
+            background-color: #f8f9fa;
+            border-color: #f1f3f5;
+            color: #ccc;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .time-cell:hover:not(.disabled) {
+            border-color: #0e3a5b;
+            color: #0e3a5b;
+            background-color: rgba(14, 58, 91, 0.02);
+        }
+        .time-cell.active-start {
+            background-color: #0e3a5b !important;
+            color: #fff !important;
+            border-color: #0e3a5b !important;
+            box-shadow: 0 4px 10px rgba(14, 58, 91, 0.2);
+        }
+        .time-cell.active-end {
+            background-color: rgba(14, 58, 91, 0.1) !important;
+            color: #0e3a5b !important;
+            border-color: #0e3a5b !important;
+        }
+
+        /* 주소 인풋 단계 스타일 */
+        .location-step-content {
+            padding: 10px 5px;
+        }
+        .location-header {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 25px;
+        }
+        .location-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .location-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .location-input-group label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #555;
+        }
+        .location-input-group input {
+            padding: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        .location-input-group input:focus {
+            border-color: #0e3a5b;
+        }
+        .step-nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            gap: 15px;
+        }
+        .btn-prev {
+            flex: 1;
+            padding: 16px 0;
+            background-color: #f1f3f5;
+            color: #555;
+            border: 1px solid #eaeaea;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: center;
+        }
+        .btn-prev:hover {
+            background-color: #e2e6ea;
+        }
+        .btn-next {
+            flex: 2;
+            padding: 16px 0;
+            background-color: #0e3a5b;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(14, 58, 91, 0.15);
+        }
+        .btn-next:hover:not(:disabled) {
+            background-color: #0b2d47;
+            transform: translateY(-1px);
+        }
+        .btn-next:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* ================= 탭 2: 원하는 안경점 선택 스타일 ================= */
+        .filter-section {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .filter-select {
+            flex: 1;
+            padding: 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #555;
+            background-color: #fff;
+            outline: none;
+        }
+        .filter-select:focus {
+            border-color: #0e3a5b;
+        }
+        .btn-reset {
+            padding: 0 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: #666;
+        }
+        .btn-reset:hover {
+            background-color: #e9ecef;
+        }
+        
+        /* 가까운 안경점 찾기 버튼 */
+        .near-store-area {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .near-store-btn {
+            width: 100%;
+            padding: 14px 0;
+            background-color: #fff;
+            color: #0e3a5b;
+            border: 1px solid #0e3a5b;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .near-store-btn:hover {
+            background-color: rgba(14, 58, 91, 0.04);
+        }
+
+        .partner-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .partner-card {
+            background: #fafafa;
+            border: 1px solid #eaeaea;
+            border-radius: 12px;
+            padding: 24px;
+            box-sizing: border-box;
+            position: relative;
+            transition: all 0.25s ease;
+        }
+        .partner-card:hover {
+            box-shadow: 0 8px 25px rgba(14, 58, 91, 0.06);
+            border-color: #0e3a5b;
+        }
+        .card-badge {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: rgba(14, 58, 91, 0.06);
+            color: #0e3a5b;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+        .card-name {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 12px;
+            word-break: keep-all;
+        }
+        .card-divider {
+            width: 30px;
+            height: 2px;
+            background-color: #0e3a5b;
+            margin-bottom: 16px;
+        }
+        .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 0.88rem;
+            color: #666;
+            line-height: 1.4;
+        }
+        .info-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .info-text {
+            word-break: keep-all;
+        }
+        .info-link {
+            color: inherit;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .info-link:hover {
+            color: #0e3a5b;
+            text-decoration: underline;
+        }
+        .route-tag, .mobile-call-tag {
+            font-size: 0.65rem;
+            background-color: #f1f3f5;
+            color: #777;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .partner-empty {
+            grid-column: span 2;
+            text-align: center;
+            padding: 50px 0;
+            color: #888;
+            font-weight: 700;
+        }
+        .partner-loader {
+            grid-column: span 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 50px 0;
+        }
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #eaeaea;
+            border-top: 3px solid #0e3a5b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 🏁 📱 모바일 디바이스 최적화 */
+        @media (max-width: 768px) {
+            .select-container {
+                margin: 90px 15px 40px 15px;
+                padding: 25px 15px;
+                border-radius: 12px;
+            }
+            .select-tabs {
+                margin-bottom: 25px;
+            }
+            .select-tab-btn {
+                font-size: 0.95rem;
+                padding: 12px 5px;
+            }
+            .calendar-cell {
+                font-size: 0.9rem;
+            }
+            .time-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .time-cell {
+                font-size: 0.85rem;
+                padding: 11px 0;
+            }
+            .filter-section {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .btn-reset {
+                padding: 12px 0;
+                text-align: center;
+            }
+            .partner-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .partner-empty, .partner-loader {
+                grid-column: span 1;
+            }
+        }
+
+        /* 🏁 원하는 안경점 검색 모달 팝업 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(14, 58, 91, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.open {
+            display: flex;
+            animation: modalFadeIn 0.3s ease-out forwards;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 35px 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 550px;
+            box-shadow: 0 25px 60px rgba(14, 58, 91, 0.18);
+            box-sizing: border-box;
+            position: relative;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            animation: modalSlideUp 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        @keyframes modalSlideUp {
+            from { transform: translateY(30px); }
+            to { transform: translateY(0); }
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            color: #888;
+            font-size: 28px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .close-modal:hover {
+            color: #0e3a5b;
+        }
+        .modal-search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .modal-search-input {
+            flex: 1;
+            padding: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        .modal-search-input:focus {
+            border-color: #0e3a5b;
+        }
+        .modal-search-btn {
+            padding: 0 24px;
+            background-color: #0e3a5b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .modal-search-btn:hover {
+            background-color: #0b2d47;
+        }
+        .modal-search-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .modal-result-area {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 10px;
+            padding-right: 5px;
+        }
+        .modal-result-card {
+            background: #fafafa;
+            border: 1px solid #eaeaea;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+        .modal-result-card:hover {
+            border-color: #0e3a5b;
+            box-shadow: 0 6px 15px rgba(14, 58, 91, 0.04);
+        }
+        .modal-card-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .modal-card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .modal-card-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-verify-loc {
+            flex: 1;
+            padding: 12px 0;
+            background-color: #fff;
+            color: #0e3a5b;
+            border: 1px solid #0e3a5b;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn-verify-loc:hover {
+            background-color: rgba(14, 58, 91, 0.04);
+        }
+        .btn-select-store {
+            flex: 1;
+            padding: 12px 0;
+            background-color: #0e3a5b;
+            color: #fff;
+            border: 1px solid #0e3a5b;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .btn-select-store:hover {
+            background-color: #0b2d47;
+            border-color: #0b2d47;
+        }
+    </style>
+</head>
+<body>
+    <div class="select-container">
+        <!-- 2개 탭 버튼 헤더 -->
+        <div class="select-tabs">
+            <button class="select-tab-btn active" id="tabVisitBtn">희망 장소와 시간 선택하기</button>
+            <button class="select-tab-btn" id="tabStoreBtn">원하는 안경점 선택하기</button>
+        </div>
+
+        <!-- 🏁 탭 패널 1: 희망 장소와 시간 선택 (본사 방문 피팅) -->
+        <div class="tab-panel active" id="panelVisit">
+            <!-- 시범 운영 안내 문구 -->
+            <div style="margin-bottom: 25px; padding: 14px 18px; background-color: #f4f7f9; border-left: 4px solid #0e3a5b; border-radius: 4px; font-size: 0.92rem; color: #0e3a5b; font-weight: 700; line-height: 1.4; letter-spacing: -0.2px;">
+                📢 서울권 시범 운영 중입니다. 추후 타 지역으로 확장 예정입니다.
+            </div>
+            <div class="visit-slider-container">
+                <div class="visit-slider-track" id="visitSliderTrack">
+                    <!-- Step 1: 날짜 및 시간 선택 -->
+                    <div class="visit-step" id="stepDateTime">
+                        <!-- 달력 헤더 -->
+                        <div class="calendar-header">
+                            <span id="calendarMonthYear">2026년 6월</span>
+                        </div>
+                        <!-- 요일 라벨 -->
+                        <div class="calendar-days">
+                            <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+                        </div>
+                        <!-- 캘린더 날짜 격자 -->
+                        <div class="calendar-grid" id="calendarGrid"></div>
+
+                        <!-- 시간 슬롯 아코디언 -->
+                        <div class="time-expander" id="timeExpander">
+                            <h4 class="time-title">피팅 시간 선택</h4>
+                            <div class="time-grid" id="timeGrid"></div>
+                        </div>
+
+                        <!-- 네비게이션 (시간선택 단계) -->
+                        <div class="step-nav-buttons" style="margin-top: 35px;">
+                            <button class="btn-prev" onclick="location.href='/general/cart'">장바구니로</button>
+                            <button class="btn-next" id="btnToLocation" disabled>장소 입력하기</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: 희망 방문 장소 입력 -->
+                    <div class="visit-step" id="stepLocation">
+                        <div class="location-step-content">
+                            <h3 class="location-header">📍 방문 피팅 희망 주소 입력</h3>
+                            <div class="location-form">
+                                <div class="location-input-group">
+                                    <label for="addressInput">방문 주소</label>
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="text" id="addressInput" placeholder="우측 주소 검색 버튼을 눌러주세요" readonly style="flex: 1; background-color: #fafafa; cursor: pointer;" required>
+                                        <button type="button" id="btnSearchAddress" style="padding: 0 16px; background-color: #0e3a5b; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.2s;">주소 검색</button>
+                                    </div>
+                                </div>
+                                <div class="location-input-group">
+                                    <label for="detailAddressInput">상세 주소 (건물명, 호수 등)</label>
+                                    <input type="text" id="detailAddressInput" placeholder="예: 1층 아무래도 안경" required>
+                                </div>
+                                <!-- 네비게이션 (주소입력 단계) -->
+                                <div class="step-nav-buttons">
+                                    <button class="btn-prev" id="btnBackToDateTime">이전으로</button>
+                                    <button class="btn-next" id="btnConfirmVisit" disabled>설정하기</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🏁 탭 패널 2: 원하는 안경점 선택 (파트너 안경점 목록) -->
+        <div class="tab-panel" id="panelStore">
+            <!-- 시/도, 구/군 필터링 섹션 -->
+            <div class="filter-section">
+                <select class="filter-select" id="citySelect">
+                    <option value="">시/도 전체</option>
+                </select>
+                <select class="filter-select" id="countrySelect" disabled>
+                    <option value="">구/군 전체</option>
+                </select>
+                <button class="btn-reset" id="resetFilterBtn">초기화</button>
+            </div>
+
+            <!-- 가까운 안경점 찾기 신규 버튼 -->
+            <div class="near-store-area">
+                <button class="near-store-btn" id="nearStoreBtn">원하는 안경점 찾기</button>
+            </div>
+
+            <!-- 파트너 안경점 그리드 영역 -->
+            <div class="partner-grid" id="partnerGrid">
+                <!-- 로더 스켈레톤 -->
+                <div class="partner-loader" id="partnerLoader">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+            <!-- 빈 검색 상태 안내 -->
+            <div id="partnerEmptyState" class="partner-empty" style="display: none;">
+                등록된 파트너 안경점이 존재하지 않습니다.
+            </div>
+        </div>
+    </div>
+
+    <!-- 외부 안경점 검색 모달 팝업 -->
+    <div id="searchStoreModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeStoreModal">&times;</span>
+            <h3 style="font-size: 1.3rem; font-weight: 800; color: #0e3a5b; margin-top: 0; margin-bottom: 15px; text-align: center;">원하는 안경점 찾기</h3>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px; line-height: 1.5; text-align: center; word-break: keep-all;">
+                찾으시는 지역의 <strong>동(예: 신림동)</strong> 또는 <strong>면/읍</strong> 이름을 입력해 주세요.<br>
+                해당 지역 주변의 모든 안경점 목록을 불러옵니다.
+            </p>
+            <div class="modal-search-box">
+                <input type="text" id="modalSearchInput" class="modal-search-input" placeholder="예: 신림동, 삼평동" required>
+                <button type="button" id="modalSearchBtn" class="modal-search-btn">검색</button>
+            </div>
+            
+            <!-- 검색 결과 영역 -->
+            <div class="modal-result-area" id="modalResultArea">
+                <div id="modalSearchEmptyState" style="text-align: center; padding: 40px 0; color: #999; font-weight: 700;">
+                    동 또는 면 이름을 검색해 주세요. (예: 신림동)
+                </div>
+                <div id="modalSearchLoader" style="display: none; justify-content: center; align-items: center; padding: 40px 0;">
+                    <div class="spinner"></div>
+                </div>
+                <div id="modalSearchList" style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- 동적으로 결과 카드 로드 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 스크립트 결합 -->
+    <script src="/static/selectStore.js?v=2.0"></script>
+    <script src="/static/globalWholesale.js?v=3.4"></script>
+</body>
+</html>

@@ -38,6 +38,7 @@ except Exception as e:
 NAVER_CLIENT_ID = None
 NAVER_CLIENT_SECRET = None
 NAVER_REDIRECT_URI = None
+NAVER_TEST_REDIRECT_URI = None
 
 naver_config_path = os.path.join(os.path.dirname(__file__), "..", "database", "naver_api.json")
 try:
@@ -47,6 +48,7 @@ try:
             NAVER_CLIENT_ID = naver_data.get("client_id")
             NAVER_CLIENT_SECRET = naver_data.get("client_secret")
             NAVER_REDIRECT_URI = naver_data.get("redirect_uri")
+            NAVER_TEST_REDIRECT_URI = naver_data.get("test_redirect_uri")
 except Exception as e:
     print(f"🔥 네이버 API 설정 파일 로드 에러: {e}")
 
@@ -54,6 +56,7 @@ except Exception as e:
 KAKAO_CLIENT_ID = None
 KAKAO_CLIENT_SECRET = None
 KAKAO_REDIRECT_URI = None
+KAKAO_TEST_REDIRECT_URI = None
 
 kakao_config_path = os.path.join(os.path.dirname(__file__), "..", "database", "kakao_api.json")
 try:
@@ -63,6 +66,7 @@ try:
             KAKAO_CLIENT_ID = kakao_data.get("client_id")
             KAKAO_CLIENT_SECRET = kakao_data.get("client_secret")
             KAKAO_REDIRECT_URI = kakao_data.get("redirect_uri")
+            KAKAO_TEST_REDIRECT_URI = kakao_data.get("test_redirect_uri")
 except Exception as e:
     print(f"🔥 카카오 API 설정 파일 로드 에러: {e}")
 
@@ -375,10 +379,13 @@ async def naver_login(request: Request, next: str = None):
     # CSRF 방지를 위한 state 난수 생성
     state = secrets.token_hex(16)
     
+    is_local = "localhost" in str(request.base_url) or "127.0.0.1" in str(request.base_url)
+    redirect_uri = NAVER_TEST_REDIRECT_URI if (is_local and NAVER_TEST_REDIRECT_URI) else NAVER_REDIRECT_URI
+    
     params = {
         "response_type": "code",
         "client_id": NAVER_CLIENT_ID,
-        "redirect_uri": NAVER_REDIRECT_URI,
+        "redirect_uri": redirect_uri,
         "state": state
     }
     
@@ -535,9 +542,12 @@ async def kakao_login(request: Request, next: str = None):
     # CSRF 방지를 위한 state 난수 생성
     state = secrets.token_hex(16)
     
+    is_local = "localhost" in str(request.base_url) or "127.0.0.1" in str(request.base_url)
+    redirect_uri = KAKAO_TEST_REDIRECT_URI if (is_local and KAKAO_TEST_REDIRECT_URI) else KAKAO_REDIRECT_URI
+    
     params = {
         "client_id": KAKAO_CLIENT_ID,
-        "redirect_uri": KAKAO_REDIRECT_URI,
+        "redirect_uri": redirect_uri,
         "response_type": "code",
         "state": state
     }
@@ -567,10 +577,14 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
     # 토큰 교환 요청
     token_url = "https://kauth.kakao.com/oauth/token"
     headers = {"Content-Type": "application/x-www-form-urlencoded;charset=utf-8"}
+    
+    is_local = "localhost" in str(request.base_url) or "127.0.0.1" in str(request.base_url)
+    redirect_uri = KAKAO_TEST_REDIRECT_URI if (is_local and KAKAO_TEST_REDIRECT_URI) else KAKAO_REDIRECT_URI
+    
     token_params = {
         "grant_type": "authorization_code",
         "client_id": KAKAO_CLIENT_ID,
-        "redirect_uri": KAKAO_REDIRECT_URI,
+        "redirect_uri": redirect_uri,
         "code": code,
         "client_secret": KAKAO_CLIENT_SECRET if KAKAO_CLIENT_SECRET else ""
     }

@@ -238,6 +238,17 @@ async def serve_bookings_page(request: Request):
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>예약 확인 템플릿(bookings.html)을 찾을 수 없습니다.</h1>", status_code=404)
 
+# 🏁 일반 회원 예약 매장/스케줄 선택 화면 HTML 서빙용 프론트엔드 라우팅 (보안 게이트 적용)
+@app.get("/general/select_store", response_class=HTMLResponse)
+async def serve_select_store_page(request: Request):
+    if not request.session.get("user_id"):
+        return RedirectResponse(url="/login")
+    select_store_path = os.path.join(static_dir, "select_store.html")
+    if os.path.exists(select_store_path):
+        with open(select_store_path, "r", encoding="utf-8", errors="replace") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>매장 선택 템플릿(select_store.html)을 찾을 수 없습니다.</h1>", status_code=404)
+
 # 🏁 일반 회원 마이페이지(Mypage) 화면 HTML 서빙용 프론트엔드 라우팅 (보안 게이트 적용)
 @app.get("/general/mypage", response_class=HTMLResponse)
 async def serve_general_mypage_page(request: Request):

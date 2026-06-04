@@ -483,11 +483,12 @@
                         }
 
                         const summaryText = `${firstItemName} 포함 총 ${itemsArr.length}개`;
+                        const titleText = booking.bookingType === 'visit' ? '1:1 안경 피팅' : (booking.storeName || '파트너 매장');
 
                         card.innerHTML = `
                             <div class="expander-header">
                                 <div class="expander-header-left">
-                                    <span class="expander-store">${booking.storeName}</span>
+                                    <span class="expander-store">${titleText}</span>
                                     <span class="expander-summary">${summaryText}</span>
                                 </div>
                                 <svg class="chevron-icon" viewBox="0 0 24 24">
@@ -497,9 +498,19 @@
                             <div class="expander-content">
                                 <div class="expander-content-inner">
                                     <div class="section-sub">예약 상세 안내</div>
-                                    <div class="info-panel">
-                                        <div>예약 일자: <span class="info-date-val">${formatYYMMDD(booking.createdAt)}</span></div>
-                                        <span class="status-badge ${isCancelled ? 'cancelled-badge' : ''}">${booking.status}</span>
+                                    <div class="info-panel" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                                        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                            <div style="font-weight: 700; color: #0e3a5b;">예약 ID: ${booking.bookingId}</div>
+                                            <span class="status-badge ${isCancelled ? 'cancelled-badge' : ''}">${booking.status}</span>
+                                        </div>
+                                        ${booking.bookingType === 'visit' ? `
+                                            <div style="margin: 2px 0;">방문 예정일: <span class="info-date-val">${booking.reservedDate}</span></div>
+                                            <div style="margin: 2px 0;">방문 예정시간: <span class="info-date-val">${booking.reservedTime.slice(0,2)}:${booking.reservedTime.slice(2,4)}</span></div>
+                                            <div style="margin: 2px 0;">방문 주소: <span class="info-date-val">${booking.address}</span></div>
+                                        ` : `
+                                            <div style="margin: 2px 0;">방문 예정매장: <span class="info-date-val">${booking.storeName}</span></div>
+                                        `}
+                                        <div style="margin-top: 6px; font-size: 0.85rem; color: #888;">접수일자: ${formatYYMMDD(booking.createdAt)}</div>
                                     </div>
                                     
                                     <div class="section-sub">예약 상품</div>

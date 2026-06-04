@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 import requests
 import json
 import os
+import re
 import base64
 from datetime import datetime
 from firebase_admin import db as rtdb
@@ -273,15 +274,67 @@ async def request_order_exchange(request: Request):
         print(f"🔥 교환 요청 처리 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
+def get_next_hour_slot(time_str: str) -> str:
+    try:
+        val = int(time_str)
+        next_val = val + 100
+        return f"{next_val:04d}"
+    except Exception:
+        return ""
+
+@router.get("/check_active_booking")
+async def check_active_booking(request: Request):
+    """
+    현재 로그인한 고객의 활성 예약("예약 완료" 상태)이 이미 존재하는지 검사합니다. (1인 1회 제한용)
+    """
+    email = request.session.get("user_id")
+    if not email:
+        return JSONResponse(status_code=403, content={"status": "error", "message": "로그인이 필요합니다."})
+    
+    try:
+        safe_email = sanitize_email(email)
+        ref = rtdb.reference(f'booking/{safe_email}')
+        bookings_dict = ref.get()
+        
+        has_active = False
+        if bookings_dict:
+            for b in bookings_dict.values():
+                if b.get("status") == "예약 완료":
+                    has_active = True
+                    break
+                    
+        return {"status": "success", "has_active": has_active}
+    except Exception as e:
+        print(f"🔥 중복 예약 체크 에러: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+@router.get("/visit_schedule")
+async def get_visit_schedule(date: str):
+    """
+    특정 날짜(YYYY-MM-DD)의 본사 방문 피팅 예약 가능 시간 슬롯 현황을 RTDB에서 조회합니다.
+    """
+    try:
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", date):
+            return JSONResponse(status_code=400, content={"status": "error", "message": "올바르지 않은 날짜 형식입니다."})
+            
+        ref = rtdb.reference(f'schedule/{date}')
+        slots = ref.get()
+        if not slots:
+            slots = {}
+            
+        return {"status": "success", "schedule": slots}
+    except Exception as e:
+        print(f"🔥 방문 스케줄 조회 에러: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
 # -------------------------------------------------------------
-# 🏁 일반 매장 피팅 예약 확정 API 엔진 탑재
+# 🏁 일반 매장 및 방문 피팅 예약 확정 API 엔진 탑재
 # -------------------------------------------------------------
 @router.post("/booking")
 async def create_booking(request: Request):
     """
-    일반 고객 또는 도매 고객의 오프라인 안경점 피팅 예약을 최종 확정합니다.
-    1. Firebase RTDB 'booking/{safe_email}/{booking_id}' 노드에 예약 정보를 저장합니다.
-    2. 텔레그램 bot_token 및 user_request_id 채널을 통해 신규 예약 알림 메시지를 발송합니다.
+    일반 고객 또는 도매 고객의 오프라인 안경점 피팅 또는 본사 방문 피팅 예약을 최종 확정합니다.
+    1인 1회 예약 제한 정책을 확인하고 중복 예약을 방어합니다.
     """
     email = request.session.get("user_id")
     user_role = request.session.get("user_role", "guest")
@@ -291,19 +344,68 @@ async def create_booking(request: Request):
     try:
         body = await request.json()
         items = body.get("items", [])
-        store_name = body.get("storeName", "")
+        booking_type = body.get("bookingType", "store") # "store" (안경점) 또는 "visit" (본사 방문)
         
-        if not items or not store_name:
-            return JSONResponse(status_code=400, content={"status": "error", "message": "필수 데이터 누락"})
-            
+        # 1. 1인 1회 예약 제한 정책 검증 (로그인 이메일 기준 활성 예약 조회)
         safe_email = sanitize_email(email)
+        bookings_ref = rtdb.reference(f'booking/{safe_email}')
+        existing_bookings = bookings_ref.get()
+        if existing_bookings:
+            for b in existing_bookings.values():
+                if b.get("status") == "예약 완료":
+                    return JSONResponse(status_code=400, content={"status": "error", "message": "이미 활성화된 피팅 예약 내역이 존재합니다. 예약은 1인당 1회만 가능합니다."})
         
-        # 🏁 고유 예약 ID 생성 (B + 년월일시분초 + 무작위 3자리)
+        # 2. 필수 데이터 검증 및 분기 정보 세팅
+        store_name = ""
+        reserved_date = ""
+        reserved_time = ""
+        address = ""
+        
+        if booking_type == "visit":
+            reserved_date = body.get("reservedDate", "")
+            reserved_time = body.get("reservedTime", "")
+            address = body.get("address", "")
+            if not items or not reserved_date or not reserved_time or not address:
+                return JSONResponse(status_code=400, content={"status": "error", "message": "필수 방문 예약 정보가 누락되었습니다."})
+            
+            # 당일 예약 및 과거 예약 금지 검증 추가
+            try:
+                booking_date_obj = datetime.strptime(reserved_date, "%Y-%m-%d").date()
+                if booking_date_obj <= datetime.now().date():
+                    return JSONResponse(status_code=400, content={"status": "error", "message": "당일 예약 또는 과거 날짜의 예약은 불가능합니다."})
+            except ValueError:
+                return JSONResponse(status_code=400, content={"status": "error", "message": "올바르지 않은 예약 날짜 형식입니다."})
+        else:
+            store_name = body.get("storeName", "")
+            if not items or not store_name:
+                return JSONResponse(status_code=400, content={"status": "error", "message": "필수 안경점 예약 정보가 누락되었습니다."})
+
+        # 3. 고유 예약 ID 생성 (B + 년월일시분초 + 무작위 3자리)
         import random
         now = datetime.now()
         booking_id = f"B{now.strftime('%y%m%d%H%M%S')}{random.randint(100, 999)}"
         
-        # 🏁 Firestore에서 예약자 실명 및 연락처 연동
+        # 4. 본사 방문 피팅 예약인 경우: 실시간 스케줄 락(Locking) 설정 (연속 2시간)
+        if booking_type == "visit":
+            next_time = get_next_hour_slot(reserved_time)
+            if not next_time:
+                return JSONResponse(status_code=400, content={"status": "error", "message": "올바르지 않은 예약 시간입니다."})
+            
+            # RTDB에서 가용 여부 선행 검증 (동시 예약 충돌 방지)
+            schedule_ref = rtdb.reference(f'schedule/{reserved_date}')
+            slots = schedule_ref.get() or {}
+            
+            slot1_status = slots.get(reserved_time, {}).get("status", "available")
+            slot2_status = slots.get(next_time, {}).get("status", "available")
+            
+            if slot1_status == "reserved" or slot2_status == "reserved":
+                return JSONResponse(status_code=400, content={"status": "error", "message": "선택하신 시간대에 이미 다른 예약이 확정되었습니다. 다른 시간을 선택해 주세요."})
+            
+            # 2개 시간 슬롯 락 적용
+            schedule_ref.child(reserved_time).update({"status": "reserved", "booking_id": booking_id})
+            schedule_ref.child(next_time).update({"status": "reserved", "booking_id": booking_id})
+            
+        # 5. Firestore에서 예약자 실명 및 연락처 연동
         from firebase_admin import firestore
         db_fs = firestore.client()
         
@@ -322,8 +424,8 @@ async def create_booking(request: Request):
                 ud = user_doc.to_dict()
                 customer_name = ud.get("name", "도매 고객")
                 customer_phone = ud.get("business_number", "사업자 회원")
-        
-        # 🏁 첫 번째 안경 아이템 이름을 백엔드에서 직접 조회하여 요약 생성
+                
+        # 첫 번째 안경 아이템 이름을 백엔드에서 직접 조회하여 요약 생성
         first_item_name = "안경 상품"
         if len(items) > 0:
             try:
@@ -335,31 +437,42 @@ async def create_booking(request: Request):
                 
         goods_summary = f"{first_item_name} 포함 총 {len(items)}개"
         
-        # 🏁 1. Firebase RTDB 예약 노드 추가
-        ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
-        ref.set({
+        # 6. Firebase RTDB 예약 노드 저장
+        booking_data = {
             "bookingId": booking_id,
             "items": items,
+            "bookingType": booking_type,
             "storeName": store_name,
+            "reservedDate": reserved_date,
+            "reservedTime": reserved_time,
+            "address": address,
             "customerName": customer_name,
             "customerPhone": customer_phone,
             "customerEmail": email,
             "status": "예약 완료",
             "createdAt": now.isoformat()
-        })
+        }
+        bookings_ref.child(booking_id).set(booking_data)
         
-        # 🏁 2. 텔레그램 user_request_id 채널로 메시지 전송
+        # 7. 텔레그램 user_request_id 채널로 접수 메시지 전송
+        if booking_type == "visit":
+            place_info = f"방문 피팅 장소: {address} ({reserved_date} {reserved_time[0:2]}:{reserved_time[2:4]} ~ 2시간)"
+        else:
+            place_info = f"예약매장: {store_name}"
+            if address:
+                place_info += f" ({address})"
         tg_message = (
-            f"📅 <b>[신규 매장 피팅 예약 접수]</b>\n\n"
+            f"📅 <b>[신규 피팅 예약 접수]</b>\n\n"
             f"<b>예약번호:</b> {booking_id}\n"
+            f"<b>예약유형:</b> {'1:1 안경 피팅' if booking_type == 'visit' else '안경점 매장 피팅'}\n"
             f"<b>예약고객:</b> {customer_name} ({email})\n"
             f"<b>연락처:</b> {customer_phone}\n"
-            f"<b>예약매장:</b> {store_name}\n"
+            f"<b>{place_info}</b>\n"
             f"<b>예약상품:</b> {goods_summary}\n"
-            f"<b>예약일시:</b> {now.strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"<b>접수일시:</b> {now.strftime('%Y-%m-%d %H:%M:%S')}\n"
         )
         
-        # database/telegram.json 로드하여 user_request_id 획득
+        tg_path = os.path.join(os.path.dirname(__file__), "..", "database", "telegram.json")
         tg_request_chat_id = ""
         if os.path.exists(tg_path):
             with open(tg_path, "r", encoding="utf-8") as f:
@@ -372,7 +485,7 @@ async def create_booking(request: Request):
         return {"status": "success", "bookingId": booking_id}
         
     except Exception as e:
-        print(f"🔥 매장 피팅 예약 처리 중 에러: {e}")
+        print(f"🔥 피팅 예약 처리 중 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
 # -------------------------------------------------------------
@@ -431,6 +544,18 @@ async def cancel_booking(request: Request, booking_id: str):
             "cancelledAt": datetime.now().isoformat()
         })
         
+        # 🏁 1.5. 본사 방문 피팅 예약인 경우: 실시간 스케줄 락 해제 (연속 2시간)
+        booking_type = booking_data.get("bookingType", "store")
+        if booking_type == "visit":
+            reserved_date = booking_data.get("reservedDate")
+            reserved_time = booking_data.get("reservedTime")
+            if reserved_date and reserved_time:
+                next_time = get_next_hour_slot(reserved_time)
+                if next_time:
+                    schedule_ref = rtdb.reference(f'schedule/{reserved_date}')
+                    schedule_ref.child(reserved_time).update({"status": "available", "booking_id": None})
+                    schedule_ref.child(next_time).update({"status": "available", "booking_id": None})
+        
         # 🏁 2. 텔레그램 user_cancel_id 채널로 취소 알림 발송
         customer_name = booking_data.get("customerName", "알 수 없음")
         customer_phone = booking_data.get("customerPhone", "알 수 없음")
@@ -475,5 +600,71 @@ async def cancel_booking(request: Request, booking_id: str):
     except Exception as e:
         print(f"🔥 매장 피팅 예약 취소 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+
+@router.get("/search_external_store")
+async def search_external_store(request: Request, keyword: str):
+    """
+    사용자의 동/면 입력값을 받아 "{keyword} 안경원"으로 카카오 로컬 검색 API를 호출합니다.
+    """
+    email = request.session.get("user_id")
+    if not email:
+        return JSONResponse(status_code=403, content={"status": "error", "message": "권한 없음. 로그인이 필요합니다."})
+    
+    if not keyword or not keyword.strip():
+        return JSONResponse(status_code=400, content={"status": "error", "message": "검색어를 입력해 주세요."})
+        
+    # 카카오 API 키 로드
+    api_key = ""
+    kakao_path = os.path.join(os.path.dirname(__file__), "..", "database", "kakao_api.json")
+    try:
+        if os.path.exists(kakao_path):
+            with open(kakao_path, "r", encoding="utf-8") as f:
+                kakao_data = json.load(f)
+                api_key = kakao_data.get("client_id", "")
+    except Exception as e:
+        print(f"🔥 카카오 API 설정 로드 에러: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": "카카오 API 설정을 불러올 수 없습니다."})
+        
+    if not api_key:
+        return JSONResponse(status_code=500, content={"status": "error", "message": "카카오 API 키가 설정되지 않았습니다."})
+        
+    try:
+        # "{입력값} 안경원" 검색어 조합
+        query_str = f"{keyword.strip()} 안경원"
+        url = "https://dapi.kakao.com/v2/local/search/keyword.json"
+        headers = {
+            "Authorization": f"KakaoAK {api_key}"
+        }
+        params = {
+            "query": query_str,
+            "size": 15 # 최대 15개 반환
+        }
+        
+        response = requests.get(url, headers=headers, params=params)
+        if response.status_code != 200:
+            print(f"🔥 카카오 로컬 API 호출 에러: {response.text}")
+            return JSONResponse(status_code=response.status_code, content={"status": "error", "message": "카카오 API 호출에 실패했습니다."})
+            
+        result = response.json()
+        documents = result.get("documents", [])
+        
+        # 필요한 정보만 가공하여 리턴
+        stores = []
+        for doc in documents:
+            stores.append({
+                "id": doc.get("id"),
+                "place_name": doc.get("place_name"),
+                "address_name": doc.get("address_name"),
+                "road_address_name": doc.get("road_address_name"),
+                "phone": doc.get("phone"),
+                "place_url": doc.get("place_url")
+            })
+            
+        return {"status": "success", "stores": stores}
+    except Exception as e:
+        print(f"🔥 외부 매장 검색 에러: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
 
 

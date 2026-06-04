@@ -8,21 +8,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const partnerEmptyState = document.getElementById("partnerEmptyState");
     const resetFilterBtn = document.getElementById("resetFilterBtn");
     
-    // 🏁 선택 모드 동적 전환용 DOM
-    const partnerTitle = document.querySelector(".partner-title");
-    const partnerSubtitle = document.querySelector(".partner-subtitle");
+
 
     let allPartners = []; // 전체 파트너 매장 데이터 배열
 
-    // 🏁 URL 쿼리 파라미터 감지를 통한 하이브리드 예약 장소 선택 스위칭 가동
-    const urlParams = new URLSearchParams(window.location.search);
-    const isSelectMode = urlParams.get("mode") === "select";
-    const itemsParam = urlParams.get("items") || "";
 
-    if (isSelectMode && partnerTitle && partnerSubtitle) {
-        partnerTitle.textContent = "예약 장소 선택";
-        partnerSubtitle.textContent = "피팅 예약을 진행하실 파트너 안경점을 아래에서 선택해 주세요.";
-    }
 
     // 🏁 11자리 또는 10자리 번호 하이픈 자동 포맷터
     const formatPhoneNumber = (phone) => {
@@ -86,20 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `;
 
-            // 🏁 선택 모드일 때 매장 선택을 위한 단정하고 예쁜 액션 버튼 동적 추가
-            let selectActionHTML = "";
-            if (isSelectMode) {
-                selectActionHTML = `
-                    <div class="select-action-area" style="margin-top: 18px; border-top: 1px dashed #eee; padding-top: 15px;">
-                        <button class="select-store-btn" 
-                                data-id="${partner.id}" 
-                                data-name="${partner.name}" 
-                                style="width: 100%; padding: 12px 0; background-color: #0e3a5b; color: #fff; border: 1px solid #0e3a5b; border-radius: 8px; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease;">
-                            이 매장 선택하기
-                        </button>
-                    </div>
-                `;
-            }
+
 
             const cardHTML = `
                 <div class="partner-card" style="animation-delay: ${index * 0.05}s;">
@@ -119,35 +96,13 @@ document.addEventListener("DOMContentLoaded", () => {
                             </a>
                         </div>
                         ${routeLinkHTML}
-                        ${selectActionHTML}
                     </div>
                 </div>
             `;
             partnerGrid.insertAdjacentHTML("beforeend", cardHTML);
         });
 
-        // 🏁 선택 모드 클릭 이벤트 리스너 일괄 바인딩 및 복귀 스위칭
-        if (isSelectMode) {
-            document.querySelectorAll(".select-store-btn").forEach(btn => {
-                btn.addEventListener("click", (e) => {
-                    const storeId = e.target.getAttribute("data-id");
-                    const storeName = e.target.getAttribute("data-name");
-                    
-                    // 예약 장소 정보(ID, 상호명)를 인코딩하여 예약하기 페이지로 복귀 
-                    location.href = `/general/reserve?items=${encodeURIComponent(itemsParam)}&place_id=${storeId}&place_name=${encodeURIComponent(storeName)}`;
-                });
-                
-                // 마우스 호버 효과 보강
-                btn.addEventListener("mouseenter", (e) => {
-                    e.target.style.backgroundColor = "#0b2d47";
-                    e.target.style.borderColor = "#0b2d47";
-                });
-                btn.addEventListener("mouseleave", (e) => {
-                    e.target.style.backgroundColor = "#0e3a5b";
-                    e.target.style.borderColor = "#0e3a5b";
-                });
-            });
-        }
+
     };
 
     // 🏁 시/도 및 구/군 셀렉트 옵션 바인딩 함수

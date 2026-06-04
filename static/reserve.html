@@ -350,9 +350,15 @@
             const submitReserveBtn = document.getElementById("submitReserveBtn");
             const loadingOverlay = document.getElementById("bookingLoadingOverlay");
 
-            // 1. URL 쿼리 파라미터에서 넘어온 items 파싱
+            // 1. URL 쿼리 파라미터에서 넘어온 items 및 선택 장소 정보 파싱
             const urlParams = new URLSearchParams(window.location.search);
             const itemsParam = urlParams.get("items");
+            
+            const typeParam = urlParams.get("type"); // "visit" 또는 "store"
+            const dateParam = urlParams.get("date");
+            const timeParam = urlParams.get("time");
+            const addressParam = urlParams.get("address");
+            
             const placeIdParam = urlParams.get("place_id");
             const placeNameParam = urlParams.get("place_name");
 
@@ -371,7 +377,23 @@
                 return;
             }
 
-            // 2. 가장 첫 번째 안경 아이템의 ID로 이름을 비동기 조회
+            // 2. 1인 1회 예약 제한 선행 체크 (페이지 로드 시점 검증)
+            fetch("/api/payment/check_active_booking")
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success" && data.has_active) {
+                        alert("이미 진행 중인 예약 건이 존재합니다.\n매장 피팅 예약은 1인당 1회만 이용 가능합니다.");
+                        submitReserveBtn.disabled = true;
+                        placeSelectBtn.disabled = true;
+                        placeTextEl.textContent = "이미 예약 완료된 일정이 존재합니다 (1인 1회 제한)";
+                        placeTextEl.style.color = "#dc3545";
+                    }
+                })
+                .catch(err => {
+                    console.error("⚠️ 예약 중복 확인 에러:", err);
+                });
+
+            // 3. 가장 첫 번째 안경 아이템의 ID로 이름을 비동기 조회
             const firstItemId = itemsArr[0];
             fetch(`/api/items/${firstItemId}`)
                 .then(res => res.json())
@@ -387,35 +409,60 @@
                     goodsTextEl.textContent = `안경 상품 외 총 ${totalCount}개`;
                 });
 
-            // 3. 예약 장소가 지정되어 복귀했는지 확인 및 렌더링
-            if (placeIdParam && placeNameParam) {
-                placeTextEl.textContent = decodeURIComponent(placeNameParam);
-                placeTextEl.classList.add("selected"); // 파란색 굵게 렌더링
-                submitReserveBtn.removeAttribute("disabled"); // 최종 확정 버튼 활성화
+            // 4. 예약 장소/스케줄 정보 복귀에 따른 렌더링 스위칭
+            if (typeParam === "visit" && dateParam && timeParam && addressParam) {
+                // 본사 방문 피팅 복귀
+                 const displayTime = `${timeParam.substring(0, 2)}:${timeParam.substring(2, 4)}`;
+                 const decodedAddr = decodeURIComponent(addressParam);
+                 placeTextEl.innerHTML = `<span style="font-weight: 800; color: #0e3a5b;">[1:1 안경 피팅]</span><br>일시: ${dateParam} ${displayTime}<br>장소: ${decodedAddr}`;
+                placeTextEl.classList.add("selected"); 
+                submitReserveBtn.removeAttribute("disabled"); 
+            } else if (typeParam === "store" && placeIdParam && placeNameParam) {
+                // 안경점 매장 피팅 복귀
+                const decodedStore = decodeURIComponent(placeNameParam);
+                let displayText = `<span style="font-weight: 800; color: #0e3a5b;">[안경점 매장 피팅]</span><br>매장: ${decodedStore}`;
+                if (addressParam) {
+                    displayText += `<br>주소: ${decodeURIComponent(addressParam)}`;
+                }
+                placeTextEl.innerHTML = displayText;
+                placeTextEl.classList.add("selected"); 
+                submitReserveBtn.removeAttribute("disabled"); 
             }
 
-            // 4. '어디서 만날까요?' 버튼 스위칭 동작 (선택 모드 파라미터 전달)
+            // 5. '어디서 만날까요?' 버튼 스위칭 동작 (신규 select_store 페이지로 연동)
             placeSelectBtn.addEventListener("click", () => {
-                location.href = `/partners?mode=select&items=${encodeURIComponent(itemsParam)}`;
+                location.href = `/general/select_store?items=${encodeURIComponent(itemsParam)}`;
             });
 
-            // 5. 예약 신청 최종 동작 제어 (비동기 연동 고도화)
+            // 6. 예약 신청 최종 동작 제어
             submitReserveBtn.addEventListener("click", () => {
-                const targetStore = placeTextEl.textContent;
-                
                 // 로딩 오버레이 실행 및 중복 방지
                 loadingOverlay.style.display = "flex";
                 submitReserveBtn.setAttribute("disabled", "true");
                 placeSelectBtn.setAttribute("disabled", "true");
 
+                // API 전송 페이로드 구성
+                const payload = {
+                    items: itemsArr,
+                    bookingType: typeParam || "store"
+                };
+
+                if (typeParam === "visit") {
+                    payload.reservedDate = dateParam;
+                    payload.reservedTime = timeParam;
+                    payload.address = decodeURIComponent(addressParam);
+                } else {
+                    payload.storeName = decodeURIComponent(placeNameParam);
+                    if (addressParam) {
+                        payload.address = decodeURIComponent(addressParam);
+                    }
+                }
+
                 // 백엔드 예약 확정 API 호출
                 fetch("/api/payment/booking", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        items: itemsArr,
-                        storeName: targetStore
-                    })
+                    body: JSON.stringify(payload)
                 })
                 .then(res => {
                     if (!res.ok) throw new Error("예약 서버 통신 실패");
@@ -423,7 +470,7 @@
                 })
                 .then(data => {
                     if (data.status === "success") {
-                        // 예약 확정 후 장바구니에서 예약된 상품들은 비워주는 세련된 후처리 진행
+                        // 예약 확정 후 장바구니에서 예약된 상품들은 비워주는 후처리 진행
                         let generalCart = [];
                         const match = document.cookie.match(new RegExp('(^| )general_cart=([^;]+)'));
                         if (match) {
@@ -445,12 +492,12 @@
                             body: JSON.stringify({ cart: updatedCart })
                         })
                         .then(() => {
-                            // 예약 완료 페이지로 최종 이동
-                            location.href = `/general/booking_success?booking_id=${data.bookingId}&store=${encodeURIComponent(targetStore)}`;
+                             const targetStore = typeParam === "visit" ? "1:1 안경 피팅" : decodeURIComponent(placeNameParam);
+                             location.href = `/general/booking_success?booking_id=${data.bookingId}&store=${encodeURIComponent(targetStore)}`;
                         })
                         .catch(err => {
-                            console.error("RTDB 동기화 에러(비보호 후처리 무시 진행):", err);
-                            location.href = `/general/booking_success?booking_id=${data.bookingId}&store=${encodeURIComponent(targetStore)}`;
+                             const targetStore = typeParam === "visit" ? "1:1 안경 피팅" : decodeURIComponent(placeNameParam);
+                             location.href = `/general/booking_success?booking_id=${data.bookingId}&store=${encodeURIComponent(targetStore)}`;
                         });
                     } else {
                         throw new Error(data.message || "예약 정보 저장 에러");
@@ -458,7 +505,7 @@
                 })
                 .catch(err => {
                     console.error("예약 오류:", err);
-                    alert(`예약 중 에러가 발생했습니다: ${err.message}\n관리자에게 문의해 주세요.`);
+                    alert(err.message || "예약 중 에러가 발생했습니다. 다시 시도해 주세요.");
                     
                     // 에러 발생 시 UI 잠금 해제 및 오버레이 클로즈
                     loadingOverlay.style.display = "none";
