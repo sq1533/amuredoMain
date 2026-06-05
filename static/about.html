@@ -313,14 +313,13 @@
                     <div class="about-video-wrapper">
                         <!-- 비디오는 metadata만 프리로드하고 음소거, 루프, Playsinline 적용하여 트래픽 최적화 -->
                         <video id="serviceVideo" autoplay muted loop playsinline preload="metadata" class="about-video">
-                            <!-- 추후 비디오 주소 확정 시 사용될 소스 뼈대 정의 -->
-                            <source src="" type="video/webm">
-                            <source src="" type="video/mp4">
+                            <!-- MP4 서비스 안내 영상 경로 연동 -->
+                            <source src="/static/img/booking_vod.mp4" type="video/mp4">
                         </video>
-                        <!-- 비디오 준비 전 플레이스홀더 노출 -->
-                        <div class="about-video-placeholder" id="videoPlaceholder">
+                        <!-- 비디오 재생 시작 전 플레이스홀더 (영상이 재생되면 JS로 페이드아웃 처리) -->
+                        <div class="about-video-placeholder" id="videoPlaceholder" style="transition: opacity 0.5s ease;">
                             <div class="about-video-placeholder-icon">🎬</div>
-                            <div>아무래도 피팅 서비스 소개 영상 준비 중</div>
+                            <div>아무래도 피팅 서비스 소개 영상 로딩 중...</div>
                         </div>
                     </div>
                 </section>
@@ -473,9 +472,9 @@
                     tabServiceBtn.classList.add("active");
                     panelVision.classList.remove("active");
                     panelService.classList.add("active");
-                    // 서비스 탭 활성화 시 비디오 재생 시작 (src 주소가 유효할 때만)
-                    if (serviceVideo && serviceVideo.querySelector('source').src) {
-                        serviceVideo.play().catch(e => console.log("비디오 자동재생 보류 (소스 없음)"));
+                    // 서비스 탭 활성화 시 비디오 재생 시작
+                    if (serviceVideo) {
+                        serviceVideo.play().catch(e => console.log("비디오 재생 시도 보류:", e));
                     }
                 }
             }
@@ -483,6 +482,27 @@
             if (tabVisionBtn && tabServiceBtn && panelVision && panelService) {
                 tabVisionBtn.addEventListener("click", () => switchTab("vision"));
                 tabServiceBtn.addEventListener("click", () => switchTab("service"));
+            }
+
+            // 비디오 재생 시작 시 플레이스홀더 페이드아웃 및 숨김 처리
+            if (serviceVideo) {
+                const placeholder = document.getElementById("videoPlaceholder");
+                
+                const hidePlaceholder = () => {
+                    if (placeholder) {
+                        placeholder.style.opacity = "0";
+                        setTimeout(() => {
+                            placeholder.style.display = "none";
+                        }, 500);
+                    }
+                };
+
+                serviceVideo.addEventListener("playing", hidePlaceholder);
+                
+                // 만약 autoplay가 즉시 활성화되어 이미 재생 중인 경우
+                if (!serviceVideo.paused) {
+                    hidePlaceholder();
+                }
             }
         });
     </script>
