@@ -34,6 +34,39 @@
 
       gtag('config', 'AW-17793333010');
     </script>
+    <!-- 🏁 B2B 상세페이지 맞춤 피팅 서비스 컴포넌트 전용 스타일 -->
+    <style>
+        .detail-images-section {
+            margin-top: 60px;
+            margin-bottom: 40px;
+            width: 100%;
+        }
+        .detail-images-container img {
+            background-color: #f7f7f7;
+            min-height: 200px;
+            transition: opacity 0.3s ease;
+        }
+        .detail-images-container img[src=""] {
+            display: none !important;
+        }
+        
+        /* 🏁 Lottie 맞춤 피팅 서비스 컴포넌트 모바일 반응형 스타일 */
+        @media (max-width: 768px) {
+            .fitting-service-container {
+                padding: 30px 15px !important;
+                margin-top: 40px !important;
+            }
+            .fitting-service-card {
+                flex-direction: column !important;
+                align-items: center !important;
+                text-align: center !important;
+                gap: 15px !important;
+                padding: 20px 15px !important;
+            }
+        }
+    </style>
+    <!-- 🏁 에어비앤비 Lottie 애니메이션 웹 플레이어 라이브러리 추가 -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 </head>
 <body>
     <!-- Google Tag Manager (noscript) -->
@@ -136,7 +169,7 @@
             <section class="detail-images-section" id="detailImagesSection" style="display: none;">
                 <div class="detail-images-container" style="max-width: 800px; margin: 40px auto; padding: 0;">
                     <!-- 파트 1: 공통 이미지 1 -->
-                    <img id="detailCommonImg1" src="/static/img/detail_common_1.webp" alt="안내 정보 1" loading="lazy" style="width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;">
+                    <img id="detailCommonImg1" src="/static/img/common.webp" alt="안내 정보 1" loading="lazy" style="width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;">
                     
                     <!-- 파트 2: 상품별 고유 상세 이미지 (동적 URL 바인딩) -->
                     <img id="detailProductImg" src="" alt="상품 상세 정보" loading="lazy" style="width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;">
@@ -147,8 +180,73 @@
                     <!-- 파트 4: info 이미지 (동적 URL 바인딩) -->
                     <img id="detailInfoImg" src="" alt="공통 정보 이미지" loading="lazy" style="width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;">
                     
-                    <!-- 파트 5: 공통 이미지 2 -->
-                    <img id="detailCommonImg2" src="/static/img/detail_common_2.webp" alt="안내 정보 2" loading="lazy" style="width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;">
+                    <!-- 파트 5: 공통 맞춤 피팅 서비스 안내 컴포넌트 -->
+                    <div class="fitting-service-container" style="background-color: #fafafa; border: 1px solid #eaeaea; border-radius: 16px; padding: 40px 30px; margin-top: 50px; font-family: inherit; box-sizing: border-box; width: 100%; text-align: left;">
+                        <!-- 헤더 영역 -->
+                        <div style="text-align: center; margin-bottom: 40px;">
+                            <h3 style="font-size: 1.45rem; font-weight: 800; color: #0e3a5b; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.5px; word-break: keep-all;">
+                                내 일상에 가장 잘 맞는 안경, 먼저 써보고 결정하세요.
+                            </h3>
+                            <p style="font-size: 0.95rem; color: #666; margin: 0; line-height: 1.5; letter-spacing: -0.2px; word-break: keep-all;">
+                                오직 고객님의 편의만을 생각한 아무래도 안경의 3가지 맞춤 피팅 서비스
+                            </p>
+                        </div>
+
+                        <!-- 카드 리스트 영역 -->
+                        <div class="fitting-service-grid" style="display: flex; flex-direction: column; gap: 24px; margin-bottom: 40px; width: 100%;">
+                            <!-- 서비스 1 -->
+                            <div class="fitting-service-card" style="display: flex; align-items: flex-start; gap: 20px; background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #f0f0f0; box-shadow: 0 4px 15px rgba(14, 58, 91, 0.02); transition: transform 0.2s ease; box-sizing: border-box; width: 100%;">
+                                <div style="flex-shrink: 0; width: 64px; height: 64px; background: #f4f7f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                    <lottie-player src="/static/img/personer.json" background="transparent" speed="1" style="width: 50px; height: 50px;" loop autoplay></lottie-player>
+                                </div>
+                                <div style="flex: 1;">
+                                    <h4 style="font-size: 1.1rem; font-weight: 800; color: #0e3a5b; margin-top: 0; margin-bottom: 6px; letter-spacing: -0.3px;">1:1 찾아가는 피팅 서비스</h4>
+                                    <p style="font-size: 0.85rem; font-weight: 700; color: #0076a8; margin-top: 0; margin-bottom: 8px;">"원하는 시간, 원하는 장소에서 프라이빗하게"</p>
+                                    <p style="font-size: 0.88rem; color: #666; margin: 0; line-height: 1.6; word-break: keep-all; letter-spacing: -0.2px;">
+                                        매장 방문이 어려우신가요? 아무래도 안경에서 고객님이 계신 곳으로 직접 찾아갑니다. 익숙하고 편안한 공간에서 여유롭게 착용해 보세요.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 서비스 2 -->
+                            <div class="fitting-service-card" style="display: flex; align-items: flex-start; gap: 20px; background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #f0f0f0; box-shadow: 0 4px 15px rgba(14, 58, 91, 0.02); transition: transform 0.2s ease; box-sizing: border-box; width: 100%;">
+                                <div style="flex-shrink: 0; width: 64px; height: 64px; background: #f4f7f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                    <lottie-player src="/static/img/partner.json" background="transparent" speed="0.5" style="width: 50px; height: 50px;" loop autoplay></lottie-player>
+                                </div>
+                                <div style="flex: 1;">
+                                    <h4 style="font-size: 1.1rem; font-weight: 800; color: #0e3a5b; margin-top: 0; margin-bottom: 6px; letter-spacing: -0.3px;">공식 파트너 안경점 예약</h4>
+                                    <p style="font-size: 0.85rem; font-weight: 700; color: #0076a8; margin-top: 0; margin-bottom: 8px;">"검증된 제휴 매장에서 확실하게"</p>
+                                    <p style="font-size: 0.88rem; color: #666; margin: 0; line-height: 1.6; word-break: keep-all; letter-spacing: -0.2px;">
+                                        고객님과 가장 가까운 공식 파트너 안경점을 선택해 주세요. 원하시는 안경을 매장으로 미리 발송해 드립니다. 편하신 시간에 방문하여 제품을 경험해 보세요.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 서비스 3 -->
+                            <div class="fitting-service-card" style="display: flex; align-items: flex-start; gap: 20px; background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #f0f0f0; box-shadow: 0 4px 15px rgba(14, 58, 91, 0.02); transition: transform 0.2s ease; box-sizing: border-box; width: 100%;">
+                                <div style="flex-shrink: 0; width: 64px; height: 64px; background: #f4f7f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                    <lottie-player src="/static/img/location.json" background="transparent" speed="1" style="width: 50px; height: 50px;" loop autoplay></lottie-player>
+                                </div>
+                                <div style="flex: 1;">
+                                    <h4 style="font-size: 1.1rem; font-weight: 800; color: #0e3a5b; margin-top: 0; margin-bottom: 6px; letter-spacing: -0.3px;">내 주변 가까운 안경점 섭외</h4>
+                                    <p style="font-size: 0.85rem; font-weight: 700; color: #0076a8; margin-top: 0; margin-bottom: 8px;">"평소 자주 가는 단골 안경점이 있다면?"</p>
+                                    <p style="font-size: 0.88rem; color: #666; margin: 0; line-height: 1.6; word-break: keep-all; letter-spacing: -0.2px;">
+                                        공식 파트너 매장이 아니어도 괜찮습니다. 방문을 원하시는 동네 안경점을 알려주시면, 본사가 직접 매장과 협의하여 해당 안경점에서 피팅하실 수 있도록 제품을 보내드립니다.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 하단 문구 영역 -->
+                        <div style="border-top: 1px dashed #eaeaea; padding-top: 25px; text-align: center; width: 100%;">
+                            <h4 style="font-size: 1.05rem; font-weight: 800; color: #0e3a5b; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.3px;">
+                                모든 피팅 서비스는 '구매 강요'가 없습니다.
+                            </h4>
+                            <p style="font-size: 0.88rem; color: #666; margin: 0; line-height: 1.6; letter-spacing: -0.2px; word-break: keep-all;">
+                                충분히 써보시고, 내게 완벽하게 맞을 때만 구매하세요. 시각적인 편안함과 업무 효율을 높여줄 아무래도 안경을 부담 없이 경험해 보시길 바랍니다.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>

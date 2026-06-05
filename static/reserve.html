@@ -199,12 +199,81 @@
             margin-right: auto; /* 버튼 영역과의 시각적 밸런스를 위한 가운데 중심 좌측정렬 */
         }
         .policy-notice-text {
-            font-size: 0.7rem; /* 0.5rem에서 0.7rem으로 상향 */
+            font-size: 0.85rem; /* 0.7rem에서 0.85rem으로 상향하여 가독성 개선 */
             color: #888;
             margin: 4px 0;
             letter-spacing: -0.2px;
             word-break: keep-all;
             display: block;
+        }
+
+        /* 🏁 서비스 사용안내 모달 스타일 */
+        .guide-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(14, 58, 91, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+        }
+        .guide-modal.open {
+            display: flex;
+            animation: guideModalFadeIn 0.3s ease-out forwards;
+        }
+        @keyframes guideModalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .guide-modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 650px;
+            box-shadow: 0 25px 60px rgba(14, 58, 91, 0.18);
+            box-sizing: border-box;
+            position: relative;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            animation: guideModalSlideUp 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        @keyframes guideModalSlideUp {
+            from { transform: translateY(30px); }
+            to { transform: translateY(0); }
+        }
+        .close-guide-modal {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            color: #888;
+            font-size: 28px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            z-index: 10;
+        }
+        .close-guide-modal:hover {
+            color: #0e3a5b;
+        }
+        .guide-image-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .guide-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
         }
 
         /* 🏁 📱 모바일 디바이스(768px 이하) 수직 1열 정렬 및 버튼 최적화 */
@@ -270,7 +339,7 @@
     <!-- <header>는 globalWholesale.js가 동적 로딩 및 삽입합니다. -->
 
     <div class="reserve-container">
-        <h1 class="reserve-title">매장 피팅 예약</h1>
+        <h1 class="reserve-title">피팅 예약</h1>
 
         <!-- 🏁 1. 서비스 소개 섹션 -->
         <div class="intro-section">
@@ -319,10 +388,22 @@
         <div class="submit-section">
             <button class="reserve-submit-btn" id="submitReserveBtn" disabled>예약 확정하기</button>
             
-            <!-- 🏁 유저 요청: 0.5rem 회색 안내 문구 2행 -->
+            <!-- 🏁 유저 요청: 안내 문구 및 사용안내 자세히보기 버튼 -->
             <div class="policy-notice-container">
                 <span class="policy-notice-text">· 파트너 안경점에서 상품 준비까지 영업일 기준 약 2~3일이 소요될 수 있습니다. 준비가 완료되면 고객님의 연락처로 안내될 예정입니다.</span>
                 <span class="policy-notice-text">· 안내 후 7일 내 미방문(노쇼) 시, 예약이 제한될 수 있습니다.</span>
+                <button type="button" id="btnOpenGuide" style="background: none; border: none; color: #0076a8; font-weight: 700; font-size: 0.88rem; cursor: pointer; padding: 4px 0; margin-top: 8px; display: inline-flex; align-items: center; gap: 4px; font-family: inherit; text-decoration: underline;">서비스 이용안내 자세히 보기 ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏁 서비스 이용안내 모달 팝업 -->
+    <div id="guideModal" class="guide-modal">
+        <div class="guide-modal-content">
+            <span class="close-guide-modal" id="btnCloseGuide">&times;</span>
+            <h3 style="font-size: 1.3rem; font-weight: 800; color: #0e3a5b; margin-top: 0; margin-bottom: 5px;">🧭 서비스 이용안내</h3>
+            <div class="guide-image-container">
+                <img src="/static/img/howTo.webp" alt="서비스 이용안내 및 주의사항" class="guide-image" loading="lazy">
             </div>
         </div>
     </div>
@@ -349,6 +430,27 @@
             const placeSelectBtn = document.getElementById("placeSelectBtn");
             const submitReserveBtn = document.getElementById("submitReserveBtn");
             const loadingOverlay = document.getElementById("bookingLoadingOverlay");
+
+            // 7. 서비스 이용안내 모달 제어 (방어 코드 실행 전 최상단에 바인딩하여 항상 작동 보장)
+            const btnOpenGuide = document.getElementById("btnOpenGuide");
+            const btnCloseGuide = document.getElementById("btnCloseGuide");
+            const guideModal = document.getElementById("guideModal");
+
+            if (btnOpenGuide && btnCloseGuide && guideModal) {
+                btnOpenGuide.addEventListener("click", () => {
+                    guideModal.classList.add("open");
+                });
+
+                btnCloseGuide.addEventListener("click", () => {
+                    guideModal.classList.remove("open");
+                });
+
+                guideModal.addEventListener("click", (e) => {
+                    if (e.target === guideModal) {
+                        guideModal.classList.remove("open");
+                    }
+                });
+            }
 
             // 1. URL 쿼리 파라미터에서 넘어온 items 및 선택 장소 정보 파싱
             const urlParams = new URLSearchParams(window.location.search);

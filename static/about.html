@@ -35,6 +35,196 @@
 
       gtag('config', 'AW-17793333010');
     </script>
+    <!-- 🏁 에어비앤비 Lottie 애니메이션 웹 플레이어 라이브러리 추가 -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <!-- 🏁 About 페이지 전용 프리미엄 반응형 및 최적화 스타일 추가 -->
+    <style>
+        /* 탭 메뉴 스타일 */
+        .about-tabs-container {
+            max-width: 900px;
+            margin: 100px auto 30px auto;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .about-tabs {
+            display: flex;
+            border-bottom: 2px solid #eaeaea;
+            gap: 15px;
+        }
+        .about-tab-btn {
+            flex: 1;
+            padding: 16px 10px;
+            background: none;
+            border: none;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #888;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-family: inherit;
+        }
+        .about-tab-btn.active {
+            color: #0e3a5b;
+            font-weight: 800;
+        }
+        .about-tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #0e3a5b;
+            border-radius: 2px;
+        }
+
+        /* 탭 패널 제어 */
+        .about-tab-panel {
+            display: none;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+        }
+        .about-tab-panel.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 비디오 플레이스홀더 스타일 */
+        .about-video-section {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .about-video-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 비율 유지 */
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(14, 58, 91, 0.06);
+        }
+        .about-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .about-video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-weight: 700;
+            font-size: 1.1rem;
+            gap: 12px;
+            pointer-events: none; /* 클릭 이벤트가 하단 비디오에 전달되도록 처리 */
+        }
+        .about-video-placeholder-icon {
+            font-size: 2.5rem;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        /* Lottie 피팅 서비스 안내 컴포넌트 스타일 (상세페이지 일관성 이식) */
+        .about-service-section {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .fitting-service-container {
+            background-color: #fafafa;
+            border: 1px solid #eaeaea;
+            border-radius: 16px;
+            padding: 40px 30px;
+            font-family: inherit;
+            box-sizing: border-box;
+            width: 100%;
+            text-align: left;
+        }
+        .fitting-service-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            background: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #f0f0f0;
+            box-shadow: 0 4px 15px rgba(14, 58, 91, 0.02);
+            transition: transform 0.2s ease;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .fitting-service-card:hover {
+            transform: translateY(-2px);
+            border-color: #0e3a5b;
+        }
+        
+        /* 가이드 이미지 스타일 */
+        .about-guide-section {
+            max-width: 900px;
+            margin: 50px auto 60px auto;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .about-guide-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(14, 58, 91, 0.05);
+        }
+
+        /* 📱 모바일 디바이스 반응형 미디어 쿼리 */
+        @media (max-width: 768px) {
+            .about-tabs-container {
+                margin-top: 80px;
+                padding: 0 15px;
+            }
+            .about-tab-btn {
+                font-size: 0.95rem;
+                padding: 12px 5px;
+            }
+            .about-video-section, .about-service-section, .about-guide-section {
+                margin: 30px auto;
+                padding: 0 15px;
+            }
+            .fitting-service-container {
+                padding: 30px 15px !important;
+            }
+            .fitting-service-card {
+                flex-direction: column !important;
+                align-items: center !important;
+                text-align: center !important;
+                gap: 15px !important;
+                padding: 20px 15px !important;
+            }
+            .about-video-placeholder {
+                font-size: 0.95rem;
+            }
+            .about-video-placeholder-icon {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Google Tag Manager (noscript) -->
@@ -82,28 +272,135 @@
         <div class="nav-overlay" id="navOverlay"></div>
     </header>
 
+    <!-- 🏁 탭 선택 버튼 영역 -->
+    <div class="about-tabs-container">
+        <div class="about-tabs">
+            <button class="about-tab-btn active" id="tabVisionBtn">아무래도 안경 비전</button>
+            <button class="about-tab-btn" id="tabServiceBtn">아무래도 안경 서비스</button>
+        </div>
+    </div>
+
     <div class="app-container">
         <!-- About 메인 컨텐츠 영역 -->
-        <main class="about-main sub-page-main">
-            <!-- 1. 거대한 브랜드 히어로 이미지 배너 -->
-            <section class="about-hero fade-in-section">
-                <!-- 가로 100%, 강렬한 흑백 대비 혹은 브랜드 심볼 사진 -->
-                <img src="/static/img/about_banner.webp" alt="About Amuredo" class="about-hero-img">
-                <div class="about-hero-text">
-                    <h1>The Vision</h1>
-                    <p>Redefining Eyewear Excellence.</p>
-                </div>
-            </section>
+        <main class="about-main sub-page-main" style="padding-top: 0;">
+            
+            <!-- 🏁 탭 패널 1: 아무래도 안경 비전 (기존 스토리) -->
+            <div class="about-tab-panel active" id="panelVision">
+                <!-- 1. 거대한 브랜드 히어로 이미지 배너 -->
+                <section class="about-hero fade-in-section">
+                    <img src="/static/img/about_banner.webp" alt="About Amuredo" class="about-hero-img">
+                    <div class="about-hero-text">
+                        <h1>The Vision</h1>
+                        <p>Redefining Eyewear Excellence.</p>
+                    </div>
+                </section>
 
-            <!-- 2. 프리미엄 철학 및 스토리 영역 (모바일/PC 반응형, 여백 극대화 레이아웃) -->
-            <section class="about-philosophy fade-in-section">
-                <h2>Our Story</h2>
-                <div class="philosophy-content">
-                    <p>아무래도는 타협하지 않는 품질과 정교한 디테일로 아이웨어의 본질에 집중합니다. 우리는 가벼운 유행 대신 시간이 흐를수록 깊어지는 세련됨을 추구하며, 당신의 일상 속에서 가장 조용하지만 강력한 시그니처가 되기를 원합니다.</p>
-                    <p>장인의 손길이 닿은 듯한 마감 처리와 인체공학적 설계를 통해 최상의 착용감을 선사하며, 현대적인 감각과 클래식한 우아함 사이의 완벽한 균형을 찾기 위해 끊임없이 연구합니다.</p>
-                    <p class="signature-text">Design for your aura, Amuredo.</p>
-                </div>
-            </section>
+                <!-- 2. 프리미엄 철학 및 스토리 스토리 영역 -->
+                <section class="about-philosophy fade-in-section">
+                    <h2>Our Story</h2>
+                    <div class="philosophy-content">
+                        <p>아무래도는 타협하지 않는 품질과 정교한 디테일로 아이웨어의 본질에 집중합니다. 우리는 가벼운 유행 대신 시간이 흐를수록 깊어지는 세련됨을 추구하며, 당신의 일상 속에서 가장 조용하지만 강력한 시그니처가 되기를 원합니다.</p>
+                        <p>장인의 손길이 닿은 듯한 마감 처리와 인체공학적 설계를 통해 최상의 착용감을 선사하며, 현대적인 감각과 클래식한 우아함 사이의 완벽한 균형을 찾기 위해 끊임없이 연구합니다.</p>
+                        <p class="signature-text">Design for your aura, Amuredo.</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 🏁 탭 패널 2: 아무래도 안경 서비스 (신규 안내 및 가이드) -->
+            <div class="about-tab-panel" id="panelService">
+                <!-- 1. 루프 비디오 영역 -->
+                <section class="about-video-section">
+                    <div class="about-video-wrapper">
+                        <!-- 비디오는 metadata만 프리로드하고 음소거, 루프, Playsinline 적용하여 트래픽 최적화 -->
+                        <video id="serviceVideo" autoplay muted loop playsinline preload="metadata" class="about-video">
+                            <!-- 추후 비디오 주소 확정 시 사용될 소스 뼈대 정의 -->
+                            <source src="" type="video/webm">
+                            <source src="" type="video/mp4">
+                        </video>
+                        <!-- 비디오 준비 전 플레이스홀더 노출 -->
+                        <div class="about-video-placeholder" id="videoPlaceholder">
+                            <div class="about-video-placeholder-icon">🎬</div>
+                            <div>아무래도 피팅 서비스 소개 영상 준비 중</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. 3대 피팅 서비스 안내 카드 섹션 -->
+                <section class="about-service-section">
+                    <div class="fitting-service-container">
+                        <!-- 헤더 영역 -->
+                        <div style="text-align: center; margin-bottom: 40px;">
+                            <h3 style="font-size: 1.45rem; font-weight: 800; color: #0e3a5b; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.5px; word-break: keep-all;">
+                                내 일상에 가장 잘 맞는 안경, 먼저 써보고 결정하세요.
+                            </h3>
+                            <p style="font-size: 0.95rem; color: #666; margin: 0; line-height: 1.5; letter-spacing: -0.2px; word-break: keep-all;">
+                                오직 고객님의 편의만을 생각한 아무래도 안경의 3가지 맞춤 피팅 서비스
+                            </p>
+                        </div>
+
+                        <!-- 카드 리스트 영역 -->
+                        <div class="fitting-service-grid" style="display: flex; flex-direction: column; gap: 24px; margin-bottom: 40px; width: 100%;">
+                            <!-- 서비스 1 -->
+                            <div class="fitting-service-card">
+                                <div style="flex-shrink: 0; width: 64px; height: 64px; background: #f4f7f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                    <lottie-player src="/static/img/personer.json" background="transparent" speed="1" style="width: 50px; height: 50px;" loop autoplay></lottie-player>
+                                </div>
+                                <div style="flex: 1;">
+                                    <h4 style="font-size: 1.1rem; font-weight: 800; color: #0e3a5b; margin-top: 0; margin-bottom: 6px; letter-spacing: -0.3px;">1:1 찾아가는 피팅 서비스</h4>
+                                    <p style="font-size: 0.85rem; font-weight: 700; color: #0076a8; margin-top: 0; margin-bottom: 8px;">"원하는 시간, 원하는 장소에서 프라이빗하게"</p>
+                                    <p style="font-size: 0.88rem; color: #666; margin: 0; line-height: 1.6; word-break: keep-all; letter-spacing: -0.2px;">
+                                        매장 방문이 어려우신가요? 아무래도 안경에서 고객님이 계신 곳으로 직접 찾아갑니다. 익숙하고 편안한 공간에서 여유롭게 착용해 보세요.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 서비스 2 -->
+                            <div class="fitting-service-card">
+                                <div style="flex-shrink: 0; width: 64px; height: 64px; background: #f4f7f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                    <lottie-player src="/static/img/partner.json" background="transparent" speed="0.5" style="width: 50px; height: 50px;" loop autoplay></lottie-player>
+                                </div>
+                                <div style="flex: 1;">
+                                    <h4 style="font-size: 1.1rem; font-weight: 800; color: #0e3a5b; margin-top: 0; margin-bottom: 6px; letter-spacing: -0.3px;">공식 파트너 안경점 예약</h4>
+                                    <p style="font-size: 0.85rem; font-weight: 700; color: #0076a8; margin-top: 0; margin-bottom: 8px;">"검증된 제휴 매장에서 확실하게"</p>
+                                    <p style="font-size: 0.88rem; color: #666; margin: 0; line-height: 1.6; word-break: keep-all; letter-spacing: -0.2px;">
+                                        고객님과 가장 가까운 공식 파트너 안경점을 선택해 주세요. 원하시는 안경을 매장으로 미리 발송해 드립니다. 편하신 시간에 방문하여 제품을 경험해 보세요.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 서비스 3 -->
+                            <div class="fitting-service-card">
+                                <div style="flex-shrink: 0; width: 64px; height: 64px; background: #f4f7f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                    <lottie-player src="/static/img/location.json" background="transparent" speed="1" style="width: 50px; height: 50px;" loop autoplay></lottie-player>
+                                </div>
+                                <div style="flex: 1;">
+                                    <h4 style="font-size: 1.1rem; font-weight: 800; color: #0e3a5b; margin-top: 0; margin-bottom: 6px; letter-spacing: -0.3px;">내 주변 가까운 안경점 섭외</h4>
+                                    <p style="font-size: 0.85rem; font-weight: 700; color: #0076a8; margin-top: 0; margin-bottom: 8px;">"평소 자주 가는 단골 안경점이 있다면?"</p>
+                                    <p style="font-size: 0.88rem; color: #666; margin: 0; line-height: 1.6; word-break: keep-all; letter-spacing: -0.2px;">
+                                        공식 파트너 매장이 아니어도 괜찮습니다. 방문을 원하시는 동네 안경점을 알려주시면, 본사가 직접 매장과 협의하여 해당 안경점에서 피팅하실 수 있도록 제품을 보내드립니다.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 하단 문구 영역 -->
+                        <div style="border-top: 1px dashed #eaeaea; padding-top: 25px; text-align: center; width: 100%;">
+                            <h4 style="font-size: 1.05rem; font-weight: 800; color: #0e3a5b; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.3px;">
+                                모든 피팅 서비스는 '구매 강요'가 없습니다.
+                            </h4>
+                            <p style="font-size: 0.88rem; color: #666; margin: 0; line-height: 1.6; letter-spacing: -0.2px; word-break: keep-all;">
+                                충분히 써보시고, 내게 완벽하게 맞을 때만 구매하세요. 시각적인 편안함과 업무 효율을 높여줄 아무래도 안경을 부담 없이 경험해 보시길 바랍니다.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. 상세 이용안내(howTo.webp) 이미지 섹션 -->
+                <section class="about-guide-section fade-in-section">
+                    <!-- UX 최적화를 위해 lazy loading 설정 적용 -->
+                    <img src="/static/img/howTo.webp" alt="상세 이용안내" class="about-guide-img" loading="lazy">
+                </section>
+            </div>
         </main>
 
         <!-- 공통 푸터(Footer): 사업자 정보 -->
@@ -153,6 +450,40 @@
 
             const fadeElements = document.querySelectorAll('.fade-in-section');
             fadeElements.forEach(el => observer.observe(el));
+
+            // 🏁 3. 탭 스위칭 및 비디오 재생 제어 최적화 로직
+            const tabVisionBtn = document.getElementById("tabVisionBtn");
+            const tabServiceBtn = document.getElementById("tabServiceBtn");
+            const panelVision = document.getElementById("panelVision");
+            const panelService = document.getElementById("panelService");
+            const serviceVideo = document.getElementById("serviceVideo");
+
+            function switchTab(activeTab) {
+                if (activeTab === "vision") {
+                    tabVisionBtn.classList.add("active");
+                    tabServiceBtn.classList.remove("active");
+                    panelVision.classList.add("active");
+                    panelService.classList.remove("active");
+                    // 비전 탭 활성화 시 비디오 일시정지 (CPU/GPU 최적화)
+                    if (serviceVideo) {
+                        serviceVideo.pause();
+                    }
+                } else {
+                    tabVisionBtn.classList.remove("active");
+                    tabServiceBtn.classList.add("active");
+                    panelVision.classList.remove("active");
+                    panelService.classList.add("active");
+                    // 서비스 탭 활성화 시 비디오 재생 시작 (src 주소가 유효할 때만)
+                    if (serviceVideo && serviceVideo.querySelector('source').src) {
+                        serviceVideo.play().catch(e => console.log("비디오 자동재생 보류 (소스 없음)"));
+                    }
+                }
+            }
+
+            if (tabVisionBtn && tabServiceBtn && panelVision && panelService) {
+                tabVisionBtn.addEventListener("click", () => switchTab("vision"));
+                tabServiceBtn.addEventListener("click", () => switchTab("service"));
+            }
         });
     </script>
 <script src="/static/globalWholesale.js?v=3.4"></script>

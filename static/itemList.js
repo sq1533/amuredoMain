@@ -145,6 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const img = document.createElement('img');
             img.src = item.image_url || "/static/img/ready.webp"; 
             img.className = 'category-image';
+            img.loading = 'lazy'; // 🏁 UX/성능 최적화를 위해 lazy loading 속성 부여
             imgWrapper.appendChild(img);
 
             // 미니멀 하단 텍스트(Minimal Bottom) 정보 래퍼 생성
