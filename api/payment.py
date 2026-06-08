@@ -538,6 +538,51 @@ async def cancel_booking(request: Request, booking_id: str):
         if not booking_data:
             return JSONResponse(status_code=404, content={"status": "error", "message": "예약 내역을 찾을 수 없습니다."})
             
+        # 🏁 [신규] 당일 취소 제한 및 과거 예약 취소 차단 로직 적용
+        booking_type = booking_data.get("bookingType", "store")
+        from datetime import timezone, timedelta
+        kst = timezone(timedelta(hours=9))
+        now_kst = datetime.now(kst)
+        today_kst = now_kst.date()
+
+        if booking_type == "visit":
+            reserved_date_str = booking_data.get("reservedDate")
+            if reserved_date_str:
+                try:
+                    reserved_date = datetime.strptime(reserved_date_str, "%Y-%m-%d").date()
+                    if reserved_date <= today_kst:
+                        return JSONResponse(
+                            status_code=400,
+                            content={
+                                "status": "error",
+                                "message": "방문 피팅 당일(또는 예약일 이후)에는 예약 취소가 불가능합니다. 취소는 예약 전날까지만 가능합니다."
+                            }
+                        )
+                except Exception as date_err:
+                    print(f"🔥 예약일 파싱 에러: {date_err}")
+        elif booking_type == "store":
+            created_at_str = booking_data.get("createdAt")
+            if created_at_str:
+                try:
+                    created_at = datetime.fromisoformat(created_at_str)
+                    if created_at.tzinfo is not None:
+                        now_compare = datetime.now(timezone.utc)
+                        time_diff = now_compare - created_at
+                    else:
+                        now_compare = datetime.now()
+                        time_diff = now_compare - created_at
+                    
+                    if time_diff > timedelta(days=7):
+                        return JSONResponse(
+                            status_code=400,
+                            content={
+                                "status": "error",
+                                "message": "안경점 매장 피팅 예약은 접수 후 7일 이내에만 취소할 수 있습니다."
+                            }
+                        )
+                except Exception as date_err:
+                    print(f"🔥 매장 접수일 파싱 에러: {date_err}")
+        
         # 🏁 1. DB의 예약 상태를 '예약 취소'로 업데이트
         ref.update({
             "status": "예약 취소",

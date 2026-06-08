@@ -91,11 +91,11 @@
             border-color: #0e3a5b;
         }
         
-        /* 취소된 예약은 흐리게 시인성 제한 */
-        .expander-card.cancelled {
-            opacity: 0.65;
+        /* 취소되거나 완료된 예약은 흐리게 시인성 제한 */
+        .expander-card.cancelled, .expander-card.completed {
+            opacity: 0.75;
         }
-        .expander-card.cancelled:hover {
+        .expander-card.cancelled:hover, .expander-card.completed:hover {
             box-shadow: none;
             border-color: #eaeaea;
         }
@@ -204,6 +204,10 @@
         .status-badge.cancelled-badge {
             background: #ffebeb;
             color: #d9534f;
+        }
+        .status-badge.completed-badge {
+            background: #e6f9ec;
+            color: #28a745;
         }
 
         /* 🏁 예약 상품 리스트 디자인 */
@@ -438,11 +442,56 @@
                     const listWrapper = document.createElement("div");
                     listWrapper.className = "expander-list";
 
+                    // 현재 한국 표준시 (KST) 구하기
+                    const kstDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
+                    const yyyy = kstDate.getFullYear();
+                    const mm = String(kstDate.getMonth() + 1).padStart(2, '0');
+                    const dd = String(kstDate.getDate()).padStart(2, '0');
+                    const todayStr = `${yyyy}-${mm}-${dd}`;
+                    
+                    const currentHour = kstDate.getHours();
+                    const currentMinute = kstDate.getMinutes();
+                    const currentTimeVal = currentHour * 100 + currentMinute;
+
                     // 예약 목록을 돌며 각각의 아코디언 빌드
                     for (const booking of bookings) {
-                        const isCancelled = (booking.status === "예약 취소");
+                        let displayStatus = booking.status;
+                        let isPast = false;
+                        
+                        if (booking.status === "예약 완료") {
+                            if (booking.bookingType === 'visit') {
+                                if (booking.reservedDate < todayStr) {
+                                    isPast = true;
+                                } else if (booking.reservedDate === todayStr) {
+                                    // 2시간 진행 후 이용 완료로 처리
+                                    const startTimeVal = parseInt(booking.reservedTime);
+                                    const endTimeVal = startTimeVal + 200; // 2시간 추가
+                                    if (currentTimeVal >= endTimeVal) {
+                                        isPast = true;
+                                    }
+                                }
+                                if (isPast) {
+                                    displayStatus = "이용 완료";
+                                }
+                            } else if (booking.bookingType === 'store') {
+                                // 접수일 기준 7일 경과 시 완료 처리
+                                if (booking.createdAt) {
+                                    const createdDate = new Date(booking.createdAt);
+                                    const diffTime = kstDate - createdDate;
+                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                    if (diffDays > 7) {
+                                        isPast = true;
+                                        displayStatus = "이용 완료";
+                                    }
+                                }
+                            }
+                        }
+
+                        const isCancelled = (displayStatus === "예약 취소");
+                        const isCompleted = (displayStatus === "이용 완료");
+
                         const card = document.createElement("div");
-                        card.className = `expander-card ${isCancelled ? 'cancelled' : ''}`;
+                        card.className = `expander-card ${isCancelled ? 'cancelled' : ''} ${isCompleted ? 'completed' : ''}`;
                         card.id = `card-${booking.bookingId}`;
 
                         // 예약에 포함된 아이템 목록
@@ -501,7 +550,7 @@
                                     <div class="info-panel" style="flex-direction: column; align-items: flex-start; gap: 8px;">
                                         <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                                             <div style="font-weight: 700; color: #0e3a5b;">예약 ID: ${booking.bookingId}</div>
-                                            <span class="status-badge ${isCancelled ? 'cancelled-badge' : ''}">${booking.status}</span>
+                                            <span class="status-badge ${isCancelled ? 'cancelled-badge' : ''} ${isCompleted ? 'completed-badge' : ''}">${displayStatus}</span>
                                         </div>
                                         ${booking.bookingType === 'visit' ? `
                                             <div style="margin: 2px 0;">방문 예정일: <span class="info-date-val">${booking.reservedDate}</span></div>
@@ -526,10 +575,14 @@
                                         `).join('')}
                                     </div>
 
-                                    ${!isCancelled ? `
+                                    ${!isCancelled && !isCompleted ? `
                                         <div class="card-action-bar">
                                             <button class="btn-action btn-action-modify" data-id="${booking.bookingId}">예약 수정</button>
-                                            <button class="btn-action btn-action-cancel" data-id="${booking.bookingId}">예약 취소</button>
+                                            ${booking.bookingType === 'visit' && booking.reservedDate === todayStr ? `
+                                                <button class="btn-action btn-action-cancel" disabled style="background-color: #f5f5f5; color: #999; border: 1px solid #ddd; cursor: not-allowed; opacity: 0.7;" title="당일 예약 취소는 불가능합니다.">당일 취소 불가</button>
+                                            ` : `
+                                                <button class="btn-action btn-action-cancel" data-id="${booking.bookingId}">예약 취소</button>
+                                            `}
                                         </div>
                                     ` : ''}
                                 </div>
@@ -563,7 +616,7 @@
                         });
 
                         // 🏁 액션 버튼 이벤트 연결
-                        if (!isCancelled) {
+                        if (!isCancelled && !isCompleted) {
                             const btnModify = card.querySelector(".btn-action-modify");
                             const btnCancel = card.querySelector(".btn-action-cancel");
 
@@ -574,12 +627,14 @@
                             });
 
                             // 예약 취소: 비동기 API 통신 연동
-                            btnCancel.addEventListener("click", (e) => {
-                                e.stopPropagation(); // 헤더 토글 이벤트 방지
-                                if (confirm("정말로 이 예약을 취소하시겠습니까?\n취소 후에는 복구가 불가합니다.")) {
-                                    executeCancel(booking.bookingId);
-                                }
-                            });
+                            if (btnCancel && !btnCancel.disabled) {
+                                btnCancel.addEventListener("click", (e) => {
+                                    e.stopPropagation(); // 헤더 토글 이벤트 방지
+                                    if (confirm("정말로 이 예약을 취소하시겠습니까?\n취소 후에는 복구가 불가합니다.")) {
+                                        executeCancel(booking.bookingId);
+                                    }
+                                });
+                            }
                         }
                     }
 
