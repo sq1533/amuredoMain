@@ -261,6 +261,18 @@ async def serve_general_mypage_page(request: Request):
     return HTMLResponse(content="<h1>마이페이지 템플릿(general_mypage.html)을 찾을 수 없습니다.</h1>", status_code=404)
 
 
+# 🏁 일반 회원 예약 피팅 상품 결제(Checkout) 화면 HTML 서빙용 프론트엔드 라우팅 (보안 게이트 적용)
+@app.get("/general/booking_checkout", response_class=HTMLResponse)
+async def serve_booking_checkout_page(request: Request):
+    if not request.session.get("user_id"):
+        return RedirectResponse(url="/login")
+    checkout_path = os.path.join(static_dir, "booking_checkout.html")
+    if os.path.exists(checkout_path):
+        with open(checkout_path, "r", encoding="utf-8", errors="replace") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>결제 템플릿(booking_checkout.html)을 찾을 수 없습니다.</h1>", status_code=404)
+
+
 
 
 # 🏁 통합 회원가입 및 로그인 페이지 라우팅

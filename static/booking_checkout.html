@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>피팅 상품 결제 - 아무래도 안경</title>
+    <meta name="description" content="아무래도 안경 피팅 완료 상품의 간편 결제 서비스입니다.">
+    <link rel="icon" href="/static/img/icon.webp" type="image/webp">
+    <link rel="apple-touch-icon" href="/static/img/icon.webp">
+    
+    <!-- Pretendard 메인 폰트 & 전역 style 연결 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=21.0">
+
+    <!-- 토스페이먼츠 SDK 로드 -->
+    <script src="https://js.tosspayments.com/v1/payment-widget"></script>
+
+    <style>
+        .checkout-wrapper {
+            max-width: 800px;
+            margin: 110px auto 60px auto;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .checkout-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 8px;
+            text-align: center;
+            letter-spacing: -0.5px;
+        }
+        .checkout-subtitle {
+            font-size: 0.95rem;
+            color: #666;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .checkout-card {
+            background: #fff;
+            border: 1px solid #eaeaea;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(14, 58, 91, 0.03);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-sizing: border-box;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            margin-bottom: 20px;
+            border-left: 4px solid #0e3a5b;
+            padding-left: 10px;
+            letter-spacing: -0.3px;
+        }
+
+        /* 예약 정보 미니 보드 */
+        .booking-summary-board {
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            color: #555;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .board-item span {
+            font-weight: 800;
+            color: #333;
+        }
+
+        /* 상품 체크 리스트 */
+        .items-checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .item-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 15px 20px;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+        .item-row:hover {
+            border-color: #0e3a5b;
+            background: #fbfdff;
+        }
+        .item-row.selected {
+            border-color: #0e3a5b;
+            background: #f8fbfe;
+        }
+        .item-checkbox {
+            width: 20px;
+            height: 20px;
+            accent-color: #0e3a5b;
+            cursor: pointer;
+        }
+        .item-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            background: #fafafa;
+            flex-shrink: 0;
+        }
+        .item-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .item-name {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #333;
+        }
+        .item-cat {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #0e3a5b;
+            background: #eef7fe;
+            padding: 2px 6px;
+            border-radius: 4px;
+            align-self: flex-start;
+        }
+        .item-price {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #0e3a5b;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .item-row.already-paid {
+            opacity: 0.5;
+            pointer-events: none;
+            background: #f5f5f5;
+        }
+        .item-row.already-paid .item-price::after {
+            content: " (결제 완료)";
+            font-size: 0.8rem;
+            color: #28a745;
+            font-weight: 800;
+        }
+
+        /* 최종 결제 합산 금액 영역 */
+        .price-summary-panel {
+            background: #f8fbfe;
+            border: 1px solid #dce8f2;
+            border-radius: 12px;
+            padding: 22px 25px;
+            margin-bottom: 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+        .price-summary-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .price-count-text {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 700;
+        }
+        .price-count-num {
+            color: #0e3a5b;
+            font-weight: 800;
+        }
+        .price-total-label {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #0e3a5b;
+        }
+        .price-total-amount {
+            font-size: 1.7rem;
+            font-weight: 900;
+            color: #0e3a5b;
+            letter-spacing: -0.5px;
+        }
+
+        /* 토스페이먼츠 위젯 디자인 */
+        #payment-method {
+            margin-bottom: 20px;
+        }
+        #agreement {
+            margin-bottom: 30px;
+        }
+
+        /* 결제 실행 버튼 */
+        .btn-checkout-submit {
+            width: 100%;
+            padding: 16px 0;
+            background: #0e3a5b;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(14, 58, 91, 0.15);
+        }
+        .btn-checkout-submit:hover {
+            background: #0b2d47;
+            transform: translateY(-1px);
+        }
+        .btn-checkout-submit:disabled {
+            background: #ccc;
+            border-color: #ccc;
+            color: #fff;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* 로딩용 플레이스홀더 */
+        .loader-panel {
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .spinner {
+            width: 45px;
+            height: 45px;
+            border: 5px solid #eaeaea;
+            border-top: 5px solid #0e3a5b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .checkout-wrapper {
+                margin: 95px auto 40px auto;
+            }
+            .checkout-title {
+                font-size: 1.6rem;
+            }
+            .checkout-card {
+                padding: 20px;
+            }
+            .booking-summary-board {
+                grid-template-columns: 1fr;
+                padding: 15px;
+                gap: 8px;
+            }
+            .item-row {
+                padding: 12px 15px;
+                gap: 10px;
+            }
+            .item-img {
+                width: 50px;
+                height: 50px;
+            }
+            .item-name {
+                font-size: 0.88rem;
+            }
+            .item-price {
+                font-size: 0.95rem;
+            }
+            .price-summary-panel {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+                text-align: center;
+                padding: 15px;
+            }
+            .price-total-amount {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더는 globalWholesale.js가 동적으로 주입 -->
+
+    <div class="checkout-wrapper">
+        <h1 class="checkout-title">피팅 완료 상품 결제</h1>
+        <p class="checkout-subtitle">피팅하셨던 소중한 안경 상품들 중, 구매를 원하시는 품목을 선택하여 간편 결제하실 수 있습니다.</p>
+
+        <!-- 메인 카드 -->
+        <div class="checkout-card" id="mainCard">
+            <!-- ⏳ 로딩 대기 상태 -->
+            <div class="loader-panel" id="loadingPanel">
+                <div class="spinner"></div>
+                <p style="color: #666; font-weight: 700;">피팅 예약 내역 및 상품 정보를 불러오고 있습니다...</p>
+            </div>
+
+            <!-- 🚫 에러 메세지 창 -->
+            <div class="loader-panel" id="errorPanel" style="display: none;">
+                <div style="font-size: 3rem; margin-bottom:15px;">⚠️</div>
+                <p style="color: #dc3545; font-weight: 800; font-size:1.1rem;" id="errorMsg">올바르지 않은 접근입니다.</p>
+                <button onclick="location.href='/general/bookings'" class="btn-checkout-submit" style="max-width:200px; margin-top:20px; padding:10px 0;">목록으로 돌아가기</button>
+            </div>
+
+            <!-- 실제 결제 정보 영역 -->
+            <div id="checkoutContent" style="display: none;">
+                <!-- 1. 예약 요약 정보 -->
+                <div class="section-title">피팅 예약 정보</div>
+                <div class="booking-summary-board">
+                    <div class="board-item">예약 번호: <span id="boardBookingId"></span></div>
+                    <div class="board-item">고객 성함: <span id="boardCustomerName"></span></div>
+                    <div class="board-item" id="visitDateArea">방문 일정: <span id="boardVisitDate"></span></div>
+                    <div class="board-item" id="storeNameArea">예약 매장: <span id="boardStoreName"></span></div>
+                </div>
+
+                <!-- 2. 구매 선택 리스트 -->
+                <div class="section-title">구매 상품 선택 (일반 소비자가격 기준)</div>
+                <div class="items-checklist" id="itemsChecklist">
+                    <!-- 동적 바인딩 -->
+                </div>
+
+                <!-- 3. 결제 총합 금액 -->
+                <div class="price-summary-panel">
+                    <div class="price-summary-left">
+                        <span class="price-total-label">최종 결제 금액</span>
+                        <span class="price-count-text">선택 상품: <span class="price-count-num" id="selectedCount">0</span>개</span>
+                    </div>
+                    <div class="price-total-amount" id="totalAmount">₩0</div>
+                </div>
+
+                <!-- 4. 토스 결제 수단 위젯 영역 -->
+                <div class="section-title">결제 수단 선택</div>
+                <div id="payment-method"></div>
+                <div id="agreement"></div>
+
+                <!-- 5. 결제 진행 버튼 -->
+                <button class="btn-checkout-submit" id="btnPaymentSubmit" disabled>결제 확정하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 푸터는 globalWholesale.js가 동적으로 주입 -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookingId = urlParams.get("booking_id");
+
+            const loadingPanel = document.getElementById("loadingPanel");
+            const errorPanel = document.getElementById("errorPanel");
+            const errorMsg = document.getElementById("errorMsg");
+            const checkoutContent = document.getElementById("checkoutContent");
+            const itemsChecklist = document.getElementById("itemsChecklist");
+            const btnPaymentSubmit = document.getElementById("btnPaymentSubmit");
+
+            if (!bookingId) {
+                showError("잘못된 접근입니다. 예약 번호(booking_id)가 누락되었습니다.");
+                return;
+            }
+
+            let bookingData = null;
+            let itemsData = [];
+            let paidItems = [];
+            let selectedItems = [];
+            let currentTotalAmount = 0;
+            let paymentWidget = null;
+            let paymentMethodWidget = null;
+
+            function showError(msg) {
+                loadingPanel.style.display = "none";
+                checkoutContent.style.display = "none";
+                errorPanel.style.display = "block";
+                errorMsg.textContent = msg;
+            }
+
+            // 1. 상세 피팅 예약 정보 조회
+            fetch(`/api/payment/booking_checkout_details/${bookingId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status !== "success") {
+                    throw new Error(data.message || "상세 내역을 불러오지 못했습니다.");
+                }
+                
+                bookingData = data.booking;
+                itemsData = data.items;
+                paidItems = data.paidItems || [];
+
+                renderCheckoutDetails();
+            })
+            .catch(err => {
+                console.error("데이터 로드 중 에러:", err);
+                showError(err.message || "예약 정보를 가져오는 과정에서 서버 에러가 발생했습니다.");
+            });
+
+            // 2. 예약 요약 정보 및 체크박스 상품 렌더링
+            function renderCheckoutDetails() {
+                loadingPanel.style.display = "none";
+                checkoutContent.style.display = "block";
+
+                // 기본 정보 셋팅
+                document.getElementById("boardBookingId").textContent = bookingData.bookingId;
+                document.getElementById("boardCustomerName").textContent = bookingData.customerName;
+
+                if (bookingData.bookingType === "visit") {
+                    document.getElementById("storeNameArea").style.display = "none";
+                    document.getElementById("boardVisitDate").textContent = `${bookingData.reservedDate} ${bookingData.reservedTime.substring(0,2)}:${bookingData.reservedTime.substring(2,4)}`;
+                } else {
+                    document.getElementById("visitDateArea").style.display = "none";
+                    document.getElementById("boardStoreName").textContent = bookingData.storeName;
+                }
+
+                // 상품 리스트 구축
+                itemsChecklist.innerHTML = "";
+                
+                // 아직 결제 안 된 상품이 단 하나라도 있는지 확인
+                let hasUnpaidItems = false;
+
+                itemsData.forEach(item => {
+                    const isAlreadyPaid = paidItems.includes(item.id);
+                    if (!isAlreadyPaid) hasUnpaidItems = true;
+
+                    const row = document.createElement("div");
+                    row.className = `item-row ${isAlreadyPaid ? 'already-paid' : 'selected'}`;
+                    row.setAttribute("data-id", item.id);
+                    row.setAttribute("data-price", item.price);
+
+                    row.innerHTML = `
+                        <input type="checkbox" class="item-checkbox" ${isAlreadyPaid ? 'disabled' : 'checked'}>
+                        <img src="${item.image}" alt="${item.name}" class="item-img">
+                        <div class="item-info">
+                            <span class="item-name">${item.name}</span>
+                            ${item.category ? `<span class="item-cat">${item.category}</span>` : ''}
+                        </div>
+                        <div class="item-price">₩${item.price.toLocaleString()}</div>
+                    `;
+
+                    // 체크박스 이외의 영역을 클릭해도 토글되도록 처리
+                    if (!isAlreadyPaid) {
+                        row.addEventListener("click", (e) => {
+                            if (e.target.className !== "item-checkbox") {
+                                const chk = row.querySelector(".item-checkbox");
+                                chk.checked = !chk.checked;
+                                handleCheckboxToggle(row, chk.checked);
+                            }
+                        });
+                        
+                        const chk = row.querySelector(".item-checkbox");
+                        chk.addEventListener("change", (e) => {
+                            handleCheckboxToggle(row, e.target.checked);
+                        });
+                    }
+
+                    itemsChecklist.appendChild(row);
+                });
+
+                if (!hasUnpaidItems) {
+                    showError("이미 모든 피팅 상품의 결제가 정상 완료되었습니다.");
+                    return;
+                }
+
+                // 초기 합산금 계산 및 토스 위젯 기동
+                recalculateTotal();
+            }
+
+            function handleCheckboxToggle(row, isChecked) {
+                if (isChecked) {
+                    row.classList.add("selected");
+                } else {
+                    row.classList.remove("selected");
+                }
+                recalculateTotal();
+            }
+
+            // 3. 선택 상품 및 가격 계산 모듈
+            function recalculateTotal() {
+                selectedItems = [];
+                currentTotalAmount = 0;
+
+                document.querySelectorAll(".item-row.selected").forEach(row => {
+                    const itemId = row.getAttribute("data-id");
+                    const itemPrice = parseInt(row.getAttribute("data-price"));
+                    selectedItems.push(itemId);
+                    currentTotalAmount += itemPrice;
+                });
+
+                document.getElementById("selectedCount").textContent = selectedItems.length;
+                document.getElementById("totalAmount").textContent = `₩${currentTotalAmount.toLocaleString()}`;
+
+                if (selectedItems.length > 0) {
+                    btnPaymentSubmit.disabled = false;
+                    // 결제 수단 위젯 금액 동적 업데이트
+                    initializeOrUpdateTossWidget(currentTotalAmount);
+                } else {
+                    btnPaymentSubmit.disabled = true;
+                    if (paymentMethodWidget) {
+                        // 금액이 0원일 경우 결제 수단 감춤
+                        document.getElementById("payment-method").innerHTML = "";
+                        document.getElementById("agreement").innerHTML = "";
+                        paymentWidget = null;
+                        paymentMethodWidget = null;
+                    }
+                }
+            }
+
+            // 4. 토스페이먼츠 위젯 세팅 및 금액 연동
+            async function initializeOrUpdateTossWidget(amount) {
+                if (paymentWidget && paymentMethodWidget) {
+                    // 이미 위젯이 로드되어 있으면 가격만 동적 갱신
+                    try {
+                        await paymentMethodWidget.updateAmount(amount);
+                    } catch (e) {
+                        console.error("토스 위젯 금액 갱신 에러:", e);
+                    }
+                    return;
+                }
+
+                try {
+                    // API 환경설정에서 토스 클라이언트 키 로드
+                    const configRes = await fetch("/api/payment/config");
+                    const configData = await configRes.json();
+                    const clientKey = configData.client_key;
+
+                    if (!clientKey) {
+                        console.error("Toss 클라이언트 키가 존재하지 않습니다.");
+                        return;
+                    }
+
+                    // 가상의 고객 식별키 생성 (일반 예약 결제용)
+                    const customerKey = btoa(bookingData.customerEmail).replace(/=/g, "");
+
+                    // 토스 위젯 기동
+                    paymentWidget = PaymentWidget(clientKey, customerKey);
+                    
+                    // 결제 수단 영역 & 이용약관 렌더링
+                    paymentMethodWidget = paymentWidget.renderPaymentMethods("#payment-method", { value: amount });
+                    paymentWidget.renderAgreement("#agreement");
+
+                } catch (err) {
+                    console.error("토스페이먼츠 위젯 초기화 중 실패:", err);
+                }
+            }
+
+            // 5. 결제 진행 버튼 클릭 시
+            btnPaymentSubmit.addEventListener("click", async () => {
+                if (selectedItems.length === 0 || currentTotalAmount === 0 || !paymentWidget) return;
+
+                btnPaymentSubmit.disabled = true;
+                btnPaymentSubmit.textContent = "결제 준비 중...";
+
+                try {
+                    // 1) 백엔드 서버에 가주문 생성 요청
+                    const pendingRes = await fetch("/api/payment/pending_booking_order", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            bookingId: bookingId,
+                            items: selectedItems
+                        })
+                    });
+                    const pendingData = await pendingRes.json();
+
+                    if (pendingData.status !== "success") {
+                        throw new Error(pendingData.message || "가결제 등록 실패");
+                    }
+
+                    // 2) 토스 결제창 활성화 기동
+                    btnPaymentSubmit.textContent = "결제창 호출 중...";
+                    await paymentWidget.requestPayment({
+                        orderId: pendingData.orderId,
+                        orderName: `아무래도 안경 피팅 구매 (${selectedItems.length}건)`,
+                        successUrl: window.location.origin + "/api/payment/toss_booking_success",
+                        failUrl: window.location.origin + "/general/bookings?payment_success=false",
+                        customerEmail: bookingData.customerEmail,
+                        customerName: bookingData.customerName
+                    });
+
+                } catch (e) {
+                    console.error("결제 진행 오류:", e);
+                    alert(e.message || "결제를 생성하는 도중 에러가 발생했습니다. 다시 시도해 주세요.");
+                    btnPaymentSubmit.disabled = false;
+                    btnPaymentSubmit.textContent = "결제 확정하기";
+                }
+            });
+        });
+    </script>
+    <script src="/static/globalWholesale.js?v=3.5"></script>
+</body>
+</html>

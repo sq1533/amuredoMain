@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, HTTPException
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
 import requests
 import json
 import os
@@ -38,7 +38,7 @@ async def get_toss_config(request: Request):
     프론트엔드(SDK)를 그릴 때 필요한 클라이언트 키를 안전하게 제공
     (하드코딩 방지)
     """
-    if not request.session.get("is_wholesale"):
+    if not request.session.get("user_id"):
         raise HTTPException(status_code=403, detail="Unauthorized")
     return {"client_key": TOSS_CLIENT_KEY}
 
@@ -710,6 +710,279 @@ async def search_external_store(request: Request, keyword: str):
     except Exception as e:
         print(f"🔥 외부 매장 검색 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+
+# -------------------------------------------------------------
+# 🏁 피팅 완료 상품 선택 결제 신규 API 엔지니어링 탑재
+# -------------------------------------------------------------
+@router.get("/booking_checkout_details/{booking_id}")
+async def get_booking_checkout_details(request: Request, booking_id: str):
+    """
+    고객의 피팅 완료된 예약건의 상세 내역 및 상품 목록을 조회합니다.
+    도매가(wsPrice)는 절대 참조하지 않고 일반 소비자 가격(price)만 강제 적용합니다.
+    """
+    email = request.session.get("user_id")
+    if not email:
+        return JSONResponse(status_code=403, content={"status": "error", "message": "로그인이 필요합니다."})
+        
+    try:
+        safe_email = sanitize_email(email)
+        
+        # 1. 예약 정보 조회
+        ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
+        booking_data = ref.get()
+        if not booking_data:
+            return JSONResponse(status_code=404, content={"status": "error", "message": "예약 내역을 찾을 수 없습니다."})
+            
+        # 2. 예약 상태 검증 (이용 완료 또는 결제 완료일 때만 접근 가능)
+        if booking_data.get("status") not in ["이용 완료", "결제 완료"]:
+            return JSONResponse(status_code=400, content={"status": "error", "message": "피팅이 완료되지 않은 예약건은 결제할 수 없습니다."})
+            
+        # 3. 예약된 안경 아이템들의 정보 및 일반 소비자 가격 조회
+        from firebase_admin import firestore
+        db_fs = firestore.client()
+        
+        items_list = []
+        items_arr = booking_data.get("items", [])
+        for item_id in items_arr:
+            try:
+                item_doc = db_fs.collection("item").document(item_id).get()
+                if item_doc.exists:
+                    idata = item_doc.to_dict()
+                    # 오직 일반 소비자 가격(price)만 획득 (wsPrice 무시)
+                    price_val = idata.get("price", 0)
+                    items_list.append({
+                        "id": item_id,
+                        "name": idata.get("name", "안경 상품"),
+                        "image": (idata.get("paths") and idata.get("paths")[0]) or "/static/img/ready.webp",
+                        "category": idata.get("category", ""),
+                        "price": price_val
+                    })
+                else:
+                    items_list.append({
+                        "id": item_id,
+                        "name": f"안경 상품 ({item_id})",
+                        "image": "/static/img/ready.webp",
+                        "category": "",
+                        "price": 0
+                    })
+            except Exception as ie:
+                print(f"🔥 아이템 정보 연동 중 에러: {ie}")
+                
+        # 4. 이미 결제 완료된 내역이 존재하는지 확인
+        payment_ref = rtdb.reference(f'booking_payments/{booking_id}')
+        payment_data = payment_ref.get() or {}
+        
+        paid_items = []
+        for p_order in payment_data.values():
+            if p_order.get("status") == "결제 완료":
+                paid_items.extend(p_order.get("paidItems", []))
+
+        return {
+            "status": "success", 
+            "booking": booking_data, 
+            "items": items_list,
+            "paidItems": paid_items
+        }
+    except Exception as e:
+        print(f"🔥 결제 상세 조회 에러: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+
+@router.post("/pending_booking_order")
+async def create_pending_booking_order(request: Request):
+    """
+    피팅 상품 결제를 위해 토스페이먼츠창을 띄우기 전 가주문을 임시 생성합니다.
+    클라이언트가 전달한 금액을 신뢰하지 않고 서버에서 직접 소비자 가격 기준으로 총액을 계산하여 검증합니다.
+    """
+    email = request.session.get("user_id")
+    if not email:
+        return JSONResponse(status_code=403, content={"status": "error", "message": "로그인이 필요합니다."})
+        
+    try:
+        body = await request.json()
+        booking_id = body.get("bookingId")
+        selected_item_ids = body.get("items", [])
+        
+        if not booking_id or not selected_item_ids:
+            return JSONResponse(status_code=400, content={"status": "error", "message": "필수 결제 요청 정보가 누락되었습니다."})
+            
+        safe_email = sanitize_email(email)
+        
+        # 1. 예약 건 정보 조회
+        booking_ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
+        booking_data = booking_ref.get()
+        if not booking_data:
+            return JSONResponse(status_code=404, content={"status": "error", "message": "예약 내역을 찾을 수 없습니다."})
+            
+        # 2. 서버 측 소비자 가격 합산 연산 (변조 방지)
+        from firebase_admin import firestore
+        db_fs = firestore.client()
+        
+        total_amount = 0
+        for item_id in selected_item_ids:
+            if item_id not in booking_data.get("items", []):
+                return JSONResponse(status_code=400, content={"status": "error", "message": "예약 내역에 포함되지 않은 상품이 선택되었습니다."})
+                
+            item_doc = db_fs.collection("item").document(item_id).get()
+            if item_doc.exists:
+                idata = item_doc.to_dict()
+                total_amount += int(idata.get("price", 0))
+                
+        if total_amount <= 0:
+            return JSONResponse(status_code=400, content={"status": "error", "message": "결제 금액이 올바르지 않습니다."})
+            
+        # 3. 고유 가주문 ID 생성
+        import random
+        now = datetime.now()
+        order_id = f"BKORD{now.strftime('%y%m%d%H%M%S')}{random.randint(100, 999)}"
+        
+        # 4. booking_orders 노드에 가결제 정보 기록
+        ref = rtdb.reference(f'booking_orders/{order_id}')
+        ref.set({
+            "orderId": order_id,
+            "bookingId": booking_id,
+            "amount": total_amount,
+            "items": selected_item_ids,
+            "customer": {
+                "name": booking_data.get("customerName", "고객"),
+                "phone": booking_data.get("customerPhone", ""),
+                "email": email
+            },
+            "status": "결제대기",
+            "createdAt": now.isoformat()
+        })
+        
+        return {"status": "success", "orderId": order_id, "amount": total_amount}
+    except Exception as e:
+        print(f"🔥 피팅 가주문 생성 에러: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+
+@router.get("/toss_booking_success")
+async def toss_booking_success_callback(request: Request, paymentKey: str, orderId: str, amount: str):
+    """
+    토스페이먼츠 결제 승인 콜백 (피팅 상품 전용).
+    가승인을 토스 API로 최종 확인하고 결제 완료 데이터를 저장 및 예약을 결제 완료 상태로 종결합니다.
+    """
+    try:
+        # 1. 가주문 정보 조회
+        order_ref = rtdb.reference(f'booking_orders/{orderId}')
+        order_data = order_ref.get()
+        if not order_data:
+            return HTMLResponse(content="<h1>가결제 정보를 찾을 수 없습니다.</h1>", status_code=404)
+            
+        booking_id = order_data.get("bookingId")
+        customer_email = order_data.get("customer", {}).get("email")
+        
+        if int(amount) != int(order_data.get("amount", 0)):
+            return HTMLResponse(content="<h1>결제 승인 금액이 위조되었습니다.</h1>", status_code=400)
+            
+        # 2. 토스페이먼츠 승인 요청
+        auth_string = f"{TOSS_SECRET_KEY}:"
+        auth_base64 = base64.b64encode(auth_string.encode('utf-8')).decode('utf-8')
+        
+        url = "https://api.tosspayments.com/v1/payments/confirm"
+        headers = {
+            "Authorization": f"Basic {auth_base64}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "paymentKey": paymentKey,
+            "orderId": orderId,
+            "amount": amount
+        }
+        
+        response = requests.post(url, headers=headers, json=payload)
+        result = response.json()
+        
+        if response.status_code == 200:
+            # 3. 결제 완료 정보 저장
+            payment_ref = rtdb.reference(f'booking_payments/{booking_id}/{orderId}')
+            payment_ref.set({
+                "orderId": orderId,
+                "paymentKey": paymentKey,
+                "amount": int(amount),
+                "paidItems": order_data.get("items", []),
+                "paidAt": datetime.now().isoformat(),
+                "status": "결제 완료"
+            })
+            
+            # 4. 가주문 상태를 결제 완료로 업데이트
+            order_ref.update({
+                "status": "결제 완료",
+                "paymentKey": paymentKey,
+                "paidAt": datetime.now().isoformat()
+            })
+            
+            # 5. 기존 예약 상태를 '결제 완료'로 업데이트
+            safe_email = sanitize_email(customer_email)
+            booking_ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
+            booking_ref.update({
+                "status": "결제 완료"
+            })
+            
+            # 6. 관리자 텔레그램 접수 안내 전송 (user_request_id 로드)
+            customer_name = order_data.get("customer", {}).get("name", "알 수 없음")
+            customer_phone = order_data.get("customer", {}).get("phone", "알 수 없음")
+            
+            # 결제한 상품들의 요약 정보
+            from firebase_admin import firestore
+            db_fs = firestore.client()
+            paid_items_ids = order_data.get("items", [])
+            first_item_name = "안경 상품"
+            if len(paid_items_ids) > 0:
+                try:
+                    item_doc = db_fs.collection("item").document(paid_items_ids[0]).get()
+                    if item_doc.exists:
+                        first_item_name = item_doc.to_dict().get("name", "안경 상품")
+                except Exception:
+                    pass
+            goods_summary = f"{first_item_name} 포함 총 {len(paid_items_ids)}개"
+            
+            tg_message = (
+                f"💳 <b>[피팅 완료 상품 결제 완료]</b>\n\n"
+                f"<b>예약번호:</b> {booking_id}\n"
+                f"<b>주문번호:</b> {orderId}\n"
+                f"<b>결제고객:</b> {customer_name} ({customer_email})\n"
+                f"<b>연락처:</b> {customer_phone}\n"
+                f"<b>결제금액:</b> ₩{int(amount):,}\n"
+                f"<b>결제상품:</b> {goods_summary}\n"
+                f"<b>결제일시:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            )
+            
+            tg_path = os.path.join(os.path.dirname(__file__), "..", "database", "telegram.json")
+            tg_request_chat_id = ""
+            if os.path.exists(tg_path):
+                with open(tg_path, "r", encoding="utf-8") as f:
+                    tg_data = json.load(f)
+                    tg_request_chat_id = tg_data.get("user_request_id", "")
+                    
+            if tg_request_chat_id:
+                send_telegram_message(tg_request_chat_id, tg_message)
+                
+            # 마이페이지로 안전한 복귀 및 결제 완료 파라미터 전달
+            html_content = f"""
+            <html>
+            <head>
+                <script>
+                    alert("결제가 완료되었습니다. 이용해 주셔서 감사합니다.");
+                    window.location.href = "/general/bookings?payment_success=true";
+                </script>
+            </head>
+            <body></body>
+            </html>
+            """
+            return HTMLResponse(content=html_content, status_code=200)
+        else:
+            error_msg = result.get("message", "결제 승인 실패")
+            print(f"🔥 피팅 상품 결제 승인 실패: {error_msg}")
+            return HTMLResponse(content=f"<h1>결제 승인 실패: {error_msg}</h1>", status_code=400)
+            
+    except Exception as e:
+        print(f"🔥 피팅 결제 승인 중 예외 발생: {e}")
+        return HTMLResponse(content="<h1>결제 처리 중 서버 에러가 발생했습니다.</h1>", status_code=500)
+
 
 
 

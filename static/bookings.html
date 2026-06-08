@@ -209,6 +209,10 @@
             background: #e6f9ec;
             color: #28a745;
         }
+        .status-badge.paid-badge {
+            background: #eef7fe;
+            color: #0e3a5b;
+        }
 
         /* 🏁 예약 상품 리스트 디자인 */
         .goods-list {
@@ -407,6 +411,13 @@
             const container = document.getElementById("bookingsContainer");
             const cancelOverlay = document.getElementById("cancelLoadingOverlay");
 
+            // 결제 완료 후 리다이렉트 시 토스트 팝업 알림
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get("payment_success") === "true") {
+                alert("결제가 정상적으로 완료되었습니다! 예약 내역에서 결제 완료 상태를 확인하실 수 있습니다.");
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
             // 날짜 변환 함수 (YYYY-MM-DDTHH:MM:SS -> YY-MM-DD)
             function formatYYMMDD(isoString) {
                 if (!isoString) return "확인 불가";
@@ -489,9 +500,10 @@
 
                         const isCancelled = (displayStatus === "예약 취소");
                         const isCompleted = (displayStatus === "이용 완료");
+                        const isPaid = (displayStatus === "결제 완료");
 
                         const card = document.createElement("div");
-                        card.className = `expander-card ${isCancelled ? 'cancelled' : ''} ${isCompleted ? 'completed' : ''}`;
+                        card.className = `expander-card ${isCancelled ? 'cancelled' : ''} ${isCompleted ? 'completed' : ''} ${isPaid ? 'paid' : ''}`;
                         card.id = `card-${booking.bookingId}`;
 
                         // 예약에 포함된 아이템 목록
@@ -550,7 +562,7 @@
                                     <div class="info-panel" style="flex-direction: column; align-items: flex-start; gap: 8px;">
                                         <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                                             <div style="font-weight: 700; color: #0e3a5b;">예약 ID: ${booking.bookingId}</div>
-                                            <span class="status-badge ${isCancelled ? 'cancelled-badge' : ''} ${isCompleted ? 'completed-badge' : ''}">${displayStatus}</span>
+                                            <span class="status-badge ${isCancelled ? 'cancelled-badge' : ''} ${isCompleted ? 'completed-badge' : ''} ${isPaid ? 'paid-badge' : ''}">${displayStatus}</span>
                                         </div>
                                         ${booking.bookingType === 'visit' ? `
                                             <div style="margin: 2px 0;">방문 예정일: <span class="info-date-val">${booking.reservedDate}</span></div>
@@ -575,7 +587,7 @@
                                         `).join('')}
                                     </div>
 
-                                    ${!isCancelled && !isCompleted ? `
+                                    ${!isCancelled && !isCompleted && !isPaid ? `
                                         <div class="card-action-bar">
                                             <button class="btn-action btn-action-modify" data-id="${booking.bookingId}">예약 수정</button>
                                             ${booking.bookingType === 'visit' && booking.reservedDate === todayStr ? `
@@ -583,6 +595,12 @@
                                             ` : `
                                                 <button class="btn-action btn-action-cancel" data-id="${booking.bookingId}">예약 취소</button>
                                             `}
+                                        </div>
+                                    ` : ''}
+
+                                    ${isCompleted ? `
+                                        <div class="card-action-bar">
+                                            <button class="btn-action btn-action-pay" data-id="${booking.bookingId}" style="background-color: #28a745; color: #fff; border: 1px solid #28a745; transition: all 0.2s ease;">피팅 상품 결제하기</button>
                                         </div>
                                     ` : ''}
                                 </div>
@@ -616,7 +634,7 @@
                         });
 
                         // 🏁 액션 버튼 이벤트 연결
-                        if (!isCancelled && !isCompleted) {
+                        if (!isCancelled && !isCompleted && !isPaid) {
                             const btnModify = card.querySelector(".btn-action-modify");
                             const btnCancel = card.querySelector(".btn-action-cancel");
 
@@ -633,6 +651,27 @@
                                     if (confirm("정말로 이 예약을 취소하시겠습니까?\n취소 후에는 복구가 불가합니다.")) {
                                         executeCancel(booking.bookingId);
                                     }
+                                });
+                            }
+                        }
+
+                        // 🏁 결제 버튼 이벤트 연결
+                        if (isCompleted) {
+                            const btnPay = card.querySelector(".btn-action-pay");
+                            if (btnPay) {
+                                btnPay.addEventListener("click", (e) => {
+                                    e.stopPropagation(); // 아코디언 토글 방지
+                                    location.href = `/general/booking_checkout?booking_id=${booking.bookingId}`;
+                                });
+                                btnPay.addEventListener("mouseenter", (e) => {
+                                    e.target.style.backgroundColor = "#218838";
+                                    e.target.style.borderColor = "#1e7e34";
+                                    e.target.style.transform = "translateY(-1px)";
+                                });
+                                btnPay.addEventListener("mouseleave", (e) => {
+                                    e.target.style.backgroundColor = "#28a745";
+                                    e.target.style.borderColor = "#28a745";
+                                    e.target.style.transform = "none";
                                 });
                             }
                         }
