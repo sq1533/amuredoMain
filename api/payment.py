@@ -11,20 +11,96 @@ from firebase_admin import db as rtdb
 router = APIRouter()
 
 # -------------------------------------------------------------
-# 토스페이먼츠 설정 로드
+# 다날 결제 설정 로드
 # -------------------------------------------------------------
-TOSS_CLIENT_KEY = ""
-TOSS_SECRET_KEY = ""
+DANAL_CLIENT_KEY = ""
+DANAL_MERCHANT_ID = ""
+DANAL_SECRET_KEY = ""
+DANAL_API_URL = "https://api.danalpay.com"
 
-config_path = os.path.join(os.path.dirname(__file__), "..", "database", "tosspayment.json")
+danal_config_path = os.path.join(os.path.dirname(__file__), "..", "database", "danal_api.json")
 try:
-    if os.path.exists(config_path):
-        with open(config_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            TOSS_CLIENT_KEY = data.get("widget_client_key", "")
-            TOSS_SECRET_KEY = data.get("widget_secret_key", "")
+    if os.path.exists(danal_config_path):
+        with open(danal_config_path, "r", encoding="utf-8") as f:
+            danal_data = json.load(f)
+            DANAL_CLIENT_KEY = danal_data.get("client_key", "")
+            DANAL_MERCHANT_ID = danal_data.get("merchant_id", "")
+            DANAL_SECRET_KEY = danal_data.get("secret_key", "")
+            DANAL_API_URL = danal_data.get("api_url", "https://api.danalpay.com")
 except Exception as e:
-    print(f"🔥 토스페이먼츠 설정 로드 에러: {e}")
+    print(f"🔥 다날 설정 로드 에러: {e}")
+
+# -------------------------------------------------------------
+# 카카오페이 & 토스페이 설정 로드
+# -------------------------------------------------------------
+KAKAOPAY_CID = ""
+KAKAOPAY_SECRET_KEY = ""
+KAKAOPAY_APPROVAL_URL = ""
+KAKAOPAY_CANCEL_URL = ""
+KAKAOPAY_FAIL_URL = ""
+
+TOSSPAY_API_KEY = ""
+TOSSPAY_RET_URL = ""
+TOSSPAY_RET_CANCEL_URL = ""
+
+pay_config_path = os.path.join(os.path.dirname(__file__), "..", "database", "pay_api.json")
+try:
+    if os.path.exists(pay_config_path):
+        with open(pay_config_path, "r", encoding="utf-8") as f:
+            pay_data = json.load(f)
+            
+            kp_data = pay_data.get("kakaopay", {})
+            KAKAOPAY_CID = kp_data.get("cid", "")
+            KAKAOPAY_SECRET_KEY = kp_data.get("secret_key", "")
+            KAKAOPAY_APPROVAL_URL = kp_data.get("approval_url", "")
+            KAKAOPAY_CANCEL_URL = kp_data.get("cancel_url", "")
+            KAKAOPAY_FAIL_URL = kp_data.get("fail_url", "")
+            
+            tp_data = pay_data.get("tosspay", {})
+            TOSSPAY_API_KEY = tp_data.get("api_key", "")
+            TOSSPAY_RET_URL = tp_data.get("retUrl", "")
+            TOSSPAY_RET_CANCEL_URL = tp_data.get("retCancelUrl", "")
+except Exception as e:
+    print(f"🔥 카카오페이/토스페이 설정 로드 에러: {e}")
+
+def confirm_danal_payment(method: str, transaction_id: str, merchant_id: str, amount: int, order_id: str) -> dict:
+    """
+    다날 승인 API 호출 헬퍼
+    """
+    auth_str = f"{DANAL_SECRET_KEY}:"
+    auth_bytes = auth_str.encode('utf-8')
+    auth_b64 = base64.b64encode(auth_bytes).decode('utf-8')
+    
+    headers = {
+        "Authorization": f"Basic {auth_b64}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "method": method,
+        "transactionId": transaction_id,
+        "merchantId": merchant_id,
+        "amount": amount,
+        "orderId": order_id
+    }
+    
+    confirm_url = f"{DANAL_API_URL.rstrip('/')}/v1/payments/confirm"
+    
+    try:
+        response = requests.post(confirm_url, json=payload, headers=headers, timeout=10)
+        print(f"Danal Confirm Request Payload: {payload}")
+        print(f"Danal Confirm Response: {response.status_code} - {response.text}")
+        if response.status_code == 200:
+            return response.json()
+        else:
+            try:
+                err_data = response.json()
+                return err_data
+            except Exception:
+                return {"code": "HTTP_ERROR", "message": f"HTTP {response.status_code}: {response.text}"}
+    except Exception as e:
+        print(f"🔥 다날 승인 API 호출 에러: {e}")
+        return {"code": "EXCEPTION", "message": str(e)}
 
 # -------------------------------------------------------------
 # 헬퍼 함수: 이메일을 DB 키로 안전하게 변환 (. -> ,)
@@ -33,14 +109,16 @@ def sanitize_email(email: str):
     return email.replace(".", ",")
 
 @router.get("/config")
-async def get_toss_config(request: Request):
+async def get_payment_config(request: Request):
     """
-    프론트엔드(SDK)를 그릴 때 필요한 클라이언트 키를 안전하게 제공
-    (하드코딩 방지)
+    프론트엔드(SDK)를 그릴 때 필요한 다날 클라이언트 키 및 가맹점 ID를 안전하게 제공
     """
     if not request.session.get("user_id"):
         raise HTTPException(status_code=403, detail="Unauthorized")
-    return {"client_key": TOSS_CLIENT_KEY}
+    return {
+        "client_key": DANAL_CLIENT_KEY,
+        "merchant_id": DANAL_MERCHANT_ID
+    }
 
 @router.post("/pending_order")
 async def create_pending_order(request: Request):
@@ -82,56 +160,7 @@ async def create_pending_order(request: Request):
         print(f"🔥 가주문 생성 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
-@router.get("/toss_success")
-async def toss_success_callback(request: Request, paymentKey: str, orderId: str, amount: str):
-    """
-    토스페이먼츠 결제창에서 가승인 후 리다이렉트되어 돌아오는 콜백 주소 (GET).
-    계층 구조 경로에서 주문 정보를 찾아 최종 승인 상태로 업데이트함.
-    """
-    email = request.session.get("user_id")
-    if not email:
-        return RedirectResponse(url="/login")
-        
-    try:
-        safe_email = sanitize_email(email)
-        auth_string = f"{TOSS_SECRET_KEY}:"
-        auth_base64 = base64.b64encode(auth_string.encode('utf-8')).decode('utf-8')
-        
-        url = "https://api.tosspayments.com/v1/payments/confirm"
-        headers = {
-            "Authorization": f"Basic {auth_base64}",
-            "Content-Type": "application/json"
-        }
-        payload = {
-            "paymentKey": paymentKey,
-            "orderId": orderId,
-            "amount": amount
-        }
-        
-        response = requests.post(url, headers=headers, json=payload)
-        result = response.json()
-        
-        if response.status_code == 200:
-            # 🏁 결제 최종 승인 완료!
-            # 계층형 경로 업데이트 (ws_orders/email/orderId)
-            ref = rtdb.reference(f'ws_orders/{safe_email}/{orderId}')
-            ref.update({
-                "status": "결제 완료",
-                "paymentKey": paymentKey,
-                "paidAt": datetime.now().isoformat()
-            })
-            
-            redirect_response = RedirectResponse(url="/wholesale/success", status_code=303)
-            redirect_response.delete_cookie(key="wholesale_cart", path="/")
-            return redirect_response
-        else:
-            error_msg = result.get("message", "결제 승인 실패")
-            print(f"🔥 토스 결제 승인 실패: {error_msg}")
-            return RedirectResponse(url="/wholesale/cart", status_code=303)
-            
-    except Exception as e:
-        print(f"🔥 결제 승인 통신 에러: {e}")
-        return RedirectResponse(url="/wholesale/cart", status_code=303)
+
 
 # -------------------------------------------------------------
 # 텔레그램 설정 로드
@@ -859,13 +888,85 @@ async def create_pending_booking_order(request: Request):
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
 
-@router.get("/toss_booking_success")
-async def toss_booking_success_callback(request: Request, paymentKey: str, orderId: str, amount: str):
-    """
-    토스페이먼츠 결제 승인 콜백 (피팅 상품 전용).
-    가승인을 토스 API로 최종 확인하고 결제 완료 데이터를 저장 및 예약을 결제 완료 상태로 종결합니다.
-    """
+
+
+# -------------------------------------------------------------
+# 🏁 다날 결제 전용 성공/실패 콜백 엔드포인트
+# -------------------------------------------------------------
+async def process_danal_success(request: Request, code: str, message: str, transactionId: str, orderId: str, method: str, amount: int):
+    email = request.session.get("user_id")
+    if not email:
+        return RedirectResponse(url="/login")
+        
     try:
+        if code != "SUCCESS":
+            print(f"🔥 다날 인증 실패: {code} - {message}")
+            return RedirectResponse(url=f"/wholesale/order?status=fail&message={message}", status_code=303)
+            
+        safe_email = sanitize_email(email)
+        ref = rtdb.reference(f'ws_orders/{safe_email}/{orderId}')
+        order_data = ref.get()
+        if not order_data:
+            print(f"🔥 주문 정보 없음: {orderId}")
+            return RedirectResponse(url="/wholesale/cart", status_code=303)
+            
+        if int(amount) != int(order_data.get("amount", 0)):
+            print(f"🔥 주문 금액 불일치: {amount} != {order_data.get('amount')}")
+            return RedirectResponse(url="/wholesale/cart", status_code=303)
+            
+        # 다날 최종 승인 API 호출
+        confirm_res = confirm_danal_payment(
+            method=method,
+            transaction_id=transactionId,
+            merchant_id=DANAL_MERCHANT_ID,
+            amount=int(amount),
+            order_id=orderId
+        )
+        
+        if confirm_res.get("code") != "SUCCESS":
+            err_msg = confirm_res.get("message", "결제 승인 실패")
+            print(f"🔥 다날 승인 실패: {confirm_res}")
+            return RedirectResponse(url=f"/wholesale/order?status=fail&message={err_msg}", status_code=303)
+            
+        # 결제 완료 상태 업데이트
+        ref.update({
+            "status": "결제 완료",
+            "transactionId": transactionId,
+            "paidAt": datetime.now().isoformat(),
+            "method": method
+        })
+        
+        redirect_response = RedirectResponse(url="/wholesale/success", status_code=303)
+        redirect_response.delete_cookie(key="wholesale_cart", path="/")
+        return redirect_response
+            
+    except Exception as e:
+        print(f"🔥 다날 결제 완료 처리 에러: {e}")
+        return RedirectResponse(url="/wholesale/cart", status_code=303)
+
+@router.get("/danal_success")
+async def danal_success_get(request: Request, code: str, message: str, transactionId: str, orderId: str, method: str, amount: int):
+    return await process_danal_success(request, code, message, transactionId, orderId, method, amount)
+
+from fastapi import Form
+@router.post("/danal_success")
+async def danal_success_post(
+    request: Request,
+    code: str = Form(...),
+    message: str = Form(...),
+    transactionId: str = Form(...),
+    orderId: str = Form(...),
+    method: str = Form(...),
+    amount: int = Form(...)
+):
+    return await process_danal_success(request, code, message, transactionId, orderId, method, amount)
+
+async def process_danal_booking_success(request: Request, code: str, message: str, transactionId: str, orderId: str, method: str, amount: int):
+    try:
+        if code != "SUCCESS":
+            print(f"🔥 다날 예약 결제 인증 실패: {code} - {message}")
+            return HTMLResponse(content=f"<script>alert('결제 인증 실패: {message}'); window.location.href='/general/bookings';</script>", status_code=200)
+
         # 1. 가주문 정보 조회
         order_ref = rtdb.reference(f'booking_orders/{orderId}')
         order_data = order_ref.get()
@@ -878,95 +979,553 @@ async def toss_booking_success_callback(request: Request, paymentKey: str, order
         if int(amount) != int(order_data.get("amount", 0)):
             return HTMLResponse(content="<h1>결제 승인 금액이 위조되었습니다.</h1>", status_code=400)
             
-        # 2. 토스페이먼츠 승인 요청
-        auth_string = f"{TOSS_SECRET_KEY}:"
-        auth_base64 = base64.b64encode(auth_string.encode('utf-8')).decode('utf-8')
+        # 다날 최종 승인 API 호출
+        confirm_res = confirm_danal_payment(
+            method=method,
+            transaction_id=transactionId,
+            merchant_id=DANAL_MERCHANT_ID,
+            amount=int(amount),
+            order_id=orderId
+        )
         
-        url = "https://api.tosspayments.com/v1/payments/confirm"
+        if confirm_res.get("code") != "SUCCESS":
+            err_msg = confirm_res.get("message", "결제 승인 실패")
+            print(f"🔥 다날 예약 결제 승인 실패: {confirm_res}")
+            return HTMLResponse(content=f"<script>alert('결제 승인 실패: {err_msg}'); window.location.href='/general/bookings';</script>", status_code=200)
+
+        # 2. 결제 완료 정보 저장
+        payment_ref = rtdb.reference(f'booking_payments/{booking_id}/{orderId}')
+        payment_ref.set({
+            "orderId": orderId,
+            "transactionId": transactionId,
+            "amount": int(amount),
+            "paidItems": order_data.get("items", []),
+            "paidAt": datetime.now().isoformat(),
+            "status": "결제 완료",
+            "method": method
+        })
+        
+        # 3. 가주문 상태를 결제 완료로 업데이트
+        order_ref.update({
+            "status": "결제 완료",
+            "transactionId": transactionId,
+            "paidAt": datetime.now().isoformat(),
+            "method": method
+        })
+        
+        # 4. 기존 예약 상태를 '결제 완료'로 업데이트
+        safe_email = sanitize_email(customer_email)
+        booking_ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
+        booking_ref.update({
+            "status": "결제 완료"
+        })
+        
+        # 5. 관리자 텔레그램 접수 안내 전송 (user_request_id 로드)
+        customer_name = order_data.get("customer", {}).get("name", "알 수 없음")
+        customer_phone = order_data.get("customer", {}).get("phone", "알 수 없음")
+        
+        # 결제한 상품들의 요약 정보
+        from firebase_admin import firestore
+        db_fs = firestore.client()
+        paid_items_ids = order_data.get("items", [])
+        first_item_name = "안경 상품"
+        if len(paid_items_ids) > 0:
+            try:
+                item_doc = db_fs.collection("item").document(paid_items_ids[0]).get()
+                if item_doc.exists:
+                    first_item_name = item_doc.to_dict().get("name", "안경 상품")
+            except Exception:
+                pass
+        goods_summary = f"{first_item_name} 포함 총 {len(paid_items_ids)}개"
+        
+        tg_message = (
+            f"💳 <b>[피팅 완료 상품 결제 완료 (다날)]</b>\n\n"
+            f"<b>예약번호:</b> {booking_id}\n"
+            f"<b>주문번호:</b> {orderId}\n"
+            f"<b>결제고객:</b> {customer_name} ({customer_email})\n"
+            f"<b>연락처:</b> {customer_phone}\n"
+            f"<b>결제금액:</b> ₩{int(amount):,}\n"
+            f"<b>결제상품:</b> {goods_summary}\n"
+            f"<b>결제수단:</b> {method}\n"
+            f"<b>결제일시:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        )
+        
+        tg_path = os.path.join(os.path.dirname(__file__), "..", "database", "telegram.json")
+        tg_request_chat_id = ""
+        if os.path.exists(tg_path):
+            with open(tg_path, "r", encoding="utf-8") as f:
+                tg_data = json.load(f)
+                tg_request_chat_id = tg_data.get("user_request_id", "")
+                
+        if tg_request_chat_id:
+            send_telegram_message(tg_request_chat_id, tg_message)
+            
+        html_content = f"""
+        <html>
+        <head>
+            <script>
+                alert("결제가 완료되었습니다. 이용해 주셔서 감사합니다.");
+                window.location.href = "/general/bookings?payment_success=true";
+            </script>
+        </head>
+        <body></body>
+        </html>
+        """
+        return HTMLResponse(content=html_content, status_code=200)
+        
+    except Exception as e:
+        print(f"🔥 피팅 결제 승인 중 예외 발생: {e}")
+        return HTMLResponse(content="<h1>결제 처리 중 서버 에러가 발생했습니다.</h1>", status_code=500)
+
+@router.get("/danal_booking_success")
+async def danal_booking_success_get(request: Request, code: str, message: str, transactionId: str, orderId: str, method: str, amount: int):
+    return await process_danal_booking_success(request, code, message, transactionId, orderId, method, amount)
+
+@router.post("/danal_booking_success")
+async def danal_booking_success_post(
+    request: Request,
+    code: str = Form(...),
+    message: str = Form(...),
+    transactionId: str = Form(...),
+    orderId: str = Form(...),
+    method: str = Form(...),
+    amount: int = Form(...)
+):
+    return await process_danal_booking_success(request, code, message, transactionId, orderId, method, amount)
+
+from typing import Optional
+from fastapi import Form, Query
+
+async def process_payment_fail(request: Request, code: Optional[str] = None, message: Optional[str] = None, orderId: Optional[str] = None):
+    # None인 경우 기본값 지정
+    code = code or "UNKNOWN"
+    message = message or "결제 중 오류가 발생했거나 취소되었습니다."
+    orderId = orderId or "UNKNOWN"
+    
+    print(f"🔥 결제 실패 콜백: {code} - {message} (주문ID: {orderId})")
+    
+    order_id_html = f"<div class='info-row'><span class='info-label'>주문 번호</span><span class='info-value'>{orderId}</span></div>" if orderId != "UNKNOWN" else ""
+    
+    html_content = f"""
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>결제 실패 - 아무래도 안경</title>
+        <link rel="icon" href="/static/img/icon.webp" type="image/webp">
+        <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+        <style>
+            * {{
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+                font-family: 'Pretendard', sans-serif;
+            }}
+
+            body {{
+                background: radial-gradient(circle at top, #162a45, #0a1424);
+                color: #fff;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }}
+
+            .fail-card {{
+                background: rgba(255, 255, 255, 0.04);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 24px;
+                padding: 50px 40px;
+                max-width: 500px;
+                width: 100%;
+                text-align: center;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            }}
+
+            .icon-container {{
+                width: 80px;
+                height: 80px;
+                background: rgba(239, 68, 68, 0.1);
+                border: 2px solid rgba(239, 68, 68, 0.3);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 30px auto;
+                animation: pulse 2s infinite;
+            }}
+
+            .fail-icon {{
+                font-size: 2.5rem;
+                color: #ef4444;
+            }}
+
+            @keyframes pulse {{
+                0% {{ transform: scale(1); }}
+                50% {{ transform: scale(1.05); }}
+                100% {{ transform: scale(1); }}
+            }}
+
+            .title {{
+                font-size: 1.8rem;
+                font-weight: 800;
+                color: #f3f4f6;
+                margin-bottom: 15px;
+                letter-spacing: -0.5px;
+            }}
+
+            .subtitle {{
+                font-size: 1rem;
+                color: #9ca3af;
+                margin-bottom: 35px;
+                line-height: 1.6;
+            }}
+
+            /* 상세 에러 정보 박스 */
+            .error-info-box {{
+                background: rgba(0, 0, 0, 0.2);
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 40px;
+                text-align: left;
+                border: 1px solid rgba(255, 255, 255, 0.03);
+            }}
+
+            .info-row {{
+                display: flex;
+                margin-bottom: 8px;
+                font-size: 0.9rem;
+            }}
+            .info-row:last-child {{
+                margin-bottom: 0;
+            }}
+
+            .info-label {{
+                width: 90px;
+                color: #6b7280;
+                font-weight: 700;
+            }}
+
+            .info-value {{
+                flex: 1;
+                color: #e5e7eb;
+                word-break: break-all;
+            }}
+
+            /* 액션 버튼 */
+            .btn-group {{
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }}
+
+            .btn {{
+                display: inline-block;
+                width: 100%;
+                padding: 16px;
+                font-size: 1rem;
+                font-weight: 700;
+                border-radius: 12px;
+                text-decoration: none;
+                cursor: pointer;
+                transition: all 0.25s ease;
+                text-align: center;
+            }}
+
+            .btn-primary {{
+                background: #2563eb;
+                color: #fff;
+                border: none;
+                box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+            }}
+            .btn-primary:hover {{
+                background: #1d4ed8;
+                transform: translateY(-2px);
+            }}
+
+            .btn-secondary {{
+                background: transparent;
+                color: #d1d5db;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+            }}
+            .btn-secondary:hover {{
+                background: rgba(255, 255, 255, 0.05);
+                color: #fff;
+            }}
+
+            @media (max-width: 480px) {{
+                .fail-card {{
+                    padding: 40px 20px;
+                }}
+                .title {{
+                    font-size: 1.5rem;
+                }}
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="fail-card">
+            <div class="icon-container">
+                <span class="fail-icon">✕</span>
+            </div>
+            <h1 class="title">결제를 완료하지 못했습니다</h1>
+            <p class="subtitle">결제 진행 중 오류가 발생했거나<br>사용자에 의해 결제 요청이 취소되었습니다.</p>
+
+            <!-- 상세 정보 박스 -->
+            <div class="error-info-box">
+                {order_id_html}
+                <div class="info-row">
+                    <span class="info-label">실패 사유</span>
+                    <span class="info-value">{message} ({code})</span>
+                </div>
+            </div>
+
+            <!-- 버튼 그룹 -->
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="window.history.back();">결제 페이지로 다시 넘어가기</button>
+                <a href="/" class="btn btn-secondary">메인페이지로 넘어가기</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content, status_code=200)
+
+@router.get("/danal_fail")
+async def danal_fail_get(
+    request: Request,
+    code: Optional[str] = Query(None),
+    message: Optional[str] = Query(None),
+    orderId: Optional[str] = Query(None)
+):
+    return await process_payment_fail(request, code, message, orderId)
+
+@router.post("/danal_fail")
+async def danal_fail_post(
+    request: Request,
+    code: Optional[str] = Form(None),
+    message: Optional[str] = Form(None),
+    orderId: Optional[str] = Form(None)
+):
+    return await process_payment_fail(request, code, message, orderId)
+
+@router.get("/fail")
+async def payment_fail_get(
+    request: Request,
+    code: Optional[str] = Query(None),
+    message: Optional[str] = Query(None),
+    orderId: Optional[str] = Query(None),
+    orderNo: Optional[str] = Query(None)
+):
+    # PG사마다 orderId 혹은 orderNo 등으로 파라미터가 다르게 올 수 있으므로 모두 지원
+    final_order_id = orderId or orderNo
+    return await process_payment_fail(request, code, message, final_order_id)
+
+@router.post("/fail")
+async def payment_fail_post(
+    request: Request,
+    code: Optional[str] = Form(None),
+    message: Optional[str] = Form(None),
+    orderId: Optional[str] = Form(None),
+    orderNo: Optional[str] = Form(None)
+):
+    final_order_id = orderId or orderNo
+    return await process_payment_fail(request, code, message, final_order_id)
+
+@router.post("/danal_noti")
+@router.get("/danal_noti")
+async def danal_noti(request: Request):
+    """
+    다날 가상계좌 입금 통보 (Noti) 수신 API (웹훅)
+    """
+    try:
+        body = await request.body()
+        print(f"📥 다날 가상계좌 입금 통보 수신: {body}")
+        # 실연동 시 가상계좌 입금 매칭 로직을 여기에 수행할 수 있습니다.
+        return HTMLResponse(content="OK", status_code=200)
+    except Exception as e:
+        print(f"🔥 다날 가상계좌 노티 처리 중 에러: {e}")
+        return HTMLResponse(content="FAIL", status_code=500)
+
+
+# -------------------------------------------------------------
+# 🏁 카카오페이 API 엔드포인트
+# -------------------------------------------------------------
+@router.post("/kakaopay_ready")
+async def kakaopay_ready(request: Request):
+    """
+    카카오페이 결제 준비 (Token 발급 및 결제창 URL 획득)
+    """
+    email = request.session.get("user_id")
+    if not email:
+        return JSONResponse(status_code=403, content={"status": "error", "message": "로그인이 필요합니다."})
+
+    try:
+        body = await request.json()
+        order_id = body.get("orderId")
+        amount = body.get("amount")
+        order_name = body.get("orderName")
+        
+        if not order_id or not amount or not order_name:
+            return JSONResponse(status_code=400, content={"status": "error", "message": "필수 결제 요청 정보가 누락되었습니다."})
+
+        # 주문 성격 구분 (BKORD 시작 = 피팅 주문)
+        order_type = "booking" if order_id.startswith("BKORD") else "wholesale"
+
+        url = "https://open-api.kakaopay.com/online/v1/payment/ready"
         headers = {
-            "Authorization": f"Basic {auth_base64}",
+            "Authorization": f"SECRET_KEY {KAKAOPAY_SECRET_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        approval_url = f"{KAKAOPAY_APPROVAL_URL}?orderNo={order_id}"
+        cancel_url = f"{KAKAOPAY_CANCEL_URL}?orderNo={order_id}&status=cancel"
+        fail_url = f"{KAKAOPAY_FAIL_URL}?orderNo={order_id}&status=fail"
+
+        payload = {
+            "cid": KAKAOPAY_CID,
+            "partner_order_id": order_id,
+            "partner_user_id": order_id,
+            "item_name": order_name,
+            "quantity": 1,
+            "total_amount": int(amount),
+            "tax_free_amount": 0,
+            "approval_url": approval_url,
+            "cancel_url": cancel_url,
+            "fail_url": fail_url
+        }
+
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        res_json = response.json()
+
+        if response.status_code == 200:
+            tid = res_json.get("tid")
+            redirect_url = res_json.get("next_redirect_pc_url") # PC 기준
+            
+            # 가주문 임시 세션 및 tid 보존
+            ref = rtdb.reference(f"payment_temp/{order_id}")
+            ref.set({
+                "tid": tid,
+                "amount": int(amount),
+                "email": email,
+                "type": order_type
+            })
+
+            return {"status": "success", "redirectUrl": redirect_url}
+        else:
+            print(f"🔥 카카오페이 준비 API 실패: {response.text}")
+            return JSONResponse(status_code=400, content={"status": "error", "message": res_json.get("msg", "카카오페이 준비 실패")})
+
+    except Exception as e:
+        print(f"🔥 카카오페이 준비 예외 발생: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+
+@router.get("/kakaopay_success")
+async def kakaopay_success(request: Request, orderNo: str, pg_token: str):
+    """
+    카카오페이 결제 승인 성공 콜백
+    """
+    try:
+        # 1. 임시 세션 정보 조회
+        ref = rtdb.reference(f"payment_temp/{orderNo}")
+        temp_data = ref.get()
+        if not temp_data:
+            return HTMLResponse(content="<h1>가결제 세션 정보를 찾을 수 없습니다.</h1>", status_code=404)
+
+        tid = temp_data.get("tid")
+        amount = temp_data.get("amount")
+        customer_email = temp_data.get("email")
+        order_type = temp_data.get("type", "wholesale")
+
+        # 2. 카카오페이 최종 승인 API 호출
+        url = "https://open-api.kakaopay.com/online/v1/payment/approve"
+        headers = {
+            "Authorization": f"SECRET_KEY {KAKAOPAY_SECRET_KEY}",
             "Content-Type": "application/json"
         }
         payload = {
-            "paymentKey": paymentKey,
-            "orderId": orderId,
-            "amount": amount
+            "cid": KAKAOPAY_CID,
+            "tid": tid,
+            "partner_order_id": orderNo,
+            "partner_user_id": orderNo,
+            "pg_token": pg_token
         }
-        
-        response = requests.post(url, headers=headers, json=payload)
-        result = response.json()
-        
-        if response.status_code == 200:
-            # 3. 결제 완료 정보 저장
-            payment_ref = rtdb.reference(f'booking_payments/{booking_id}/{orderId}')
+
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        res_json = response.json()
+
+        if response.status_code != 200:
+            print(f"🔥 카카오페이 최종 승인 실패: {response.text}")
+            err_msg = res_json.get("msg", "카카오페이 승인 실패")
+            return await process_payment_fail(request, code="APPROVE_ERROR", message=err_msg, orderId=orderNo)
+
+        # 3. 승인 성공 시 분기 처리
+        ref.delete() # 임시 세션 데이터 삭제
+
+        if order_type == "booking":
+            # 피팅 완료 상품 주문 확정 처리
+            booking_order_ref = rtdb.reference(f"booking_orders/{orderNo}")
+            order_data = booking_order_ref.get()
+            if not order_data:
+                return HTMLResponse(content="<h1>피팅 가결제 정보를 찾을 수 없습니다.</h1>", status_code=404)
+
+            booking_id = order_data.get("bookingId")
+            
+            # 결제 완료 정보 저장
+            payment_ref = rtdb.reference(f"booking_payments/{booking_id}/{orderNo}")
             payment_ref.set({
-                "orderId": orderId,
-                "paymentKey": paymentKey,
+                "orderId": orderNo,
+                "transactionId": tid,
                 "amount": int(amount),
                 "paidItems": order_data.get("items", []),
                 "paidAt": datetime.now().isoformat(),
-                "status": "결제 완료"
-            })
-            
-            # 4. 가주문 상태를 결제 완료로 업데이트
-            order_ref.update({
                 "status": "결제 완료",
-                "paymentKey": paymentKey,
-                "paidAt": datetime.now().isoformat()
+                "method": "KAKAOPAY"
             })
-            
-            # 5. 기존 예약 상태를 '결제 완료'로 업데이트
+
+            # 가주문 상태 업데이트
+            booking_order_ref.update({
+                "status": "결제 완료",
+                "transactionId": tid,
+                "paidAt": datetime.now().isoformat(),
+                "method": "KAKAOPAY"
+            })
+
+            # 예약 상태 업데이트
             safe_email = sanitize_email(customer_email)
-            booking_ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
-            booking_ref.update({
-                "status": "결제 완료"
-            })
-            
-            # 6. 관리자 텔레그램 접수 안내 전송 (user_request_id 로드)
+            booking_ref = rtdb.reference(f"booking/{safe_email}/{booking_id}")
+            booking_ref.update({"status": "결제 완료"})
+
+            # 텔레그램 접수 안내
             customer_name = order_data.get("customer", {}).get("name", "알 수 없음")
             customer_phone = order_data.get("customer", {}).get("phone", "알 수 없음")
-            
-            # 결제한 상품들의 요약 정보
-            from firebase_admin import firestore
-            db_fs = firestore.client()
-            paid_items_ids = order_data.get("items", [])
-            first_item_name = "안경 상품"
-            if len(paid_items_ids) > 0:
-                try:
-                    item_doc = db_fs.collection("item").document(paid_items_ids[0]).get()
-                    if item_doc.exists:
-                        first_item_name = item_doc.to_dict().get("name", "안경 상품")
-                except Exception:
-                    pass
-            goods_summary = f"{first_item_name} 포함 총 {len(paid_items_ids)}개"
-            
             tg_message = (
-                f"💳 <b>[피팅 완료 상품 결제 완료]</b>\n\n"
+                f"💳 <b>[피팅 완료 상품 결제 완료 (카카오페이)]</b>\n\n"
                 f"<b>예약번호:</b> {booking_id}\n"
-                f"<b>주문번호:</b> {orderId}\n"
+                f"<b>주문번호:</b> {orderNo}\n"
                 f"<b>결제고객:</b> {customer_name} ({customer_email})\n"
                 f"<b>연락처:</b> {customer_phone}\n"
                 f"<b>결제금액:</b> ₩{int(amount):,}\n"
-                f"<b>결제상품:</b> {goods_summary}\n"
                 f"<b>결제일시:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
             )
-            
             tg_path = os.path.join(os.path.dirname(__file__), "..", "database", "telegram.json")
-            tg_request_chat_id = ""
             if os.path.exists(tg_path):
                 with open(tg_path, "r", encoding="utf-8") as f:
                     tg_data = json.load(f)
                     tg_request_chat_id = tg_data.get("user_request_id", "")
-                    
-            if tg_request_chat_id:
-                send_telegram_message(tg_request_chat_id, tg_message)
-                
-            # 마이페이지로 안전한 복귀 및 결제 완료 파라미터 전달
+                    if tg_request_chat_id:
+                        send_telegram_message(tg_request_chat_id, tg_message)
+
             html_content = f"""
             <html>
             <head>
                 <script>
-                    alert("결제가 완료되었습니다. 이용해 주셔서 감사합니다.");
+                    alert("카카오페이 결제가 완료되었습니다. 이용해 주셔서 감사합니다.");
                     window.location.href = "/general/bookings?payment_success=true";
                 </script>
             </head>
@@ -974,14 +1533,233 @@ async def toss_booking_success_callback(request: Request, paymentKey: str, order
             </html>
             """
             return HTMLResponse(content=html_content, status_code=200)
+
         else:
-            error_msg = result.get("message", "결제 승인 실패")
-            print(f"🔥 피팅 상품 결제 승인 실패: {error_msg}")
-            return HTMLResponse(content=f"<h1>결제 승인 실패: {error_msg}</h1>", status_code=400)
-            
+            # 도매 주문 완료 처리
+            safe_email = sanitize_email(customer_email)
+            ws_order_ref = rtdb.reference(f"ws_orders/{safe_email}/{orderNo}")
+            ws_order_ref.update({
+                "status": "결제 완료",
+                "transactionId": tid,
+                "paidAt": datetime.now().isoformat(),
+                "method": "KAKAOPAY"
+            })
+
+            redirect_response = RedirectResponse(url="/wholesale/success", status_code=303)
+            redirect_response.delete_cookie(key="wholesale_cart", path="/")
+            return redirect_response
+
     except Exception as e:
-        print(f"🔥 피팅 결제 승인 중 예외 발생: {e}")
-        return HTMLResponse(content="<h1>결제 처리 중 서버 에러가 발생했습니다.</h1>", status_code=500)
+        print(f"🔥 카카오페이 승인 예외 발생: {e}")
+        return HTMLResponse(content="<h1>결제 승인 처리 중 에러가 발생했습니다.</h1>", status_code=500)
+
+
+@router.get("/kakaopay_fail")
+async def kakaopay_fail(request: Request, orderNo: str, status: str):
+    """
+    카카오페이 결제 취소 / 실패 콜백
+    """
+    msg = "결제가 사용자에 의해 취소되었습니다." if status == "cancel" else "결제 승인 전 단계에서 처리에 실패했습니다."
+    return await process_payment_fail(request, code=status, message=msg, orderId=orderNo)
+
+
+# -------------------------------------------------------------
+# 🏁 토스페이 API 엔드포인트 (Toss Pay V2 간편결제)
+# -------------------------------------------------------------
+@router.post("/tosspay_ready")
+async def tosspay_ready(request: Request):
+    """
+    토스페이 결제 준비
+    """
+    email = request.session.get("user_id")
+    if not email:
+        return JSONResponse(status_code=403, content={"status": "error", "message": "로그인이 필요합니다."})
+
+    try:
+        body = await request.json()
+        order_id = body.get("orderId")
+        amount = body.get("amount")
+        order_name = body.get("orderName")
+
+        if not order_id or not amount or not order_name:
+            return JSONResponse(status_code=400, content={"status": "error", "message": "필수 결제 요청 정보가 누락되었습니다."})
+
+        order_type = "booking" if order_id.startswith("BKORD") else "wholesale"
+
+        url = "https://pay.toss.im/api/v2/payments"
+        headers = {"Content-Type": "application/json"}
+
+        ret_url = f"{TOSSPAY_RET_URL}?orderNo={order_id}"
+        ret_cancel_url = f"{TOSSPAY_RET_CANCEL_URL}?orderNo={order_id}&status=cancel"
+
+        payload = {
+            "orderNo": order_id,
+            "amount": int(amount),
+            "amountTaxFree": 0,
+            "productDesc": order_name,
+            "apiKey": TOSSPAY_API_KEY,
+            "retUrl": ret_url,
+            "retCancelUrl": ret_cancel_url,
+            "autoExecute": False
+        }
+
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        res_json = response.json()
+
+        if response.status_code == 200 and res_json.get("code") == 0:
+            pay_token = res_json.get("payToken")
+            redirect_url = res_json.get("checkoutPage")
+
+            # 가주문 임시 세션 및 payToken 보존
+            ref = rtdb.reference(f"payment_temp/{order_id}")
+            ref.set({
+                "payToken": pay_token,
+                "amount": int(amount),
+                "email": email,
+                "type": order_type
+            })
+
+            return {"status": "success", "redirectUrl": redirect_url}
+        else:
+            print(f"🔥 토스페이 준비 API 실패: {response.text}")
+            return JSONResponse(status_code=400, content={"status": "error", "message": res_json.get("msg", "토스페이 준비 실패")})
+
+    except Exception as e:
+        print(f"🔥 토스페이 준비 예외 발생: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+
+@router.get("/tosspay_success")
+async def tosspay_success(request: Request, orderNo: str, status: str = None):
+    """
+    토스페이 결제 완료 성공 콜백
+    """
+    try:
+        # 1. 임시 세션 정보 조회
+        ref = rtdb.reference(f"payment_temp/{orderNo}")
+        temp_data = ref.get()
+        if not temp_data:
+            return HTMLResponse(content="<h1>가결제 세션 정보를 찾을 수 없습니다.</h1>", status_code=404)
+
+        pay_token = temp_data.get("payToken")
+        amount = temp_data.get("amount")
+        customer_email = temp_data.get("email")
+        order_type = temp_data.get("type", "wholesale")
+
+        # 2. 토스페이 최종 승인 API 호출 (Execute)
+        url = "https://pay.toss.im/api/v2/execute"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "apiKey": TOSSPAY_API_KEY,
+            "payToken": pay_token,
+            "orderNo": orderNo
+        }
+
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        res_json = response.json()
+
+        if response.status_code != 200 or res_json.get("code") != 0:
+            print(f"🔥 토스페이 최종 승인 실패: {response.text}")
+            err_msg = res_json.get("msg", "토스페이 승인 실패")
+            return await process_payment_fail(request, code="EXECUTE_ERROR", message=err_msg, orderId=orderNo)
+
+        # 3. 승인 성공 시 분기 처리
+        ref.delete() # 임시 세션 데이터 삭제
+
+        if order_type == "booking":
+            # 피팅 완료 상품 주문 확정 처리
+            booking_order_ref = rtdb.reference(f"booking_orders/{orderNo}")
+            order_data = booking_order_ref.get()
+            if not order_data:
+                return HTMLResponse(content="<h1>피팅 가결제 정보를 찾을 수 없습니다.</h1>", status_code=404)
+
+            booking_id = order_data.get("bookingId")
+            
+            # 결제 완료 정보 저장
+            payment_ref = rtdb.reference(f"booking_payments/{booking_id}/{orderNo}")
+            payment_ref.set({
+                "orderId": orderNo,
+                "transactionId": pay_token,
+                "amount": int(amount),
+                "paidItems": order_data.get("items", []),
+                "paidAt": datetime.now().isoformat(),
+                "status": "결제 완료",
+                "method": "TOSSPAY"
+            })
+
+            # 가주문 상태 업데이트
+            booking_order_ref.update({
+                "status": "결제 완료",
+                "transactionId": pay_token,
+                "paidAt": datetime.now().isoformat(),
+                "method": "TOSSPAY"
+            })
+
+            # 예약 상태 업데이트
+            safe_email = sanitize_email(customer_email)
+            booking_ref = rtdb.reference(f"booking/{safe_email}/{booking_id}")
+            booking_ref.update({"status": "결제 완료"})
+
+            # 텔레그램 접수 안내
+            customer_name = order_data.get("customer", {}).get("name", "알 수 없음")
+            customer_phone = order_data.get("customer", {}).get("phone", "알 수 없음")
+            tg_message = (
+                f"💳 <b>[피팅 완료 상품 결제 완료 (토스페이)]</b>\n\n"
+                f"<b>예약번호:</b> {booking_id}\n"
+                f"<b>주문번호:</b> {orderNo}\n"
+                f"<b>결제고객:</b> {customer_name} ({customer_email})\n"
+                f"<b>연락처:</b> {customer_phone}\n"
+                f"<b>결제금액:</b> ₩{int(amount):,}\n"
+                f"<b>결제일시:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            )
+            tg_path = os.path.join(os.path.dirname(__file__), "..", "database", "telegram.json")
+            if os.path.exists(tg_path):
+                with open(tg_path, "r", encoding="utf-8") as f:
+                    tg_data = json.load(f)
+                    tg_request_chat_id = tg_data.get("user_request_id", "")
+                    if tg_request_chat_id:
+                        send_telegram_message(tg_request_chat_id, tg_message)
+
+            html_content = f"""
+            <html>
+            <head>
+                <script>
+                    alert("토스페이 결제가 완료되었습니다. 이용해 주셔서 감사합니다.");
+                    window.location.href = "/general/bookings?payment_success=true";
+                </script>
+            </head>
+            <body></body>
+            </html>
+            """
+            return HTMLResponse(content=html_content, status_code=200)
+
+        else:
+            # 도매 주문 완료 처리
+            safe_email = sanitize_email(customer_email)
+            ws_order_ref = rtdb.reference(f"ws_orders/{safe_email}/{orderNo}")
+            ws_order_ref.update({
+                "status": "결제 완료",
+                "transactionId": pay_token,
+                "paidAt": datetime.now().isoformat(),
+                "method": "TOSSPAY"
+            })
+
+            redirect_response = RedirectResponse(url="/wholesale/success", status_code=303)
+            redirect_response.delete_cookie(key="wholesale_cart", path="/")
+            return redirect_response
+
+    except Exception as e:
+        print(f"🔥 토스페이 승인 예외 발생: {e}")
+        return HTMLResponse(content="<h1>결제 승인 처리 중 에러가 발생했습니다.</h1>", status_code=500)
+
+
+@router.get("/tosspay_fail")
+async def tosspay_fail(request: Request, orderNo: str, status: str):
+    """
+    토스페이 결제 취소 / 실패 콜백
+    """
+    msg = "결제가 사용자에 의해 취소되었습니다." if status == "cancel" else "결제 승인 전 단계에서 처리에 실패했습니다."
+    return await process_payment_fail(request, code=status, message=msg, orderId=orderNo)
 
 
 

@@ -282,12 +282,12 @@
 
             // 전역 window.formatWon 사용 (로컬 함수 삭제)
 
-            // 수량 포맷 제한 (10~200, 10단위)
+            // 수량 제한 (5~30, 5단위 올림)
             function clampQuantity(val) {
                 let v = parseInt(val) || 0;
-                v = Math.round(v / 10) * 10;
-                if (v < 10) v = 10;
-                if (v > 200) v = 200;
+                v = Math.ceil(v / 5) * 5;
+                if (v < 5) v = 5;
+                if (v > 30) v = 30;
                 return v;
             }
 
@@ -347,7 +347,7 @@
                 document.querySelectorAll(".btn-minus").forEach(btn => {
                     btn.addEventListener("click", (e) => {
                         const idx = e.target.getAttribute("data-idx");
-                        let newQty = clampQuantity(cart[idx].quantity - 10);
+                        let newQty = clampQuantity(cart[idx].quantity - 5);
                         updateItemQuantity(idx, newQty, cart);
                     });
                 });
@@ -355,7 +355,7 @@
                 document.querySelectorAll(".btn-plus").forEach(btn => {
                     btn.addEventListener("click", (e) => {
                         const idx = e.target.getAttribute("data-idx");
-                        let newQty = clampQuantity(cart[idx].quantity + 10);
+                        let newQty = clampQuantity(cart[idx].quantity + 5);
                         updateItemQuantity(idx, newQty, cart);
                     });
                 });

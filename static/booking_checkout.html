@@ -12,8 +12,8 @@
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <link rel="stylesheet" href="/static/style.css?v=21.0">
 
-    <!-- 토스페이먼츠 SDK 로드 -->
-    <script src="https://js.tosspayments.com/v1/payment-widget"></script>
+    <!-- 다날 결제 SDK -->
+    <script src="https://static.danalpay.com/d1/sdk/index.js"></script>
 
     <style>
         .checkout-wrapper {
@@ -195,13 +195,7 @@
             letter-spacing: -0.5px;
         }
 
-        /* 토스페이먼츠 위젯 디자인 */
-        #payment-method {
-            margin-bottom: 20px;
-        }
-        #agreement {
-            margin-bottom: 30px;
-        }
+
 
         /* 결제 실행 버튼 */
         .btn-checkout-submit {
@@ -289,6 +283,71 @@
                 font-size: 1.5rem;
             }
         }
+
+        /* 🏁 다날 결제수단 그리드 UI 스타일 */
+        .payment-methods-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .pay-method-label {
+            cursor: pointer;
+            user-select: none;
+        }
+        .pay-method-label input[type="radio"] {
+            display: none;
+        }
+        .pay-method-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 15px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .pay-method-label input[type="radio"]:checked + .pay-method-card {
+            background: #f2f7ff;
+        }
+        .pay-method-icon {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+        .pay-method-name {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #333;
+        }
+        .pay-method-label input[type="radio"]:checked + .pay-method-card .pay-method-name {
+            color: #1b64da;
+        }
+        .pay-method-icon-svg {
+            transition: color 0.25s ease;
+        }
+        .pay-method-label input[type="radio"]:checked + .pay-method-card .pay-method-icon-svg {
+            color: #1b64da !important;
+        }
+        .pay-method-card:hover .pay-method-icon-svg {
+            color: #0e3a5b;
+        }
+        @media (max-width: 768px) {
+            .payment-methods-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .pay-method-card {
+                padding: 15px 10px;
+            }
+            .pay-method-icon {
+                font-size: 1.5rem;
+            }
+            .pay-method-name {
+                font-size: 0.85rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -339,13 +398,51 @@
                     <div class="price-total-amount" id="totalAmount">₩0</div>
                 </div>
 
-                <!-- 4. 토스 결제 수단 위젯 영역 -->
+                <!-- 다날 결제 수단 선택 영역 -->
                 <div class="section-title">결제 수단 선택</div>
-                <div id="payment-method"></div>
-                <div id="agreement"></div>
+                <div class="payment-methods-grid" style="margin-bottom: 30px;">
+                    <label class="pay-method-label" for="method-card">
+                        <input type="radio" id="method-card" name="danal-payment-method" value="CARD">
+                        <div class="pay-method-card" style="min-height: 92px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #333; margin-bottom: 8px;" class="pay-method-icon-svg">
+                                <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+                                <line x1="2" y1="10" x2="22" y2="10"></line>
+                            </svg>
+                            <span class="pay-method-name">신용카드</span>
+                        </div>
+                    </label>
+                    <label class="pay-method-label" for="method-vaccount">
+                        <input type="radio" id="method-vaccount" name="danal-payment-method" value="VACCOUNT">
+                        <div class="pay-method-card" style="min-height: 92px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #333; margin-bottom: 8px;" class="pay-method-icon-svg">
+                                <path d="M3 21h18"></path>
+                                <path d="M3 10h18"></path>
+                                <path d="M5 6l7-3 7 3"></path>
+                                <path d="M4 10v11"></path>
+                                <path d="M20 10v11"></path>
+                                <path d="M8 14v3"></path>
+                                <path d="M12 14v3"></path>
+                                <path d="M16 14v3"></path>
+                            </svg>
+                            <span class="pay-method-name">가상계좌</span>
+                        </div>
+                    </label>
+                    <label class="pay-method-label" for="method-kakaopay">
+                        <input type="radio" id="method-kakaopay" name="danal-payment-method" value="KAKAOPAY">
+                        <div class="pay-method-card" style="min-height: 92px; padding: 0; border: none; background: transparent; box-shadow: none; display: flex; align-items: center; justify-content: center;">
+                            <img src="/static/img/kakaopay.webp" alt="카카오페이" style="width: 80px; height: auto; object-fit: contain;">
+                        </div>
+                    </label>
+                    <label class="pay-method-label" for="method-tosspay">
+                        <input type="radio" id="method-tosspay" name="danal-payment-method" value="TOSSPAY">
+                        <div class="pay-method-card" style="min-height: 92px; padding: 0; border: none; background: transparent; box-shadow: none; display: flex; align-items: center; justify-content: center;">
+                            <img src="/static/img/tosspay.webp" alt="토스페이" style="width: 100%; height: 92px; object-fit: contain;">
+                        </div>
+                    </label>
+                </div>
 
-                <!-- 5. 결제 진행 버튼 -->
-                <button class="btn-checkout-submit" id="btnPaymentSubmit" disabled>결제 확정하기</button>
+                <!-- 5. 결제 진행 버튼 (결제수단 클릭 시 자동 제출되므로 숨김 처리) -->
+                <button class="btn-checkout-submit" id="btnPaymentSubmit" style="display: none;">결제 확정하기</button>
             </div>
         </div>
     </div>
@@ -364,6 +461,17 @@
             const itemsChecklist = document.getElementById("itemsChecklist");
             const btnPaymentSubmit = document.getElementById("btnPaymentSubmit");
 
+            // 🏁 다날 결제 설정 로드
+            let clientKey = "";
+            let merchantId = "";
+            fetch("/api/payment/config")
+            .then(res => res.json())
+            .then(configData => {
+                clientKey = configData.client_key;
+                merchantId = configData.merchant_id;
+            })
+            .catch(err => console.error("다날 결제 설정 로드 에러:", err));
+
             if (!bookingId) {
                 showError("잘못된 접근입니다. 예약 번호(booking_id)가 누락되었습니다.");
                 return;
@@ -374,8 +482,7 @@
             let paidItems = [];
             let selectedItems = [];
             let currentTotalAmount = 0;
-            let paymentWidget = null;
-            let paymentMethodWidget = null;
+
 
             function showError(msg) {
                 loadingPanel.style.display = "none";
@@ -499,61 +606,18 @@
 
                 if (selectedItems.length > 0) {
                     btnPaymentSubmit.disabled = false;
-                    // 결제 수단 위젯 금액 동적 업데이트
-                    initializeOrUpdateTossWidget(currentTotalAmount);
                 } else {
                     btnPaymentSubmit.disabled = true;
-                    if (paymentMethodWidget) {
-                        // 금액이 0원일 경우 결제 수단 감춤
-                        document.getElementById("payment-method").innerHTML = "";
-                        document.getElementById("agreement").innerHTML = "";
-                        paymentWidget = null;
-                        paymentMethodWidget = null;
-                    }
                 }
             }
 
-            // 4. 토스페이먼츠 위젯 세팅 및 금액 연동
-            async function initializeOrUpdateTossWidget(amount) {
-                if (paymentWidget && paymentMethodWidget) {
-                    // 이미 위젯이 로드되어 있으면 가격만 동적 갱신
-                    try {
-                        await paymentMethodWidget.updateAmount(amount);
-                    } catch (e) {
-                        console.error("토스 위젯 금액 갱신 에러:", e);
-                    }
+
+            // 5. 결제 진행 함수 정의 및 결제수단 클릭 이벤트 바인딩
+            async function requestCheckout(selectedMethod) {
+                if (selectedItems.length === 0 || currentTotalAmount === 0) {
+                    alert("결제할 상품을 하나 이상 선택해주세요.");
                     return;
                 }
-
-                try {
-                    // API 환경설정에서 토스 클라이언트 키 로드
-                    const configRes = await fetch("/api/payment/config");
-                    const configData = await configRes.json();
-                    const clientKey = configData.client_key;
-
-                    if (!clientKey) {
-                        console.error("Toss 클라이언트 키가 존재하지 않습니다.");
-                        return;
-                    }
-
-                    // 가상의 고객 식별키 생성 (일반 예약 결제용)
-                    const customerKey = btoa(bookingData.customerEmail).replace(/=/g, "");
-
-                    // 토스 위젯 기동
-                    paymentWidget = PaymentWidget(clientKey, customerKey);
-                    
-                    // 결제 수단 영역 & 이용약관 렌더링
-                    paymentMethodWidget = paymentWidget.renderPaymentMethods("#payment-method", { value: amount });
-                    paymentWidget.renderAgreement("#agreement");
-
-                } catch (err) {
-                    console.error("토스페이먼츠 위젯 초기화 중 실패:", err);
-                }
-            }
-
-            // 5. 결제 진행 버튼 클릭 시
-            btnPaymentSubmit.addEventListener("click", async () => {
-                if (selectedItems.length === 0 || currentTotalAmount === 0 || !paymentWidget) return;
 
                 btnPaymentSubmit.disabled = true;
                 btnPaymentSubmit.textContent = "결제 준비 중...";
@@ -574,16 +638,50 @@
                         throw new Error(pendingData.message || "가결제 등록 실패");
                     }
 
-                    // 2) 토스 결제창 활성화 기동
                     btnPaymentSubmit.textContent = "결제창 호출 중...";
-                    await paymentWidget.requestPayment({
+                    const orderName = `아무래도 안경 피팅 구매 (${selectedItems.length}건)`;
+
+                    // 간편결제(카카오페이 / 토스페이) 분기 처리
+                    if (selectedMethod === "KAKAOPAY" || selectedMethod === "TOSSPAY") {
+                        const readyUrl = selectedMethod === "KAKAOPAY" ? "/api/payment/kakaopay_ready" : "/api/payment/tosspay_ready";
+                        const payRes = await fetch(readyUrl, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                orderId: pendingData.orderId,
+                                amount: pendingData.amount,
+                                orderName: orderName
+                            })
+                        });
+                        const payData = await payRes.json();
+                        if (payData.status === "success" && payData.redirectUrl) {
+                            window.location.href = payData.redirectUrl;
+                        } else {
+                            throw new Error(payData.message || "결제 준비 실패");
+                        }
+                        return;
+                    }
+
+                    // 다날 SDK 호출
+                    const danalPayments = DanalPayments(clientKey);
+                    const paymentParams = {
+                        orderName: orderName,
+                        amount: pendingData.amount,
+                        merchantId: merchantId,
                         orderId: pendingData.orderId,
-                        orderName: `아무래도 안경 피팅 구매 (${selectedItems.length}건)`,
-                        successUrl: window.location.origin + "/api/payment/toss_booking_success",
-                        failUrl: window.location.origin + "/general/bookings?payment_success=false",
-                        customerEmail: bookingData.customerEmail,
-                        customerName: bookingData.customerName
-                    });
+                        userId: bookingData.customerEmail || "guest@amuredo.com",
+                        successUrl: window.location.origin + "/api/payment/danal_booking_success",
+                        failUrl: window.location.origin + "/api/payment/danal_fail",
+                        userEmail: bookingData.customerEmail || "guest@amuredo.com",
+                        userName: bookingData.customerName || "고객",
+                        paymentsMethod: selectedMethod
+                    };
+
+                    if (selectedMethod === "VACCOUNT") {
+                        paymentParams.notiUrl = window.location.origin + "/api/payment/danal_noti";
+                    }
+
+                    await danalPayments.requestPayment(paymentParams);
 
                 } catch (e) {
                     console.error("결제 진행 오류:", e);
@@ -591,6 +689,19 @@
                     btnPaymentSubmit.disabled = false;
                     btnPaymentSubmit.textContent = "결제 확정하기";
                 }
+            }
+
+            // 각 결제수단 라벨 클릭 이벤트 바인딩
+            document.querySelectorAll(".pay-method-label").forEach(label => {
+                label.addEventListener("click", async (e) => {
+                    e.preventDefault(); // 기본 체크 동작 억제 후 커스텀 처리
+                    
+                    const radio = label.querySelector("input[name='danal-payment-method']");
+                    if (radio) {
+                        radio.checked = true;
+                        await requestCheckout(radio.value);
+                    }
+                });
             });
         });
     </script>

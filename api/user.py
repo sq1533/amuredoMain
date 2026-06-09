@@ -368,13 +368,17 @@ def is_under_14(birthyear_str: str) -> bool:
 
 # 1) 네이버 인가 코드 요청 및 리다이렉트
 @router.get("/login/naver")
-async def naver_login(request: Request, next: str = None):
+async def naver_login(request: Request, next: str = None, agree: bool = False):
     if not NAVER_CLIENT_ID or not NAVER_REDIRECT_URI:
         raise HTTPException(status_code=500, detail="네이버 API 설정이 완료되지 않았습니다. database/naver_api.json을 생성해 주세요.")
     
     # 이전 페이지 경로 기억
     if next:
         request.session["social_next"] = next
+
+    # 약관 동의 여부 세션 기억
+    if agree:
+        request.session["social_agree"] = True
 
     # CSRF 방지를 위한 state 난수 생성
     state = secrets.token_hex(16)
@@ -464,6 +468,7 @@ async def naver_callback(request: Request, code: str = None, state: str = None, 
         
         if user_doc.exists:
             # [A] 기존 일반 회원 로그인 처리
+            request.session.pop("social_agree", None)  # 불필요한 동의 세션 정리
             request.session["user_id"] = email
             request.session["user_role"] = "general"
             request.session["is_wholesale"] = False
@@ -494,6 +499,11 @@ async def naver_callback(request: Request, code: str = None, state: str = None, 
             if is_under_14(birthyear):
                 return RedirectResponse(url="/login?error=under_14")
                 
+            # 소셜 회원가입 시 약관 동의 세션 검증
+            social_agree = request.session.pop("social_agree", False)
+            if not social_agree:
+                return RedirectResponse(url="/login?error=agreement_required")
+                
             new_user_data = {
                 "name": name,
                 "email": email,
@@ -502,7 +512,13 @@ async def naver_callback(request: Request, code: str = None, state: str = None, 
                 "birth": birthday,
                 "role": "general",
                 "provider": "naver",
-                "created_at": firestore.SERVER_TIMESTAMP
+                "created_at": firestore.SERVER_TIMESTAMP,
+                "terms_agreed": True,
+                "terms_agreed_at": firestore.SERVER_TIMESTAMP,
+                "terms_version": "v1.0",
+                "privacy_agreed": True,
+                "privacy_agreed_at": firestore.SERVER_TIMESTAMP,
+                "privacy_version": "v1.0"
             }
             user_ref.set(new_user_data)
             
@@ -531,13 +547,17 @@ async def naver_callback(request: Request, code: str = None, state: str = None, 
 
 # 1) 카카오 인가 코드 요청 및 리다이렉트
 @router.get("/login/kakao")
-async def kakao_login(request: Request, next: str = None):
+async def kakao_login(request: Request, next: str = None, agree: bool = False):
     if not KAKAO_CLIENT_ID or not KAKAO_REDIRECT_URI:
         raise HTTPException(status_code=500, detail="카카오 API 설정이 완료되지 않았습니다. database/kakao_api.json을 생성해 주세요.")
     
     # 이전 페이지 경로 기억
     if next:
         request.session["social_next"] = next
+
+    # 약관 동의 여부 세션 기억
+    if agree:
+        request.session["social_agree"] = True
 
     # CSRF 방지를 위한 state 난수 생성
     state = secrets.token_hex(16)
@@ -651,6 +671,7 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
         
         if user_doc.exists:
             # [A] 기존 일반 회원 로그인 처리
+            request.session.pop("social_agree", None)  # 불필요한 동의 세션 정리
             request.session["user_id"] = email
             request.session["user_role"] = "general"
             request.session["is_wholesale"] = False
@@ -681,6 +702,11 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
             if birthyear and is_under_14(birthyear):
                 return RedirectResponse(url="/login?error=under_14")
                 
+            # 소셜 회원가입 시 약관 동의 세션 검증
+            social_agree = request.session.pop("social_agree", False)
+            if not social_agree:
+                return RedirectResponse(url="/login?error=agreement_required")
+                
             new_user_data = {
                 "name": name,
                 "email": email,
@@ -689,7 +715,13 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
                 "birth": birthday if birthday else "",
                 "role": "general",
                 "provider": "kakao",
-                "created_at": firestore.SERVER_TIMESTAMP
+                "created_at": firestore.SERVER_TIMESTAMP,
+                "terms_agreed": True,
+                "terms_agreed_at": firestore.SERVER_TIMESTAMP,
+                "terms_version": "v1.0",
+                "privacy_agreed": True,
+                "privacy_agreed_at": firestore.SERVER_TIMESTAMP,
+                "privacy_version": "v1.0"
             }
             user_ref.set(new_user_data)
             

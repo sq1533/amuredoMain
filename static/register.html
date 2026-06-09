@@ -330,6 +330,112 @@
                 padding: 30px 20px;
             }
         }
+
+        /* 🏁 일반 회원가입 약관 동의 프리미엄 컴포넌트 */
+        .terms-agreement-box {
+            background: #ffffff;
+            border: 1px solid #eaeaea;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-sizing: border-box;
+            text-align: left;
+        }
+        .terms-all-agree {
+            margin-bottom: 12px;
+            font-weight: 700;
+            color: #0e3a5b;
+        }
+        .terms-divider {
+            border: 0;
+            height: 1px;
+            background: #eaeaea;
+            margin: 12px 0;
+        }
+        .terms-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .terms-item:last-child {
+            margin-bottom: 0;
+        }
+        .terms-link {
+            font-size: 0.85rem;
+            color: #888;
+            text-decoration: underline;
+            transition: color 0.2s ease;
+        }
+        .terms-link:hover {
+            color: #0e3a5b;
+        }
+        
+        .register-checkbox-container {
+            display: flex !important;
+            align-items: center !important;
+            position: relative;
+            cursor: pointer;
+            font-size: 0.95rem;
+            user-select: none;
+            gap: 10px;
+            color: #555;
+            margin: 0 !important;
+            padding: 0;
+            line-height: 1.4;
+        }
+        .register-checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        .register-checkmark {
+            flex-shrink: 0;
+            display: block;
+            position: relative;
+            height: 18px;
+            width: 18px;
+            background-color: #f0f0f0;
+            border: 1px solid #eaeaea;
+            border-radius: 4px;
+            transition: all 0.25s ease;
+        }
+        .register-checkbox-container:hover input ~ .register-checkmark {
+            background-color: #e5e5e5;
+        }
+        .register-checkbox-container input:checked ~ .register-checkmark {
+            background-color: #0e3a5b;
+            border-color: #0e3a5b;
+        }
+        .register-checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+        .register-checkbox-container input:checked ~ .register-checkmark:after {
+            display: block;
+        }
+        .register-checkbox-container .register-checkmark:after {
+            left: 5px;
+            top: 2px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        .agree-text-main {
+            font-weight: 700;
+            color: #0e3a5b;
+            line-height: 1;
+        }
+        .agree-text-sub {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1;
+        }
     </style>
 </head>
 <body>
@@ -349,6 +455,34 @@
 
         <!-- 🏁 [Panel 1] 일반 고객용 SNS 가입 카드 패널 -->
         <div class="customer-panel" id="panelCustomer">
+            <!-- 🏁 프리미엄 약관 동의 컴포넌트 -->
+            <div class="terms-agreement-box">
+                <div class="terms-all-agree">
+                    <label class="register-checkbox-container">
+                        <input type="checkbox" id="agreeAll">
+                        <span class="register-checkmark"></span>
+                        <span class="agree-text-main">모든 약관에 동의합니다.</span>
+                    </label>
+                </div>
+                <hr class="terms-divider">
+                <div class="terms-item">
+                    <label class="register-checkbox-container">
+                        <input type="checkbox" class="agree-item" id="agreeTerms" required>
+                        <span class="register-checkmark"></span>
+                        <span class="agree-text-sub">[필수] 이용약관 동의</span>
+                    </label>
+                    <a href="/static/terms.html" target="_blank" class="terms-link">보기</a>
+                </div>
+                <div class="terms-item">
+                    <label class="register-checkbox-container">
+                        <input type="checkbox" class="agree-item" id="agreePrivacy" required>
+                        <span class="register-checkmark"></span>
+                        <span class="agree-text-sub">[필수] 개인정보 수집 및 이용 동의</span>
+                    </label>
+                    <a href="/static/privacy.html" target="_blank" class="terms-link">보기</a>
+                </div>
+            </div>
+
             <button class="sns-btn btn-naver" id="naverSignupBtn">
                 <span>네이버로 회원가입</span>
             </button>
@@ -453,16 +587,49 @@
                 }
             });
 
-            // 🏁 2. 소셜 간편 가입 버튼 동작 바인딩
+            // 🏁 2. 소셜 간편 가입 버튼 동작 바인딩 & 약관 동의 제어
             const naverSignupBtn = document.getElementById("naverSignupBtn");
             const kakaoSignupBtn = document.getElementById("kakaoSignupBtn");
+            const agreeAll = document.getElementById("agreeAll");
+            const agreeItems = document.querySelectorAll(".agree-item");
+            const agreeTerms = document.getElementById("agreeTerms");
+            const agreePrivacy = document.getElementById("agreePrivacy");
+
+            // 전체 동의 토글 로직
+            agreeAll.addEventListener("change", (e) => {
+                const checked = e.target.checked;
+                agreeItems.forEach(item => {
+                    item.checked = checked;
+                });
+            });
+
+            // 개별 동의 변경 시 전체 동의 체크 여부 업데이트
+            agreeItems.forEach(item => {
+                item.addEventListener("change", () => {
+                    const allChecked = Array.from(agreeItems).every(i => i.checked);
+                    agreeAll.checked = allChecked;
+                });
+            });
+
+            // 약관 필수 검증 헬퍼
+            function checkAgreement() {
+                if (!agreeTerms.checked || !agreePrivacy.checked) {
+                    alert("이용약관 및 개인정보 처리방침에 모두 동의해 주세요.");
+                    return false;
+                }
+                return true;
+            }
 
             naverSignupBtn.addEventListener("click", () => {
-                location.href = "/api/user/login/naver";
+                if (checkAgreement()) {
+                    location.href = "/api/user/login/naver?agree=true";
+                }
             });
 
             kakaoSignupBtn.addEventListener("click", () => {
-                location.href = "/api/user/login/kakao";
+                if (checkAgreement()) {
+                    location.href = "/api/user/login/kakao?agree=true";
+                }
             });
 
             // 🏁 3. 사장님(도매) 회원가입 입력 검증 및 전송 모듈

@@ -438,6 +438,7 @@
                 else if (errorParam === 'essential_data_missing') errorMsg = "네이버 로그인 필수 동의 항목(이메일, 이름, 연락처 등)이 누락되었습니다. 다시 시도해 주세요.";
                 else if (errorParam === 'token_failed' || errorParam === 'no_token') errorMsg = "네이버 인증 토큰 획득에 실패했습니다.";
                 else if (errorParam === 'profile_failed') errorMsg = "네이버 프로필 정보를 가져오는 데 실패했습니다.";
+                else if (errorParam === 'agreement_required') errorMsg = "회원가입을 위해 이용약관 및 개인정보 처리방침 동의가 필요합니다.";
                 
                 showModal('error', '로그인 오류', errorMsg);
                 
