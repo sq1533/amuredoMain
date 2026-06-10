@@ -2301,4 +2301,192 @@ body {
 }
 
 
+/* -------------------------------------------------------------
+   🏁 피팅 서비스 리뷰(후기) 카드 공통 디자인 시스템
+   ------------------------------------------------------------- */
+.reviews-section {
+    max-width: 1200px;
+    margin: 80px auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
 
+.reviews-slider-wrapper {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 50px;
+    box-sizing: border-box;
+}
+
+.reviews-slider-container {
+    overflow: hidden;
+    width: 100%;
+}
+
+.reviews-track {
+    display: flex;
+    gap: 30px;
+    transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: transform;
+}
+
+.reviews-track .review-card {
+    flex: 0 0 calc(33.333% - 20px);
+    max-width: calc(33.333% - 20px);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(14, 58, 91, 0.08);
+    border-radius: 20px;
+    padding: 30px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(14, 58, 91, 0.02);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.reviews-track .review-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 40px rgba(14, 58, 91, 0.08);
+    border-color: #0e3a5b;
+    background: #ffffff;
+}
+
+.slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #ffffff;
+    border: 1px solid #eaeaea;
+    color: #0e3a5b;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 5;
+    font-size: 1.25rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(14, 58, 91, 0.08);
+    transition: all 0.25s ease;
+    outline: none;
+    user-select: none;
+}
+
+.slider-arrow:hover {
+    background: #0e3a5b;
+    color: #ffffff;
+    border-color: #0e3a5b;
+    box-shadow: 0 6px 20px rgba(14, 58, 91, 0.15);
+}
+
+.slider-arrow.prev { left: 0; }
+.slider-arrow.next { right: 0; }
+
+.review-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.review-stars {
+    color: #ffb703;
+    font-size: 1.15rem;
+    letter-spacing: 1px;
+}
+
+.review-date {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: 500;
+}
+
+.review-body {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: #444;
+    word-break: keep-all;
+    white-space: pre-wrap;
+    flex-grow: 1;
+}
+
+.review-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed #eee;
+    padding-top: 15px;
+    margin-top: 5px;
+}
+
+.review-author {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #0e3a5b;
+}
+
+.review-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #8b5e3c;
+    background: rgba(139, 94, 60, 0.08);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+/* 🏁 구매 완료 스티커 디자인 효과 (over 효과 및 -4도 회전) */
+.purchase-sticker {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    width: 70px;
+    height: 70px;
+    z-index: 10;
+    transform: rotate(-4deg);
+    pointer-events: none;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.06));
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.review-card:hover .purchase-sticker {
+    transform: rotate(-8deg) scale(1.08);
+}
+
+@media (max-width: 992px) {
+    .reviews-track .review-card {
+        flex: 0 0 calc(50% - 15px);
+        max-width: calc(50% - 15px);
+    }
+}
+
+@media (max-width: 768px) {
+    .reviews-section {
+        margin: 50px auto;
+    }
+    .reviews-track .review-card {
+        flex: 0 0 100%;
+        max-width: 100%;
+        padding: 24px;
+    }
+    .reviews-slider-wrapper {
+        padding: 0 30px;
+    }
+    .slider-arrow {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    .purchase-sticker {
+        width: 62px;
+        height: 62px;
+        top: -10px;
+        right: -10px;
+    }
+}

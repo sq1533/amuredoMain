@@ -273,6 +273,18 @@ async def serve_booking_checkout_page(request: Request):
     return HTMLResponse(content="<h1>결제 템플릿(booking_checkout.html)을 찾을 수 없습니다.</h1>", status_code=404)
 
 
+# 🏁 일반 회원 예약 피팅 상품 결제 성공(Payment Success) 화면 HTML 서빙용 프론트엔드 라우팅 (보안 게이트 적용)
+@app.get("/general/payment_success", response_class=HTMLResponse)
+async def serve_payment_success_page(request: Request):
+    if not request.session.get("user_id"):
+        return RedirectResponse(url="/login")
+    success_path = os.path.join(static_dir, "payment_success.html")
+    if os.path.exists(success_path):
+        with open(success_path, "r", encoding="utf-8", errors="replace") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>결제 완료 템플릿(payment_success.html)을 찾을 수 없습니다.</h1>", status_code=404)
+
+
 
 
 # 🏁 통합 회원가입 및 로그인 페이지 라우팅

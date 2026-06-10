@@ -92,10 +92,10 @@
         }
         
         /* 취소되거나 완료된 예약은 흐리게 시인성 제한 */
-        .expander-card.cancelled, .expander-card.completed {
+        .expander-card.cancelled, .expander-card.completed, .expander-card.cancel-req, .expander-card.exchange-req {
             opacity: 0.75;
         }
-        .expander-card.cancelled:hover, .expander-card.completed:hover {
+        .expander-card.cancelled:hover, .expander-card.completed:hover, .expander-card.cancel-req:hover, .expander-card.exchange-req:hover {
             box-shadow: none;
             border-color: #eaeaea;
         }
@@ -212,6 +212,14 @@
         .status-badge.paid-badge {
             background: #eef7fe;
             color: #0e3a5b;
+        }
+        .status-badge.cancel-req-badge {
+            background: #fff0e6;
+            color: #ff6600;
+        }
+        .status-badge.exchange-req-badge {
+            background: #f0f0ff;
+            color: #5f5ce5;
         }
 
         /* 🏁 예약 상품 리스트 디자인 */
@@ -379,6 +387,71 @@
                 padding: 10px 0;
             }
         }
+        
+        /* 🏁 리뷰 작성 모달 및 별점 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.open {
+            display: flex !important;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            box-sizing: border-box;
+            position: relative;
+            box-shadow: 0 15px 50px rgba(14, 58, 91, 0.15);
+            border: 1px solid #eaeaea;
+            animation: modalFadeIn 0.3s ease;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .close-modal:hover {
+            color: #333;
+        }
+        .star-rating {
+            display: flex;
+            gap: 8px;
+        }
+        .star-rating .star {
+            font-size: 2rem;
+            color: #ccc;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .star-rating .star.hovered,
+        .star-rating .star.selected {
+            color: #ffb703;
+        }
+        textarea#reviewContent:focus {
+            border-color: #0e3a5b !important;
+        }
     </style>
 </head>
 <body>
@@ -501,9 +574,11 @@
                         const isCancelled = (displayStatus === "예약 취소");
                         const isCompleted = (displayStatus === "이용 완료");
                         const isPaid = (displayStatus === "결제 완료");
+                        const isCancelRequested = (displayStatus === "취소 요청 완료");
+                        const isExchangeRequested = (displayStatus === "교환 요청 완료");
 
                         const card = document.createElement("div");
-                        card.className = `expander-card ${isCancelled ? 'cancelled' : ''} ${isCompleted ? 'completed' : ''} ${isPaid ? 'paid' : ''}`;
+                        card.className = `expander-card ${isCancelled ? 'cancelled' : ''} ${isCompleted ? 'completed' : ''} ${isPaid ? 'paid' : ''} ${isCancelRequested ? 'cancel-req' : ''} ${isExchangeRequested ? 'exchange-req' : ''}`;
                         card.id = `card-${booking.bookingId}`;
 
                         // 예약에 포함된 아이템 목록
@@ -512,12 +587,20 @@
                         // 병렬로 상품 세부 정보 썸네일 패치
                         let firstItemName = "안경 상품";
                         let itemsDetails = [];
+                        let hasReview = false;
                         if (itemsArr.length > 0) {
                             try {
+                                const reviewStatusPromise = (isCompleted || isPaid || isCancelRequested || isExchangeRequested)
+                                    ? fetch(`/api/payment/booking/${booking.bookingId}/review_status`).then(r => r.json())
+                                    : Promise.resolve({ has_review: false });
                                 const fetchPromises = itemsArr.map(id => 
                                     fetch(`/api/items/${id}`).then(r => r.json())
                                 );
-                                const fetchedItems = await Promise.all(fetchPromises);
+                                
+                                const [fetchedItems, reviewStatus] = await Promise.all([
+                                    Promise.all(fetchPromises),
+                                    reviewStatusPromise
+                                ]);
                                 
                                 fetchedItems.forEach((item, idx) => {
                                     if (item && !item.error) {
@@ -538,8 +621,9 @@
                                 if (itemsDetails.length > 0) {
                                     firstItemName = itemsDetails[0].name;
                                 }
+                                hasReview = reviewStatus && reviewStatus.has_review;
                             } catch (err) {
-                                console.error("안경 세부 정보 로드 에러:", err);
+                                console.error("안경 세부 정보 또는 리뷰 상태 로드 에러:", err);
                             }
                         }
 
@@ -562,7 +646,7 @@
                                     <div class="info-panel" style="flex-direction: column; align-items: flex-start; gap: 8px;">
                                         <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                                             <div style="font-weight: 700; color: #0e3a5b;">예약 ID: ${booking.bookingId}</div>
-                                            <span class="status-badge ${isCancelled ? 'cancelled-badge' : ''} ${isCompleted ? 'completed-badge' : ''} ${isPaid ? 'paid-badge' : ''}">${displayStatus}</span>
+                                            <span class="status-badge ${isCancelled ? 'cancelled-badge' : ''} ${isCompleted ? 'completed-badge' : ''} ${isPaid ? 'paid-badge' : ''} ${isCancelRequested ? 'cancel-req-badge' : ''} ${isExchangeRequested ? 'exchange-req-badge' : ''}">${displayStatus}</span>
                                         </div>
                                         ${booking.bookingType === 'visit' ? `
                                             <div style="margin: 2px 0;">방문 예정일: <span class="info-date-val">${booking.reservedDate}</span></div>
@@ -587,7 +671,7 @@
                                         `).join('')}
                                     </div>
 
-                                    ${!isCancelled && !isCompleted && !isPaid ? `
+                                    ${!isCancelled && !isCompleted && !isPaid && !isCancelRequested && !isExchangeRequested ? `
                                         <div class="card-action-bar">
                                             <button class="btn-action btn-action-modify" data-id="${booking.bookingId}">예약 수정</button>
                                             ${booking.bookingType === 'visit' && booking.reservedDate === todayStr ? `
@@ -598,11 +682,22 @@
                                         </div>
                                     ` : ''}
 
-                                    ${isCompleted ? `
-                                        <div class="card-action-bar">
-                                            <button class="btn-action btn-action-pay" data-id="${booking.bookingId}" style="background-color: #28a745; color: #fff; border: 1px solid #28a745; transition: all 0.2s ease;">피팅 상품 결제하기</button>
-                                        </div>
-                                    ` : ''}
+                                     ${(isCompleted || isPaid || isExchangeRequested) ? `
+                                         <div class="card-action-bar" style="flex-wrap: wrap; gap: 10px;">
+                                             ${isCompleted ? `
+                                                 <button class="btn-action btn-action-pay" data-id="${booking.bookingId}" style="background-color: #28a745; color: #fff; border: 1px solid #28a745; transition: all 0.2s ease;">피팅 상품 결제하기</button>
+                                             ` : ''}
+                                             ${isPaid ? `
+                                                 <button class="btn-action btn-action-cancel-req" data-id="${booking.bookingId}" style="background-color: #fff; color: #d9534f; border: 1px solid #ffebeb; transition: all 0.2s ease;">결제 취소 요청</button>
+                                                 <button class="btn-action btn-action-exchange-req" data-id="${booking.bookingId}" style="background-color: #fff; color: #5f5ce5; border: 1px solid #f0f0ff; transition: all 0.2s ease;">상품 교환 요청</button>
+                                             ` : ''}
+                                             ${hasReview ? `
+                                                 <button class="btn-action" disabled style="background-color: #f5f5f5; color: #999; border: 1px solid #ddd; cursor: not-allowed; opacity: 0.7;">리뷰 작성 완료</button>
+                                             ` : `
+                                                 <button class="btn-action btn-action-review" data-id="${booking.bookingId}" data-store="${titleText}">리뷰 쓰기</button>
+                                             `}
+                                         </div>
+                                     ` : ''}
                                 </div>
                             </div>
                         `;
@@ -634,7 +729,7 @@
                         });
 
                         // 🏁 액션 버튼 이벤트 연결
-                        if (!isCancelled && !isCompleted && !isPaid) {
+                        if (!isCancelled && !isCompleted && !isPaid && !isCancelRequested && !isExchangeRequested) {
                             const btnModify = card.querySelector(".btn-action-modify");
                             const btnCancel = card.querySelector(".btn-action-cancel");
 
@@ -672,6 +767,41 @@
                                     e.target.style.backgroundColor = "#28a745";
                                     e.target.style.borderColor = "#28a745";
                                     e.target.style.transform = "none";
+                                });
+                            }
+                        }
+
+                        // 🏁 B2C 일반 고객 결제 취소 / 상품 교환 요청 버튼 이벤트 연결
+                        if (isPaid) {
+                            const btnCancelReq = card.querySelector(".btn-action-cancel-req");
+                            const btnExchangeReq = card.querySelector(".btn-action-exchange-req");
+
+                            if (btnCancelReq) {
+                                btnCancelReq.addEventListener("click", (e) => {
+                                    e.stopPropagation(); // 아코디언 토글 방지
+                                    if (confirm("정말로 결제 취소 요청을 보내시겠습니까?\n관리자 확인 후 처리가 완료됩니다.")) {
+                                        executeCancelRequest(booking.bookingId);
+                                    }
+                                });
+                            }
+
+                            if (btnExchangeReq) {
+                                btnExchangeReq.addEventListener("click", (e) => {
+                                    e.stopPropagation(); // 아코디언 토글 방지
+                                    if (confirm("정말로 상품 교환 요청을 보내시겠습니까?\n관리자 확인 후 처리가 완료됩니다.")) {
+                                        executeExchangeRequest(booking.bookingId);
+                                    }
+                                });
+                            }
+                        }
+
+                        // 🏁 리뷰 쓰기 버튼 이벤트 연결
+                        if (isCompleted || isPaid || isExchangeRequested) {
+                            const btnReview = card.querySelector(".btn-action-review");
+                            if (btnReview) {
+                                btnReview.addEventListener("click", (e) => {
+                                    e.stopPropagation(); // 아코디언 토글 방지
+                                    openReviewModal(booking.bookingId, btnReview.getAttribute("data-store"));
                                 });
                             }
                         }
@@ -716,6 +846,62 @@
                 });
             }
 
+            // 3. 결제 취소 요청 전송 모듈
+            function executeCancelRequest(bookingId) {
+                cancelOverlay.style.display = "flex";
+
+                fetch(`/api/payment/booking_order/cancel_request`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ bookingId: bookingId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    cancelOverlay.style.display = "none";
+                    if (data.status === "success") {
+                        alert(data.message || "취소 요청이 접수되었습니다.");
+                        loadBookingsList(); // 리스트 새로고침
+                    } else {
+                        alert(`요청 실패: ${data.message}`);
+                    }
+                })
+                .catch(err => {
+                    cancelOverlay.style.display = "none";
+                    console.error("취소 요청 전송 에러:", err);
+                    alert("서버와 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+                });
+            }
+
+            // 4. 상품 교환 요청 전송 모듈
+            function executeExchangeRequest(bookingId) {
+                cancelOverlay.style.display = "flex";
+
+                fetch(`/api/payment/booking_order/exchange_request`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ bookingId: bookingId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    cancelOverlay.style.display = "none";
+                    if (data.status === "success") {
+                        alert(data.message || "교환 요청이 접수되었습니다.");
+                        loadBookingsList(); // 리스트 새로고침
+                    } else {
+                        alert(`요청 실패: ${data.message}`);
+                    }
+                })
+                .catch(err => {
+                    cancelOverlay.style.display = "none";
+                    console.error("교환 요청 전송 에러:", err);
+                    alert("서버와 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+                });
+            }
+
             // 빈 목록 상태 렌더러
             function renderEmptyState() {
                 container.innerHTML = `
@@ -728,10 +914,166 @@
                 `;
             }
 
+            // 🏁 5. 리뷰 관련 모달 스크립트 모듈
+            let currentBookingId = null;
+            let currentRating = 0;
+
+            const reviewModal = document.getElementById("reviewModal");
+            const reviewStoreInput = document.getElementById("reviewStoreName");
+            const reviewContentArea = document.getElementById("reviewContent");
+            const closeReviewModalBtn = document.getElementById("closeReviewModal");
+            const btnCancelReview = document.getElementById("btnCancelReview");
+            const btnSubmitReview = document.getElementById("btnSubmitReview");
+            const stars = document.querySelectorAll("#reviewStarRating .star");
+
+            // 리뷰 모달 열기
+            function openReviewModal(bookingId, storeName) {
+                currentBookingId = bookingId;
+                currentRating = 0;
+                reviewStoreInput.value = storeName;
+                reviewContentArea.value = "";
+                resetStars();
+                reviewModal.classList.add("open");
+            }
+
+            // 리뷰 모달 닫기
+            function closeReviewModalWindow() {
+                reviewModal.classList.remove("open");
+                currentBookingId = null;
+                currentRating = 0;
+            }
+
+            function resetStars() {
+                stars.forEach(s => {
+                    s.classList.remove("selected", "hovered");
+                });
+            }
+
+            // 별점 별 인터랙션
+            stars.forEach(star => {
+                star.addEventListener("click", () => {
+                    currentRating = parseInt(star.getAttribute("data-value"));
+                    highlightStars(currentRating);
+                });
+
+                star.addEventListener("mouseenter", () => {
+                    const hoverVal = parseInt(star.getAttribute("data-value"));
+                    stars.forEach((s, idx) => {
+                        if (idx < hoverVal) {
+                            s.classList.add("hovered");
+                        } else {
+                            s.classList.remove("hovered");
+                        }
+                    });
+                });
+
+                star.addEventListener("mouseleave", () => {
+                    stars.forEach(s => s.classList.remove("hovered"));
+                });
+            });
+
+            function highlightStars(rating) {
+                stars.forEach((s, idx) => {
+                    if (idx < rating) {
+                        s.classList.add("selected");
+                    } else {
+                        s.classList.remove("selected");
+                    }
+                });
+            }
+
+            closeReviewModalBtn.addEventListener("click", closeReviewModalWindow);
+            btnCancelReview.addEventListener("click", closeReviewModalWindow);
+
+            // 리뷰 모달 외부 클릭 시 닫기
+            window.addEventListener("click", (e) => {
+                if (e.target === reviewModal) {
+                    closeReviewModalWindow();
+                }
+            });
+
+            // 리뷰 제출 API 전송
+            btnSubmitReview.addEventListener("click", () => {
+                const contentText = reviewContentArea.value.trim();
+                
+                if (currentRating === 0) {
+                    alert("별점을 선택해 주세요!");
+                    return;
+                }
+                if (contentText.length < 5) {
+                    alert("후기 내용은 최소 5자 이상 작성해 주세요.");
+                    return;
+                }
+
+                btnSubmitReview.disabled = true;
+                btnSubmitReview.textContent = "등록 중...";
+
+                fetch("/api/payment/review", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        bookingId: currentBookingId,
+                        content: contentText,
+                        rating: currentRating
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    btnSubmitReview.disabled = false;
+                    btnSubmitReview.textContent = "등록하기";
+                    if (data.status === "success") {
+                        alert("소중한 리뷰가 정상적으로 등록되었습니다!");
+                        closeReviewModalWindow();
+                        loadBookingsList(); // 목록 새로고침
+                    } else {
+                        alert(`등록 실패: ${data.message || data.detail}`);
+                    }
+                })
+                .catch(err => {
+                    btnSubmitReview.disabled = false;
+                    btnSubmitReview.textContent = "등록하기";
+                    console.error("리뷰 제출 에러:", err);
+                    alert("서버와 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+                });
+            });
+
             // 초기 실행
             loadBookingsList();
         });
     </script>
+
+    <!-- 리뷰 작성 모달 -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeReviewModal">&times;</span>
+            <h2 style="margin-bottom: 20px; font-weight: 800; color: #0e3a5b;">피팅 서비스 후기 작성</h2>
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: 700; color: #555; display: block; margin-bottom: 5px;">방문 매장</label>
+                <input type="text" id="reviewStoreName" readonly style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa; font-weight: bold; color: #333; box-sizing: border-box;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: 700; color: #555; display: block; margin-bottom: 8px;">서비스 만족도 (별점)</label>
+                <div class="star-rating" id="reviewStarRating">
+                    <span class="star" data-value="1">★</span>
+                    <span class="star" data-value="2">★</span>
+                    <span class="star" data-value="3">★</span>
+                    <span class="star" data-value="4">★</span>
+                    <span class="star" data-value="5">★</span>
+                </div>
+            </div>
+            <div style="margin-bottom: 25px;">
+                <label style="font-weight: 700; color: #555; display: block; margin-bottom: 8px;">후기 내용 (최소 5자)</label>
+                <textarea id="reviewContent" placeholder="피팅 서비스에 대한 솔직한 후기를 남겨주세요." style="width: 100%; height: 120px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: none; box-sizing: border-box; font-family: inherit; font-size: 0.95rem;"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" id="btnCancelReview" class="btn-action" style="flex: 1; background: #fff; border: 1px solid #ddd; color: #666; cursor: pointer; border-radius: 8px; padding: 12px; font-weight: 700;">취소</button>
+                <button type="button" id="btnSubmitReview" class="btn-action" style="flex: 1; background: #0e3a5b; border: 1px solid #0e3a5b; color: #fff; cursor: pointer; border-radius: 8px; padding: 12px; font-weight: 700;">등록하기</button>
+            </div>
+        </div>
+    </div>
+
     <script src="/static/globalWholesale.js?v=3.4"></script>
 </body>
 </html>

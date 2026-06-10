@@ -260,4 +260,150 @@ document.addEventListener("DOMContentLoaded", () => {
             trackElement.scrollLeft = scrollLeft - walk;
         });
     }
+
+    /* ====================================================
+       🏁 5. 피팅 서비스 리뷰(후기) 동적 로딩 및 렌더링 로직
+       ==================================================== */
+    const reviewsContainer = document.getElementById("reviewsContainer");
+
+    function loadReviews() {
+        if (!reviewsContainer) return; // index.html이 아닐 경우 리턴
+
+        fetch("/api/payment/fitting_reviews?limit=30")
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success" && data.reviews) {
+                    renderReviews(data.reviews);
+                    setupSliderLogic();
+                } else {
+                    renderReviewsEmpty();
+                }
+            })
+            .catch(error => {
+                console.error("피팅 후기 로딩 실패:", error);
+                renderReviewsEmpty();
+            });
+    }
+
+    function renderReviews(reviews) {
+        reviewsContainer.innerHTML = "";
+        
+        if (reviews.length === 0) {
+            renderReviewsEmpty();
+            return;
+        }
+
+        reviews.forEach(review => {
+            const card = document.createElement("div");
+            card.className = "review-card";
+
+            // 별 아이콘 생성
+            const starText = "★".repeat(review.rating) + "☆".repeat(5 - review.rating);
+
+            // 날짜 포맷 (YYYY-MM-DD -> YY.MM.DD)
+            let displayDate = "";
+            if (review.reservedDate) {
+                const parts = review.reservedDate.split("-");
+                if (parts.length === 3) {
+                    displayDate = `${parts[0].slice(-2)}.${parts[1]}.${parts[2]}`;
+                } else {
+                    displayDate = review.reservedDate;
+                }
+            }
+
+            // 구매 완료 스티커 이미지 태그
+            let stickerHTML = "";
+            if (review.is_purchased) {
+                stickerHTML = `<img src="/static/img/buy.svg" class="purchase-sticker" alt="구매 완료 스티커">`;
+            }
+
+            card.innerHTML = `
+                ${stickerHTML}
+                <div class="review-header-info">
+                    <span class="review-stars">${starText}</span>
+                    <span class="review-date">${displayDate} 피팅</span>
+                </div>
+                <p class="review-body">${escapeHTML(review.content)}</p>
+                <div class="review-footer">
+                    <span class="review-author">${review.customerName} 고객님</span>
+                    <span class="review-badge">피팅 후기</span>
+                </div>
+            `;
+            reviewsContainer.appendChild(card);
+        });
+    }
+
+    function setupSliderLogic() {
+        const prevBtn = document.getElementById("reviewPrevBtn");
+        const nextBtn = document.getElementById("reviewNextBtn");
+        if (!prevBtn || !nextBtn) return;
+
+        let currentIdx = 0;
+
+        function updateSlider() {
+            const cards = reviewsContainer.querySelectorAll(".review-card");
+            if (cards.length === 0) return;
+
+            const cardWidth = cards[0].offsetWidth;
+            const gap = 30; // CSS gap 값
+            
+            reviewsContainer.style.transform = `translateX(-${currentIdx * (cardWidth + gap)}px)`;
+
+            const total = cards.length;
+            const visible = window.innerWidth > 992 ? 3 : (window.innerWidth > 768 ? 2 : 1);
+            
+            prevBtn.style.opacity = currentIdx === 0 ? "0.3" : "1";
+            prevBtn.style.pointerEvents = currentIdx === 0 ? "none" : "auto";
+            
+            const isEnd = currentIdx >= total - visible;
+            nextBtn.style.opacity = isEnd ? "0.3" : "1";
+            nextBtn.style.pointerEvents = isEnd ? "none" : "auto";
+        }
+
+        prevBtn.addEventListener("click", () => {
+            if (currentIdx > 0) {
+                currentIdx--;
+                updateSlider();
+            }
+        });
+
+        nextBtn.addEventListener("click", () => {
+            const cards = reviewsContainer.querySelectorAll(".review-card");
+            const visible = window.innerWidth > 992 ? 3 : (window.innerWidth > 768 ? 2 : 1);
+            if (currentIdx < cards.length - visible) {
+                currentIdx++;
+                updateSlider();
+            }
+        });
+
+        window.addEventListener("resize", () => {
+            currentIdx = 0;
+            updateSlider();
+        });
+
+        updateSlider();
+    }
+
+    function renderReviewsEmpty() {
+        if (reviewsContainer) {
+            reviewsContainer.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: rgba(255, 255, 255, 0.5); border-radius: 16px; border: 1px dashed #ddd; color: #888;">
+                    <p style="font-weight: 700; margin-bottom: 5px;">등록된 피팅 후기가 없습니다.</p>
+                    <p style="font-size: 0.9rem;">아무래도 안경의 첫 번째 피팅 후기 주인공이 되어보세요!</p>
+                </div>
+            `;
+        }
+    }
+
+    function escapeHTML(str) {
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // 리뷰 로드 실행
+    loadReviews();
 });

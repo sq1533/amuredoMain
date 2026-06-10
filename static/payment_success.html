@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>주문 완료 - 아무래도 안경</title>
+    <title>결제 성공 - 아무래도 안경</title>
     <link rel="icon" href="/static/img/icon.webp" type="image/webp">
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <link rel="stylesheet" href="/static/style.css?v=21.0">
@@ -42,14 +42,15 @@
         .success-icon-badge {
             width: 72px;
             height: 72px;
-            background: rgba(37, 99, 235, 0.1);
-            border: 2px solid rgba(37, 99, 235, 0.3);
+            background: rgba(16, 185, 129, 0.15);
+            border: 2px solid rgba(16, 185, 129, 0.4);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 24px auto;
             font-size: 2rem;
+            color: #10b981;
             animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
@@ -97,7 +98,7 @@
 
         .receipt-title {
             font-weight: 800;
-            color: #3b82f6;
+            color: #10b981;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -156,7 +157,7 @@
         .summary-value {
             font-size: 1.5rem;
             font-weight: 900;
-            color: #3b82f6;
+            color: #10b981;
         }
 
         .receipt-footer-info {
@@ -175,19 +176,17 @@
             justify-content: space-between;
         }
 
-        /* 액션 버튼 */
+        /* 액션 버튼 그룹 */
         .btn-group {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
 
-        .home-btn {
+        .btn {
             display: block;
             width: 100%;
             padding: 16px;
-            background: #2563eb;
-            color: white;
             border: none;
             border-radius: 12px;
             font-size: 1.05rem;
@@ -195,20 +194,37 @@
             cursor: pointer;
             text-decoration: none;
             transition: all 0.25s ease;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
             text-align: center;
             box-sizing: border-box;
         }
 
-        .home-btn:hover {
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover {
             background-color: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #d1d5db;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
             transform: translateY(-2px);
         }
 
         /* 로딩용 */
         .loader-spinner {
             border: 3px solid rgba(255,255,255,0.1);
-            border-top: 3px solid #3b82f6;
+            border-top: 3px solid #10b981;
             border-radius: 50%;
             width: 30px;
             height: 30px;
@@ -235,8 +251,8 @@
         <div class="success-icon-badge">✓</div>
         <h1 class="success-title">결제 성공</h1>
         <p class="success-desc" id="successDesc">
-            가맹점주님, 결제해 주셔서 대단히 감사합니다.<br>
-            빠른 시일 내에 안전하게 배송해 드리겠습니다.
+            고객님, 결제해 주셔서 대단히 감사합니다.<br>
+            피팅하신 상품이 정상적으로 주문 처리되었습니다.
         </p>
 
         <!-- 디지털 영수증 -->
@@ -273,7 +289,8 @@
         </div>
 
         <div class="btn-group">
-            <a href="/" class="home-btn">메인 화면으로 돌아가기</a>
+            <a href="/" class="btn btn-primary">메인 화면으로 돌아가기</a>
+            <a href="/general/bookings" class="btn btn-secondary">내 예약 내역 확인하기</a>
         </div>
     </div>
 
@@ -285,13 +302,13 @@
             const receiptContent = document.getElementById("receiptContent");
 
             if (!orderId) {
-                document.getElementById("successDesc").textContent = "결제 완료 정보가 유실되었습니다. 주문 내역에서 확인해 주세요.";
+                document.getElementById("successDesc").textContent = "결제 완료 정보가 유실되었습니다. 예약 확인 내역에서 조회가 가능합니다.";
                 receiptLoader.style.display = "none";
                 return;
             }
 
             try {
-                const res = await fetch(`/api/payment/order/${orderId}`);
+                const res = await fetch(`/api/payment/booking_order/${orderId}`);
                 const data = await res.json();
 
                 if (res.status === 404 || data.status !== "success") {
@@ -299,7 +316,7 @@
                 }
 
                 // 타이틀 커스텀 인사말
-                document.getElementById("successDesc").innerHTML = `<strong>${data.customerName} 가맹점주님</strong>, 결제해 주셔서 대단히 감사합니다.<br>빠른 시일 내에 안전하게 배송해 드리겠습니다.`;
+                document.getElementById("successDesc").innerHTML = `<strong>${data.customerName} 고객님</strong>, 결제해 주셔서 대단히 감사합니다.<br>피팅하신 상품이 정상적으로 주문 완료되었습니다.`;
 
                 // 영수증 정보 매핑
                 document.getElementById("orderIdText").textContent = data.orderId;
@@ -318,13 +335,7 @@
                     const row = document.createElement("div");
                     row.className = "receipt-item-row";
 
-                    let priceVal = 0;
-                    if (typeof item.unit_price === 'string') {
-                        priceVal = parseInt(item.unit_price.replace(/[^0-9]/g, "")) || 0;
-                    } else {
-                        priceVal = parseInt(item.unit_price) || 0;
-                    }
-
+                    let priceVal = parseInt(item.price) || 0;
                     let qtyVal = parseInt(item.quantity) || 1;
                     let totalVal = priceVal * qtyVal;
 
@@ -343,7 +354,7 @@
 
             } catch (err) {
                 console.error("영수증 로드 에러:", err);
-                document.getElementById("successDesc").textContent = "결제 완료 정보 조회를 실패했습니다. 관리자에게 문의해 주세요.";
+                document.getElementById("successDesc").textContent = "결제 완료 정보 조회를 실패했습니다. 예약 확인 내역에서 확인을 부탁드립니다.";
                 receiptLoader.style.display = "none";
             }
 
