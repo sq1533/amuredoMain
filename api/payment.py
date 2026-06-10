@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
 from typing import Optional
 import requests
@@ -184,7 +184,7 @@ def send_telegram_message(chat_id, text):
         return
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     try:
-        requests.post(url, json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"})
+        requests.post(url, json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"}, timeout=3)
     except Exception as e:
         print(f"🔥 텔레그램 발송 에러: {e}")
 
@@ -217,7 +217,7 @@ async def get_my_orders(request: Request):
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
 @router.post("/cancel_request")
-async def request_order_cancel(request: Request):
+async def request_order_cancel(request: Request, background_tasks: BackgroundTasks):
     """
     도매 고객이 주문 취소를 요청했을 때 호출됨.
     관리자 텔레그램으로 정보를 전송함.
@@ -251,7 +251,7 @@ async def request_order_cancel(request: Request):
             f"<b>이메일:</b> {customer.get('email')}\n"
         )
         
-        send_telegram_message(CANCEL_CHAT_ID, message)
+        background_tasks.add_task(send_telegram_message, CANCEL_CHAT_ID, message)
         
         # [신규] DB 상태를 '취소 요청 완료'로 업데이트
         ref.update({"status": "취소 요청 완료"})
@@ -262,7 +262,7 @@ async def request_order_cancel(request: Request):
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
 @router.post("/exchange_request")
-async def request_order_exchange(request: Request):
+async def request_order_exchange(request: Request, background_tasks: BackgroundTasks):
     """
     도매 고객이 주문 교환을 요청했을 때 호출됨.
     관리자 텔레그램으로 정보를 전송하고 상태를 업데이트함.
@@ -294,7 +294,7 @@ async def request_order_exchange(request: Request):
             f"<b>이메일:</b> {customer.get('email')}\n"
         )
         
-        send_telegram_message(CANCEL_CHAT_ID, message)
+        background_tasks.add_task(send_telegram_message, CANCEL_CHAT_ID, message)
         
         # DB 상태를 '교환 요청 완료'로 업데이트
         ref.update({"status": "교환 요청 완료"})
@@ -361,7 +361,7 @@ async def get_visit_schedule(date: str):
 # 🏁 일반 매장 및 방문 피팅 예약 확정 API 엔진 탑재
 # -------------------------------------------------------------
 @router.post("/booking")
-async def create_booking(request: Request):
+async def create_booking(request: Request, background_tasks: BackgroundTasks):
     """
     일반 고객 또는 도매 고객의 오프라인 안경점 피팅 또는 본사 방문 피팅 예약을 최종 확정합니다.
     1인 1회 예약 제한 정책을 확인하고 중복 예약을 방어합니다.
@@ -510,7 +510,7 @@ async def create_booking(request: Request):
                 tg_request_chat_id = tg_data.get("user_request_id", "")
                 
         if tg_request_chat_id:
-            send_telegram_message(tg_request_chat_id, tg_message)
+            background_tasks.add_task(send_telegram_message, tg_request_chat_id, tg_message)
             
         return {"status": "success", "bookingId": booking_id}
         
@@ -548,7 +548,7 @@ async def get_my_bookings(request: Request):
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
 @router.post("/booking/{booking_id}/cancel")
-async def cancel_booking(request: Request, booking_id: str):
+async def cancel_booking(request: Request, booking_id: str, background_tasks: BackgroundTasks):
     """
     고객의 오프라인 안경점 피팅 예약을 취소합니다.
     1. RTDB의 예약 데이터 상태를 '예약 취소'로 업데이트합니다. (고객 이력 보존 목적)
@@ -668,7 +668,7 @@ async def cancel_booking(request: Request, booking_id: str):
                 tg_cancel_chat_id = tg_data.get("user_cancel_id", "")
                 
         if tg_cancel_chat_id:
-            send_telegram_message(tg_cancel_chat_id, tg_message)
+            background_tasks.add_task(send_telegram_message, tg_cancel_chat_id, tg_message)
             
         return {"status": "success", "message": "예약이 성공적으로 취소되었습니다."}
         
@@ -953,7 +953,8 @@ async def process_wholesale_success(
             "status": "결제 완료",
             "transactionId": tid,
             "paidAt": datetime.now().isoformat(),
-            "method": "KAKAOPAY"
+            "method": "KAKAOPAY",
+            "pgProvider": "kakaopay"
         })
         
         redirect_response = RedirectResponse(url=f"/wholesale/success?orderId={final_order_id}", status_code=303)
@@ -989,7 +990,8 @@ async def process_wholesale_success(
             "status": "결제 완료",
             "transactionId": transactionId,
             "paidAt": datetime.now().isoformat(),
-            "method": method or "DANAL"
+            "method": method or "DANAL",
+            "pgProvider": "danal"
         })
         
         redirect_response = RedirectResponse(url=f"/wholesale/success?orderId={final_order_id}", status_code=303)
@@ -1027,7 +1029,8 @@ async def process_wholesale_success(
             "status": "결제 완료",
             "transactionId": pay_token,
             "paidAt": datetime.now().isoformat(),
-            "method": "TOSSPAY"
+            "method": "TOSSPAY",
+            "pgProvider": "tosspay"
         })
         
         redirect_response = RedirectResponse(url=f"/wholesale/success?orderId={final_order_id}", status_code=303)
@@ -1036,6 +1039,7 @@ async def process_wholesale_success(
 
 async def process_booking_success(
     request: Request,
+    background_tasks: BackgroundTasks,
     orderId: Optional[str] = None,
     orderNo: Optional[str] = None,
     pg_token: Optional[str] = None,
@@ -1243,7 +1247,7 @@ async def process_booking_success(
             tg_data = json.load(f)
             tg_request_chat_id = tg_data.get("user_request_id", "")
             if tg_request_chat_id:
-                send_telegram_message(tg_request_chat_id, tg_message)
+                background_tasks.add_task(send_telegram_message, tg_request_chat_id, tg_message)
 
     return RedirectResponse(url=f"/general/payment_success?orderId={final_order_id}", status_code=303)
 
@@ -1278,6 +1282,7 @@ async def wholesale_success_post(
 @router.get("/booking_success")
 async def booking_success_get(
     request: Request,
+    background_tasks: BackgroundTasks,
     orderId: Optional[str] = Query(None),
     orderNo: Optional[str] = Query(None),
     pg_token: Optional[str] = Query(None),
@@ -1287,11 +1292,12 @@ async def booking_success_get(
     method: Optional[str] = Query(None),
     amount: Optional[int] = Query(None)
 ):
-    return await process_booking_success(request, orderId, orderNo, pg_token, code, message, transactionId, method, amount)
+    return await process_booking_success(request, background_tasks, orderId, orderNo, pg_token, code, message, transactionId, method, amount)
 
 @router.post("/booking_success")
 async def booking_success_post(
     request: Request,
+    background_tasks: BackgroundTasks,
     orderId: Optional[str] = Form(None),
     orderNo: Optional[str] = Form(None),
     pg_token: Optional[str] = Form(None),
@@ -1301,7 +1307,7 @@ async def booking_success_post(
     method: Optional[str] = Form(None),
     amount: Optional[int] = Form(None)
 ):
-    return await process_booking_success(request, orderId, orderNo, pg_token, code, message, transactionId, method, amount)
+    return await process_booking_success(request, background_tasks, orderId, orderNo, pg_token, code, message, transactionId, method, amount)
 
 from typing import Optional
 from fastapi import Form, Query
@@ -1994,7 +2000,7 @@ async def get_fitting_reviews(limit: int = 30):
 
 
 @router.post("/booking_order/cancel_request")
-async def request_booking_order_cancel(request: Request):
+async def request_booking_order_cancel(request: Request, background_tasks: BackgroundTasks):
     """
     일반 고객이 예약 완료 및 결제 완료된 상품 주문의 취소를 요청했을 때 호출됨.
     booking_id를 받아 booking_payments에서 order_id를 조회하고,
@@ -2070,7 +2076,7 @@ async def request_booking_order_cancel(request: Request):
             f"<b>이메일:</b> {customer_email}\n"
         )
         
-        send_telegram_message(CANCEL_CHAT_ID, message)
+        background_tasks.add_task(send_telegram_message, CANCEL_CHAT_ID, message)
 
         return {"status": "success", "message": "취소 요청이 완료되었습니다. 관리자 확인 후 처리가 진행됩니다."}
     except Exception as e:
@@ -2079,7 +2085,7 @@ async def request_booking_order_cancel(request: Request):
 
 
 @router.post("/booking_order/exchange_request")
-async def request_booking_order_exchange(request: Request):
+async def request_booking_order_exchange(request: Request, background_tasks: BackgroundTasks):
     """
     일반 고객이 예약 완료 및 결제 완료된 상품 주문의 교환을 요청했을 때 호출됨.
     booking_id를 받아 booking_payments에서 order_id를 조회하고,
@@ -2155,7 +2161,7 @@ async def request_booking_order_exchange(request: Request):
             f"<b>이메일:</b> {customer_email}\n"
         )
         
-        send_telegram_message(CANCEL_CHAT_ID, message)
+        background_tasks.add_task(send_telegram_message, CANCEL_CHAT_ID, message)
 
         return {"status": "success", "message": "교환 요청이 완료되었습니다. 관리자 확인 후 처리가 진행됩니다."}
     except Exception as e:
