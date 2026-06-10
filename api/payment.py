@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
+from starlette.concurrency import run_in_threadpool
 from typing import Optional
 import requests
 import json
@@ -716,7 +717,7 @@ async def search_external_store(request: Request, keyword: str):
             "size": 15 # 최대 15개 반환
         }
         
-        response = requests.get(url, headers=headers, params=params)
+        response = await run_in_threadpool(requests.get, url, headers=headers, params=params)
         if response.status_code != 200:
             print(f"🔥 카카오 로컬 API 호출 에러: {response.text}")
             return JSONResponse(status_code=response.status_code, content={"status": "error", "message": "카카오 API 호출에 실패했습니다."})
@@ -939,7 +940,7 @@ async def process_wholesale_success(
             "partner_user_id": final_order_id,
             "pg_token": pg_token
         }
-        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        response = await run_in_threadpool(requests.post, url, headers=headers, json=payload, timeout=10)
         res_json = response.json()
         if response.status_code != 200:
             err_msg = res_json.get("msg", "카카오페이 승인 실패")
@@ -975,7 +976,8 @@ async def process_wholesale_success(
         if amount is not None and int(amount) != int(order_data.get("amount", 0)):
             return RedirectResponse(url="/wholesale/cart", status_code=303)
             
-        confirm_res = confirm_danal_payment(
+        confirm_res = await run_in_threadpool(
+            confirm_danal_payment,
             method=method or "DANAL",
             transaction_id=transactionId,
             merchant_id=DANAL_MERCHANT_ID,
@@ -1015,7 +1017,7 @@ async def process_wholesale_success(
             "payToken": pay_token,
             "orderNo": final_order_id
         }
-        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        response = await run_in_threadpool(requests.post, url, headers=headers, json=payload, timeout=10)
         res_json = response.json()
         if response.status_code != 200 or res_json.get("code") != 0:
             err_msg = res_json.get("msg", "토스페이 승인 실패")
@@ -1087,7 +1089,7 @@ async def process_booking_success(
             "partner_user_id": final_order_id,
             "pg_token": pg_token
         }
-        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        response = await run_in_threadpool(requests.post, url, headers=headers, json=payload, timeout=10)
         res_json = response.json()
         if response.status_code != 200:
             err_msg = res_json.get("msg", "카카오페이 승인 실패")
@@ -1115,7 +1117,8 @@ async def process_booking_success(
         if amount is not None and int(amount) != int(resolved_amount):
             return HTMLResponse(content="<h1>결제 승인 금액이 위조되었습니다.</h1>", status_code=400)
             
-        confirm_res = confirm_danal_payment(
+        confirm_res = await run_in_threadpool(
+            confirm_danal_payment,
             method=method or "DANAL",
             transaction_id=transactionId,
             merchant_id=DANAL_MERCHANT_ID,
@@ -1149,7 +1152,7 @@ async def process_booking_success(
             "payToken": pay_token,
             "orderNo": final_order_id
         }
-        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        response = await run_in_threadpool(requests.post, url, headers=headers, json=payload, timeout=10)
         res_json = response.json()
         if response.status_code != 200 or res_json.get("code") != 0:
             err_msg = res_json.get("msg", "토스페이 승인 실패")
@@ -1620,7 +1623,7 @@ async def kakaopay_ready(request: Request):
             "fail_url": fail_url
         }
 
-        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        response = await run_in_threadpool(requests.post, url, headers=headers, json=payload, timeout=10)
         res_json = response.json()
 
         if response.status_code == 200:
@@ -1703,7 +1706,7 @@ async def tosspay_ready(request: Request):
             "autoExecute": False
         }
 
-        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        response = await run_in_threadpool(requests.post, url, headers=headers, json=payload, timeout=10)
         res_json = response.json()
 
         if response.status_code == 200 and res_json.get("code") == 0:
