@@ -92,10 +92,10 @@
         }
         
         /* 취소되거나 완료된 예약은 흐리게 시인성 제한 */
-        .expander-card.cancelled, .expander-card.completed, .expander-card.cancel-req, .expander-card.exchange-req {
+        .expander-card.cancelled, .expander-card.completed, .expander-card.cancel-req, .expander-card.exchange-req, .expander-card.refund-completed {
             opacity: 0.75;
         }
-        .expander-card.cancelled:hover, .expander-card.completed:hover, .expander-card.cancel-req:hover, .expander-card.exchange-req:hover {
+        .expander-card.cancelled:hover, .expander-card.completed:hover, .expander-card.cancel-req:hover, .expander-card.exchange-req:hover, .expander-card.refund-completed:hover {
             box-shadow: none;
             border-color: #eaeaea;
         }
@@ -220,6 +220,11 @@
         .status-badge.exchange-req-badge {
             background: #f0f0ff;
             color: #5f5ce5;
+        }
+        .status-badge.refund-completed-badge {
+            background: #f5f5f5;
+            color: #777;
+            border: 1px solid #ddd;
         }
 
         /* 🏁 예약 상품 리스트 디자인 */
@@ -576,9 +581,10 @@
                         const isPaid = (displayStatus === "결제 완료");
                         const isCancelRequested = (displayStatus === "취소 요청 완료");
                         const isExchangeRequested = (displayStatus === "교환 요청 완료");
+                        const isRefundOrExchangeCompleted = (displayStatus === "환불 및 교환 완료");
 
                         const card = document.createElement("div");
-                        card.className = `expander-card ${isCancelled ? 'cancelled' : ''} ${isCompleted ? 'completed' : ''} ${isPaid ? 'paid' : ''} ${isCancelRequested ? 'cancel-req' : ''} ${isExchangeRequested ? 'exchange-req' : ''}`;
+                        card.className = `expander-card ${isCancelled ? 'cancelled' : ''} ${isCompleted ? 'completed' : ''} ${isPaid ? 'paid' : ''} ${isCancelRequested ? 'cancel-req' : ''} ${isExchangeRequested ? 'exchange-req' : ''} ${isRefundOrExchangeCompleted ? 'refund-completed' : ''}`;
                         card.id = `card-${booking.bookingId}`;
 
                         // 예약에 포함된 아이템 목록
@@ -646,7 +652,7 @@
                                     <div class="info-panel" style="flex-direction: column; align-items: flex-start; gap: 8px;">
                                         <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                                             <div style="font-weight: 700; color: #0e3a5b;">예약 ID: ${booking.bookingId}</div>
-                                            <span class="status-badge ${isCancelled ? 'cancelled-badge' : ''} ${isCompleted ? 'completed-badge' : ''} ${isPaid ? 'paid-badge' : ''} ${isCancelRequested ? 'cancel-req-badge' : ''} ${isExchangeRequested ? 'exchange-req-badge' : ''}">${displayStatus}</span>
+                                            <span class="status-badge ${isCancelled ? 'cancelled-badge' : ''} ${isCompleted ? 'completed-badge' : ''} ${isPaid ? 'paid-badge' : ''} ${isCancelRequested ? 'cancel-req-badge' : ''} ${isExchangeRequested ? 'exchange-req-badge' : ''} ${isRefundOrExchangeCompleted ? 'refund-completed-badge' : ''}">${displayStatus}</span>
                                         </div>
                                         ${booking.bookingType === 'visit' ? `
                                             <div style="margin: 2px 0;">방문 예정일: <span class="info-date-val">${booking.reservedDate}</span></div>
@@ -671,7 +677,7 @@
                                         `).join('')}
                                     </div>
 
-                                    ${!isCancelled && !isCompleted && !isPaid && !isCancelRequested && !isExchangeRequested ? `
+                                    ${!isCancelled && !isCompleted && !isPaid && !isCancelRequested && !isExchangeRequested && !isRefundOrExchangeCompleted ? `
                                         <div class="card-action-bar">
                                             <button class="btn-action btn-action-modify" data-id="${booking.bookingId}">예약 수정</button>
                                             ${booking.bookingType === 'visit' && booking.reservedDate === todayStr ? `
@@ -729,7 +735,7 @@
                         });
 
                         // 🏁 액션 버튼 이벤트 연결
-                        if (!isCancelled && !isCompleted && !isPaid && !isCancelRequested && !isExchangeRequested) {
+                        if (!isCancelled && !isCompleted && !isPaid && !isCancelRequested && !isExchangeRequested && !isRefundOrExchangeCompleted) {
                             const btnModify = card.querySelector(".btn-action-modify");
                             const btnCancel = card.querySelector(".btn-action-cancel");
 
