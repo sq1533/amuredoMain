@@ -323,7 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="review-stars">${starText}</span>
                     <span class="review-date">${displayDate} 피팅</span>
                 </div>
-                <p class="review-body">${escapeHTML(review.content)}</p>
+                <p class="review-body">${escapeHTML(review.content || "")}</p>
                 <div class="review-footer">
                     <span class="review-author">${review.customerName} 고객님</span>
                     <span class="review-badge">피팅 후기</span>

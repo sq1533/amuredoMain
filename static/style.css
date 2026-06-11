@@ -2322,6 +2322,8 @@ body {
 .reviews-slider-container {
     overflow: hidden;
     width: 100%;
+    padding: 20px 10px;
+    margin: -20px -10px;
 }
 
 .reviews-track {
@@ -2444,10 +2446,10 @@ body {
 /* 🏁 구매 완료 스티커 디자인 효과 (over 효과 및 -4도 회전) */
 .purchase-sticker {
     position: absolute;
-    top: -12px;
-    right: -12px;
-    width: 70px;
-    height: 70px;
+    top: -10px;
+    right: -10px;
+    width: 50px;
+    height: 50px;
     z-index: 10;
     transform: rotate(-4deg);
     pointer-events: none;
@@ -2482,11 +2484,5 @@ body {
         width: 36px;
         height: 36px;
         font-size: 1rem;
-    }
-    .purchase-sticker {
-        width: 62px;
-        height: 62px;
-        top: -10px;
-        right: -10px;
     }
 }

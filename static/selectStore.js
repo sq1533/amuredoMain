@@ -627,7 +627,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="review-stars" style="color:#ffb703; font-size:1rem;">${starText}</span>
                     <span class="review-date" style="font-size:0.8rem; color:#888;">${displayDate} 피팅</span>
                 </div>
-                <p class="review-body" style="font-size:0.9rem; line-height:1.6; color:#444; word-break:keep-all; white-space:pre-wrap; margin:10px 0; flex-grow:1;">${escapeHTML(review.content)}</p>
+                <p class="review-body" style="font-size:0.9rem; line-height:1.6; color:#444; word-break:keep-all; white-space:pre-wrap; margin:10px 0; flex-grow:1;">${escapeHTML(review.content || "")}</p>
                 <div class="review-footer" style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #eee; padding-top:10px; margin-top:5px;">
                     <span class="review-author" style="font-size:0.85rem; font-weight:800; color:#0e3a5b;">${review.customerName} 고객님</span>
                     <span class="review-badge" style="font-size:0.7rem; font-weight:700; color:#8b5e3c; background:rgba(139, 94, 60, 0.08); padding:2px 6px; border-radius:4px;">피팅 후기</span>
@@ -707,6 +707,20 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     }
+
+    // 🏁 신규: 스크롤 감지 애니메이션 (fade-in-section) 등록
+    const fadeElements = document.querySelectorAll(".fade-in-section");
+    const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                obs.unobserve(entry.target);
+            }
+        });
+    }, { 
+        threshold: 0.1 
+    });
+    fadeElements.forEach(el => observer.observe(el));
 
     // 리뷰 로드 실행
     loadReviews();
