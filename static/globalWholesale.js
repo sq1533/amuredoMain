@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (role === "wholesale") {
             headerTitle = "B2B 파트너";
             menuItemsHTML = `
-                <li><a href="/wholesale/cart" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">장바구니<span class="cart-count-badge" id="pcCartBadge" style="display: none;">0</span></a></li>
+                <li><a href="/wholesale/cart" style="position: relative; display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">장바구니<span class="cart-count-badge" id="pcCartBadge" style="display: none;">0</span></a></li>
                 <li><a href="/wholesale/orders" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">주문현황</a></li>
                 <li><a href="/wholesale/mypage" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">마이페이지</a></li>
                 <li><a href="/partners" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">파트너 안경점</a></li>
@@ -198,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (role === "general") {
             headerTitle = "멤버십";
             menuItemsHTML = `
-                <li><a href="/general/cart" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">장바구니<span class="cart-count-badge" id="pcCartBadge" style="display: none;">0</span></a></li>
+                <li><a href="/general/cart" style="position: relative; display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">장바구니<span class="cart-count-badge" id="pcCartBadge" style="display: none;">0</span></a></li>
                 <li><a href="/general/bookings" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">예약확인</a></li>
                 <li><a href="/general/mypage" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">마이페이지</a></li>
                 <li><a href="/partners" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">파트너 안경점</a></li>
@@ -272,20 +272,18 @@ document.addEventListener("DOMContentLoaded", () => {
             <style id="mobileBottomNavStyles">
                 .cart-count-badge {
                     display: none;
-                    align-items: center;
-                    justify-content: center;
-                    background-color: #d9534f;
-                    color: #ffffff;
-                    font-size: 0.65rem;
+                    position: absolute;
+                    top: 2px;
+                    right: 9px;
+                    color: #d9534f;
+                    background: transparent !important;
+                    border: none !important;
+                    font-size: 0.9rem;
                     font-weight: 800;
-                    border-radius: 50%;
-                    min-width: 15px;
-                    height: 15px;
-                    padding: 0 3px;
-                    box-sizing: border-box;
                     line-height: 1;
-                    vertical-align: middle;
-                    margin-left: 6px;
+                    padding: 0;
+                    min-width: auto;
+                    height: auto;
                 }
                 .mobile-cart-icon-wrapper {
                     position: relative;
@@ -295,9 +293,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 .cart-count-badge.mobile-cart-badge {
                     position: absolute;
-                    top: -4px;
-                    right: -8px;
+                    top: -3px;
+                    right: -7px;
                     margin-left: 0;
+                    font-size: 0.7rem;
                 }
                 @media (max-width: 1024px) {
                     .pc-only-wholesale-menu { display: none !important; }

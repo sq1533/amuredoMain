@@ -328,6 +328,9 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("장바구니 DB 동기화 실패:", err);
         });
         
-        alert(`'${itemName}' 상품이 장바구니에 담겼습니다.`);
+        // 🏁 브라우저가 배지 갱신 화면을 먼저 그리도록 100ms 지연 후 알림창을 띄움
+        setTimeout(() => {
+            alert(`'${itemName}' 상품이 장바구니에 담겼습니다.`);
+        }, 100);
     }
 });
