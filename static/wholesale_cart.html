@@ -262,6 +262,11 @@
             function saveCart(cart) {
                 document.cookie = `wholesale_cart=${encodeURIComponent(JSON.stringify(cart))}; path=/; max-age=2592000`;
                 
+                // 🏁 퀵 메뉴 장바구니 수량 배지 즉각 갱신
+                if (window.updateGlobalCartBadge) {
+                    window.updateGlobalCartBadge("wholesale");
+                }
+                
                 // Firebase RTDB에 최신 장바구니 상태 동시 전송
                 fetch('/api/user/cart/sync', {
                     method: 'POST',

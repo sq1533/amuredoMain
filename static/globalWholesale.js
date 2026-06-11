@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (role === "wholesale") {
             headerTitle = "B2B 파트너";
             menuItemsHTML = `
-                <li><a href="/wholesale/cart" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">장바구니</a></li>
+                <li><a href="/wholesale/cart" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">장바구니<span class="cart-count-badge" id="pcCartBadge" style="display: none;">0</span></a></li>
                 <li><a href="/wholesale/orders" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">주문현황</a></li>
                 <li><a href="/wholesale/mypage" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">마이페이지</a></li>
                 <li><a href="/partners" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">파트너 안경점</a></li>
@@ -176,7 +176,10 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             bottomNavHTML = `
                 <a href="/wholesale/cart" class="nav-item">
-                    <img src="/static/img/shopping_cart.svg" alt="Cart" style="width:24px;height:24px;opacity:0.7;">
+                    <div class="mobile-cart-icon-wrapper">
+                        <img src="/static/img/shopping_cart.svg" alt="Cart" style="width:24px;height:24px;opacity:0.7;display:block;">
+                        <span class="cart-count-badge mobile-cart-badge" id="mobileCartBadge" style="display: none;">0</span>
+                    </div>
                     <span>장바구니</span>
                 </a>
                 <a href="/wholesale/orders" class="nav-item">
@@ -195,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (role === "general") {
             headerTitle = "멤버십";
             menuItemsHTML = `
-                <li><a href="/general/cart" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">장바구니</a></li>
+                <li><a href="/general/cart" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">장바구니<span class="cart-count-badge" id="pcCartBadge" style="display: none;">0</span></a></li>
                 <li><a href="/general/bookings" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">예약확인</a></li>
                 <li><a href="/general/mypage" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">마이페이지</a></li>
                 <li><a href="/partners" style="display: block; padding: 10px 5px; background: #f8f9fa; color: #333; text-decoration: none; border-radius: 6px; text-align: center; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">파트너 안경점</a></li>
@@ -203,7 +206,10 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             bottomNavHTML = `
                 <a href="/general/cart" class="nav-item">
-                    <img src="/static/img/shopping_cart.svg" alt="Cart" style="width:24px;height:24px;opacity:0.7;">
+                    <div class="mobile-cart-icon-wrapper">
+                        <img src="/static/img/shopping_cart.svg" alt="Cart" style="width:24px;height:24px;opacity:0.7;display:block;">
+                        <span class="cart-count-badge mobile-cart-badge" id="mobileCartBadge" style="display: none;">0</span>
+                    </div>
                     <span>장바구니</span>
                 </a>
                 <a href="/general/bookings" class="nav-item">
@@ -264,6 +270,35 @@ document.addEventListener("DOMContentLoaded", () => {
             </nav>
 
             <style id="mobileBottomNavStyles">
+                .cart-count-badge {
+                    display: none;
+                    align-items: center;
+                    justify-content: center;
+                    background-color: #d9534f;
+                    color: #ffffff;
+                    font-size: 0.65rem;
+                    font-weight: 800;
+                    border-radius: 50%;
+                    min-width: 15px;
+                    height: 15px;
+                    padding: 0 3px;
+                    box-sizing: border-box;
+                    line-height: 1;
+                    vertical-align: middle;
+                    margin-left: 6px;
+                }
+                .mobile-cart-icon-wrapper {
+                    position: relative;
+                    display: inline-block;
+                    width: 24px;
+                    height: 24px;
+                }
+                .cart-count-badge.mobile-cart-badge {
+                    position: absolute;
+                    top: -4px;
+                    right: -8px;
+                    margin-left: 0;
+                }
                 @media (max-width: 1024px) {
                     .pc-only-wholesale-menu { display: none !important; }
                 }
@@ -437,10 +472,66 @@ document.addEventListener("DOMContentLoaded", () => {
         backupInitialCart(role);
     };
 
+    // 🏁 실시간 장바구니 배지 업데이트 엔진 전역 선언
+    window.updateGlobalCartBadge = (role) => {
+        if (!role || role === "guest") {
+            return;
+        }
+
+        const pcBadge = document.getElementById("pcCartBadge");
+        const mobileBadge = document.getElementById("mobileCartBadge");
+
+        const setBadgeText = (count) => {
+            if (count > 0) {
+                if (pcBadge) {
+                    pcBadge.textContent = count;
+                    pcBadge.style.display = "inline-flex";
+                }
+                if (mobileBadge) {
+                    mobileBadge.textContent = count;
+                    mobileBadge.style.display = "inline-flex";
+                }
+            } else {
+                if (pcBadge) pcBadge.style.display = "none";
+                if (mobileBadge) mobileBadge.style.display = "none";
+            }
+        };
+
+        // Step 1. 로컬 쿠키 장바구니 개수로 1차 선제 렌더링
+        const cookieName = role === "wholesale" ? "wholesale_cart" : "general_cart";
+        const match = document.cookie.match(new RegExp('(^| )' + cookieName + '=([^;]+)'));
+        let count = 0;
+        if (match) {
+            try {
+                const cart = JSON.parse(decodeURIComponent(match[2]));
+                count = Array.isArray(cart) ? cart.length : 0;
+            } catch (e) {
+                count = 0;
+            }
+        }
+        setBadgeText(count);
+
+        // Step 2. 백그라운드 비동기 통신을 통해 Realtime DB 최신본 패치 및 로컬 캐시/배지 갱신
+        fetch("/api/user/cart/load")
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success" && Array.isArray(data.cart)) {
+                    const latestCount = data.cart.length;
+                    setBadgeText(latestCount);
+                    // 로컬 쿠키 동기화
+                    document.cookie = `${cookieName}=${encodeURIComponent(JSON.stringify(data.cart))}; path=/; max-age=2592000`;
+                }
+            })
+            .catch(err => {
+                console.error("실시간 장바구니 데이터 로드 실패:", err);
+            });
+    };
+
     // 1단계: 쿠키 값 기준으로 지연 없이 즉각 선제 렌더링
     const initialRole = getRoleFromCookie();
     renderQuickMenu(initialRole);
     reorganizeMobileMenu(initialRole === "wholesale");
+    window.updateGlobalCartBadge(initialRole);
 
     // 2단계: 백그라운드 세션 체크 및 불일치 시 UI 보정
     fetch("/api/user/status")
@@ -453,6 +544,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.cookie = `amuredo_role=${encodeURIComponent(verifiedRole)}; path=/; max-age=2592000`;
                 renderQuickMenu(verifiedRole);
                 reorganizeMobileMenu(verifiedRole === "wholesale");
+                window.updateGlobalCartBadge(verifiedRole);
+            } else {
+                // 평상시에도 실시간 DB 수량을 체크하여 쿠키/UI 반영
+                window.updateGlobalCartBadge(verifiedRole);
             }
         })
         .catch(err => {

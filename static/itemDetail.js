@@ -306,6 +306,11 @@ document.addEventListener("DOMContentLoaded", () => {
         // 4. 쿠키 저장
         document.cookie = `general_cart=${encodeURIComponent(JSON.stringify(cart))}; path=/; max-age=2592000`;
         
+        // 🏁 퀵 메뉴 장바구니 수량 배지 즉각 갱신
+        if (window.updateGlobalCartBadge) {
+            window.updateGlobalCartBadge("general");
+        }
+        
         // 5. Firebase RTDB에 실시간 즉시 동기화 수행
         fetch('/api/user/cart/sync', {
             method: 'POST',
