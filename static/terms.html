@@ -6,6 +6,7 @@
     <title>이용약관 | 아무래도(amuredo)</title>
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=23.0">
     <style>
         body {
             font-family: 'Pretendard', sans-serif;
@@ -37,23 +38,40 @@
             margin-bottom: 1rem;
             word-break: keep-all;
         }
-        .back-btn {
-            display: inline-block;
-            margin-bottom: 20px;
-            text-decoration: none;
-            color: #0e3a5b;
-            font-weight: bold;
-            font-size: 1rem;
+        table {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            word-break: keep-all;
         }
-        .back-btn:hover {
-            text-decoration: underline;
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+            line-height: 1.4;
+            min-width: 120px;
+        }
+        th {
+            background-color: #f7f7f7;
+            font-weight: bold;
+        }
+        td:nth-child(3) {
+            min-width: 250px;
+        }
+        td:nth-child(4) {
+            min-width: 200px;
         }
     </style>
 </head>
 <body>
-    <div class="terms-container">
-        <a href="/" class="back-btn">&larr; 쇼핑몰로 돌아가기</a>
-        <h1>전자상거래(인터넷사이버몰) 표준약관</h1>
+    <main class="sub-page-main">
+        <div class="app-container">
+            <div class="terms-container">
+                <h1>전자상거래(인터넷사이버몰) 표준약관</h1>
         
         <h2>제1조(목적)</h2>
         <p>이 약관은 주식회사 키제이(전자상거래 사업자)가 운영하는 amuredo.shop 사이버 몰(이하 “몰”이라 한다)에서 제공하는 인터넷 관련 서비스(이하 “서비스”라 한다)를 이용함에 있어 사이버 몰과 이용자의 권리․의무 및 책임사항을 규정함을 목적으로 합니다.<br>
@@ -228,7 +246,9 @@
         한국인터넷진흥원 (http://www.kisa.or.kr)<br>
         KISA 불법스팸대응센터 (https://spam.kisa.or.kr)<br>
         KISA 개인정보침해신고센터 (https://privacy.kisa.or.kr)</p>
-    </div>
+            </div>
+        </div>
+    </main>
 <script src="/static/globalWholesale.js?v=3.4"></script>
 </body>
 </html>

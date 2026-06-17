@@ -406,4 +406,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 리뷰 로드 실행
     loadReviews();
+
+    /* ====================================================
+       🏁 6. 메인 비디오 배너 반응형 로딩 및 포스터 이미지 설정 로직
+       ==================================================== */
+    const setupResponsiveBanner = () => {
+        const videoEl = document.getElementById("mainBannerVideo");
+        if (!videoEl) return;
+
+        const isMobile = window.innerWidth <= 640;
+        const targetSrc = isMobile ? "/static/img/banner_vod_mo.mp4" : "/static/img/banner_vod_pc.mp4";
+        const targetPoster = isMobile ? "/static/img/banner_img_mo.jpg" : "/static/img/banner_img_pc.jpg";
+
+        // 현재 설정되어 있는 소스가 타겟 소스와 같다면 리로드 방지 (중복 리로드 차단)
+        if (videoEl.getAttribute("data-loaded-src") === targetSrc) {
+            return;
+        }
+
+        // 포스터 이미지 및 비디오 소스 주입
+        videoEl.setAttribute("poster", targetPoster);
+        videoEl.innerHTML = `<source src="${targetSrc}" type="video/mp4">`;
+        videoEl.setAttribute("data-loaded-src", targetSrc);
+
+        // 비디오 소스가 변경되었으므로 비디오 데이터를 다시 로드하고 자동 재생 시도
+        videoEl.load();
+        videoEl.play().catch(err => {
+            console.log("비디오 자동재생 실패(브라우저 정책):", err);
+        });
+    };
+
+    // 초기 실행 및 윈도우 리사이즈 이벤트 바인딩
+    setupResponsiveBanner();
+    window.addEventListener("resize", setupResponsiveBanner);
 });

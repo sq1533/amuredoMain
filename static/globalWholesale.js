@@ -15,45 +15,51 @@ document.addEventListener("DOMContentLoaded", () => {
             <style id="globalWholesaleStyles">
                 /* 🏁 전역 헤더 & 햄버거 메뉴 필수 스타일 */
                 .main-header {
-                    position: fixed; top: 0; left: 0; width: 100%; height: 70px;
-                    background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+                    position: fixed; top: 0; left: 0; width: 100%; height: 75px;
+                    background: rgba(244, 243, 240, 0.95); backdrop-filter: blur(10px);
                     display: flex; justify-content: space-between; align-items: center;
-                    padding: 0 20px; z-index: 10000 !important; border-bottom: 1px solid #eee;
+                    padding: 1rem 2.5rem; z-index: 10000 !important; border-bottom: 1px solid #eaeaea;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
                 }
-                .logo { height: 30px; display: block; }
+                .logo-wrapper { flex: 0 0 auto; width: 160px; display: flex; align-items: center; justify-content: center; }
+                .logo { width: 100%; object-fit: contain; display: block; }
                 
                 /* PC 네비게이션 */
-                .pc-nav-left, .pc-nav-right { display: flex; gap: 20px; align-items: center; }
+                .pc-nav-left, .pc-nav-right { display: flex; gap: 2.5rem; align-items: center; }
+                .pc-nav-left { flex: 1; justify-content: flex-start; }
+                .pc-nav-right { flex: 1; justify-content: flex-end; }
                 .nav-switch-btn { 
-                    background: none; border: none; font-size: 0.95rem; font-weight: 600; 
-                    color: #333; cursor: pointer; transition: color 0.2s;
+                    background: transparent; border: none; font-size: 1.2rem; font-weight: 600; 
+                    color: #222; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s ease;
                 }
-                .nav-switch-btn:hover { color: #0e3a5b; }
+                .nav-switch-btn:hover { color: #4a90e2; }
 
-                /* 햄버거 버튼 (강제 노출 설정) */
+                /* 햄버거 버튼 (B2B/B2C 통합 640px 이하 노출) */
                 .menu-toggle-btn {
-                    display: none; background: none; border: none; cursor: pointer;
-                    padding: 10px; z-index: 10005 !important;
+                    display: none; align-items: center; justify-content: center;
+                    width: 40px; height: 40px; background-color: #E5E3DD; border: none;
+                    border-radius: 4px; cursor: pointer; position: absolute; right: 1.5rem;
+                    z-index: 10005 !important;
                 }
                 .hamburger-box {
-                    display: block; width: 24px; height: 2px; background: #333;
+                    display: block; width: 20px; height: 2px; background: #222;
                     position: relative; transition: background 0.3s;
                 }
                 .hamburger-box::before, .hamburger-box::after {
-                    content: ""; position: absolute; width: 24px; height: 2px; background: #333;
+                    content: ""; position: absolute; width: 100%; height: 2px; background: #222;
                     left: 0; transition: all 0.3s;
                 }
-                .hamburger-box::before { top: -7px; }
-                .hamburger-box::after { top: 7px; }
+                .hamburger-box::before { top: -6px; }
+                .hamburger-box::after { bottom: -6px; }
 
                 /* 모바일 메뉴바 (전체 높이 및 배경 강제) */
                 .page-nav {
-                    position: fixed; top: 0; right: -100%; width: 280px; height: 100vh !important;
-                    background: #ffffff !important; z-index: 10010 !important; 
-                    transition: right 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-                    padding: 80px 0 40px 0; /* 좌우 패딩은 nav-links에서 조절 */
-                    box-shadow: -10px 0 30px rgba(0,0,0,0.1);
-                    overflow-y: auto; /* 메뉴가 길어질 경우 스크롤 허용 */
+                    position: fixed; top: 0; right: -300px; width: 250px; height: 100vh !important;
+                    background: #F4F3F0 !important; z-index: 10010 !important; 
+                    transition: right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+                    padding: 80px 0 40px 0;
+                    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+                    overflow-y: auto;
                     display: block !important;
                 }
                 .page-nav.open { right: 0 !important; }
@@ -65,25 +71,34 @@ document.addEventListener("DOMContentLoaded", () => {
                 .nav-overlay.active { display: block; opacity: 1; }
                 
                 .close-menu-btn {
-                    position: absolute; top: 20px; right: 20px; font-size: 1.8rem;
+                    position: absolute; top: 20px; right: 20px; font-size: 1.5rem;
                     background: none; border: none; cursor: pointer; color: #333;
                     padding: 10px; z-index: 10011;
                 }
                 .nav-links { 
-                    list-style: none; padding: 0 30px; margin: 0; 
+                    list-style: none; padding: 0 1.5rem; margin: 0; 
                     display: flex; flex-direction: column; gap: 5px; 
                 }
-                .nav-links li { width: 100%; }
+                .nav-links li { width: 100%; list-style-type: none !important; margin: 0; padding: 0; }
                 .nav-links .nav-switch-btn {
-                    width: 100%; text-align: left; padding: 15px 10px;
-                    font-size: 1.1rem; border-bottom: 1px solid #f5f5f5;
+                    width: 100%; text-align: left; padding: 1rem 0;
+                    font-size: 1.2rem; border-bottom: 1px solid #f0f0f0; display: block;
+                }
+                .nav-links li:nth-child(3) .nav-switch-btn {
+                    border-bottom: none;
+                }
+                .nav-links li:nth-child(3) {
+                    border-bottom: 1px solid #dcdcdc;
+                    margin-bottom: 15px;
+                    padding-bottom: 15px;
                 }
 
-                /* 📱 모바일 반응형 처리 */
-                @media (max-width: 768px) {
+                /* 📱 모바일 반응형 처리 (640px 이하) */
+                @media (max-width: 640px) {
+                    .main-header { justify-content: center; padding: 1rem 1.5rem; }
                     .pc-nav-left, .pc-nav-right { display: none !important; }
-                    .menu-toggle-btn { display: block !important; }
-                    .logo-wrapper { position: absolute; left: 50%; transform: translateX(-50%); }
+                    .menu-toggle-btn { display: flex !important; }
+                    .logo-wrapper { width: 140px; position: absolute; left: 50%; transform: translateX(-50%); }
                 }
             </style>
             <header class="main-header">
