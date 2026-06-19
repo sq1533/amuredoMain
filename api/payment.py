@@ -229,16 +229,19 @@ async def get_payment_config(request: Request):
     if not request.session.get("user_id"):
         raise HTTPException(status_code=403, detail="Unauthorized")
         
-    from datetime import datetime, timedelta
-    expire_time = datetime.now() + timedelta(hours=24)
+    from datetime import datetime, timedelta, timezone
+    kst = timezone(timedelta(hours=9))
+    expire_time = datetime.now(kst) + timedelta(hours=24)
     expire_datetime_str = expire_time.strftime("%Y%m%d%H%M%S")
     expire_date_str = expire_time.strftime("%Y%m%d")
+    expire_time_str = expire_time.strftime("%H%M")
     
     return {
         "client_key": DANAL_CLIENT_KEY,
         "merchant_id": DANAL_MERCHANT_ID,
         "expire_datetime": expire_datetime_str,
-        "expire_date": expire_date_str
+        "expire_date": expire_date_str,
+        "expire_time": expire_time_str
     }
 
 @router.post("/pending_order")
@@ -288,6 +291,7 @@ async def create_pending_order(request: Request):
 # -------------------------------------------------------------
 TELEGRAM_TOKEN = ""
 CANCEL_CHAT_ID = ""
+REQUEST_CHAT_ID = ""
 
 tg_path = os.path.join(os.path.dirname(__file__), "..", "database", "telegram.json")
 try:
@@ -296,6 +300,7 @@ try:
             tg_data = json.load(f)
             TELEGRAM_TOKEN = tg_data.get("bot_token", "")
             CANCEL_CHAT_ID = tg_data.get("user_cancel_id", "")
+            REQUEST_CHAT_ID = tg_data.get("user_request_id", "")
 except Exception as e:
     print(f"🔥 텔레그램 설정 로드 에러: {e}")
 
@@ -622,15 +627,8 @@ async def create_booking(request: Request, background_tasks: BackgroundTasks):
             f"<b>접수일시:</b> {now.strftime('%Y-%m-%d %H:%M:%S')}\n"
         )
         
-        tg_path = os.path.join(os.path.dirname(__file__), "..", "database", "telegram.json")
-        tg_request_chat_id = ""
-        if os.path.exists(tg_path):
-            with open(tg_path, "r", encoding="utf-8") as f:
-                tg_data = json.load(f)
-                tg_request_chat_id = tg_data.get("user_request_id", "")
-                
-        if tg_request_chat_id:
-            background_tasks.add_task(send_telegram_message, tg_request_chat_id, tg_message)
+        if REQUEST_CHAT_ID:
+            background_tasks.add_task(send_telegram_message, REQUEST_CHAT_ID, tg_message)
             
         return {"status": "success", "bookingId": booking_id}
         
@@ -780,15 +778,8 @@ async def cancel_booking(request: Request, booking_id: str, background_tasks: Ba
             f"<b>취소일시:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
         )
         
-        # database/telegram.json 로드하여 user_cancel_id 획득
-        tg_cancel_chat_id = ""
-        if os.path.exists(tg_path):
-            with open(tg_path, "r", encoding="utf-8") as f:
-                tg_data = json.load(f)
-                tg_cancel_chat_id = tg_data.get("user_cancel_id", "")
-                
-        if tg_cancel_chat_id:
-            background_tasks.add_task(send_telegram_message, tg_cancel_chat_id, tg_message)
+        if CANCEL_CHAT_ID:
+            background_tasks.add_task(send_telegram_message, CANCEL_CHAT_ID, tg_message)
             
         return {"status": "success", "message": "예약이 성공적으로 취소되었습니다."}
         
@@ -1432,13 +1423,8 @@ async def process_booking_success(
         va = payment_payload["virtualAccount"]
         tg_message += f"\n<b>[발급 계좌 정보]</b>\n<b>은행:</b> {va.get('bankName')}\n<b>계좌번호:</b> {va.get('accountNumber')}\n<b>기한:</b> {va.get('expireDateTime')}\n"
 
-    tg_path = os.path.join(os.path.dirname(__file__), "..", "database", "telegram.json")
-    if os.path.exists(tg_path):
-        with open(tg_path, "r", encoding="utf-8") as f:
-            tg_data = json.load(f)
-            tg_request_chat_id = tg_data.get("user_request_id", "")
-            if tg_request_chat_id:
-                background_tasks.add_task(send_telegram_message, tg_request_chat_id, tg_message)
+    if REQUEST_CHAT_ID:
+        background_tasks.add_task(send_telegram_message, REQUEST_CHAT_ID, tg_message)
 
     if is_vaccount:
         order_name_val = first_item_name if len(paid_items_ids) <= 1 else f"{first_item_name} 외 {len(paid_items_ids)-1}건"
@@ -1513,9 +1499,6 @@ async def booking_success_post(
     amount: Optional[int] = Form(None)
 ):
     return await process_booking_success(request, background_tasks, orderId, orderNo, pg_token, code, message, transactionId, method, amount)
-
-from typing import Optional
-from fastapi import Form, Query
 
 async def process_payment_fail(request: Request, code: Optional[str] = None, message: Optional[str] = None, orderId: Optional[str] = None):
     # None인 경우 기본값 지정
@@ -1852,13 +1835,8 @@ async def danal_noti(request: Request, background_tasks: BackgroundTasks):
                 f"<b>입금은행:</b> {bank_name or '미지정'}\n"
                 f"<b>입금일시:</b> {paid_at_time.replace('T', ' ')}\n"
             )
-            tg_path = os.path.join(os.path.dirname(__file__), "..", "database", "telegram.json")
-            if os.path.exists(tg_path):
-                with open(tg_path, "r", encoding="utf-8") as f:
-                    tg_data = json.load(f)
-                    tg_request_chat_id = tg_data.get("user_request_id", "")
-                    if tg_request_chat_id:
-                        background_tasks.add_task(send_telegram_message, tg_request_chat_id, tg_message)
+            if REQUEST_CHAT_ID:
+                background_tasks.add_task(send_telegram_message, REQUEST_CHAT_ID, tg_message)
                         
         else:
             order_ref = rtdb.reference(f"booking_orders/{order_id}")
@@ -1929,13 +1907,8 @@ async def danal_noti(request: Request, background_tasks: BackgroundTasks):
                 f"<b>입금은행:</b> {bank_name or '미지정'}\n"
                 f"<b>입금일시:</b> {paid_at_time.replace('T', ' ')}\n"
             )
-            tg_path = os.path.join(os.path.dirname(__file__), "..", "database", "telegram.json")
-            if os.path.exists(tg_path):
-                with open(tg_path, "r", encoding="utf-8") as f:
-                    tg_data = json.load(f)
-                    tg_request_chat_id = tg_data.get("user_request_id", "")
-                    if tg_request_chat_id:
-                        background_tasks.add_task(send_telegram_message, tg_request_chat_id, tg_message)
+            if REQUEST_CHAT_ID:
+                background_tasks.add_task(send_telegram_message, REQUEST_CHAT_ID, tg_message)
                         
         return HTMLResponse(content="OK", status_code=200)
     except Exception as e:
