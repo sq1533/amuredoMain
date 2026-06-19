@@ -212,7 +212,7 @@ def send_virtual_account_email(to_email: str, customer_name: str, order_id: str,
         server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
         server.starttls()
         server.login(sender_email, sender_password)
-        server.send_mail(sender_email, [to_email], msg.as_string())
+        server.sendmail(sender_email, [to_email], msg.as_string())
         server.quit()
         print(f"📧 이메일 발송 완료: {to_email}")
     except Exception as e:
