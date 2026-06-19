@@ -464,11 +464,13 @@
             // 🏁 다날 결제 설정 로드
             let clientKey = "";
             let merchantId = "";
+            let expireDatetime = "";
             fetch("/api/payment/config")
             .then(res => res.json())
             .then(configData => {
                 clientKey = configData.client_key;
                 merchantId = configData.merchant_id;
+                expireDatetime = configData.expire_datetime;
             })
             .catch(err => console.error("다날 결제 설정 로드 에러:", err));
 
@@ -679,6 +681,9 @@
 
                     if (selectedMethod === "VACCOUNT") {
                         paymentParams.notiUrl = window.location.origin + "/api/payment/danal_noti";
+                        if (expireDatetime) {
+                            paymentParams.expireDateTime = expireDatetime;
+                        }
                     }
 
                     await danalPayments.requestPayment(paymentParams);

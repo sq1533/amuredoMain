@@ -224,13 +224,21 @@ def send_virtual_account_email(to_email: str, customer_name: str, order_id: str,
 @router.get("/config")
 async def get_payment_config(request: Request):
     """
-    프론트엔드(SDK)를 그릴 때 필요한 다날 클라이언트 키 및 가맹점 ID를 안전하게 제공
+    프론트엔드(SDK)를 그릴 때 필요한 다날 클라이언트 키 및 가맹점 ID 및 24시간 가상계좌 기한을 안전하게 제공
     """
     if not request.session.get("user_id"):
         raise HTTPException(status_code=403, detail="Unauthorized")
+        
+    from datetime import datetime, timedelta
+    expire_time = datetime.now() + timedelta(hours=24)
+    expire_datetime_str = expire_time.strftime("%Y%m%d%H%M%S")
+    expire_date_str = expire_time.strftime("%Y%m%d")
+    
     return {
         "client_key": DANAL_CLIENT_KEY,
-        "merchant_id": DANAL_MERCHANT_ID
+        "merchant_id": DANAL_MERCHANT_ID,
+        "expire_datetime": expire_datetime_str,
+        "expire_date": expire_date_str
     }
 
 @router.post("/pending_order")

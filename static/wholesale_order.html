@@ -573,6 +573,9 @@
 
                     if (selectedMethod === "VACCOUNT") {
                         paymentParams.notiUrl = window.location.origin + "/api/payment/danal_noti";
+                        if (configData && configData.expire_datetime) {
+                            paymentParams.expireDateTime = configData.expire_datetime;
+                        }
                     }
 
                     await danalPayments.requestPayment(paymentParams);
