@@ -9,8 +9,15 @@ import re
 import base64
 from datetime import datetime
 from firebase_admin import db as rtdb
+from firebase_admin import firestore
 
 router = APIRouter()
+
+def get_base_url(request: Request) -> str:
+    is_local = "localhost" in request.url.netloc or "127.0.0.1" in request.url.netloc
+    scheme = "http" if is_local else "https"
+    return f"{scheme}://{request.url.netloc}"
+
 
 # -------------------------------------------------------------
 # 다날 결제 설정 로드
@@ -182,7 +189,7 @@ def send_virtual_account_email(to_email: str, customer_name: str, order_id: str,
                 </tr>
                 <tr>
                     <td style="padding: 10px 0; color: #666; font-weight: bold; border-bottom: 1px solid #eee;">예금주</td>
-                    <td style="padding: 10px 0; color: #333; border-bottom: 1px solid #eee;">(주)아무래도안경 (또는 다날가상계좌)</td>
+                    <td style="padding: 10px 0; color: #333; border-bottom: 1px solid #eee;">주식회사 키제이</td>
                 </tr>
                 <tr>
                     <td style="padding: 10px 0; color: #666; font-weight: bold; border-bottom: 1px solid #eee;">입금금액</td>
@@ -561,7 +568,6 @@ async def create_booking(request: Request, background_tasks: BackgroundTasks):
             schedule_ref.child(next_time).update({"status": "reserved", "booking_id": booking_id})
             
         # 5. Firestore에서 예약자 실명 및 연락처 연동
-        from firebase_admin import firestore
         db_fs = firestore.client()
         
         customer_name = "알 수 없음"
@@ -755,7 +761,6 @@ async def cancel_booking(request: Request, booking_id: str, background_tasks: Ba
         store_name = booking_data.get("storeName", "미선택 매장")
         
         # 첫 상품명 조회를 시도하여 요약 생성
-        from firebase_admin import firestore
         db_fs = firestore.client()
         items = booking_data.get("items", [])
         first_item_name = "안경 상품"
@@ -880,7 +885,6 @@ async def get_booking_checkout_details(request: Request, booking_id: str):
             return JSONResponse(status_code=400, content={"status": "error", "message": "피팅이 완료되지 않은 예약건은 결제할 수 없습니다."})
             
         # 3. 예약된 안경 아이템들의 정보 및 일반 소비자 가격 조회
-        from firebase_admin import firestore
         db_fs = firestore.client()
         
         items_list = []
@@ -957,7 +961,6 @@ async def create_pending_booking_order(request: Request):
             return JSONResponse(status_code=404, content={"status": "error", "message": "예약 내역을 찾을 수 없습니다."})
             
         # 2. 서버 측 소비자 가격 합산 연산 (변조 방지)
-        from firebase_admin import firestore
         db_fs = firestore.client()
         
         total_amount = 0
@@ -1382,7 +1385,6 @@ async def process_booking_success(
                 r_time = bdata.get("reservedTime")
                 if r_date and r_time:
                     review_doc_id = f"{r_date}_{r_time}"
-                    from firebase_admin import firestore
                     db_fs = firestore.client()
                     review_ref = db_fs.collection("fitting_reviews").document(review_doc_id)
                     if review_ref.get().exists:
@@ -1394,7 +1396,6 @@ async def process_booking_success(
     customer_name = order_data.get("customer", {}).get("name", "알 수 없음")
     customer_phone = order_data.get("customer", {}).get("phone", "알 수 없음")
     
-    from firebase_admin import firestore
     db_fs = firestore.client()
     paid_items_ids = order_data.get("items", [])
     first_item_name = "안경 상품"
@@ -1809,6 +1810,11 @@ async def danal_noti(request: Request, background_tasks: BackgroundTasks):
                 print(f"⚠️ 다날 Noti 수신: ws_orders/{safe_email}/{order_id} 노드가 비어있습니다.")
                 return HTMLResponse(content="FAIL", status_code=404)
                 
+            # 🏁 [중복 차단 필터] 이미 결제 완료 상태인 주문은 처리 스킵
+            if order_data.get("status") == "결제 완료":
+                print(f"ℹ️ 이미 결제 완료된 도매 주문입니다. (주문ID: {order_id}) Noti 처리 생략 및 성공 응답.")
+                return HTMLResponse(content="OK", status_code=200)
+                
             db_amount = int(order_data.get("amount", 0))
             if amount is not None and int(amount) != db_amount:
                 print(f"⚠️ 금액 위조 의심: DB금액 {db_amount} != 노티금액 {amount}")
@@ -1844,6 +1850,11 @@ async def danal_noti(request: Request, background_tasks: BackgroundTasks):
             if not order_data:
                 print(f"⚠️ 다날 Noti 수신: booking_orders/{order_id} 가결제 정보를 찾을 수 없습니다.")
                 return HTMLResponse(content="FAIL", status_code=404)
+                
+            # 🏁 [중복 차단 필터] 이미 결제 완료 상태인 주문은 처리 스킵
+            if order_data.get("status") == "결제 완료":
+                print(f"ℹ️ 이미 결제 완료된 피팅 주문입니다. (주문ID: {order_id}) Noti 처리 생략 및 성공 응답.")
+                return HTMLResponse(content="OK", status_code=200)
                 
             booking_id = order_data.get("bookingId")
             customer_email = order_data.get("customer", {}).get("email")
@@ -1888,7 +1899,6 @@ async def danal_noti(request: Request, background_tasks: BackgroundTasks):
                         r_time = bdata.get("reservedTime")
                         if r_date and r_time:
                             review_doc_id = f"{r_date}_{r_time}"
-                            from firebase_admin import firestore
                             db_fs = firestore.client()
                             review_ref = db_fs.collection("fitting_reviews").document(review_doc_id)
                             if review_ref.get().exists:
@@ -1946,9 +1956,7 @@ async def kakaopay_ready(request: Request):
             "Content-Type": "application/json"
         }
 
-        is_local = "localhost" in request.url.netloc or "127.0.0.1" in request.url.netloc
-        scheme = "http" if is_local else "https"
-        base_url = f"{scheme}://{request.url.netloc}"
+        base_url = get_base_url(request)
         if order_type == "booking":
             approval_url = f"{base_url}/api/payment/booking_success?orderNo={order_id}"
         else:
@@ -2035,9 +2043,7 @@ async def tosspay_ready(request: Request):
         url = "https://pay.toss.im/api/v2/payments"
         headers = {"Content-Type": "application/json"}
 
-        is_local = "localhost" in request.url.netloc or "127.0.0.1" in request.url.netloc
-        scheme = "http" if is_local else "https"
-        base_url = f"{scheme}://{request.url.netloc}"
+        base_url = get_base_url(request)
         if order_type == "booking":
             ret_url = f"{base_url}/api/payment/booking_success?orderNo={order_id}"
         else:
@@ -2140,7 +2146,6 @@ async def get_booking_order_detail(request: Request, order_id: str):
             raise HTTPException(status_code=404, detail="Booking order not found")
             
         # 2. 아이템 ID 리스트를 기반으로 실제 상품 정보(이름, 단가) 조회
-        from firebase_admin import firestore
         db_fs = firestore.client()
         
         items_list = []
@@ -2248,7 +2253,6 @@ async def create_review(request: Request):
         review_doc_id = f"{reserved_date}_{reserved_time}"
         
         # 2. Firestore 중복 체크 및 저장
-        from firebase_admin import firestore
         db_fs = firestore.client()
         
         review_ref = db_fs.collection("fitting_reviews").document(review_doc_id)
@@ -2305,7 +2309,6 @@ async def get_booking_review_status(request: Request, booking_id: str):
             
         review_doc_id = f"{reserved_date}_{reserved_time}"
         
-        from firebase_admin import firestore
         db_fs = firestore.client()
         review_doc = db_fs.collection("fitting_reviews").document(review_doc_id).get()
         
@@ -2321,7 +2324,6 @@ async def get_fitting_reviews(limit: int = 30):
     개인정보 보호를 위해 작성자명은 마스킹 처리하여 반환합니다.
     """
     try:
-        from firebase_admin import firestore
         db_fs = firestore.client()
         
         if db_fs is None:
@@ -2383,7 +2385,15 @@ async def request_booking_order_cancel(request: Request, background_tasks: Backg
         order_ids = list(payments_data.keys())
         if not order_ids:
             return JSONResponse(status_code=404, content={"status": "error", "message": "주문번호를 조회할 수 없습니다."})
-        order_id = order_ids[0]
+        
+        order_id = None
+        for oid in order_ids:
+            p_info = payments_data.get(oid)
+            if isinstance(p_info, dict) and p_info.get("status") == "결제 완료":
+                order_id = oid
+                break
+        if not order_id:
+            order_id = order_ids[0]
 
         # 2. booking_orders에서 주문 정보 확인
         order_ref = rtdb.reference(f"booking_orders/{order_id}")
@@ -2468,7 +2478,15 @@ async def request_booking_order_exchange(request: Request, background_tasks: Bac
         order_ids = list(payments_data.keys())
         if not order_ids:
             return JSONResponse(status_code=404, content={"status": "error", "message": "주문번호를 조회할 수 없습니다."})
-        order_id = order_ids[0]
+        
+        order_id = None
+        for oid in order_ids:
+            p_info = payments_data.get(oid)
+            if isinstance(p_info, dict) and p_info.get("status") == "결제 완료":
+                order_id = oid
+                break
+        if not order_id:
+            order_id = order_ids[0]
 
         # 2. booking_orders에서 주문 정보 확인
         order_ref = rtdb.reference(f"booking_orders/{order_id}")

@@ -20,6 +20,15 @@ def sanitize_email_for_rtdb(email: str) -> str:
     """
     return email.replace(".", "_dot_").replace("@", "_at_")
 
+def get_social_redirect_uri(request: Request, provider: str) -> str:
+    is_local = "localhost" in str(request.base_url) or "127.0.0.1" in str(request.base_url)
+    if provider == "naver":
+        return NAVER_TEST_REDIRECT_URI if (is_local and NAVER_TEST_REDIRECT_URI) else NAVER_REDIRECT_URI
+    elif provider == "kakao":
+        return KAKAO_TEST_REDIRECT_URI if (is_local and KAKAO_TEST_REDIRECT_URI) else KAKAO_REDIRECT_URI
+    return ""
+
+
 
 # 텔레그램 설정 로드 (database/telegram.json)
 TELEGRAM_BOT_TOKEN = None
@@ -406,8 +415,7 @@ async def naver_login(request: Request, next: str = None, agree: bool = False):
     # CSRF 방지를 위한 state 난수 생성
     state = secrets.token_hex(16)
     
-    is_local = "localhost" in str(request.base_url) or "127.0.0.1" in str(request.base_url)
-    redirect_uri = NAVER_TEST_REDIRECT_URI if (is_local and NAVER_TEST_REDIRECT_URI) else NAVER_REDIRECT_URI
+    redirect_uri = get_social_redirect_uri(request, "naver")
     
     params = {
         "response_type": "code",
@@ -585,8 +593,7 @@ async def kakao_login(request: Request, next: str = None, agree: bool = False):
     # CSRF 방지를 위한 state 난수 생성
     state = secrets.token_hex(16)
     
-    is_local = "localhost" in str(request.base_url) or "127.0.0.1" in str(request.base_url)
-    redirect_uri = KAKAO_TEST_REDIRECT_URI if (is_local and KAKAO_TEST_REDIRECT_URI) else KAKAO_REDIRECT_URI
+    redirect_uri = get_social_redirect_uri(request, "kakao")
     
     params = {
         "client_id": KAKAO_CLIENT_ID,
@@ -621,8 +628,7 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
     token_url = "https://kauth.kakao.com/oauth/token"
     headers = {"Content-Type": "application/x-www-form-urlencoded;charset=utf-8"}
     
-    is_local = "localhost" in str(request.base_url) or "127.0.0.1" in str(request.base_url)
-    redirect_uri = KAKAO_TEST_REDIRECT_URI if (is_local and KAKAO_TEST_REDIRECT_URI) else KAKAO_REDIRECT_URI
+    redirect_uri = get_social_redirect_uri(request, "kakao")
     
     token_params = {
         "grant_type": "authorization_code",
