@@ -1965,7 +1965,9 @@ async def kakaopay_ready(request: Request):
             "Content-Type": "application/json"
         }
 
-        base_url = f"{request.url.scheme}://{request.url.netloc}"
+        is_local = "localhost" in request.url.netloc or "127.0.0.1" in request.url.netloc
+        scheme = "http" if is_local else "https"
+        base_url = f"{scheme}://{request.url.netloc}"
         if order_type == "booking":
             approval_url = f"{base_url}/api/payment/booking_success?orderNo={order_id}"
         else:
@@ -2052,7 +2054,9 @@ async def tosspay_ready(request: Request):
         url = "https://pay.toss.im/api/v2/payments"
         headers = {"Content-Type": "application/json"}
 
-        base_url = f"{request.url.scheme}://{request.url.netloc}"
+        is_local = "localhost" in request.url.netloc or "127.0.0.1" in request.url.netloc
+        scheme = "http" if is_local else "https"
+        base_url = f"{scheme}://{request.url.netloc}"
         if order_type == "booking":
             ret_url = f"{base_url}/api/payment/booking_success?orderNo={order_id}"
         else:
