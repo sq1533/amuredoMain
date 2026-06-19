@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException, Response
+from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException, Response, BackgroundTasks
+from starlette.concurrency import run_in_threadpool
 from firebase_admin import firestore
 from firebase_admin import db as rtdb
 import requests
@@ -75,8 +76,29 @@ def get_password_hash(password: str) -> str:
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
+def send_telegram_wholesale_notification(token: str, chat_id: str, message: str, file_data: bytes = None, filename: str = None, content_type: str = None):
+    try:
+        # 1. 텍스트 메시지 전송
+        requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={"chat_id": chat_id, "text": message},
+            timeout=5
+        )
+        # 2. 이미지 파일 전송 (존재할 경우)
+        if file_data:
+            files = {"photo": (filename, file_data, content_type)}
+            requests.post(
+                f"https://api.telegram.org/bot{token}/sendPhoto",
+                data={"chat_id": chat_id},
+                files=files,
+                timeout=10
+            )
+    except Exception as e:
+        print(f"🔥 도매 가입 텔레그램 알림 백그라운드 발송 실패: {e}")
+
 @router.post("/register")
 async def register_wholesale(
+    background_tasks: BackgroundTasks,
     name: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
@@ -120,7 +142,7 @@ async def register_wholesale(
         }
         user_ref.set(user_data)
 
-        # 3. 텔레그램 관리자 알림 전송
+        # 3. 텔레그램 관리자 알림 전송 (비동기 백그라운드 예약)
         message = (
             f"🔔 [도매 가입 신청 알림]\n\n"
             f"👤 대표자명: {name}\n"
@@ -129,18 +151,19 @@ async def register_wholesale(
             f"위 정보를 확인 후 관리자 페이지에서 승인 처리를 진행해 주세요."
         )
         
-        # 텍스트 메시지 전송
-        requests.post(
-            f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
-            json={"chat_id": TELEGRAM_CHAT_ID, "text": message}
-        )
-
-        # 사업자 등록증 이미지 전송
-        files = {"photo": (business_license.filename, await business_license.read(), business_license.content_type)}
-        requests.post(
-            f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto",
-            data={"chat_id": TELEGRAM_CHAT_ID},
-            files=files
+        # 스트림이 닫히기 전에 바이트를 미리 읽어옴
+        file_bytes = await business_license.read()
+        filename = business_license.filename
+        content_type = business_license.content_type
+        
+        background_tasks.add_task(
+            send_telegram_wholesale_notification,
+            token=TELEGRAM_BOT_TOKEN,
+            chat_id=TELEGRAM_CHAT_ID,
+            message=message,
+            file_data=file_bytes,
+            filename=filename,
+            content_type=content_type
         )
 
         return {"status": "success", "message": "가입 신청이 완료되었습니다. 관리자 승인 후 이용 가능합니다."}
@@ -426,7 +449,7 @@ async def naver_callback(request: Request, code: str = None, state: str = None, 
     }
     
     try:
-        token_res = requests.post(token_url, params=token_params)
+        token_res = await run_in_threadpool(requests.post, token_url, params=token_params, timeout=10)
         if token_res.status_code != 200:
             return RedirectResponse(url="/login?error=token_failed")
             
@@ -438,7 +461,7 @@ async def naver_callback(request: Request, code: str = None, state: str = None, 
         # 사용자 프로필 조회
         profile_url = "https://openapi.naver.com/v1/nid/me"
         headers = {"Authorization": f"Bearer {access_token}"}
-        profile_res = requests.get(profile_url, headers=headers)
+        profile_res = await run_in_threadpool(requests.get, profile_url, headers=headers, timeout=10)
         
         if profile_res.status_code != 200:
             return RedirectResponse(url="/login?error=profile_failed")
@@ -610,7 +633,7 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
     }
     
     try:
-        token_res = requests.post(token_url, data=token_params, headers=headers)
+        token_res = await run_in_threadpool(requests.post, token_url, data=token_params, headers=headers, timeout=10)
         if token_res.status_code != 200:
             print(f"🔥 카카오 토큰 발급 에러 응답: {token_res.text}")
             return RedirectResponse(url="/login?error=token_failed")
@@ -626,7 +649,7 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
         }
-        profile_res = requests.get(profile_url, headers=headers)
+        profile_res = await run_in_threadpool(requests.get, profile_url, headers=headers, timeout=10)
         
         if profile_res.status_code != 200:
             print(f"🔥 카카오 프로필 조회 에러 응답: {profile_res.text}")

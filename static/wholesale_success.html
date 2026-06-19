@@ -233,7 +233,7 @@
 <body>
     <div class="success-container">
         <div class="success-icon-badge">✓</div>
-        <h1 class="success-title">결제 성공</h1>
+        <h1 class="success-title" id="successTitle">결제 성공</h1>
         <p class="success-desc" id="successDesc">
             가맹점주님, 결제해 주셔서 대단히 감사합니다.<br>
             빠른 시일 내에 안전하게 배송해 드리겠습니다.
@@ -250,6 +250,23 @@
             <div id="receiptLoader" class="loader-spinner"></div>
 
             <div id="receiptContent" style="display: none;">
+                <!-- 가상계좌 정보 카드 -->
+                <div id="vaccountInfoBox" style="display: none; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: left;">
+                    <div style="font-size: 1rem; font-weight: 800; color: #10b981; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                        🏦 입금 대기 안내 (가상계좌)
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; color: #d1d5db;">
+                        <div style="display: flex; justify-content: space-between;"><span style="color: #9ca3af;">은행명</span><span id="vaccountBank" style="font-weight: 700;">-</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span style="color: #9ca3af;">계좌번호</span><span id="vaccountNumber" style="font-weight: 800; color: #f3f4f6; letter-spacing: 0.5px;">-</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span style="color: #9ca3af;">예금주</span><span style="font-weight: 700;">(주)아무래도안경</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span style="color: #9ca3af;">입금기한</span><span id="vaccountExpire" style="font-weight: 700; color: #ef4444;">-</span></div>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 0.78rem; color: #9ca3af; line-height: 1.4; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 8px;">
+                        * 기한 내 미입금 시 자동으로 계좌가 회수되며 주문이 취소됩니다.<br>
+                        * 가상계좌 입금 안내 메일이 가맹점 이메일로 발송되었습니다.
+                    </div>
+                </div>
+
                 <div class="receipt-items-list" id="receiptItems">
                     <!-- 상품 항목 동적 렌더링 -->
                 </div>
@@ -298,8 +315,30 @@
                     throw new Error("주문 내역 없음");
                 }
 
-                // 타이틀 커스텀 인사말
-                document.getElementById("successDesc").innerHTML = `<strong>${data.customerName} 가맹점주님</strong>, 결제해 주셔서 대단히 감사합니다.<br>빠른 시일 내에 안전하게 배송해 드리겠습니다.`;
+                // 타이틀 커스텀 인사말 및 가상계좌 분기
+                const isVaccount = data.method && data.method.toUpperCase() === "VACCOUNT";
+                if (isVaccount) {
+                    document.getElementById("successTitle").textContent = "가상계좌 발급";
+                    document.getElementById("successDesc").innerHTML = `<strong>${data.customerName} 가맹점주님</strong>, 가상계좌가 발급되었습니다.<br>아래 정보를 확인하여 기한 내 입금해 주시기 바랍니다.`;
+                    
+                    if (data.virtualAccount) {
+                        document.getElementById("vaccountBank").textContent = data.virtualAccount.bankName || "-";
+                        document.getElementById("vaccountNumber").textContent = data.virtualAccount.accountNumber || "-";
+                        
+                        let expireStr = data.virtualAccount.expireDateTime || "-";
+                        if (expireStr.length === 14) {
+                            expireStr = `${expireStr.slice(0,4)}-${expireStr.slice(4,6)}-${expireStr.slice(6,8)} ${expireStr.slice(8,10)}:${expireStr.slice(10,12)}:${expireStr.slice(12,14)}`;
+                        } else if (expireStr.includes("T")) {
+                            expireStr = expireStr.replace("T", " ").split("+")[0];
+                        }
+                        document.getElementById("vaccountExpire").textContent = expireStr;
+                        document.getElementById("vaccountInfoBox").style.display = "block";
+                    }
+                } else {
+                    document.getElementById("successTitle").textContent = "결제 성공";
+                    document.getElementById("successDesc").innerHTML = `<strong>${data.customerName} 가맹점주님</strong>, 결제해 주셔서 대단히 감사합니다.<br>빠른 시일 내에 안전하게 배송해 드리겠습니다.`;
+                    document.getElementById("vaccountInfoBox").style.display = "none";
+                }
 
                 // 영수증 정보 매핑
                 document.getElementById("orderIdText").textContent = data.orderId;

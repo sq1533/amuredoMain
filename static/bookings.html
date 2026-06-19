@@ -226,6 +226,11 @@
             color: #777;
             border: 1px solid #ddd;
         }
+        .status-badge.vaccount-pending-badge {
+            background: #fff8eb;
+            color: #f0ad4e;
+            border: 1px solid #ffe8c1;
+        }
 
         /* 🏁 예약 상품 리스트 디자인 */
         .goods-list {
@@ -582,9 +587,10 @@
                         const isCancelRequested = (displayStatus === "취소 요청 완료");
                         const isExchangeRequested = (displayStatus === "교환 요청 완료");
                         const isRefundOrExchangeCompleted = (displayStatus === "환불 및 교환 완료");
+                        const isVAccountPending = (displayStatus === "입금 대기");
 
                         const card = document.createElement("div");
-                        card.className = `expander-card ${isCancelled ? 'cancelled' : ''} ${isCompleted ? 'completed' : ''} ${isPaid ? 'paid' : ''} ${isCancelRequested ? 'cancel-req' : ''} ${isExchangeRequested ? 'exchange-req' : ''} ${isRefundOrExchangeCompleted ? 'refund-completed' : ''}`;
+                        card.className = `expander-card ${isCancelled ? 'cancelled' : ''} ${isCompleted ? 'completed' : ''} ${isPaid ? 'paid' : ''} ${isCancelRequested ? 'cancel-req' : ''} ${isExchangeRequested ? 'exchange-req' : ''} ${isRefundOrExchangeCompleted ? 'refund-completed' : ''} ${isVAccountPending ? 'vaccount-pending' : ''}`;
                         card.id = `card-${booking.bookingId}`;
 
                         // 예약에 포함된 아이템 목록
@@ -652,7 +658,7 @@
                                     <div class="info-panel" style="flex-direction: column; align-items: flex-start; gap: 8px;">
                                         <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                                             <div style="font-weight: 700; color: #0e3a5b;">예약 ID: ${booking.bookingId}</div>
-                                            <span class="status-badge ${isCancelled ? 'cancelled-badge' : ''} ${isCompleted ? 'completed-badge' : ''} ${isPaid ? 'paid-badge' : ''} ${isCancelRequested ? 'cancel-req-badge' : ''} ${isExchangeRequested ? 'exchange-req-badge' : ''} ${isRefundOrExchangeCompleted ? 'refund-completed-badge' : ''}">${displayStatus}</span>
+                                            <span class="status-badge ${isCancelled ? 'cancelled-badge' : ''} ${isCompleted ? 'completed-badge' : ''} ${isPaid ? 'paid-badge' : ''} ${isCancelRequested ? 'cancel-req-badge' : ''} ${isExchangeRequested ? 'exchange-req-badge' : ''} ${isRefundOrExchangeCompleted ? 'refund-completed-badge' : ''} ${isVAccountPending ? 'vaccount-pending-badge' : ''}">${displayStatus}</span>
                                         </div>
                                         ${booking.bookingType === 'visit' ? `
                                             <div style="margin: 2px 0;">방문 예정일: <span class="info-date-val">${booking.reservedDate}</span></div>
@@ -677,7 +683,7 @@
                                         `).join('')}
                                     </div>
 
-                                    ${!isCancelled && !isCompleted && !isPaid && !isCancelRequested && !isExchangeRequested && !isRefundOrExchangeCompleted ? `
+                                    ${!isCancelled && !isCompleted && !isPaid && !isCancelRequested && !isExchangeRequested && !isRefundOrExchangeCompleted && !isVAccountPending ? `
                                         <div class="card-action-bar">
                                             <button class="btn-action btn-action-modify" data-id="${booking.bookingId}">예약 수정</button>
                                             ${booking.bookingType === 'visit' && booking.reservedDate === todayStr ? `
@@ -735,7 +741,7 @@
                         });
 
                         // 🏁 액션 버튼 이벤트 연결
-                        if (!isCancelled && !isCompleted && !isPaid && !isCancelRequested && !isExchangeRequested && !isRefundOrExchangeCompleted) {
+                        if (!isCancelled && !isCompleted && !isPaid && !isCancelRequested && !isExchangeRequested && !isRefundOrExchangeCompleted && !isVAccountPending) {
                             const btnModify = card.querySelector(".btn-action-modify");
                             const btnCancel = card.querySelector(".btn-action-cancel");
 
