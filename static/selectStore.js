@@ -646,42 +646,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
         function updateSlider() {
             const cards = reviewsContainer.querySelectorAll(".review-card");
-            if (cards.length === 0) return;
-
-            const cardWidth = cards[0].offsetWidth;
-            const gap = 30; // CSS gap 값 (style.css에서 gap: 30px로 설정됨)
-            
-            reviewsContainer.style.transform = `translateX(-${currentIdx * (cardWidth + gap)}px)`;
-
             const total = cards.length;
-            const visible = window.innerWidth > 992 ? 3 : (window.innerWidth > 768 ? 2 : 1);
-            
-            prevBtn.style.opacity = currentIdx === 0 ? "0.3" : "1";
-            prevBtn.style.pointerEvents = currentIdx === 0 ? "none" : "auto";
-            
-            const isEnd = currentIdx >= total - visible;
-            nextBtn.style.opacity = isEnd ? "0.3" : "1";
-            nextBtn.style.pointerEvents = isEnd ? "none" : "auto";
+            if (total === 0) return;
+
+            // 모든 카드의 3D 클래스 초기화
+            cards.forEach(card => {
+                card.classList.remove("active", "prev-card", "next-card");
+            });
+
+            if (total === 1) {
+                cards[0].classList.add("active");
+            } else if (total === 2) {
+                cards[currentIdx].classList.add("active");
+                const nextIdx = (currentIdx + 1) % total;
+                cards[nextIdx].classList.add("next-card");
+            } else {
+                const prevIdx = (currentIdx - 1 + total) % total;
+                const nextIdx = (currentIdx + 1) % total;
+
+                cards[currentIdx].classList.add("active");
+                cards[prevIdx].classList.add("prev-card");
+                cards[nextIdx].classList.add("next-card");
+            }
         }
 
         prevBtn.addEventListener("click", () => {
-            if (currentIdx > 0) {
-                currentIdx--;
-                updateSlider();
-            }
+            const cards = reviewsContainer.querySelectorAll(".review-card");
+            const total = cards.length;
+            if (total <= 1) return;
+            currentIdx = (currentIdx - 1 + total) % total;
+            updateSlider();
         });
 
         nextBtn.addEventListener("click", () => {
             const cards = reviewsContainer.querySelectorAll(".review-card");
-            const visible = window.innerWidth > 992 ? 3 : (window.innerWidth > 768 ? 2 : 1);
-            if (currentIdx < cards.length - visible) {
-                currentIdx++;
-                updateSlider();
-            }
-        });
-
-        window.addEventListener("resize", () => {
-            currentIdx = 0;
+            const total = cards.length;
+            if (total <= 1) return;
+            currentIdx = (currentIdx + 1) % total;
             updateSlider();
         });
 

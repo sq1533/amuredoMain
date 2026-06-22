@@ -1765,7 +1765,7 @@ body {
 .checklist-section {
     padding: 4rem 1.5rem;
     background-color: #fff;
-    margin-bottom: 4rem;
+    margin-bottom: 0;
 }
 
 .checklist-container {
@@ -1816,7 +1816,7 @@ body {
 
 /* 🏁 브랜드 채널 연결 섹션 스타일링 */
 .brand-channels-section {
-    padding: 2rem 1.5rem 6rem;
+    padding: 0 1.5rem 6rem;
     background-color: #fff;
 }
 
@@ -2315,64 +2315,107 @@ body {
 .reviews-slider-wrapper {
     position: relative;
     width: 100%;
+    max-width: 700px; /* 세로형으로 좁게 배치하여 가독성 강화 */
     margin: 0 auto;
-    padding: 0 50px;
+    padding: 50px 0; /* 위아래 조작 화살표 공간 확보 */
     box-sizing: border-box;
+    perspective: 1200px;
+    perspective-origin: 50% 50%;
 }
 
 .reviews-slider-container {
-    overflow: hidden;
+    overflow: visible; /* 3D 공간 연출을 위해 외부 노출 허용 */
     width: 100%;
-    padding: 20px 10px;
-    margin: -20px -10px;
+    height: 340px; /* 세로형 3개 카드 간격 높이 고정 */
+    position: relative;
+    margin: 0 auto;
 }
 
 .reviews-track {
-    display: flex;
-    gap: 30px;
-    transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
-    will-change: transform;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
 }
 
 .reviews-track .review-card {
-    flex: 0 0 calc(33.333% - 20px);
-    max-width: calc(33.333% - 20px);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateZ(-200px);
+    width: 90%;
+    max-width: 600px;
+    height: 120px; /* 높이를 컴팩트하게 제한 */
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(14, 58, 91, 0.08);
     border-radius: 20px;
-    padding: 30px;
-    position: relative;
+    padding: 15px 25px; /* 내부 여백 조절 */
     box-shadow: 0 10px 30px rgba(14, 58, 91, 0.02);
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 15px;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
 }
 
-.reviews-track .review-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 15px 40px rgba(14, 58, 91, 0.08);
-    border-color: #0e3a5b;
+/* 3D 휠 위치 상태 정의 (위, 가운데, 아래) */
+.reviews-track .review-card.active {
+    transform: translate(-50%, -50%) translateZ(90px) rotateX(0deg);
+    opacity: 1;
+    z-index: 10;
     background: #ffffff;
+    border-color: rgba(14, 58, 91, 0.15);
+    box-shadow: 0 15px 40px rgba(14, 58, 91, 0.08);
+    pointer-events: auto;
+    height: 195px; /* 가운데 카드는 텍스트 전체 노출을 위해 높이 대폭 확장 */
+}
+
+.reviews-track .review-card.active:hover {
+    transform: translate(-50%, -50%) translateZ(105px) rotateX(0deg);
+    border-color: #0e3a5b;
+}
+
+/* 활성 카드 상태에서만 텍스트 말줄임 해제 및 전체 노출 */
+.reviews-track .review-card.active .review-body {
+    white-space: pre-wrap;
+    overflow-y: auto;
+    text-overflow: clip;
+}
+
+.reviews-track .review-card.prev-card {
+    transform: translate(-50%, -150%) translateZ(-60px) rotateX(28deg);
+    opacity: 0.45;
+    z-index: 5;
+    scale: 0.84;
+}
+
+.reviews-track .review-card.next-card {
+    transform: translate(-50%, 50%) translateZ(-60px) rotateX(-28deg);
+    opacity: 0.45;
+    z-index: 5;
+    scale: 0.84;
 }
 
 .slider-arrow {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    left: 50%;
+    transform: translateX(-50%);
     background: #ffffff;
     border: 1px solid #eaeaea;
     color: #0e3a5b;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     cursor: pointer;
-    z-index: 5;
-    font-size: 1.25rem;
+    z-index: 15;
+    font-size: 1.1rem;
     font-weight: bold;
     display: flex;
     align-items: center;
@@ -2390,8 +2433,13 @@ body {
     box-shadow: 0 6px 20px rgba(14, 58, 91, 0.15);
 }
 
-.slider-arrow.prev { left: 0; }
-.slider-arrow.next { right: 0; }
+.slider-arrow.prev {
+    top: 0;
+}
+
+.slider-arrow.next {
+    bottom: 0;
+}
 
 .review-header-info {
     display: flex;
@@ -2401,22 +2449,24 @@ body {
 
 .review-stars {
     color: #ffb703;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     letter-spacing: 1px;
 }
 
 .review-date {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #888;
     font-weight: 500;
 }
 
 .review-body {
-    font-size: 0.95rem;
-    line-height: 1.65;
+    font-size: 0.85rem;
+    line-height: 1.5;
     color: #444;
     word-break: keep-all;
-    white-space: pre-wrap;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* 카드가 작으므로 텍스트가 넘치면 말줄임 */
     flex-grow: 1;
 }
 
@@ -2425,65 +2475,73 @@ body {
     justify-content: space-between;
     align-items: center;
     border-top: 1px dashed #eee;
-    padding-top: 15px;
-    margin-top: 5px;
+    padding-top: 8px;
+    margin-top: 2px;
 }
 
 .review-author {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 800;
     color: #0e3a5b;
 }
 
 .review-badge {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
     color: #8b5e3c;
     background: rgba(139, 94, 60, 0.08);
-    padding: 3px 8px;
+    padding: 2px 6px;
     border-radius: 4px;
 }
 
-/* 🏁 구매 완료 스티커 디자인 효과 (over 효과 및 -4도 회전) */
+/* 🏁 구매 완료 스티커 디자인 효과 */
 .purchase-sticker {
     position: absolute;
-    top: -10px;
-    right: -10px;
-    width: 50px;
-    height: 50px;
-    z-index: 10;
+    top: -8px;
+    right: -8px;
+    width: 40px;
+    height: 40px;
+    z-index: 12;
     transform: rotate(-4deg);
     pointer-events: none;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.06));
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.review-card:hover .purchase-sticker {
-    transform: rotate(-8deg) scale(1.08);
-}
-
-@media (max-width: 992px) {
-    .reviews-track .review-card {
-        flex: 0 0 calc(50% - 15px);
-        max-width: calc(50% - 15px);
-    }
+.review-card.active:hover .purchase-sticker {
+    transform: rotate(-8deg) scale(1.06);
 }
 
 @media (max-width: 768px) {
     .reviews-section {
         margin: 50px auto;
     }
-    .reviews-track .review-card {
-        flex: 0 0 100%;
-        max-width: 100%;
-        padding: 24px;
-    }
     .reviews-slider-wrapper {
-        padding: 0 30px;
+        max-width: 100%;
+        padding: 40px 0;
+    }
+    .reviews-slider-container {
+        height: 320px;
+    }
+    .reviews-track .review-card {
+        width: 95%;
+        height: 110px;
+        padding: 12px 20px;
+    }
+    .reviews-track .review-card.active {
+        height: 175px; /* 모바일 환경용 활성 카드 높이 확장 */
+    }
+    .reviews-track .review-card.prev-card {
+        transform: translate(-50%, -145%) translateZ(-50px) rotateX(25deg);
+        scale: 0.85;
+    }
+    .reviews-track .review-card.next-card {
+        transform: translate(-50%, 45%) translateZ(-50px) rotateX(-25deg);
+        scale: 0.85;
     }
     .slider-arrow {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
+        width: 34px;
+        height: 34px;
+        font-size: 0.95rem;
     }
 }

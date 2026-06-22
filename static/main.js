@@ -208,58 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ====================================================
-       4. [공용 유틸리티] 데스크탑 마우스 드래그 가로 스크롤 호환 함수
-       ==================================================== */
-    function setupDesktopDrag(trackElement) {
-        let isDown = false;
-        let startX;
-        let scrollLeft;
 
-        trackElement.addEventListener('mousedown', (e) => {
-            isDown = true;
-            trackElement.classList.add('active-drag'); // 드래그 중 스냅 일시 해제
-            startX = e.pageX - trackElement.offsetLeft;
-            scrollLeft = trackElement.scrollLeft;
-        });
-
-        trackElement.addEventListener('mouseleave', () => {
-            if (!isDown) return;
-            isDown = false;
-            trackElement.classList.remove('active-drag');
-        });
-
-        trackElement.addEventListener('mouseup', (e) => {
-            if (!isDown) return;
-            isDown = false;
-            trackElement.classList.remove('active-drag');
-            
-            // 드래그 거리에 따른 강제 스냅 보정 로직
-            const endX = e.pageX - trackElement.offsetLeft;
-            const diff = startX - endX; // 양수: 다음으로 밀기, 음수: 이전으로 밀기
-            const threshold = 50; // 50px 이상 움직이면 다음 장으로 판단
-            const width = trackElement.offsetWidth;
-            
-            if (Math.abs(diff) > threshold) {
-                const target = diff > 0 
-                    ? Math.ceil(trackElement.scrollLeft / width) * width 
-                    : Math.floor(trackElement.scrollLeft / width) * width;
-                
-                trackElement.scrollTo({
-                    left: target,
-                    behavior: 'smooth'
-                });
-            }
-        });
-
-        trackElement.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - trackElement.offsetLeft;
-            const walk = (x - startX) * 1.5; // 드래그 가속도
-            trackElement.scrollLeft = scrollLeft - walk;
-        });
-    }
 
     /* ====================================================
        🏁 5. 피팅 서비스 리뷰(후기) 동적 로딩 및 렌더링 로직
@@ -342,42 +291,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
         function updateSlider() {
             const cards = reviewsContainer.querySelectorAll(".review-card");
-            if (cards.length === 0) return;
-
-            const cardWidth = cards[0].offsetWidth;
-            const gap = 30; // CSS gap 값
-            
-            reviewsContainer.style.transform = `translateX(-${currentIdx * (cardWidth + gap)}px)`;
-
             const total = cards.length;
-            const visible = window.innerWidth > 992 ? 3 : (window.innerWidth > 768 ? 2 : 1);
-            
-            prevBtn.style.opacity = currentIdx === 0 ? "0.3" : "1";
-            prevBtn.style.pointerEvents = currentIdx === 0 ? "none" : "auto";
-            
-            const isEnd = currentIdx >= total - visible;
-            nextBtn.style.opacity = isEnd ? "0.3" : "1";
-            nextBtn.style.pointerEvents = isEnd ? "none" : "auto";
+            if (total === 0) return;
+
+            // 모든 카드의 3D 클래스 초기화
+            cards.forEach(card => {
+                card.classList.remove("active", "prev-card", "next-card");
+            });
+
+            if (total === 1) {
+                cards[0].classList.add("active");
+            } else if (total === 2) {
+                cards[currentIdx].classList.add("active");
+                const nextIdx = (currentIdx + 1) % total;
+                cards[nextIdx].classList.add("next-card");
+            } else {
+                const prevIdx = (currentIdx - 1 + total) % total;
+                const nextIdx = (currentIdx + 1) % total;
+
+                cards[currentIdx].classList.add("active");
+                cards[prevIdx].classList.add("prev-card");
+                cards[nextIdx].classList.add("next-card");
+            }
         }
 
         prevBtn.addEventListener("click", () => {
-            if (currentIdx > 0) {
-                currentIdx--;
-                updateSlider();
-            }
+            const cards = reviewsContainer.querySelectorAll(".review-card");
+            const total = cards.length;
+            if (total <= 1) return;
+            currentIdx = (currentIdx - 1 + total) % total;
+            updateSlider();
         });
 
         nextBtn.addEventListener("click", () => {
             const cards = reviewsContainer.querySelectorAll(".review-card");
-            const visible = window.innerWidth > 992 ? 3 : (window.innerWidth > 768 ? 2 : 1);
-            if (currentIdx < cards.length - visible) {
-                currentIdx++;
-                updateSlider();
-            }
-        });
-
-        window.addEventListener("resize", () => {
-            currentIdx = 0;
+            const total = cards.length;
+            if (total <= 1) return;
+            currentIdx = (currentIdx + 1) % total;
             updateSlider();
         });
 
