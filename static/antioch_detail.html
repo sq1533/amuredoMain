@@ -144,7 +144,7 @@
                         <span style="font-size: 0.95rem; font-weight: 700; color: #555; margin-right: 15px;">발주 수량</span>
                         <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 6px; overflow: hidden; background: #fff;">
                             <button id="qtyMinusBtn" style="width: 40px; height: 40px; border: none; background: #f8f9fa; cursor: pointer; font-size: 1.2rem; color: #333; transition: background 0.2s;">-</button>
-                            <input type="number" id="qtyInput" value="5" min="5" max="30" step="5" style="width: 60px; height: 40px; text-align: center; border: none; border-left: 1px solid #ccc; border-right: 1px solid #ccc; font-size: 1.1rem; font-weight: bold; outline: none; -moz-appearance: textfield;">
+                            <input type="number" id="qtyInput" value="1" min="1" max="20" step="1" style="width: 60px; height: 40px; text-align: center; border: none; border-left: 1px solid #ccc; border-right: 1px solid #ccc; font-size: 1.1rem; font-weight: bold; outline: none; -moz-appearance: textfield;">
                             <button id="qtyPlusBtn" style="width: 40px; height: 40px; border: none; background: #f8f9fa; cursor: pointer; font-size: 1.2rem; color: #333; transition: background 0.2s;">+</button>
                         </div>
                     </div>
@@ -315,28 +315,22 @@
             `;
             document.head.appendChild(style);
 
-            // 수량 포맷 및 제한 강제 적용 (5단위 올림, 5~30)
+            // 수량 포맷 및 제한 강제 적용 (1~20)
             function formatQuantity() {
-                let val = parseInt(qtyInput.value) || 0;
-                val = Math.ceil(val / 5) * 5;
-                if (val < 5) val = 5;
-                if (val > 30) val = 30;
-                qtyInput.value = val;
+                qtyInput.value = Math.max(1, Math.min(20, parseInt(qtyInput.value) || 0));
             }
 
             qtyMinusBtn.addEventListener("click", () => {
-                let val = parseInt(qtyInput.value) || 0;
-                qtyInput.value = val - 5;
+                qtyInput.value = (parseInt(qtyInput.value) || 0) - 1;
                 formatQuantity();
             });
 
             qtyPlusBtn.addEventListener("click", () => {
-                let val = parseInt(qtyInput.value) || 0;
-                qtyInput.value = val + 5;
+                qtyInput.value = (parseInt(qtyInput.value) || 0) + 1;
                 formatQuantity();
             });
 
-            // 수동 입력 시 포커스 해제되거나 엔터 칠 때 5단위 강제 맞춤
+            // 수동 입력 시 포커스 해제되거나 엔터 칠 때 제한 강제 맞춤
             qtyInput.addEventListener("blur", formatQuantity);
             qtyInput.addEventListener("keydown", (e) => {
                 if (e.key === "Enter") {
@@ -387,7 +381,7 @@
                             const existingIndex = cart.findIndex(item => item.id === itemId);
                             if (existingIndex > -1) {
                                 cart[existingIndex].quantity += qty;
-                                if (cart[existingIndex].quantity > 30) cart[existingIndex].quantity = 30;
+                                if (cart[existingIndex].quantity > 20) cart[existingIndex].quantity = 20;
                                 cart[existingIndex].total_price = cart[existingIndex].quantity * cart[existingIndex].unit_price;
                             } else {
                                 cart.push(cartItem);
@@ -396,6 +390,26 @@
                             // 쿠키 갱신 (유효기간 30일)
                             document.cookie = `wholesale_cart=${encodeURIComponent(JSON.stringify(cart))}; path=/; max-age=2592000`;
                             
+                            // Firebase RTDB에 실시간 즉시 동기화 수행
+                            fetch('/api/user/cart/sync', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ cart: cart })
+                            })
+                            .then(res => res.json())
+                            .then(syncData => {
+                                if (syncData.status === 'success') {
+                                    sessionStorage.setItem("initialCartState", JSON.stringify(cart));
+                                }
+                                // 동기화 완료 후 배지 즉각 갱신
+                                if (window.updateGlobalCartBadge) {
+                                    window.updateGlobalCartBadge("wholesale");
+                                }
+                            })
+                            .catch(err => {
+                                console.error("도매 장바구니 DB 동기화 실패:", err);
+                            });
+
                             // 커스텀 성공 팝업 노출
                             showCartToast();
                         } else {

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException, Response, BackgroundTasks
+from typing import Optional
 from starlette.concurrency import run_in_threadpool
 from firebase_admin import firestore
 from firebase_admin import db as rtdb
@@ -112,7 +113,7 @@ async def register_wholesale(
     email: str = Form(...),
     password: str = Form(...),
     business_number: str = Form(...),
-    business_license: UploadFile = File(...)
+    business_license: Optional[UploadFile] = File(None)
 ):
     try:
         # 백엔드 보안 검증 1: 비밀번호 화이트리스트 및 길이 검사 (정규식)
@@ -124,12 +125,16 @@ async def register_wholesale(
         if not re.match(r"^\d{10}$", business_number):
             return {"status": "error", "message": "사업자 등록 번호는 하이픈을 제외한 10자리 숫자여야 합니다."}
 
-        # 백엔드 보안 검증 2: 파일 용량 검사 (5MB = 5 * 1024 * 1024)
-        business_license.file.seek(0, 2) # 파일 끝으로 이동
-        file_size = business_license.file.tell() # 현재 위치(크기) 얻기
-        business_license.file.seek(0) # 다시 처음으로 이동
-        if file_size > 5 * 1024 * 1024:
-            return {"status": "error", "message": "5MB 이하의 이미지만 첨부 가능합니다."}
+        # 백엔드 보안 검증 3: 파일 용량 및 형식 검사
+        if business_license and business_license.filename:
+            business_license.file.seek(0, 2) # 파일 끝으로 이동
+            file_size = business_license.file.tell() # 현재 위치(크기) 얻기
+            business_license.file.seek(0) # 다시 처음으로 이동
+            if file_size > 5 * 1024 * 1024:
+                return {"status": "error", "message": "5MB 이하의 이미지만 첨부 가능합니다."}
+                
+            if not business_license.content_type.startswith("image/"):
+                return {"status": "error", "message": "이미지 파일만 첨부 가능합니다."}
 
         # DB 호출 지연 (서버 초기화 완료 후 요청 시점에만 호출됨)
         db = firestore.client()
@@ -160,10 +165,11 @@ async def register_wholesale(
             f"위 정보를 확인 후 관리자 페이지에서 승인 처리를 진행해 주세요."
         )
         
-        # 스트림이 닫히기 전에 바이트를 미리 읽어옴
-        file_bytes = await business_license.read()
-        filename = business_license.filename
-        content_type = business_license.content_type
+        # 스트림 닫히기 전 바이트 및 정보 미리 획득 (삼항 연산자 간소화)
+        has_license = bool(business_license and business_license.filename)
+        file_bytes = await business_license.read() if has_license else None
+        filename = business_license.filename if has_license else None
+        content_type = business_license.content_type if has_license else None
         
         background_tasks.add_task(
             send_telegram_wholesale_notification,

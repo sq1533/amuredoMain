@@ -537,7 +537,7 @@
                     <div class="file-header-wrapper">
                         <label style="margin-bottom: 0; white-space: nowrap;">사업자 등록증 첨부</label>
                         <label for="images" class="custom-file-label">파일 선택</label>
-                        <input type="file" id="images" name="business_license" accept="image/*" required>
+                        <input type="file" id="images" name="business_license" accept="image/*">
                     </div>
                     <div id="filePreview" class="file-preview-container" style="margin-top: 5px;"></div>
                 </div>
@@ -737,11 +737,16 @@
 
             passwordConfirmInput.addEventListener("input", checkPasswordMatch);
 
-            // 파일 선택 시 피드백 및 용량 제한 (5MB)
             imageInput.addEventListener("change", (e) => {
                 filePreview.innerHTML = "";
                 const file = e.target.files[0];
                 if (file) {
+                    // 이미지 파일 형식 검사
+                    if (!file.type.startsWith("image/")) {
+                        alert("이미지 파일만 첨부 가능합니다.");
+                        imageInput.value = ""; // 선택 초기화
+                        return;
+                    }
                     // 5MB 용량 제한
                     if (file.size > 5 * 1024 * 1024) {
                         alert("5MB 이하의 이미지만 첨부 가능합니다.");
