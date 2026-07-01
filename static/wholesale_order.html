@@ -428,9 +428,10 @@
             // 🏁 1. 결제 설정 로드 (다날)
             let clientKey = "";
             let merchantId = "";
+            let configData = null;
             try {
                 const configRes = await fetch("/api/payment/config");
-                const configData = await configRes.json();
+                configData = await configRes.json();
                 clientKey = configData.client_key;
                 merchantId = configData.merchant_id;
                 
