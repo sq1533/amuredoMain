@@ -37,7 +37,7 @@
     </script>
 </head>
 
-<body>
+<body class="main-body">
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P6STJHVH"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -83,161 +83,78 @@
             <div class="nav-overlay" id="navOverlay"></div>
         </header>
     
-    <!-- 🏁 풀와이드 배너 영역: 단일 비디오 배너 (상호작용 제거) -->
-    <section class="banner-section full-width">
-        <div class="banner-container">
-            <!-- 비디오 배너: 로딩 중 포스터 이미지 노출, 자동재생, 음소거, 반복재생 -->
-            <video 
-                id="mainBannerVideo"
-                class="banner-video" 
-                autoplay 
-                muted 
-                loop 
-                playsinline>
-                Your browser does not support the video tag.
-            </video>
-        </div>
-    </section>
+    <!-- 하단 메인 콘텐츠 및 푸터 컨테이너 (너비 제한 해제됨) -->
+    <div class="app-container main-page">
+        <main class="main-content main-grid-layout">
+            <!-- 4-1 배너 (12x6) -->
+            <div class="grid-cell banner-cell">
+                <div class="wireframe-text">배너 이미지 (12x6)</div>
+            </div>
 
-    <!-- 하단 메인 콘텐츠 및 푸터 컨테이너 (1024px 제한) -->
-    <div class="app-container">
-        <main class="main-content">
-            <!-- 🏁 피팅 서비스 후기 섹션 (Reviews Section) -->
-            <section class="reviews-section fade-in-section">
-                <div class="brand-story-header" style="text-align: center; margin-bottom: 45px;">
-                    <span class="eng-title">reviews</span>
-                    <h2 class="kor-title" style="font-size: 2.2rem; font-weight: 800; color: #0e3a5b; margin-top: 10px;">피팅 이용 후기</h2>
-                    <p style="font-size: 1rem; color: #666; margin-top: 10px;">1:1 피팅 서비스를 이용하신 고객님들의 진솔한 후기입니다.</p>
-                </div>
-                <div class="reviews-slider-wrapper">
-                    <button class="slider-arrow prev" id="reviewPrevBtn">▲</button>
-                    <div class="reviews-slider-container">
-                        <div class="reviews-track" id="reviewsContainer">
-                            <!-- 동적으로 리뷰 카드 주입 -->
-                        </div>
-                    </div>
-                    <button class="slider-arrow next" id="reviewNextBtn">▼</button>
-                </div>
-            </section>
+            <!-- 4-2 미니 배너 01 (8x4 + 4x4) -->
+            <div class="grid-cell mini-banner-01-text">
+                <div class="wireframe-text">미니 배너 01 텍스트 (8x4)</div>
+            </div>
+            <div class="grid-cell mini-banner-01-img">
+                <div class="wireframe-text">미니 배너 01 이미지 (4x4)</div>
+            </div>
 
-            <!-- 🏁 브랜드 스토리 (Gear Philosophy) 구역 -->
-            <section class="brand-story-section fade-in-section">
-                <div class="brand-story-header">
-                    <span class="eng-title">gear philosophy</span>
-                    <h2 class="kor-title">장비 철학</h2>
-                </div>
+            <!-- 4-3 미니 배너 02 (4x4 + 4x4 + 4x4) -->
+            <div class="grid-cell mini-banner-02-sub">
+                <div class="wireframe-text">미니 배너 02 서브타이틀 (4x4)</div>
+            </div>
+            <div class="grid-cell mini-banner-02-img">
+                <div class="wireframe-text">미니 배너 02 이미지 (4x4)</div>
+            </div>
+            <div class="grid-cell mini-banner-02-text">
+                <div class="wireframe-text">미니 배너 02 텍스트 (4x4)</div>
+            </div>
 
-                <div class="story-flex-container">
-                    <div class="story-text-wrap">
-                        <h2 class="story-subtitle">업무의 해상도를 높이는<br>완벽한 오피스 기어, 아무래도.</h2>
-                        <p class="story-body">아무래도는 단순한 안경을 넘어,<br>몰입을 방해하는 시각적 소음을 차단하는 '기어'를 만듭니다.<br>장시간 모니터 앞에서도 변함없는 편안함과<br>당신의 데스크테리어를 완성하는 미니멀한 스펙을 경험하세요.<br>전문가들을 위한 최적의 밸런스를 설계합니다.</p>
-                    </div>
-                    <div class="story-image-wrap">
-                        <img src="/static/img/brandStory.webp" alt="amuredo Gear Philosophy" class="brand-story-img">
-                    </div>
-                </div>
-            </section>
+            <!-- 4-4 미니 배너 03 (4x4 + 8x4) -->
+            <div class="grid-cell mini-banner-03-img">
+                <div class="wireframe-text">미니 배너 03 이미지 (4x4)</div>
+            </div>
+            <div class="grid-cell mini-banner-03-text">
+                <div class="wireframe-text">미니 배너 03 텍스트 (8x4)</div>
+            </div>
 
-            <!-- 🏁 통합 베스트 상품 영역 (Productive Line-up) -->
-            <section class="best-items-section fade-in-section">
-                <div class="brand-story-header" style="margin-bottom: 2rem;">
-                    <span class="eng-title">productive line-up</span>
-                    <h2 class="kor-title">워크스타일 큐레이션</h2>
-                </div>
+            <!-- 미니 배너와 시리즈 간 12x2 공간 확보 -->
+            <!-- 상단: 빈 공간 (12x1) -->
+            <div class="grid-cell series-gap-empty">
+                <div class="wireframe-text">빈 공간 (12x1)</div>
+            </div>
+            <!-- 하단: 시리즈 제목 텍스트 (12x1) -->
+            <div class="grid-cell series-gap-title">
+                <div class="wireframe-text">시리즈 제목 텍스트 (12x1)</div>
+            </div>
 
-                <!-- 탭 메뉴 (원형 기어 셀렉터 스타일) -->
-                <div class="best-tabs">
-                    <button class="best-tab active" data-event="focus">
-                        <span class="tab-icon">⊙</span>
-                        <span class="tab-text">Focus</span>
-                    </button>
-                    <button class="best-tab" data-event="meeting">
-                        <span class="tab-icon">◒</span>
-                        <span class="tab-text">Meet</span>
-                    </button>
-                    <button class="best-tab" data-event="drive">
-                        <span class="tab-icon">◈</span>
-                        <span class="tab-text">Drive</span>
-                    </button>
-                    <button class="best-tab" data-event="holiday">
-                        <span class="tab-icon">◇</span>
-                        <span class="tab-text">Day-off</span>
-                    </button>
-                </div>
+            <!-- 5. 시리즈 이미지 요소 3그리드 배치 4개 (3x5) -->
+            <div class="grid-cell series-img-01">
+                <div class="wireframe-text">시리즈 01 이미지 (3x5)</div>
+            </div>
+            <div class="grid-cell series-img-02">
+                <div class="wireframe-text">시리즈 02 이미지 (3x5)</div>
+            </div>
+            <div class="grid-cell series-img-03">
+                <div class="wireframe-text">시리즈 03 이미지 (3x5)</div>
+            </div>
+            <div class="grid-cell series-img-04">
+                <div class="wireframe-text">시리즈 04 이미지 (3x5)</div>
+            </div>
 
-                <!-- 🏁 모델 화보 & 해시태그 (2:1 비율 단일 화보 구조) -->
-                <div class="best-model-row fade-in-section">
-                    <div class="model-single-img-wrap">
-                        <img src="/static/img/main01.webp" id="bestMainBanner" alt="Best Gear Concept Banner">
-                    </div>
-                    <div class="model-text-wrap" id="bestHashtags">
-                        <span class="hashtag-text"># 초경량 기어</span>
-                        <span class="hashtag-text"># 시각 노이즈 차단</span>
-                        <span class="hashtag-text"># 12g의 혁신</span>
-                        <span class="hashtag-text"># 오피스 셋업</span>
-                    </div>
-                </div>
-
-                <!-- 아이템 3열 고정 그리드 -->
-                <div class="best-items-grid" id="bestItemsGrid">
-                    <!-- JS 코드가 선택된 탭의 데이터를 호출하여 삽입합니다 -->
-                </div>
-            </section>
-
-            <!-- 🏁 하단 기획: Gear Checklist (업무 스타일 자가진단) -->
-            <section class="checklist-section fade-in-section">
-                <div class="brand-story-header">
-                    <span class="eng-title">gear checklist</span>
-                    <h2 class="kor-title">당신의 워크 스타일에 맞는 기어는?</h2>
-                </div>
-                
-                <div class="checklist-container">
-                    <div class="checklist-item" onclick="location.href='/glasses?filter=엔지니어'">
-                        <div class="check-icon">□</div>
-                        <div class="check-content">
-                            <h3>장시간 모니터 앞에 있는 개발자/기획자</h3>
-                            <p>가벼움과 편안함이 최우선이라면? <strong>#엔지니어</strong> 라인업</p>
-                        </div>
-                    </div>
-                    <div class="checklist-item" onclick="location.href='/glasses?filter=오피스'">
-                        <div class="check-icon">□</div>
-                        <div class="check-content">
-                            <h3>클라이언트 미팅이 잦은 비즈니스맨</h3>
-                            <p>단정한 인상과 신뢰감이 필요하다면? <strong>#오피스</strong> 라인업</p>
-                        </div>
-                    </div>
-                    <div class="checklist-item" onclick="location.href='/sunglasses?filter=홀리데이'">
-                        <div class="check-icon">□</div>
-                        <div class="check-content">
-                            <h3>외근이 많고 이동이 잦은 필드 워커</h3>
-                            <p>강한 빛으로부터 시력을 보호해야 한다면? <strong>#홀리데이 포인트</strong> 라인업</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 🏁 브랜드 채널 연결 (Connect with Amuredo) -->
-            <section class="brand-channels-section fade-in-section">
-                <div class="brand-story-header">
-                    <span class="eng-title">connect with us</span>
-                    <h2 class="kor-title">아무래도와 연결하기</h2>
-                </div>
-
-                <div class="channels-container">
-                    <a href="#" id="naverStoreLink" target="_blank" class="channel-card">
-                        <div class="channel-icon">N</div>
-                        <span class="channel-name">Naver Store</span>
-                    </a>
-                    <a href="#" id="naverBlogLink" target="_blank" class="channel-card">
-                        <div class="channel-icon">B</div>
-                        <span class="channel-name">Official Blog</span>
-                    </a>
-                    <a href="#" id="instagramLink" target="_blank" class="channel-card">
-                        <div class="channel-icon">I</div>
-                        <span class="channel-name">Instagram</span>
-                    </a>
-                </div>
-            </section>
+            <!-- 6. 시리즈 텍스트 요소 3그리드 배치 4개 (3x1) -->
+            <div class="grid-cell series-txt-01">
+                <div class="wireframe-text">시리즈 01 제목 및 설명 (3x1)</div>
+            </div>
+            <div class="grid-cell series-txt-02">
+                <div class="wireframe-text">시리즈 02 제목 및 설명 (3x1)</div>
+            </div>
+            <div class="grid-cell series-txt-03">
+                <div class="wireframe-text">시리즈 03 제목 및 설명 (3x1)</div>
+            </div>
+            <div class="grid-cell series-txt-04">
+                <div class="wireframe-text">시리즈 04 제목 및 설명 (3x1)</div>
+            </div>
         </main>
 
         <!-- 공통 푸터(Footer): 사업자 정보 -->

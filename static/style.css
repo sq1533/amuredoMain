@@ -69,6 +69,7 @@ body {
 
 /* 헤더 내부의 실제 클릭 가능한 요소들은 클릭을 허용 */
 .main-header .pc-nav-left,
+.main-header .pc-nav-center,
 .main-header .pc-nav-right,
 .main-header .logo-wrapper,
 .main-header .menu-toggle-btn,
@@ -134,7 +135,6 @@ body {
     font-weight: 600;
     cursor: pointer;
     color: #222;
-    text-transform: uppercase; 
     letter-spacing: 1px; 
     transition: color 0.2s ease;
 }
@@ -2545,3 +2545,305 @@ body {
         font-size: 0.95rem;
     }
 }
+
+/* ==========================================================================
+   🏁 메인페이지 UI 그리드 개편 (12열 정사각형 그리드 와이어프레임)
+   ========================================================================== */
+
+/* 메인페이지 배경색 및 전체 너비 해제 오버라이딩 */
+body.main-body {
+    background-color: #F7F7F7 !important;
+}
+
+.app-container.main-page {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    background-color: #F7F7F7 !important;
+}
+
+.app-container.main-page .main-content {
+    max-width: none !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: #F7F7F7 !important;
+}
+
+/* 12열 정사각형 그리드 레이아웃 */
+.main-grid-layout {
+    display: grid !important;
+    grid-template-columns: repeat(12, 1fr) !important;
+    grid-auto-rows: calc(100vw / 12) !important; /* 1:1 정사각형 기저 형성 */
+    gap: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    background-color: #F7F7F7 !important;
+}
+
+/* 개별 그리드 셀 스타일 (와이어프레임) */
+.grid-cell {
+    border: 1px solid #ddd !important; /* 경계를 알아볼 수 있는 선 */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    background-color: #F7F7F7 !important;
+    padding: 20px !important;
+    overflow: hidden !important;
+}
+
+/* 각 그리드 셀의 배치 및 정렬 */
+
+/* 4-1 배너 (12x6) */
+.banner-cell {
+    grid-column: span 12 !important;
+    grid-row: span 6 !important;
+}
+
+/* 4-2 미니 배너 01 (8x4 + 4x4) - 왼쪽 정렬 */
+.mini-banner-01-text {
+    grid-column: span 8 !important;
+    grid-row: span 4 !important;
+    justify-content: flex-start !important;
+}
+.mini-banner-01-img {
+    grid-column: span 4 !important;
+    grid-row: span 4 !important;
+}
+
+/* 4-3 미니 배너 02 (4x4 + 4x4 + 4x4) - 중앙 정렬 */
+.mini-banner-02-sub {
+    grid-column: span 4 !important;
+    grid-row: span 4 !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+.mini-banner-02-img {
+    grid-column: span 4 !important;
+    grid-row: span 4 !important;
+}
+.mini-banner-02-text {
+    grid-column: span 4 !important;
+    grid-row: span 4 !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+/* 4-4 미니 배너 03 (4x4 + 8x4) - 오른쪽 정렬 */
+.mini-banner-03-img {
+    grid-column: span 4 !important;
+    grid-row: span 4 !important;
+}
+.mini-banner-03-text {
+    grid-column: span 8 !important;
+    grid-row: span 4 !important;
+    justify-content: flex-end !important;
+}
+
+/* 미니 배너와 시리즈 간 12x2 공간 확보 */
+.series-gap-empty {
+    grid-column: span 12 !important;
+    grid-row: span 1 !important;
+}
+.series-gap-title {
+    grid-column: span 12 !important;
+    grid-row: span 1 !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    padding-left: 40px !important; /* 약간의 좌측 패딩으로 균형감 확보 */
+}
+
+/* 5. 시리즈 이미지 요소 (3x5) 4개 */
+.series-img-01, .series-img-02, .series-img-03, .series-img-04 {
+    grid-column: span 3 !important;
+    grid-row: span 5 !important;
+}
+
+/* 6. 시리즈 텍스트 요소 (3x1) 4개 */
+.series-txt-01, .series-txt-02, .series-txt-03, .series-txt-04 {
+    grid-column: span 3 !important;
+    grid-row: span 1 !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+/* 와이어프레임 텍스트 스타일 */
+.wireframe-text {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: #888 !important;
+    letter-spacing: -0.3px !important;
+    word-break: keep-all !important;
+    text-align: inherit !important;
+}
+
+/* ==========================================================================
+   🏁 PC 헤더 3분할 정렬 및 플로팅 퀵 메뉴 + 슬라이드인 검색창 스타일
+   ========================================================================== */
+
+/* 상단 헤더 정렬 조율 */
+.pc-nav-center {
+    display: flex !important;
+    gap: 3.5rem !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 1 !important;
+}
+
+.pc-nav-right {
+    display: flex !important;
+    gap: 2rem !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex: 0 0 auto !important;
+}
+
+/* PC 플로팅 퀵 메뉴바 (오른쪽 하단 fixed 고정) */
+.floating-quick-menu {
+    position: fixed !important;
+    bottom: 40px !important;
+    right: 40px !important;
+    top: auto !important;
+    left: auto !important;
+    margin-left: 0 !important;
+    width: 170px !important;
+    height: 52px !important;
+    background: #ffffff !important;
+    border: 1px solid #eaeaea !important;
+    border-radius: 30px !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.06) !important;
+    z-index: 10001 !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: hidden !important;
+    pointer-events: auto !important;
+}
+
+.quick-btn {
+    flex: 1 !important;
+    height: 100% !important;
+    border: none !important;
+    background: transparent !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: #333 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+}
+
+
+
+/* 대각선 경계 구분선 */
+.diagonal-divider {
+    width: 1px !important;
+    height: 140% !important;
+    background-color: #eaeaea !important;
+    transform: rotate(25deg) !important;
+    margin: 0 -1px !important;
+    flex-shrink: 0 !important;
+}
+
+/* 슬라이드인 검색창 오버레이 및 패널 */
+.search-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
+    z-index: 10005 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: opacity 0.35s ease, visibility 0.35s ease !important;
+}
+
+.search-overlay.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.search-panel {
+    position: absolute !important;
+    top: 0 !important;
+    right: -420px !important; /* 화면 우측 바깥에 대기 */
+    width: 400px !important;
+    height: 100% !important;
+    background: #ffffff !important;
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1) !important;
+    padding: 60px 40px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    transition: right 0.4s cubic-bezier(0.77, 0, 0.175, 1) !important;
+}
+
+.search-overlay.active .search-panel {
+    right: 0 !important; /* 활성화 시 미끄러져 들어옴 */
+}
+
+/* 닫기 버튼 */
+.search-close-btn {
+    position: absolute !important;
+    top: 2rem !important;
+    right: 2rem !important;
+    background: transparent !important;
+    border: none !important;
+    font-size: 1.6rem !important;
+    cursor: pointer !important;
+    color: #444 !important;
+    transition: color 0.2s !important;
+}
+.search-close-btn:hover {
+    color: #d32f2f !important;
+}
+
+/* 검색 입력 폼 wrapper */
+.search-input-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    border-bottom: 2px solid #0e3a5b !important;
+    padding: 10px 0 !important;
+    margin-top: 10px !important;
+}
+
+#globalSearchInput {
+    flex: 1 !important;
+    border: none !important;
+    outline: none !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    color: #333 !important;
+    background: transparent !important;
+}
+
+#globalSearchInput::placeholder {
+    color: #aaa !important;
+}
+
+.search-submit-btn {
+    background: #0e3a5b !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 8px 16px !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: background 0.2s !important;
+}
+
+.search-submit-btn:hover {
+    background: #0b2d47 !important;
+}
+
+

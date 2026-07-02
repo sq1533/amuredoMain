@@ -11,18 +11,56 @@
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <link rel="stylesheet" href="/static/style.css?v=21.0">
     <style>
+        /* 🏁 로그인 페이지 12그리드 레이아웃 */
+        .login-grid-layout {
+            display: grid !important;
+            grid-template-columns: repeat(12, 1fr) !important;
+            grid-auto-rows: calc(100vw / 12) !important;
+            gap: 0 !important;
+            padding-top: 140px !important; /* 상단 헤더 높이만큼 마진 확보 */
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
         .login-container {
-            max-width: 440px;
-            margin: 150px auto;
+            grid-column: 5 / span 3 !important;
+            grid-row: 1 / span 4 !important;
+            width: auto !important;
+            max-width: none !important;
+            margin: 0 !important;
             padding: 40px;
             background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 20px 50px rgba(14, 58, 91, 0.06);
+            border-radius: 0 !important; /* 모서리 둥근 효과 삭제 */
+            border: 1px solid #eaeaea !important;
+            box-shadow: none !important; /* 그림자 효과 제거 */
             box-sizing: border-box;
             position: relative;
             overflow: hidden; /* 배경 파도가 박스 밖으로 튀어나가지 않도록 제한 */
             z-index: 1; /* 가상 요소 배경 위에 글자들이 올바르게 뜨도록 제어 */
             transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* 🏁 회원가입 switch 1그리드 셀 */
+        .register-switch-cell {
+            grid-column: 8 / span 1 !important;
+            grid-row: 1 / span 4 !important;
+            border: 1px solid #eaeaea !important;
+            border-left: none !important; /* 로그인 컨테이너 테두리와 겹침 방지 */
+            background-color: #ffffff !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            box-sizing: border-box !important;
+            transition: background-color 0.2s !important;
+            text-decoration: none !important;
+            text-align: center !important;
+            writing-mode: vertical-rl !important; /* 세로 글씨체로 1그리드 셀에 핏 */
+            letter-spacing: 4px !important;
+        }
+
+        .register-switch-cell:hover {
+            background-color: #fcfcfc !important;
         }
         
         /* 🏁 이중 오버레이: 블루/회색 배경 슬라이더 공통 스타일 */
@@ -156,11 +194,11 @@
             animation: panelFadeIn 0.4s ease-out forwards;
         }
         .form-group {
-            margin-bottom: 22px;
+            margin-bottom: 10px;
         }
         .form-group label {
             display: block;
-            margin-bottom: 8px; /* 라벨과 인풋 박스 간의 여백 유지 */
+            margin-bottom: 10px; /* 라벨과 인풋 박스 간의 여백 유지 */
             font-weight: 700;
             color: #0e3a5b; /* 기본 딥 블루 컬러 */
             font-size: 0.95rem;
@@ -194,7 +232,7 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 20px;
+            margin-top: 10px;
             box-shadow: 0 4px 12px rgba(14, 58, 91, 0.2);
         }
         .submit-btn:hover {
@@ -267,29 +305,44 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 📱 모바일 디바이스 최적화 여백 */
-        @media (max-width: 500px) {
+        /* 📱 모바일 디바이스 최적화 여백 및 그리드 해제 */
+        @media (max-width: 768px) {
+            .login-grid-layout {
+                display: flex !important;
+                flex-direction: column !important;
+                padding: 100px 20px 40px 20px !important;
+                gap: 15px !important;
+            }
             .login-container {
-                margin: 90px 15px 40px 15px; /* 상단 플로팅 메뉴바(70px) 고려하여 90px로 수정 */
-                padding: 30px 20px;
+                width: 100% !important;
+                height: auto !important;
+                padding: 30px 20px !important;
+            }
+            .register-switch-cell {
+                width: 100% !important;
+                height: 54px !important;
+                border-left: 1px solid #eaeaea !important;
+                writing-mode: horizontal-tb !important; /* 모바일에서는 가로 텍스트 */
+                letter-spacing: 2px !important;
             }
         }
     </style>
 </head>
 <body>
-    <div class="login-container" id="loginContainer">
-        <!-- 🏁 파도 애니메이션을 품을 이중 오버레이 슬라이더 레이어 -->
-        <div class="login-bg-overlay bg-blue" id="loginBgOverlay"></div>
-        <div class="login-bg-overlay bg-white" id="loginBgOverlayWhite"></div>
+    <div class="login-grid-layout">
+        <div class="login-container" id="loginContainer">
+            <!-- 🏁 파도 애니메이션을 품을 이중 오버레이 슬라이더 레이어 -->
+            <div class="login-bg-overlay bg-blue" id="loginBgOverlay"></div>
+            <div class="login-bg-overlay bg-white" id="loginBgOverlayWhite"></div>
 
-        <h1 class="login-title">amuredo</h1>
-        <p class="login-subtitle">아무래도 안경 통합 로그인 센터에 오신 것을 환영합니다.</p>
+            <h1 class="login-title">amuredo</h1>
+            <p class="login-subtitle">아무래도 안경 통합 로그인 센터에 오신 것을 환영합니다.</p>
 
-        <!-- 🏁 상단 전환 탭 버튼 2행 스위치 -->
-        <div class="login-tabs">
-            <button class="login-tab active" id="tabCustomer">고객 로그인</button>
-            <button class="login-tab" id="tabWholesale">사장님 로그인</button>
-        </div>
+            <!-- 🏁 상단 전환 탭 버튼 2행 스위치 -->
+            <div class="login-tabs">
+                <button class="login-tab active" id="tabCustomer">고객 로그인</button>
+                <button class="login-tab" id="tabWholesale">사장님 로그인</button>
+            </div>
 
         <!-- 🏁 [Panel 1] 일반 고객용 SNS 로그인 카드 패널 (1행 2열 원형 구조) -->
         <div class="customer-panel" id="panelCustomer">
@@ -318,9 +371,13 @@
                 <button type="submit" id="submitBtn" class="submit-btn">로그인</button>
             </form>
         </div>
-
-        <a href="/register" class="register-link">아직 회원이 아니신가요? 가입 신청하기</a>
     </div>
+
+    <!-- 회원가입 switch 버튼 1그리드 셀 -->
+    <div class="register-switch-cell" onclick="location.href='/register'">
+        <div class="wireframe-text" style="color: #333 !important; font-size: 1.1rem; font-weight: 800; text-align: center;">회원가입</div>
+    </div>
+</div>
 
     <!-- 🏁 커스텀 팝업 (모달) UI -->
     <div id="customModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
