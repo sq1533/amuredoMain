@@ -146,12 +146,12 @@ body {
 /* ========= 2.5 서브 페이지 공통 레이아웃 (여백 처리) ========= */
 /* 메인 페이지를 제외한 모든 서브 페이지의 본문 상단 여백 설정 (헤더 오버레이 대응) */
 .sub-page-main {
-    padding-top: 140px; /* PC 환경: 헤더 높이 + 여유 공간 */
+    padding-top: calc(4vw + 30px); /* PC 환경: 헤더 가변 높이(4vw) + 여유 여백 */
     padding-bottom: 5rem;
     min-height: 80vh; /* 푸터가 너무 올라오지 않게 최소 높이 확보 */
 }
 
-@media screen and (max-width: 640px) {
+@media screen and (max-width: 1024px) {
     .sub-page-main {
         padding-top: 100px; /* 모바일 환경: 헤더 높이 대응 */
     }
@@ -2681,6 +2681,199 @@ body.main-body {
 }
 
 /* ==========================================================================
+   🏁 와일드 모바일 (6그리드) & 모바일 (4그리드) 메인 페이지 그리드 반응형 오버라이드
+   ========================================================================== */
+
+/* 와일드 모바일 환경 (6그리드) */
+@media screen and (max-width: 1024px) and (min-width: 641px) {
+    .main-grid-layout {
+        grid-template-columns: repeat(6, 1fr) !important;
+        grid-auto-rows: calc(100vw / 6) !important;
+    }
+    .banner-cell {
+        grid-column: span 6 !important;
+        grid-row: span 6 !important;
+    }
+    .mini-banner-01-text {
+        grid-column: span 3 !important;
+        grid-row: span 3 !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+    .mini-banner-01-img {
+        grid-column: span 3 !important;
+        grid-row: span 3 !important;
+    }
+    .mini-banner-02-sub {
+        display: none !important;
+    }
+    .mini-banner-02-img {
+        grid-column: span 3 !important;
+        grid-row: span 3 !important;
+    }
+    .mini-banner-02-text {
+        grid-column: span 3 !important;
+        grid-row: span 3 !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+    .mini-banner-03-text {
+        grid-column: 1 / span 3 !important;
+        grid-row: span 3 !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+    .mini-banner-03-img {
+        grid-column: 4 / span 3 !important;
+        grid-row: span 3 !important;
+    }
+    .series-gap-empty {
+        grid-column: span 6 !important;
+        grid-row: span 1 !important;
+    }
+    .series-gap-title {
+        grid-column: span 6 !important;
+        grid-row: span 1 !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding-left: 0 !important;
+    }
+    .series-img-01 {
+        grid-column: 1 / span 3 !important;
+        grid-row: 18 / span 5 !important;
+    }
+    .series-img-02 {
+        grid-column: 4 / span 3 !important;
+        grid-row: 18 / span 5 !important;
+    }
+    .series-txt-01 {
+        grid-column: 1 / span 3 !important;
+        grid-row: 23 / span 1 !important;
+    }
+    .series-txt-02 {
+        grid-column: 4 / span 3 !important;
+        grid-row: 23 / span 1 !important;
+    }
+    .series-img-03 {
+        grid-column: 1 / span 3 !important;
+        grid-row: 24 / span 5 !important;
+    }
+    .series-img-04 {
+        grid-column: 4 / span 3 !important;
+        grid-row: 24 / span 5 !important;
+    }
+    .series-txt-03 {
+        grid-column: 1 / span 3 !important;
+        grid-row: 29 / span 1 !important;
+    }
+    .series-txt-04 {
+        grid-column: 4 / span 3 !important;
+        grid-row: 29 / span 1 !important;
+    }
+}
+
+/* 모바일 환경 (4그리드) */
+@media screen and (max-width: 640px) {
+    .main-grid-layout {
+        grid-template-columns: repeat(4, 1fr) !important;
+        grid-auto-rows: calc(100vw / 4) !important;
+    }
+    .banner-cell {
+        grid-column: span 4 !important;
+        grid-row: span 8 !important;
+    }
+    .mini-banner-01-img {
+        grid-column: span 4 !important;
+        grid-row: 9 / span 4 !important;
+    }
+    .mini-banner-01-text {
+        grid-column: span 4 !important;
+        grid-row: 13 / span 1 !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+    .mini-banner-02-sub {
+        display: none !important;
+    }
+    .mini-banner-02-img {
+        grid-column: span 4 !important;
+        grid-row: span 4 !important;
+    }
+    .mini-banner-02-text {
+        grid-column: span 4 !important;
+        grid-row: span 1 !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+    .mini-banner-03-img {
+        grid-column: span 4 !important;
+        grid-row: span 4 !important;
+    }
+    .mini-banner-03-text {
+        grid-column: span 4 !important;
+        grid-row: span 1 !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+    .series-gap-empty {
+        grid-column: span 4 !important;
+        grid-row: span 1 !important;
+    }
+    .series-gap-title {
+        grid-column: span 4 !important;
+        grid-row: span 1 !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding-left: 0 !important;
+    }
+    .series-img-01 {
+        grid-column: 1 / span 2 !important;
+        grid-row: 26 / span 4 !important;
+    }
+    .series-img-02 {
+        grid-column: 3 / span 2 !important;
+        grid-row: 26 / span 4 !important;
+    }
+    .series-txt-01 {
+        grid-column: 1 / span 2 !important;
+        grid-row: 30 / span 1 !important;
+    }
+    .series-txt-02 {
+        grid-column: 3 / span 2 !important;
+        grid-row: 30 / span 1 !important;
+    }
+    .series-img-03 {
+        grid-column: 1 / span 2 !important;
+        grid-row: 31 / span 4 !important;
+    }
+    .series-img-04 {
+        grid-column: 3 / span 2 !important;
+        grid-row: 31 / span 4 !important;
+    }
+    .series-txt-03 {
+        grid-column: 1 / span 2 !important;
+        grid-row: 35 / span 1 !important;
+    }
+    .series-txt-04 {
+        grid-column: 3 / span 2 !important;
+        grid-row: 35 / span 1 !important;
+    }
+    .search-panel {
+        width: 100% !important;
+        right: -100% !important;
+        padding: 60px 20px !important;
+    }
+    .search-overlay.active .search-panel {
+        right: 0 !important;
+    }
+    .search-close-btn {
+        top: 1.5rem !important;
+        right: 1.5rem !important;
+        font-size: 1.8rem !important;
+    }
+}
+
+/* ==========================================================================
    🏁 PC 헤더 3분할 정렬 및 플로팅 퀵 메뉴 + 슬라이드인 검색창 스타일
    ========================================================================== */
 
@@ -2845,5 +3038,20 @@ body.main-body {
 .search-submit-btn:hover {
     background: #0b2d47 !important;
 }
+
+/* 🏁 전역 반응형 그리드 시스템 정의 */
+.grid-system-12 {
+    display: grid !important;
+    grid-template-columns: repeat(12, 1fr) !important;
+}
+.grid-system-6 {
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+}
+.grid-system-4 {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+}
+
 
 

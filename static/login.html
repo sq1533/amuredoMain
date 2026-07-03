@@ -4,74 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 아무레도 검색엔진 최적화(SEO) 및 SNS 공유 설정 -->
-    <title>통합 로그인 - 아무래도 안경</title>
+    <title>통합 인증 센터 - 아무래도 안경</title>
     <meta name="description" content="분위기와 억양을 디자인을 디자인합니다. 아무래도 안경, 본질의 아름다움을 추구합니다">
     <link rel="icon" href="/static/img/icon.webp" type="image/webp">
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <link rel="stylesheet" href="/static/style.css?v=21.0">
     <style>
-        /* 🏁 로그인 페이지 12그리드 레이아웃 */
-        .login-grid-layout {
+        /* 🏁 통합 12그리드 레이아웃 */
+        .auth-grid-layout {
             display: grid !important;
             grid-template-columns: repeat(12, 1fr) !important;
             grid-auto-rows: calc(100vw / 12) !important;
             gap: 0 !important;
-            padding-top: 140px !important; /* 상단 헤더 높이만큼 마진 확보 */
+            padding-top: calc(4vw + 30px) !important; /* 상단 대형 헤더(4vw) 높이만큼 마진 확보 */
             width: 100% !important;
             box-sizing: border-box !important;
         }
 
-        .login-container {
-            grid-column: 5 / span 3 !important;
+        /* 🏁 유효 메인 프레임 (4~9번 컬럼 점유, 높이 6) */
+        .auth-grid-frame {
+            grid-column: 4 / span 6 !important;
             grid-row: 1 / span 4 !important;
-            width: auto !important;
-            max-width: none !important;
-            margin: 0 !important;
-            padding: 40px;
-            background: #fff;
-            border-radius: 0 !important; /* 모서리 둥근 효과 삭제 */
+            position: relative !important;
             border: 1px solid #eaeaea !important;
-            box-shadow: none !important; /* 그림자 효과 제거 */
-            box-sizing: border-box;
-            position: relative;
-            overflow: hidden; /* 배경 파도가 박스 밖으로 튀어나가지 않도록 제한 */
-            z-index: 1; /* 가상 요소 배경 위에 글자들이 올바르게 뜨도록 제어 */
-            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            background: #ffffff !important;
+            overflow: hidden !important;
+            display: flex !important;
+            box-sizing: border-box !important;
+            border-radius: 0 !important; /* 모서리 둥근 효과 삭제 */
+            box-shadow: none !important;
         }
 
-        /* 🏁 회원가입 switch 1그리드 셀 */
-        .register-switch-cell {
-            grid-column: 8 / span 1 !important;
-            grid-row: 1 / span 4 !important;
-            border: 1px solid #eaeaea !important;
-            border-left: none !important; /* 로그인 컨테이너 테두리와 겹침 방지 */
+        /* 🏁 슬라이딩 스위치 1그리드 오버레이 (너비 16.66%) */
+        .switch-overlay {
+            position: absolute !important;
+            top: 0 !important;
+            height: 100% !important;
+            width: 16.66% !important;
+            z-index: 10 !important;
             background-color: #ffffff !important;
+            border-left: 1px solid #eaeaea !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             cursor: pointer !important;
             box-sizing: border-box !important;
-            transition: background-color 0.2s !important;
+            transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1), background-color 0.2s !important;
             text-decoration: none !important;
             text-align: center !important;
-            writing-mode: vertical-rl !important; /* 세로 글씨체로 1그리드 셀에 핏 */
+            writing-mode: vertical-rl !important; /* 세로 글씨체 */
             letter-spacing: 4px !important;
+            left: 83.33% !important; /* 초기 로그인 뷰일 때 우측 배치 */
+            transform: translateX(0) !important;
         }
-
-        .register-switch-cell:hover {
+        .switch-overlay:hover {
             background-color: #fcfcfc !important;
         }
-        
-        /* 🏁 이중 오버레이: 블루/회색 배경 슬라이더 공통 스타일 */
-        .login-bg-overlay {
+
+        /* 🏁 콘텐츠 페인 공통 스타일 */
+        .auth-pane {
+            position: absolute !important;
+            top: 0 !important;
+            height: 100% !important;
+            width: 83.33% !important; /* 5그리드 분량 차지 */
+            box-sizing: border-box !important;
+            padding: 40px !important;
+            background: #ffffff !important;
+            transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.6s cubic-bezier(0.77, 0, 0.175, 1) !important;
+            overflow-y: auto !important; /* 세로 내용물 넘칠 시 유연하게 스크롤 제공 */
+        }
+
+        /* 1) 로그인 폼 페인 (좌측 배치) */
+        .login-form-pane {
+            left: 0 !important;
+            z-index: 5 !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transform: translateX(0) !important;
+        }
+
+        /* 2) 회원가입 폼 페인 (우측 배치) */
+        .register-form-pane {
+            right: 0 !important;
+            z-index: 5 !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transform: translateX(20px) !important;
+        }
+
+        /* 🏁 회원가입 뷰 상태 (Active) 적용 시 애니메이션 정의 */
+        .auth-grid-frame.register-active .switch-overlay {
+            transform: translateX(-500%) !important; /* 5칸만큼 왼쪽으로 수평 스크롤 이동 */
+            border-left: none !important;
+            border-right: 1px solid #eaeaea !important;
+        }
+        .auth-grid-frame.register-active .login-form-pane {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transform: translateX(-20px) !important;
+        }
+        .auth-grid-frame.register-active .register-form-pane {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transform: translateX(0) !important;
+        }
+
+        /* 🏁 이중 오버레이: 블루/화이트 배경 슬라이더 공통 스타일 */
+        .auth-bg-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: -1; /* 인풋창과 글자들 뒤에 위치 */
-            /* 파도의 물결 속도감 제어를 위한 정밀 가속도 곡선 탑재 */
             transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
         }
         
@@ -87,7 +133,7 @@
             transform: translateX(100%);
         }
 
-        .login-title {
+        .auth-title {
             font-size: 2rem;
             font-weight: 800;
             color: #0e3a5b;
@@ -96,7 +142,7 @@
             letter-spacing: -0.5px;
             transition: color 0.4s ease;
         }
-        .login-subtitle {
+        .auth-subtitle {
             font-size: 0.95rem;
             color: #777;
             margin-bottom: 35px;
@@ -106,15 +152,15 @@
             transition: color 0.4s ease;
         }
         
-        /* 🏁 상단 이중 로그인 탭 스위치 스타일 */
-        .login-tabs {
+        /* 🏁 상단 이중 로그인/가입 탭 스위치 스타일 */
+        .auth-tabs {
             display: flex;
             border-bottom: 2px solid #eaeaea;
             margin-bottom: 30px;
             position: relative;
             transition: border-color 0.4s ease;
         }
-        .login-tab {
+        .auth-tab {
             flex: 1;
             background: none;
             border: none;
@@ -127,15 +173,15 @@
             border-bottom: 3px solid transparent;
             margin-bottom: -2.5px;
         }
-        .login-tab:hover {
+        .auth-tab:hover {
             color: #555;
         }
-        .login-tab.active {
+        .auth-tab.active {
             color: #0e3a5b;
             border-bottom-color: #0e3a5b;
         }
 
-        /* 🏁 1. 고객 로그인 패널 스타일 (1행 2열 원형 소셜 가입) */
+        /* 🏁 1. 고객 패널 스타일 */
         .customer-panel {
             background: #F7F7F7;
             border-radius: 12px;
@@ -145,6 +191,13 @@
             justify-content: center;
             align-items: center;
             gap: 30px; /* 원형 버튼 간의 간격 */
+            animation: panelFadeIn 0.4s ease-out forwards;
+        }
+        .customer-panel-register {
+            background: #F7F7F7;
+            border-radius: 12px;
+            padding: 35px 25px;
+            box-sizing: border-box;
             animation: panelFadeIn 0.4s ease-out forwards;
         }
         
@@ -162,26 +215,14 @@
             background: transparent;
             box-shadow: none;
         }
-        
-        /* 네이버 버튼 스타일 조정 */
-        .btn-naver {
-            background: transparent;
-        }
         .btn-naver:hover {
             transform: scale(1.15) rotate(5deg);
             box-shadow: none;
-        }
-        
-        /* 카카오 버튼 스타일 조정 */
-        .btn-kakao {
-            background: transparent;
         }
         .btn-kakao:hover {
             transform: scale(1.15) rotate(-5deg);
             box-shadow: none;
         }
-        
-        /* 내장형 SVG 아이콘 */
         .sns-svg-icon {
             width: 26px;
             height: 26px;
@@ -189,31 +230,74 @@
             display: block;
         }
 
-        /* 🏁 2. 사장님 로그인 패널 스타일 */
-        .wholesale-panel {
-            animation: panelFadeIn 0.4s ease-out forwards;
+        /* 🏁 2. 소셜 간편 가입 전용 스타일 */
+        .sns-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 4px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         }
-        .form-group {
-            margin-bottom: 10px;
+        .btn-naver-rect {
+            background: #03a94d;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+        .btn-naver-rect:hover {
+            background: #028e40;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(3, 169, 77, 0.2);
+        }
+        .btn-kakao-rect {
+            background: #fee500;
+            color: #191919;
+        }
+        .btn-kakao-rect:hover {
+            background: #edd500;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(254, 229, 0, 0.25);
+        }
+
+        /* 🏁 3. 사장님 가입/로그인 양식 스타일 */
+        .auth-grid-frame .form-group {
+            margin-bottom: 8px !important;
+            gap: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
         }
         .form-group label {
             display: block;
-            margin-bottom: 10px; /* 라벨과 인풋 박스 간의 여백 유지 */
+            margin-bottom: 4px !important; /* 라벨과 인풋 박스 간의 여백 */
             font-weight: 700;
             color: #0e3a5b; /* 기본 딥 블루 컬러 */
             font-size: 0.95rem;
+            line-height: 1 !important; /* 글꼴 고유 상하 line-height 공백 제거하여 마진 정확도 확보 */
             transition: color 0.4s ease;
         }
         .form-group input {
             width: 100%;
-            padding: 13px 16px;
             border: 1px solid #eaeaea;
             background-color: #F7F7F7; /* 인풋 박스 배경 지정 */
-            border-radius: 8px;
+            border-radius: 4px !important;
             font-size: 0.95rem;
             color: #333;
-            box-sizing: border-box;
+            box-sizing: border-box !important;
             transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"] {
+            padding: 0.8rem 1rem !important;
+            height: 2.875rem !important;
+            box-sizing: border-box !important;
         }
         .form-group input:focus {
             outline: none;
@@ -221,18 +305,53 @@
             background-color: #fff;
             box-shadow: 0 0 0 3px rgba(14, 58, 91, 0.1);
         }
+
+        /* 첨부파일 스타일 */
+        .file-header-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 8px;
+        }
+        .custom-file-label {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px 16px;
+            background: #F7F7F7;
+            color: #0e3a5b;
+            border: 1px solid #eaeaea;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: all 0.25s ease;
+            text-align: center;
+            white-space: nowrap;
+            box-sizing: border-box;
+            line-height: 1;
+            vertical-align: middle;
+        }
+        .custom-file-label:hover {
+            background: #eef3f7;
+            border-color: #0e3a5b;
+        }
+        #registerImages {
+            display: none;
+        }
+
         .submit-btn {
             width: 100%;
             padding: 16px;
             background: #0e3a5b;
             color: #fff;
             border: none;
-            border-radius: 8px;
+            border-radius: 4px !important;
             font-size: 1.05rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 10px;
+            margin-top: 6px !important;
             box-shadow: 0 4px 12px rgba(14, 58, 91, 0.2);
         }
         .submit-btn:hover {
@@ -245,59 +364,208 @@
             transform: none !important;
             box-shadow: none !important;
         }
-        
-        .register-link {
-            display: block;
-            text-align: center;
-            margin-top: 25px;
-            color: #666;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: color 0.4s ease;
+        .register-form-pane .submit-btn,
+        .login-form-pane .submit-btn {
+            padding: 4px 16px !important;
+            height: auto !important;
         }
-        .register-link:hover {
-            color: #0e3a5b;
-            text-decoration: underline;
+        
+        .feedback-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 5px;
+            display: none;
+        }
+        .text-red {
+            color: #d9534f !important;
+        }
+        .text-green {
+            color: #2b8a3e !important;
         }
 
-        /* ============================================================= */
-        /* 🏁 [사장님 로그인] 활성화 시 딥 블루 컨테이너 & #F7F7F7 텍스트 테마 */
-        /* ============================================================= */
-        .login-container.wholesale-active {
-            box-shadow: 0 25px 60px rgba(14, 58, 91, 0.25);
+        /* 🏁 [사장님 회원가입] 활성화 시 딥 블루 컨테이너 & #F7F7F7 텍스트 테마 */
+        .auth-grid-frame.wholesale-active-login .login-form-pane,
+        .auth-grid-frame.wholesale-active-register .register-form-pane {
+            /* 이중 전환 슬라이더 배경색 변화를 위해 투명화 처리 */
         }
-        .login-container.wholesale-active .login-title,
-        .login-container.wholesale-active .login-subtitle,
-        .login-container.wholesale-active .form-group label,
-        .login-container.wholesale-active .register-link {
-            color: #F7F7F7 !important; /* 딥 블루 배경 위에 서는 연회색 반전 처리 */
+        .auth-grid-frame.wholesale-active-login .login-form-pane .auth-title,
+        .auth-grid-frame.wholesale-active-login .login-form-pane .auth-subtitle,
+        .auth-grid-frame.wholesale-active-login .login-form-pane .form-group label,
+        .auth-grid-frame.wholesale-active-register .register-form-pane .auth-title,
+        .auth-grid-frame.wholesale-active-register .register-form-pane .auth-subtitle,
+        .auth-grid-frame.wholesale-active-register .register-form-pane .form-group label,
+        .auth-grid-frame.wholesale-active-register .register-form-pane .agree-text-main,
+        .auth-grid-frame.wholesale-active-register .register-form-pane .agree-text-sub {
+            color: #F7F7F7 !important; /* 딥 블루 배경 위에 서는 연회색 반전 */
         }
-        .login-container.wholesale-active .login-tabs {
+        .auth-grid-frame.wholesale-active-login .login-form-pane .auth-tabs,
+        .auth-grid-frame.wholesale-active-register .register-form-pane .auth-tabs {
             border-bottom-color: rgba(247, 247, 247, 0.2);
         }
-        .login-container.wholesale-active .login-tab {
+        .auth-grid-frame.wholesale-active-login .login-form-pane .auth-tab,
+        .auth-grid-frame.wholesale-active-register .register-form-pane .auth-tab {
             color: rgba(247, 247, 247, 0.45);
         }
-        .login-container.wholesale-active .login-tab:hover {
+        .auth-grid-frame.wholesale-active-login .login-form-pane .auth-tab:hover,
+        .auth-grid-frame.wholesale-active-register .register-form-pane .auth-tab:hover {
             color: #F7F7F7;
         }
-        .login-container.wholesale-active .login-tab.active {
+        .auth-grid-frame.wholesale-active-login .login-form-pane .auth-tab.active,
+        .auth-grid-frame.wholesale-active-register .register-form-pane .auth-tab.active {
             color: #F7F7F7 !important;
             border-bottom-color: #F7F7F7 !important;
         }
-        .login-container.wholesale-active .form-group input:focus {
+        .auth-grid-frame.wholesale-active-login .login-form-pane .form-group input:focus,
+        .auth-grid-frame.wholesale-active-register .register-form-pane .form-group input:focus {
             border-color: #F7F7F7;
             box-shadow: 0 0 0 3px rgba(247, 247, 247, 0.25);
         }
-        .login-container.wholesale-active .submit-btn {
-            background: #F7F7F7; /* 파란 배경 위에서 극명하게 대조되는 화이트/연회색 버튼 */
-            color: #0e3a5b;
+        .auth-grid-frame.wholesale-active-login .login-form-pane .submit-btn,
+        .auth-grid-frame.wholesale-active-register .register-form-pane .submit-btn {
+            background: #F1C5A4 !important; /* 도매고객 전용 피치 베이지 톤 버튼 */
+            color: #0e3a5b !important;
             box-shadow: 0 6px 20px rgba(0,0,0,0.12);
         }
-        .login-container.wholesale-active .submit-btn:hover {
-            background: #ffffff;
-            color: #0b2d47;
+        .auth-grid-frame.wholesale-active-login .login-form-pane .submit-btn:hover,
+        .auth-grid-frame.wholesale-active-register .register-form-pane .submit-btn:hover {
+            background: #f8dfcb !important; /* 호버 시 한 단계 밝은 피치 톤 */
+            color: #0b2d47 !important;
+        }
+
+        /* 🏁 프리미엄 약관 동의 컴포넌트 */
+        .terms-agreement-box {
+            background: #F7F7F7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            transition: background 0.4s ease;
+        }
+        .auth-grid-frame.wholesale-active-register .register-form-pane .terms-agreement-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(247, 247, 247, 0.1);
+        }
+        .terms-all-agree {
+            margin-bottom: 12px;
+        }
+        .terms-divider {
+            border: none;
+            border-top: 1px solid #eaeaea;
+            margin: 12px 0;
+            transition: border-color 0.4s ease;
+        }
+        .auth-grid-frame.wholesale-active-register .register-form-pane .terms-divider {
+            border-top-color: rgba(247, 247, 247, 0.1);
+        }
+        .terms-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .terms-item:last-child {
+            margin-bottom: 0;
+        }
+        .terms-link {
+            font-size: 0.8rem;
+            color: #777;
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+        .auth-grid-frame.wholesale-active-register .register-form-pane .terms-link {
+            color: rgba(247, 247, 247, 0.6);
+        }
+        .terms-link:hover {
+            color: #0e3a5b;
+        }
+        .auth-grid-frame.wholesale-active-register .register-form-pane .terms-link:hover {
+            color: #F7F7F7;
+        }
+        
+        /* 커스텀 체크박스 스타일 */
+        .register-checkbox-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding-left: 28px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .register-checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        .register-checkmark {
+            flex-shrink: 0;
+            display: block;
+            position: relative;
+            height: 18px;
+            width: 18px;
+            background-color: #f0f0f0;
+            border: 1px solid #eaeaea;
+            border-radius: 4px;
+            transition: all 0.25s ease;
+        }
+        .register-checkbox-container:hover input ~ .register-checkmark {
+            background-color: #e5e5e5;
+        }
+        .register-checkbox-container input:checked ~ .register-checkmark {
+            background-color: #0e3a5b;
+            border-color: #0e3a5b;
+        }
+        .auth-grid-frame.wholesale-active-register .register-form-pane .register-checkbox-container input:checked ~ .register-checkmark {
+            background-color: #F7F7F7;
+            border-color: #F7F7F7;
+        }
+        .register-checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+        .register-checkbox-container input:checked ~ .register-checkmark:after {
+            display: block;
+        }
+        .register-checkbox-container .register-checkmark:after {
+            left: 5px;
+            top: 2px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        .auth-grid-frame.wholesale-active-register .register-form-pane .register-checkbox-container .register-checkmark:after {
+            border-color: #0e3a5b;
+        }
+        .agree-text-main {
+            font-weight: 700;
+            color: #0e3a5b;
+            line-height: 1;
+            padding-left: 6px;
+            transition: color 0.4s;
+        }
+        .agree-text-sub {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1;
+            padding-left: 6px;
+            transition: color 0.4s;
+        }
+        .agreement-alert-msg {
+            display: none;
+            color: #d9534f;
+            background-color: #fdf2f2;
+            border: 1px solid #fde8e8;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            text-align: center;
+            line-height: 1.4;
         }
 
         @keyframes panelFadeIn {
@@ -305,81 +573,250 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 📱 모바일 디바이스 최적화 여백 및 그리드 해제 */
-        @media (max-width: 768px) {
-            .login-grid-layout {
-                display: flex !important;
-                flex-direction: column !important;
+        /* 📱 와일드 모바일 디바이스 최적화 (641px ~ 1024px) */
+        @media (max-width: 1024px) and (min-width: 641px) {
+            .auth-grid-layout {
+                display: grid !important;
+                grid-template-columns: repeat(6, 1fr) !important;
+                grid-auto-rows: auto !important;
                 padding: 100px 20px 40px 20px !important;
                 gap: 15px !important;
             }
-            .login-container {
+            .auth-grid-frame {
+                grid-column: 2 / span 4 !important;
+                width: 100% !important;
+                height: auto !important;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            .auth-pane {
+                position: relative !important;
                 width: 100% !important;
                 height: auto !important;
                 padding: 30px 20px !important;
+                display: block !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                transform: none !important;
             }
-            .register-switch-cell {
+            /* 모바일 상태에서는 로그인창만 먼저 띄우고 회원가입은 버튼에 의해 완전 페이지 토글 처리 */
+            .auth-grid-frame:not(.register-active) .register-form-pane {
+                display: none !important;
+            }
+            .auth-grid-frame.register-active .login-form-pane {
+                display: none !important;
+            }
+            .switch-overlay {
+                position: relative !important;
                 width: 100% !important;
                 height: 54px !important;
-                border-left: 1px solid #eaeaea !important;
+                left: 0 !important;
+                transform: none !important;
+                border: 1px solid #eaeaea !important;
                 writing-mode: horizontal-tb !important; /* 모바일에서는 가로 텍스트 */
                 letter-spacing: 2px !important;
+            }
+            .auth-grid-frame.register-active .switch-overlay {
+                transform: none !important;
+                border-right: 1px solid #eaeaea !important;
+            }
+        }
+
+        /* 📱 모바일 디바이스 최적화 (640px 이하) */
+        @media (max-width: 640px) {
+            .auth-grid-layout {
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr) !important;
+                grid-auto-rows: auto !important;
+                padding: 90px 15px 40px 15px !important;
+                gap: 12px !important;
+            }
+            .auth-grid-frame {
+                grid-column: 1 / span 4 !important;
+                width: 100% !important;
+                height: auto !important;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            .auth-pane {
+                position: relative !important;
+                width: 100% !important;
+                height: auto !important;
+                padding: 25px 15px !important;
+                display: block !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                transform: none !important;
+            }
+            .auth-grid-frame:not(.register-active) .register-form-pane {
+                display: none !important;
+            }
+            .auth-grid-frame.register-active .login-form-pane {
+                display: none !important;
+            }
+            .switch-overlay {
+                position: relative !important;
+                width: 100% !important;
+                height: 50px !important;
+                left: 0 !important;
+                transform: none !important;
+                border: 1px solid #eaeaea !important;
+                writing-mode: horizontal-tb !important; /* 모바일에서는 가로 텍스트 */
+                letter-spacing: 2px !important;
+            }
+            .auth-grid-frame.register-active .switch-overlay {
+                transform: none !important;
+                border-right: 1px solid #eaeaea !important;
             }
         }
     </style>
 </head>
 <body>
-    <div class="login-grid-layout">
-        <div class="login-container" id="loginContainer">
-            <!-- 🏁 파도 애니메이션을 품을 이중 오버레이 슬라이더 레이어 -->
-            <div class="login-bg-overlay bg-blue" id="loginBgOverlay"></div>
-            <div class="login-bg-overlay bg-white" id="loginBgOverlayWhite"></div>
+    <div class="auth-grid-layout">
+        <!-- 🏁 통합 인증 프레임 컨테이너 -->
+        <div class="auth-grid-frame" id="authFrame">
+            
+            <!-- [1] 로그인 패널 영역 -->
+            <div class="auth-pane login-form-pane" id="loginFormPane">
+                <!-- 파도 애니메이션을 품을 이중 오버레이 슬라이더 레이어 -->
+                <div class="auth-bg-overlay bg-blue" id="loginBgOverlay"></div>
+                <div class="auth-bg-overlay bg-white" id="loginBgOverlayWhite"></div>
 
-            <h1 class="login-title">amuredo</h1>
-            <p class="login-subtitle">아무래도 안경 통합 로그인 센터에 오신 것을 환영합니다.</p>
+                <h1 class="auth-title">amuredo</h1>
+                <p class="auth-subtitle login-subtitle">아무래도 안경 통합 로그인 센터에 오신 것을 환영합니다.</p>
 
-            <!-- 🏁 상단 전환 탭 버튼 2행 스위치 -->
-            <div class="login-tabs">
-                <button class="login-tab active" id="tabCustomer">고객 로그인</button>
-                <button class="login-tab" id="tabWholesale">사장님 로그인</button>
+                <!-- 🏁 상단 전환 탭 버튼 2행 스위치 -->
+                <div class="auth-tabs">
+                    <button class="auth-tab active" id="loginTabCustomer">고객 로그인</button>
+                    <button class="auth-tab" id="loginTabWholesale">사장님 로그인</button>
+                </div>
+
+                <!-- 🏁 일반 고객용 SNS 로그인 카드 패널 (1행 2열 원형 구조) -->
+                <div class="customer-panel" id="loginPanelCustomer">
+                    <button class="sns-circle-btn btn-naver" id="naverLoginBtn" title="네이버로 로그인">
+                        <img src="/static/img/naver.svg" alt="Naver Login" class="sns-svg-icon" style="width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box;">
+                    </button>
+                    
+                    <button class="sns-circle-btn btn-kakao" id="kakaoLoginBtn" title="카카오로 로그인">
+                        <img src="/static/img/kakao.svg" alt="Kakao Login" class="sns-svg-icon" style="width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box;">
+                    </button>
+                </div>
+
+                <!-- 🏁 사장님 로그인 카드 패널 -->
+                <div class="wholesale-panel" id="loginPanelWholesale" style="display: none;">
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">이메일</label>
+                            <input type="email" id="loginEmail" name="email" placeholder="example@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">비밀번호</label>
+                            <input type="password" id="loginPassword" name="password" placeholder="비밀번호를 입력하세요" required>
+                        </div>
+                        <button type="submit" id="loginSubmitBtn" class="submit-btn">로그인</button>
+                    </form>
+                </div>
             </div>
 
-        <!-- 🏁 [Panel 1] 일반 고객용 SNS 로그인 카드 패널 (1행 2열 원형 구조) -->
-        <div class="customer-panel" id="panelCustomer">
-            <!-- 네이버: 녹색 원 + 준비된 naver.svg 공식 로고 연동 -->
-            <button class="sns-circle-btn btn-naver" id="naverLoginBtn" title="네이버로 로그인">
-                <img src="/static/img/naver.svg" alt="Naver Login" class="sns-svg-icon" style="width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box;">
-            </button>
-            
-            <!-- 카카오: 노란색 원 + 준비된 kakao.svg 공식 로고 연동 -->
-            <button class="sns-circle-btn btn-kakao" id="kakaoLoginBtn" title="카카오로 로그인">
-                <img src="/static/img/kakao.svg" alt="Kakao Login" class="sns-svg-icon" style="width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box;">
-            </button>
-        </div>
+            <!-- [2] 회원가입 패널 영역 -->
+            <div class="auth-pane register-form-pane" id="registerFormPane">
+                <!-- 파도 애니메이션을 품을 이중 오버레이 슬라이더 레이어 -->
+                <div class="auth-bg-overlay bg-blue" id="registerBgOverlay"></div>
+                <div class="auth-bg-overlay bg-white" id="registerBgOverlayWhite"></div>
 
-        <!-- 🏁 [Panel 2] 사장님 로그인 카드 패널 -->
-        <div class="wholesale-panel" id="panelWholesale" style="display: none;">
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="email">이메일</label>
-                    <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                <h1 class="auth-title">amuredo</h1>
+                <p class="auth-subtitle register-subtitle">아무래도 안경 통합 가입 센터에 오신 것을 환영합니다.</p>
+
+                <!-- 🏁 상단 전환 탭 버튼 2행 스위치 -->
+                <div class="auth-tabs">
+                    <button class="auth-tab active" id="registerTabCustomer">고객 회원가입</button>
+                    <button class="auth-tab" id="registerTabWholesale">사장님 가입하기</button>
                 </div>
-                <div class="form-group">
-                    <label for="password">비밀번호</label>
-                    <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+
+                <!-- 🏁 일반 고객용 SNS 가입 카드 패널 -->
+                <div class="customer-panel-register" id="registerPanelCustomer">
+                    <div class="terms-agreement-box">
+                        <div class="terms-all-agree">
+                            <label class="register-checkbox-container">
+                                <input type="checkbox" id="registerAgreeAll">
+                                <span class="register-checkmark"></span>
+                                <span class="agree-text-main">모든 약관에 동의합니다.</span>
+                            </label>
+                        </div>
+                        <hr class="terms-divider">
+                        <div class="terms-item">
+                            <label class="register-checkbox-container">
+                                <input type="checkbox" class="agree-item" id="registerAgreeTerms" required>
+                                <span class="register-checkmark"></span>
+                                <span class="agree-text-sub">[필수] 이용약관 동의</span>
+                            </label>
+                            <a href="/static/terms.html" target="_blank" class="terms-link">보기</a>
+                        </div>
+                        <div class="terms-item">
+                            <label class="register-checkbox-container">
+                                <input type="checkbox" class="agree-item" id="registerAgreePrivacy" required>
+                                <span class="register-checkmark"></span>
+                                <span class="agree-text-sub">[필수] 개인정보 수집 및 이용 동의</span>
+                            </label>
+                            <a href="/static/privacy.html" target="_blank" class="terms-link">보기</a>
+                        </div>
+                    </div>
+
+                    <div id="agreementAlertMsg" class="agreement-alert-msg">
+                        이용동의 이후 서비스 이용이 가능합니다.
+                    </div>
+
+                    <button class="sns-btn btn-naver-rect" id="naverSignupBtn">
+                        <span>네이버로 회원가입</span>
+                    </button>
+                    <button class="sns-btn btn-kakao-rect" id="kakaoSignupBtn">
+                        <span>카카오로 회원가입</span>
+                    </button>
                 </div>
-                <button type="submit" id="submitBtn" class="submit-btn">로그인</button>
-            </form>
+
+                <!-- 🏁 사장님 가입 카드 패널 -->
+                <div class="wholesale-panel" id="registerPanelWholesale" style="display: none;">
+                    <form id="registerForm" enctype="multipart/form-data">
+                        <!-- 대표자명 & 사업자 등록 번호 1:1 병렬 배치 -->
+                        <div class="form-row-half" style="display: flex !important; gap: 12px !important; margin-bottom: 8px !important; width: 100% !important;">
+                            <div class="form-group" style="flex: 1 !important; margin-bottom: 0 !important;">
+                                <label for="registerName">대표자명</label>
+                                <input type="text" id="registerName" name="name" placeholder="대표자 성함을 입력하세요" required>
+                            </div>
+                            <div class="form-group" style="flex: 1 !important; margin-bottom: 0 !important;">
+                                <label for="registerBusinessNumber">사업자 등록 번호</label>
+                                <input type="text" id="registerBusinessNumber" name="business_number" placeholder="000-00-00000" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerEmail">이메일 (ID로 사용)</label>
+                            <input type="email" id="registerEmail" name="email" placeholder="example@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">비밀번호 <span style="font-size: 0.8rem; font-weight: normal; color: inherit; opacity: 0.8;">(영문, 숫자 필수 / 특수문자 선택 / 6~12자리)</span></label>
+                            <input type="password" id="registerPassword" name="password" placeholder="비밀번호를 입력하세요" required>
+                            <div id="pwdRuleFeedback" class="feedback-text"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPasswordConfirm">비밀번호 확인</label>
+                            <input type="password" id="registerPasswordConfirm" placeholder="비밀번호를 다시 입력하세요" required>
+                            <div id="pwdConfirmFeedback" class="feedback-text"></div>
+                        </div>
+                        <button type="submit" id="registerSubmitBtn" class="submit-btn">가입 신청하기</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- [3] 슬라이딩 스위치 버튼 오버레이 -->
+            <div class="switch-overlay" id="switchOverlay">
+                <div class="wireframe-text" id="switchText" style="color: #333 !important; font-size: 1.1rem; font-weight: 800; text-align: center; transition: opacity 0.3s;">회원가입</div>
+            </div>
+
         </div>
     </div>
 
-    <!-- 회원가입 switch 버튼 1그리드 셀 -->
-    <div class="register-switch-cell" onclick="location.href='/register'">
-        <div class="wireframe-text" style="color: #333 !important; font-size: 1.1rem; font-weight: 800; text-align: center;">회원가입</div>
-    </div>
-</div>
-
-    <!-- 🏁 커스텀 팝업 (모달) UI -->
+    <!-- 🏁 커스텀 팝업 (모달) UI (이원화 통합 공통 제어) -->
     <div id="customModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
         <div style="background: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); width: 320px; text-align: center; transform: translateY(-20px); animation: modalFadeIn 0.3s forwards;">
             <div id="modalIcon" style="font-size: 2.5rem; margin-bottom: 15px;">👋</div>
@@ -412,104 +849,7 @@
                 }
             }
 
-            // 🏁 1. 상단 이중 가입 탭 스위칭 & 완벽한 상반 방향 파도(Wave-Fill) 슬라이더 제어
-            const tabCustomer = document.getElementById("tabCustomer");
-            const tabWholesale = document.getElementById("tabWholesale");
-            const panelCustomer = document.getElementById("panelCustomer");
-            const panelWholesale = document.getElementById("panelWholesale");
-            const registerContainer = document.getElementById("loginContainer");
-            const registerBgOverlay = document.getElementById("loginBgOverlay");
-            const registerBgOverlayWhite = document.getElementById("loginBgOverlayWhite");
-            const registerSubtitle = document.querySelector(".login-subtitle");
-
-            tabCustomer.addEventListener("click", () => {
-                if (!tabCustomer.classList.contains("active")) {
-                    tabCustomer.classList.add("active");
-                    tabWholesale.classList.remove("active");
-                    
-                    // 1) 웅장한 흰색 파도가 오른쪽에서 왼쪽으로 촥 차오르도록 설정
-                    registerBgOverlayWhite.style.transition = "transform 0.6s cubic-bezier(0.77, 0, 0.175, 1)";
-                    registerBgOverlayWhite.style.transform = "translateX(0%)";
-                    
-                    // 2) 600ms 뒤 모션이 완전히 완료되면 패널 전환 및 두 슬라이더 원점 무효화 리셋 단행
-                    setTimeout(() => {
-                        // 컨테이너 사장님용 블루 테마 해제 (파도가 다 덮은 후 안전하게 제거)
-                        registerContainer.classList.remove("wholesale-active");
-                        
-                        panelCustomer.style.display = "flex";
-                        panelWholesale.style.display = "none";
-                        registerSubtitle.textContent = "아무래도 안경 통합 로그인 센터에 오신 것을 환영합니다.";
-                        
-                        // 트랜지션 해제 상태로 조용히 원복
-                        registerBgOverlay.style.transition = "none";
-                        registerBgOverlay.style.transform = "translateX(-100%)"; // 블루는 다시 왼쪽 대기
-                        
-                        registerBgOverlayWhite.style.transition = "none";
-                        registerBgOverlayWhite.style.transform = "translateX(100%)"; // 화이트는 다시 오른쪽 대기
-                    }, 600);
-                }
-            });
-
-            tabWholesale.addEventListener("click", () => {
-                if (!tabWholesale.classList.contains("active")) {
-                    tabWholesale.classList.add("active");
-                    tabCustomer.classList.remove("active");
-                    
-                    // 1) 파란 물결 오버레이가 왼쪽에서 오른쪽으로 촥 덮치며 차오르도록 설정
-                    registerBgOverlay.style.transition = "transform 0.6s cubic-bezier(0.77, 0, 0.175, 1)";
-                    
-                    // 2) 약간의 딜레이를 주어 리셋 트랜지션 무효화가 끝난 후 렌더링되도록 보장
-                    setTimeout(() => {
-                        registerContainer.classList.add("wholesale-active");
-                        registerBgOverlay.style.transform = "translateX(0%)";
-                    }, 30);
-                    
-                    // 3) 패널 전환 처리
-                    panelCustomer.style.display = "none";
-                    panelWholesale.style.display = "block";
-                    registerSubtitle.textContent = "도매 파트너 전용 로그인 페이지입니다.";
-                }
-            });
-
-            // 🏁 2. 소셜 간편 로그인 버튼 동작 바인딩 (이전 마지막 페이지 경로 전송)
-            const naverLoginBtn = document.getElementById("naverLoginBtn");
-            const kakaoLoginBtn = document.getElementById("kakaoLoginBtn");
-
-            naverLoginBtn.addEventListener("click", () => {
-                const next = sessionStorage.getItem("login_redirect_to") || "";
-                location.href = `/api/user/login/naver?next=${encodeURIComponent(next)}`;
-            });
-
-            kakaoLoginBtn.addEventListener("click", () => {
-                const next = sessionStorage.getItem("login_redirect_to") || "";
-                location.href = `/api/user/login/kakao?next=${encodeURIComponent(next)}`;
-            });
-
-            // 🏁 네이버 로그인 쿼리스트링 에러 핸들러 탑재
-            const urlParams = new URLSearchParams(window.location.search);
-            const errorParam = urlParams.get('error');
-            if (errorParam) {
-                if (errorParam === 'agreement_required') {
-                    // 이용동의가 필요한 고객은 회원가입 및 약관동의를 위해 register 페이지로 즉시 전환
-                    location.href = '/register?error=agreement_required';
-                    return;
-                }
-                
-                let errorMsg = "로그인 진행 중 알 수 없는 오류가 발생했습니다.";
-                if (errorParam === 'cancel') errorMsg = "로그인이 취소되었습니다.";
-                else if (errorParam === 'under_14') errorMsg = "만 14세 이하인 고객은 회원가입이 불가능합니다.";
-                else if (errorParam === 'essential_data_missing') errorMsg = "네이버 로그인 필수 동의 항목(이메일, 이름, 연락처 등)이 누락되었습니다. 다시 시도해 주세요.";
-                else if (errorParam === 'token_failed' || errorParam === 'no_token') errorMsg = "네이버 인증 토큰 획득에 실패했습니다.";
-                else if (errorParam === 'profile_failed') errorMsg = "네이버 프로필 정보를 가져오는 데 실패했습니다.";
-                
-                showModal('error', '로그인 오류', errorMsg);
-                
-                // 주소창에서 error 파라미터를 깔끔하게 청소하여 새로고침 시 계속 팝업이 뜨는 현상 차단
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-
-            // 🏁 3. 사장님(도매) 로그인 컨트롤러
-            // 팝업 컨트롤 함수
+            // 🏁 1. 통합 모달 팝업 공통 제어 함수
             function showModal(type, title, message, callback) {
                 const modal = document.getElementById('customModal');
                 const icon = document.getElementById('modalIcon');
@@ -540,11 +880,214 @@
                 });
             }
 
+            // 🏁 2. 로그인 뷰 / 회원가입 뷰 통합 모드 체인저 및 URL 싱크 로직
+            const authFrame = document.getElementById("authFrame");
+            const switchOverlay = document.getElementById("switchOverlay");
+            const switchText = document.getElementById("switchText");
+
+            function updateMode(mode, triggerUrlSync = true) {
+                if (mode === 'register') {
+                    authFrame.classList.add("register-active");
+                    switchText.opacity = 0;
+                    setTimeout(() => {
+                        switchText.textContent = "로그인";
+                        switchText.opacity = 1;
+                    }, 300);
+
+                    if (triggerUrlSync) {
+                        window.history.pushState({ mode: 'register' }, "", "/register" + window.location.search);
+                    }
+                } else {
+                    authFrame.classList.remove("register-active");
+                    switchText.opacity = 0;
+                    setTimeout(() => {
+                        switchText.textContent = "회원가입";
+                        switchText.opacity = 1;
+                    }, 300);
+
+                    if (triggerUrlSync) {
+                        window.history.pushState({ mode: 'login' }, "", "/login" + window.location.search);
+                    }
+                }
+            }
+
+            // 스위치 오버레이 클릭 시 마스크 트랜지션 구동
+            switchOverlay.addEventListener("click", () => {
+                if (authFrame.classList.contains("register-active")) {
+                    updateMode('login');
+                } else {
+                    updateMode('register');
+                }
+            });
+
+            // 브라우저 뒤로가기/앞으로가기 상태 변화 감지
+            window.addEventListener("popstate", (e) => {
+                if (e.state && e.state.mode === 'register') {
+                    updateMode('register', false);
+                } else {
+                    updateMode('login', false);
+                }
+            });
+
+            // 초기 로드 시 경로 체크 및 즉시 포지셔닝 설정
+            const initialPath = window.location.pathname;
+            if (initialPath === '/register') {
+                // 회원가입 경로인 경우 깜빡임 없이 즉각 회원가입 모드로 설정
+                updateMode('register', false);
+            } else {
+                updateMode('login', false);
+            }
+
+
+            // 🏁 3. 로그인 패널 내 [고객 vs 사장님] 파도 오버레이 전환 제어
+            const loginTabCustomer = document.getElementById("loginTabCustomer");
+            const loginTabWholesale = document.getElementById("loginTabWholesale");
+            const loginPanelCustomer = document.getElementById("loginPanelCustomer");
+            const loginPanelWholesale = document.getElementById("loginPanelWholesale");
+            const loginContainer = document.getElementById("loginFormPane"); // 로그인 배경 컨테이너
+            const loginBgOverlay = document.getElementById("loginBgOverlay");
+            const loginBgOverlayWhite = document.getElementById("loginBgOverlayWhite");
+            const loginSubtitle = document.querySelector(".login-subtitle");
+
+            loginTabCustomer.addEventListener("click", () => {
+                if (!loginTabCustomer.classList.contains("active")) {
+                    loginTabCustomer.classList.add("active");
+                    loginTabWholesale.classList.remove("active");
+                    
+                    loginBgOverlayWhite.style.transition = "transform 0.6s cubic-bezier(0.77, 0, 0.175, 1)";
+                    loginBgOverlayWhite.style.transform = "translateX(0%)";
+                    
+                    setTimeout(() => {
+                        authFrame.classList.remove("wholesale-active-login");
+                        
+                        loginPanelCustomer.style.display = "flex";
+                        loginPanelWholesale.style.display = "none";
+                        loginSubtitle.textContent = "아무래도 안경 통합 로그인 센터에 오신 것을 환영합니다.";
+                        
+                        loginBgOverlay.style.transition = "none";
+                        loginBgOverlay.style.transform = "translateX(-100%)";
+                        
+                        loginBgOverlayWhite.style.transition = "none";
+                        loginBgOverlayWhite.style.transform = "translateX(100%)";
+                    }, 600);
+                }
+            });
+
+            loginTabWholesale.addEventListener("click", () => {
+                if (!loginTabWholesale.classList.contains("active")) {
+                    loginTabWholesale.classList.add("active");
+                    loginTabCustomer.classList.remove("active");
+                    
+                    loginBgOverlay.style.transition = "transform 0.6s cubic-bezier(0.77, 0, 0.175, 1)";
+                    
+                    setTimeout(() => {
+                        authFrame.classList.add("wholesale-active-login");
+                        loginBgOverlay.style.transform = "translateX(0%)";
+                    }, 30);
+                    
+                    loginPanelCustomer.style.display = "none";
+                    loginPanelWholesale.style.display = "block";
+                    loginSubtitle.textContent = "도매 파트너 전용 로그인 페이지입니다.";
+                }
+            });
+
+
+            // 🏁 4. 회원가입 패널 내 [고객 vs 사장님] 파도 오버레이 전환 제어
+            const registerTabCustomer = document.getElementById("registerTabCustomer");
+            const registerTabWholesale = document.getElementById("registerTabWholesale");
+            const registerPanelCustomer = document.getElementById("registerPanelCustomer");
+            const registerPanelWholesale = document.getElementById("registerPanelWholesale");
+            const registerContainer = document.getElementById("registerFormPane"); // 회원가입 배경 컨테이너
+            const registerBgOverlay = registerContainer.querySelector(".bg-blue");
+            const registerBgOverlayWhite = registerContainer.querySelector(".bg-white");
+            const registerSubtitle = document.querySelector(".register-subtitle");
+
+            registerTabCustomer.addEventListener("click", () => {
+                if (!registerTabCustomer.classList.contains("active")) {
+                    registerTabCustomer.classList.add("active");
+                    registerTabWholesale.classList.remove("active");
+                    
+                    registerBgOverlayWhite.style.transition = "transform 0.6s cubic-bezier(0.77, 0, 0.175, 1)";
+                    registerBgOverlayWhite.style.transform = "translateX(0%)";
+                    
+                    setTimeout(() => {
+                        authFrame.classList.remove("wholesale-active-register");
+                        
+                        registerPanelCustomer.style.display = "block";
+                        registerPanelWholesale.style.display = "none";
+                        registerSubtitle.textContent = "아무래도 안경 통합 가입 센터에 오신 것을 환영합니다.";
+                        
+                        registerBgOverlay.style.transition = "none";
+                        registerBgOverlay.style.transform = "translateX(-100%)";
+                        
+                        registerBgOverlayWhite.style.transition = "none";
+                        registerBgOverlayWhite.style.transform = "translateX(100%)";
+                    }, 600);
+                }
+            });
+
+            registerTabWholesale.addEventListener("click", () => {
+                if (!registerTabWholesale.classList.contains("active")) {
+                    registerTabWholesale.classList.add("active");
+                    registerTabCustomer.classList.remove("active");
+                    
+                    registerBgOverlay.style.transition = "transform 0.6s cubic-bezier(0.77, 0, 0.175, 1)";
+                    
+                    setTimeout(() => {
+                        authFrame.classList.add("wholesale-active-register");
+                        registerBgOverlay.style.transform = "translateX(0%)";
+                    }, 30);
+                    
+                    registerPanelCustomer.style.display = "none";
+                    registerPanelWholesale.style.display = "block";
+                    registerSubtitle.textContent = "도매 가입 신청을 위해 사업자 정보를 정확히 입력해 주세요.";
+                }
+            });
+
+
+            // 🏁 5. 로그인 패널: 소셜 간편 로그인 및 도매 로그인 전송 제어
+            const naverLoginBtn = document.getElementById("naverLoginBtn");
+            const kakaoLoginBtn = document.getElementById("kakaoLoginBtn");
+
+            naverLoginBtn.addEventListener("click", () => {
+                const next = sessionStorage.getItem("login_redirect_to") || "";
+                location.href = `/api/user/login/naver?next=${encodeURIComponent(next)}`;
+            });
+
+            kakaoLoginBtn.addEventListener("click", () => {
+                const next = sessionStorage.getItem("login_redirect_to") || "";
+                location.href = `/api/user/login/kakao?next=${encodeURIComponent(next)}`;
+            });
+
+            // 쿼리 스트링 네이버 에러 핸들러
+            const errorParamVal = urlParams.get('error');
+            if (errorParamVal) {
+                if (errorParamVal === 'agreement_required') {
+                    // 이용동의가 필요한 소셜 사용자는 가입 양식 및 약관 동의를 위해 회원가입 뷰로 즉시 전환
+                    updateMode('register', false);
+                    const agreementAlertMsg = document.getElementById("agreementAlertMsg");
+                    if (agreementAlertMsg) {
+                        agreementAlertMsg.style.display = "block";
+                    }
+                } else {
+                    let errorMsg = "로그인 진행 중 알 수 없는 오류가 발생했습니다.";
+                    if (errorParamVal === 'cancel') errorMsg = "로그인이 취소되었습니다.";
+                    else if (errorParamVal === 'under_14') errorMsg = "만 14세 이하인 고객은 회원가입이 불가능합니다.";
+                    else if (errorParamVal === 'essential_data_missing') errorMsg = "네이버 로그인 필수 동의 항목(이메일, 이름, 연락처 등)이 누락되었습니다. 다시 시도해 주세요.";
+                    else if (errorParamVal === 'token_failed' || errorParamVal === 'no_token') errorMsg = "네이버 인증 토큰 획득에 실패했습니다.";
+                    else if (errorParamVal === 'profile_failed') errorMsg = "네이버 프로필 정보를 가져오는 데 실패했습니다.";
+                    
+                    showModal('error', '로그인 오류', errorMsg);
+                }
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // 도매 로그인 전송
             document.getElementById("loginForm").addEventListener("submit", async (e) => {
                 e.preventDefault();
-                const submitBtn = document.getElementById("submitBtn");
-                submitBtn.disabled = true;
-                submitBtn.innerText = "로그인 중...";
+                const loginSubmitBtn = document.getElementById("loginSubmitBtn");
+                loginSubmitBtn.disabled = true;
+                loginSubmitBtn.innerText = "로그인 중...";
 
                 const formData = new FormData(e.target);
 
@@ -557,13 +1100,12 @@
 
                     if (result.status === "success") {
                         showModal('success', '로그인 성공', result.message, () => {
-                            // 마지막 방문 페이지로 복귀
                             const redirectTo = sessionStorage.getItem("login_redirect_to");
                             if (redirectTo) {
-                                sessionStorage.removeItem("login_redirect_to"); // 메모리 비우기
+                                sessionStorage.removeItem("login_redirect_to");
                                 location.href = redirectTo;
                             } else {
-                                location.href = "/antioch"; // 도매 전용 페이지로 이동
+                                location.href = "/antioch";
                             }
                         });
                     } else {
@@ -572,12 +1114,188 @@
                 } catch (error) {
                     showModal('error', '시스템 오류', '서버 통신 중 오류가 발생했습니다.');
                 } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "로그인";
+                    loginSubmitBtn.disabled = false;
+                    loginSubmitBtn.innerText = "로그인";
+                }
+            });
+
+
+            // 🏁 6. 회원가입 패널: 약관 동의 체크박스 & 소셜 회원가입 제어
+            const naverSignupBtn = document.getElementById("naverSignupBtn");
+            const kakaoSignupBtn = document.getElementById("kakaoSignupBtn");
+            const registerAgreeAll = document.getElementById("registerAgreeAll");
+            const agreeItems = registerContainer.querySelectorAll(".agree-item");
+            const registerAgreeTerms = document.getElementById("registerAgreeTerms");
+            const registerAgreePrivacy = document.getElementById("registerAgreePrivacy");
+
+            registerAgreeAll.addEventListener("change", (e) => {
+                const checked = e.target.checked;
+                agreeItems.forEach(item => {
+                    item.checked = checked;
+                });
+            });
+
+            agreeItems.forEach(item => {
+                item.addEventListener("change", () => {
+                    const allChecked = Array.from(agreeItems).every(i => i.checked);
+                    registerAgreeAll.checked = allChecked;
+                });
+            });
+
+            function checkAgreement() {
+                if (!registerAgreeTerms.checked || !registerAgreePrivacy.checked) {
+                    showModal('error', '약관동의 필요', '이용약관 및 개인정보 처리방침에 모두 동의해 주세요.');
+                    return false;
+                }
+                return true;
+            }
+
+            naverSignupBtn.addEventListener("click", () => {
+                if (checkAgreement()) {
+                    location.href = "/api/user/login/naver?agree=true";
+                }
+            });
+
+            kakaoSignupBtn.addEventListener("click", () => {
+                if (checkAgreement()) {
+                    location.href = "/api/user/login/kakao?agree=true";
+                }
+            });
+
+
+            // 🏁 7. 사장님(도매) 회원가입 입력 검증 및 전송 제어
+            const registerForm = document.getElementById("registerForm");
+            const registerSubmitBtn = document.getElementById("registerSubmitBtn");
+            const registerPassword = document.getElementById("registerPassword");
+            const registerPasswordConfirm = document.getElementById("registerPasswordConfirm");
+            const registerBusinessNumber = document.getElementById("registerBusinessNumber");
+            const pwdRuleFeedback = document.getElementById("pwdRuleFeedback");
+            const pwdConfirmFeedback = document.getElementById("pwdConfirmFeedback");
+
+            // 사업자 번호 포맷팅 (000-00-00000)
+            registerBusinessNumber.addEventListener("input", (e) => {
+                let val = e.target.value.replace(/[^0-9]/g, '');
+                if (val.length > 10) val = val.substring(0, 10);
+
+                let formatted = val;
+                if (val.length > 5) {
+                    formatted = val.substring(0, 3) + '-' + val.substring(3, 5) + '-' + val.substring(5);
+                } else if (val.length > 3) {
+                    formatted = val.substring(0, 3) + '-' + val.substring(3);
+                }
+                e.target.value = formatted;
+            });
+
+            // 비밀번호 규칙 정규식 검증
+            const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*]{6,12}$/;
+
+            function checkPasswordRules() {
+                const pwd = registerPassword.value;
+                pwdRuleFeedback.style.display = "block";
+                
+                if (pwd.length === 0) {
+                    pwdRuleFeedback.style.display = "none";
+                    return false;
+                }
+                
+                if (pwdRegex.test(pwd)) {
+                    pwdRuleFeedback.textContent = "사용 가능한 비밀번호입니다.";
+                    pwdRuleFeedback.className = "feedback-text text-green";
+                    return true;
+                } else {
+                    pwdRuleFeedback.textContent = "영문/숫자 필수, 6~12자리, 특수문자는 !@#$%^&*만 가능합니다.";
+                    pwdRuleFeedback.className = "feedback-text text-red";
+                    return false;
+                }
+            }
+
+            function checkPasswordMatch() {
+                const pwd = registerPassword.value;
+                const confirmPwd = registerPasswordConfirm.value;
+                pwdConfirmFeedback.style.display = "block";
+
+                if (confirmPwd.length === 0) {
+                    pwdConfirmFeedback.style.display = "none";
+                    return false;
+                }
+
+                if (pwd === confirmPwd) {
+                    pwdConfirmFeedback.textContent = "비밀번호가 일치합니다.";
+                    pwdConfirmFeedback.className = "feedback-text text-green";
+                    return true;
+                } else {
+                    pwdConfirmFeedback.textContent = "비밀번호가 일치하지 않습니다.";
+                    pwdConfirmFeedback.className = "feedback-text text-red";
+                    return false;
+                }
+            }
+
+            registerPassword.addEventListener("input", () => {
+                checkPasswordRules();
+                if (registerPasswordConfirm.value.length > 0) {
+                    checkPasswordMatch();
+                }
+            });
+
+            registerPasswordConfirm.addEventListener("input", checkPasswordMatch);
+
+            // 회원가입 폼 전송
+            registerForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                
+                if (!checkPasswordRules()) {
+                    showModal('error', '양식 입력 오류', '비밀번호 규칙을 확인해 주세요.');
+                    registerPassword.focus();
+                    return;
+                }
+                
+                if (!checkPasswordMatch()) {
+                    showModal('error', '양식 입력 오류', '비밀번호가 일치하지 않습니다.');
+                    registerPasswordConfirm.focus();
+                    return;
+                }
+
+                registerSubmitBtn.disabled = true;
+                registerSubmitBtn.innerText = "신청 중...";
+
+                const formData = new FormData(registerForm);
+                
+                // 백엔드 통신용 사업자번호 하이픈 제거 가공
+                const rawBizNum = formData.get("business_number").replace(/-/g, '');
+                if (rawBizNum.length !== 10) {
+                    showModal('error', '입력 규격 확인', '사업자 등록 번호 10자리를 정확히 입력해 주세요.');
+                    registerSubmitBtn.disabled = false;
+                    registerSubmitBtn.innerText = "가입 신청하기";
+                    registerBusinessNumber.focus();
+                    return;
+                }
+                formData.set("business_number", rawBizNum);
+
+                try {
+                    const response = await fetch("/api/user/register", {
+                        method: "POST",
+                        body: formData
+                    });
+                    const result = await response.json();
+
+                    if (result.status === "success") {
+                        showModal('success', '가입 신청 완료', result.message, () => {
+                            // 가입 완료 시 로그인 뷰포트로 즉시 슬라이딩 이동
+                            updateMode('login');
+                            registerForm.reset();
+                        });
+                    } else {
+                        showModal('error', '가입 신청 실패', result.message);
+                    }
+                } catch (error) {
+                    showModal('error', '시스템 오류', '서버 통신 중 오류가 발생했습니다.');
+                } finally {
+                    registerSubmitBtn.disabled = false;
+                    registerSubmitBtn.innerText = "가입 신청하기";
                 }
             });
         });
     </script>
-<script src="/static/globalWholesale.js?v=3.4"></script>
+    <script src="/static/globalWholesale.js?v=3.5"></script>
 </body>
 </html>

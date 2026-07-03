@@ -54,20 +54,35 @@ document.addEventListener("DOMContentLoaded", () => {
             <style id="globalWholesaleStyles">
                 /* 🏁 전역 헤더 & 햄버거 메뉴 필수 스타일 */
                 .main-header {
-                    position: fixed; top: 0; left: 0; width: 100%; height: 75px;
-                    background: rgba(244, 243, 240, 0.95); backdrop-filter: blur(10px);
+                    position: fixed; top: 20px; left: 10%; width: 80%; height: 4vw;
+                    background: rgba(244, 243, 240, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
                     display: flex; justify-content: space-between; align-items: center;
-                    padding: 1rem 2.5rem; z-index: 10000 !important; border-bottom: 1px solid #eaeaea;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                    padding: 0 4rem; z-index: 10020 !important; border: 1px solid rgba(234, 234, 234, 0.5);
+                    border-radius: 24px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+                    transition: all 0.4s ease;
                 }
-                .logo-wrapper { flex: 0 0 auto; width: 160px; display: flex; align-items: center; justify-content: flex-start; }
-                .logo { width: 100%; object-fit: contain; display: block; }
+                .main-header.scrolled {
+                    position: fixed !important;
+                    top: 20px !important;
+                    left: 10% !important;
+                    width: 80% !important;
+                    height: 4vw !important;
+                    border-radius: 24px !important;
+                    background: rgba(244, 243, 240, 0.85) !important;
+                    border: 1px solid rgba(234, 234, 234, 0.6) !important;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+                    padding: 0 4rem !important;
+                    z-index: 10020 !important;
+                }
+                .logo-wrapper { flex: 0 0 auto; width: auto !important; height: 100% !important; display: flex !important; align-items: center !important; justify-content: flex-start; }
+                .logo { height: 60% !important; max-height: 60% !important; width: auto !important; object-fit: contain; display: block; }
                 
                 /* PC 네비게이션 */
-                .pc-nav-center { display: flex; gap: 2.5rem; align-items: center; justify-content: center; flex: 1; pointer-events: auto !important; }
-                .pc-nav-right { display: flex; gap: 2.5rem; align-items: center; justify-content: flex-end; flex: 0 0 auto; }
+                .pc-nav-center { display: flex; gap: 2.5rem; align-items: center; justify-content: center; flex: 1; height: 100% !important; pointer-events: auto !important; }
+                .pc-nav-right { display: flex; gap: 2.5rem; align-items: center; justify-content: flex-end; flex: 0 0 auto; height: 100% !important; }
                 .nav-switch-btn { 
-                    background: transparent; border: none; font-size: 1.2rem; font-weight: 600; 
+                    background: transparent; border: none; font-size: 1.1rem; font-weight: 600; 
                     color: #222; cursor: pointer; letter-spacing: 1px; transition: color 0.2s ease;
                     text-transform: none !important;
                 }
@@ -78,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     text-transform: uppercase !important;
                 }
 
-                /* 햄버거 버튼 (B2B/B2C 통합 640px 이하 노출) */
+                /* 햄버거 버튼 (B2B/B2C 통합 1024px 이하 노출) */
                 .menu-toggle-btn {
                     display: none; align-items: center; justify-content: center;
                     width: 40px; height: 40px; background-color: #E5E3DD; border: none;
@@ -102,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     transition: right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
                     padding: 80px 0 40px 0;
                     box-shadow: -5px 0 25px rgba(0, 0, 0, 0.08);
-                    display: flex; flex-direction: column; justify-content: flex-start;
+                    display: none !important; flex-direction: column; justify-content: flex-start;
                 }
                 .page-nav.open { right: 0; }
                 .close-menu-btn {
@@ -124,11 +139,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 /* 📱 모바일 반응형 처리 */
-                @media (max-width: 640px) {
-                    .main-header { justify-content: center; padding: 1rem 1.5rem; }
+                @media (max-width: 1024px) {
+                    .main-header {
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100% !important;
+                        height: 75px !important;
+                        border-radius: 0 !important;
+                        border: none !important;
+                        border-bottom: 1px solid #eaeaea !important;
+                        background: rgba(244, 243, 240, 0.95) !important;
+                        padding: 1rem 1.5rem !important;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
+                        justify-content: center !important;
+                        z-index: 10020 !important;
+                    }
                     .pc-nav-center, .pc-nav-right { display: none !important; }
-                    .menu-toggle-btn { display: flex !important; position: absolute; left: 1.5rem; }
-                    .logo-wrapper { width: 140px; position: absolute; left: 50%; transform: translateX(-50%); }
+                    .menu-toggle-btn { display: flex !important; position: absolute; right: 1.5rem !important; left: auto !important; }
+                    .logo-wrapper { width: auto !important; position: absolute; left: 50% !important; transform: translateX(-50%) !important; }
+                    .page-nav { display: flex !important; }
                 }
             </style>
             <header class="main-header">
@@ -185,79 +215,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (oldPcMenu) oldPcMenu.remove();
         const oldSearchOverlay = document.getElementById("globalSearchOverlay");
         if (oldSearchOverlay) oldSearchOverlay.remove();
-        const oldMobileBar = document.querySelector(".mobile-wholesale-bottom-nav");
+        const oldMobileBar = document.querySelector(".mobile-common-bottom-nav") || document.querySelector(".mobile-wholesale-bottom-nav");
         if (oldMobileBar) oldMobileBar.remove();
         const oldMobileStyle = document.getElementById("mobileBottomNavStyles");
         if (oldMobileStyle) oldMobileStyle.remove();
         const oldLogoutModal = document.getElementById("customGlobalLogoutModal");
         if (oldLogoutModal) oldLogoutModal.remove();
-
-        let bottomNavHTML = "";
-
-        if (role === "wholesale") {
-            bottomNavHTML = `
-                <a href="/wholesale/cart" class="nav-item">
-                    <div class="mobile-cart-icon-wrapper">
-                        <img src="/static/img/shopping_cart.svg" alt="Cart" style="width:24px;height:24px;opacity:0.7;display:block;">
-                        <span class="cart-count-badge mobile-cart-badge" id="mobileCartBadge" style="display: none;">0</span>
-                    </div>
-                    <span>장바구니</span>
-                </a>
-                <a href="/wholesale/orders" class="nav-item">
-                    <img src="/static/img/order.svg" alt="Orders" style="width:24px;height:24px;opacity:0.7;">
-                    <span>주문현황</span>
-                </a>
-                <a href="/partners" class="nav-item">
-                    <img src="/static/img/partner.svg" alt="Partners" style="width:24px;height:24px;opacity:0.7;">
-                    <span>파트너 안경점</span>
-                </a>
-                <a href="/wholesale/mypage" class="nav-item">
-                    <img src="/static/img/my_page.svg" alt="Mypage" style="width:24px;height:24px;opacity:0.7;">
-                    <span>마이페이지</span>
-                </a>
-            `;
-        } else if (role === "general") {
-            bottomNavHTML = `
-                <a href="/general/cart" class="nav-item">
-                    <div class="mobile-cart-icon-wrapper">
-                        <img src="/static/img/shopping_cart.svg" alt="Cart" style="width:24px;height:24px;opacity:0.7;display:block;">
-                        <span class="cart-count-badge mobile-cart-badge" id="mobileCartBadge" style="display: none;">0</span>
-                    </div>
-                    <span>장바구니</span>
-                </a>
-                <a href="/general/bookings" class="nav-item">
-                    <img src="/static/img/order.svg" alt="Reservations" style="width:24px;height:24px;opacity:0.7;">
-                    <span>예약확인</span>
-                </a>
-                <a href="/partners" class="nav-item">
-                    <img src="/static/img/partner.svg" alt="Partners" style="width:24px;height:24px;opacity:0.7;">
-                    <span>파트너 안경점</span>
-                </a>
-                <a href="/general/mypage" class="nav-item">
-                    <img src="/static/img/my_page.svg" alt="Mypage" style="width:24px;height:24px;opacity:0.7;">
-                    <span>마이페이지</span>
-                </a>
-            `;
-        } else { // guest
-            bottomNavHTML = `
-                <a href="/login" class="nav-item">
-                    <img src="/static/img/my_page.svg" alt="Login" style="width:24px;height:24px;opacity:0.7;">
-                    <span>로그인</span>
-                </a>
-                <a href="/register" class="nav-item">
-                    <img src="/static/img/order.svg" alt="Register" style="width:24px;height:24px;opacity:0.7;">
-                    <span>회원가입</span>
-                </a>
-                <a href="/partners" class="nav-item">
-                    <img src="/static/img/partner.svg" alt="Partners" style="width:24px;height:24px;opacity:0.7;">
-                    <span>안경점 안내</span>
-                </a>
-                <a href="/contact" class="nav-item">
-                    <img src="/static/img/logout.svg" alt="Contact" style="width:24px;height:24px;opacity:0.7;">
-                    <span style="color: #0e3a5b;">입점 문의</span>
-                </a>
-            `;
-        }
 
         const menuHTML = `
             <div id="globalWholesaleMenuContainer" class="pc-only-wholesale-menu floating-quick-menu">
@@ -266,8 +229,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button class="quick-btn top-btn" id="quickTopBtn">TOP</button>
             </div>
             
-            <nav class="mobile-wholesale-bottom-nav">
-                ${bottomNavHTML}
+            <nav class="mobile-common-bottom-nav">
+                <a href="/" class="bottom-nav-item">
+                    <span class="material-icons">home</span>
+                    <span>Home</span>
+                </a>
+                <a href="/login" class="bottom-nav-item">
+                    <span class="material-icons">login</span>
+                    <span>Login</span>
+                </a>
+                <a href="#" class="bottom-nav-item" id="bottomNavSearchTrigger">
+                    <span class="material-icons">search</span>
+                    <span>Search</span>
+                </a>
+                <a href="#" class="bottom-nav-item" id="bottomNavTopTrigger">
+                    <span class="material-icons">arrow_upward</span>
+                    <span>Top</span>
+                </a>
             </nav>
 
             <!-- 글로벌 검색 오버레이 패널 (오른쪽 -> 왼쪽 슬라이드인) -->
@@ -314,43 +292,46 @@ document.addEventListener("DOMContentLoaded", () => {
                 @media (max-width: 1024px) {
                     .pc-only-wholesale-menu { display: none !important; }
                 }
-                .mobile-wholesale-bottom-nav {
+                .mobile-common-bottom-nav {
                     display: none;
                     position: fixed;
                     bottom: 0;
                     left: 0;
                     width: 100%;
-                    height: 70px;
-                    background: rgba(255, 255, 255, 0.85);
+                    height: 60px;
+                    background: rgba(255, 255, 255, 0.9);
                     backdrop-filter: blur(15px);
                     -webkit-backdrop-filter: blur(15px);
                     border-top: 1px solid rgba(0, 0, 0, 0.05);
-                    z-index: 10002;
+                    z-index: 10002 !important;
                     justify-content: space-around;
                     align-items: center;
                     padding-bottom: env(safe-area-inset-bottom);
                     box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
                 }
-                @media (max-width: 768px) {
-                    .mobile-wholesale-bottom-nav { display: flex; }
-                    body { padding-bottom: 80px !important; }
+                @media (max-width: 1024px) {
+                    .mobile-common-bottom-nav { display: flex; }
+                    body { padding-bottom: 70px !important; }
                 }
-                .mobile-wholesale-bottom-nav .nav-item {
+                .bottom-nav-item {
                     flex: 1;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
                     text-decoration: none;
-                    color: #666;
-                    gap: 4px;
+                    color: #555;
+                    gap: 2px;
                     transition: all 0.2s;
                 }
-                .mobile-wholesale-bottom-nav .nav-item span {
-                    font-size: 0.7rem;
+                .bottom-nav-item .material-icons {
+                    font-size: 1.5rem;
+                }
+                .bottom-nav-item span:not(.material-icons) {
+                    font-size: 0.72rem;
                     font-weight: 700;
                 }
-                .mobile-wholesale-bottom-nav .nav-item:active {
+                .bottom-nav-item:active {
                     transform: scale(0.95);
                 }
                 .ws-modal-overlay {
@@ -406,6 +387,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 setTimeout(() => searchInput.focus(), 150); // 패널 미끄러져 들어온 뒤 포커싱
             };
         }
+        
+        // 🏁 모바일 하단 탭바 검색 및 탑 액션 동시 연동
+        const bottomSearchBtn = document.getElementById("bottomNavSearchTrigger");
+        if (bottomSearchBtn && searchOverlay && searchInput) {
+            bottomSearchBtn.onclick = (e) => {
+                e.preventDefault();
+                searchOverlay.classList.add("active");
+                setTimeout(() => searchInput.focus(), 150);
+            };
+        }
+
         if (searchCloseBtn && searchOverlay) {
             searchCloseBtn.onclick = () => {
                 searchOverlay.classList.remove("active");
@@ -418,6 +410,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (quickTopBtn) {
             quickTopBtn.onclick = (e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+        }
+        const bottomTopBtn = document.getElementById("bottomNavTopTrigger");
+        if (bottomTopBtn) {
+            bottomTopBtn.onclick = (e) => {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };

@@ -86,23 +86,14 @@ def get_password_hash(password: str) -> str:
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
-def send_telegram_wholesale_notification(token: str, chat_id: str, message: str, file_data: bytes = None, filename: str = None, content_type: str = None):
+def send_telegram_wholesale_notification(token: str, chat_id: str, message: str):
     try:
-        # 1. 텍스트 메시지 전송
+        # 1. 텍스트 메시지만 전송 (사진 전송 단계 제거)
         requests.post(
             f"https://api.telegram.org/bot{token}/sendMessage",
             json={"chat_id": chat_id, "text": message},
             timeout=5
         )
-        # 2. 이미지 파일 전송 (존재할 경우)
-        if file_data:
-            files = {"photo": (filename, file_data, content_type)}
-            requests.post(
-                f"https://api.telegram.org/bot{token}/sendPhoto",
-                data={"chat_id": chat_id},
-                files=files,
-                timeout=10
-            )
     except Exception as e:
         print(f"🔥 도매 가입 텔레그램 알림 백그라운드 발송 실패: {e}")
 
@@ -112,8 +103,7 @@ async def register_wholesale(
     name: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
-    business_number: str = Form(...),
-    business_license: Optional[UploadFile] = File(None)
+    business_number: str = Form(...)
 ):
     try:
         # 백엔드 보안 검증 1: 비밀번호 화이트리스트 및 길이 검사 (정규식)
@@ -124,17 +114,6 @@ async def register_wholesale(
         # 백엔드 보안 검증 2: 사업자 등록 번호 10자리 숫자 검증
         if not re.match(r"^\d{10}$", business_number):
             return {"status": "error", "message": "사업자 등록 번호는 하이픈을 제외한 10자리 숫자여야 합니다."}
-
-        # 백엔드 보안 검증 3: 파일 용량 및 형식 검사
-        if business_license and business_license.filename:
-            business_license.file.seek(0, 2) # 파일 끝으로 이동
-            file_size = business_license.file.tell() # 현재 위치(크기) 얻기
-            business_license.file.seek(0) # 다시 처음으로 이동
-            if file_size > 5 * 1024 * 1024:
-                return {"status": "error", "message": "5MB 이하의 이미지만 첨부 가능합니다."}
-                
-            if not business_license.content_type.startswith("image/"):
-                return {"status": "error", "message": "이미지 파일만 첨부 가능합니다."}
 
         # DB 호출 지연 (서버 초기화 완료 후 요청 시점에만 호출됨)
         db = firestore.client()
@@ -165,20 +144,11 @@ async def register_wholesale(
             f"위 정보를 확인 후 관리자 페이지에서 승인 처리를 진행해 주세요."
         )
         
-        # 스트림 닫히기 전 바이트 및 정보 미리 획득 (삼항 연산자 간소화)
-        has_license = bool(business_license and business_license.filename)
-        file_bytes = await business_license.read() if has_license else None
-        filename = business_license.filename if has_license else None
-        content_type = business_license.content_type if has_license else None
-        
         background_tasks.add_task(
             send_telegram_wholesale_notification,
             token=TELEGRAM_BOT_TOKEN,
             chat_id=TELEGRAM_CHAT_ID,
-            message=message,
-            file_data=file_bytes,
-            filename=filename,
-            content_type=content_type
+            message=message
         )
 
         return {"status": "success", "message": "가입 신청이 완료되었습니다. 관리자 승인 후 이용 가능합니다."}
