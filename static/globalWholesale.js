@@ -96,15 +96,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 /* 햄버거 버튼 (B2B/B2C 통합 1024px 이하 노출) */
                 .menu-toggle-btn {
                     display: none; align-items: center; justify-content: center;
-                    width: 40px; height: 40px; background-color: #E5E3DD; border: none;
+                    width: 40px; height: 40px; background-color: #F8DEC9; border: none;
                     border-radius: 4px; cursor: pointer; z-index: 10005 !important;
                 }
                 .hamburger-box {
-                    display: block; width: 20px; height: 2px; background: #222;
+                    display: block; width: 20px; height: 2px; background: #0E3B5D;
                     position: relative; transition: background 0.3s;
                 }
                 .hamburger-box::before, .hamburger-box::after {
-                    content: ""; position: absolute; width: 100%; height: 2px; background: #222;
+                    content: ""; position: absolute; width: 100%; height: 2px; background: #0E3B5D;
                     left: 0; transition: all 0.3s;
                 }
                 .hamburger-box::before { top: -6px; }
@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 /* 모바일 메뉴바 */
                 .page-nav {
                     position: fixed; top: 0; right: -300px; width: 250px; height: 100vh !important;
-                    background: #F4F3F0 !important; z-index: 10010 !important; 
+                    background: #F4F3F0 !important; z-index: 10030 !important; 
                     transition: right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
                     padding: 80px 0 40px 0;
                     box-shadow: -5px 0 25px rgba(0, 0, 0, 0.08);
@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 .nav-overlay {
                     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
                     background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px);
-                    z-index: 10008 !important; display: none; opacity: 0; transition: opacity 0.3s;
+                    z-index: 10025 !important; display: none; opacity: 0; transition: opacity 0.3s;
                 }
                 .nav-overlay.active { display: block; opacity: 1; }
                 
@@ -140,12 +140,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 /* 📱 모바일 반응형 처리 */
                 @media (max-width: 1024px) {
+                    body {
+                        padding-top: calc(10vw + 20px) !important;
+                    }
                     .main-header {
                         position: fixed !important;
                         top: 0 !important;
                         left: 0 !important;
                         width: 100% !important;
-                        height: 75px !important;
+                        height: 10vw !important;
                         border-radius: 0 !important;
                         border: none !important;
                         border-bottom: 1px solid #eaeaea !important;
@@ -156,8 +159,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         z-index: 10020 !important;
                     }
                     .pc-nav-center, .pc-nav-right { display: none !important; }
-                    .menu-toggle-btn { display: flex !important; position: absolute; right: 1.5rem !important; left: auto !important; }
-                    .logo-wrapper { width: auto !important; position: absolute; left: 50% !important; transform: translateX(-50%) !important; }
+                    .menu-toggle-btn { display: flex !important; position: absolute; right: 1.5rem !important; left: auto !important; top: 50% !important; transform: translateY(-50%) !important; }
+                    .logo-wrapper { width: auto !important; position: absolute; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; }
                     .page-nav { display: flex !important; }
                 }
             </style>

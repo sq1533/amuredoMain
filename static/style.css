@@ -2770,6 +2770,19 @@ body.main-body {
         grid-column: 4 / span 3 !important;
         grid-row: 29 / span 1 !important;
     }
+    .search-panel {
+        width: 100% !important;
+        right: -100% !important;
+        padding: 60px 20px !important;
+    }
+    .search-overlay.active .search-panel {
+        right: 0 !important;
+    }
+    .search-close-btn {
+        top: calc(10vw + 20px) !important;
+        right: 1.5rem !important;
+        font-size: 1.8rem !important;
+    }
 }
 
 /* 모바일 환경 (4그리드) */
@@ -2867,7 +2880,7 @@ body.main-body {
         right: 0 !important;
     }
     .search-close-btn {
-        top: 1.5rem !important;
+        top: calc(10vw + 20px) !important;
         right: 1.5rem !important;
         font-size: 1.8rem !important;
     }
@@ -2953,7 +2966,7 @@ body.main-body {
     background: rgba(0, 0, 0, 0.4) !important;
     backdrop-filter: blur(5px) !important;
     -webkit-backdrop-filter: blur(5px) !important;
-    z-index: 10005 !important;
+    z-index: 10025 !important;
     opacity: 0 !important;
     visibility: hidden !important;
     transition: opacity 0.35s ease, visibility 0.35s ease !important;
@@ -2987,7 +3000,7 @@ body.main-body {
 /* 닫기 버튼 */
 .search-close-btn {
     position: absolute !important;
-    top: 2rem !important;
+    top: calc(4vw + 40px) !important;
     right: 2rem !important;
     background: transparent !important;
     border: none !important;
