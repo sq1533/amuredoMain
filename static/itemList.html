@@ -81,19 +81,19 @@
         <div class="nav-overlay" id="navOverlay"></div>
     </header>
 
-    <div class="app-container">
+    <div class="app-container main-page">
         <!-- 메인 콘텐츠 영역 (카테고리별 Item List 구현 구역) -->
-        <main class="main-content sub-page-main">
-            <!-- 🏁 카테고리 필터(shape) 컨테이너: 탭 형식 UI -->
+        <main class="main-content sub-page-main main-grid-layout">
+            <!-- 현재 페이지의 카테고리 타이틀 (JS가 자동으로 경로를 읽어와 주입) -->
+            <h1 class="category-page-title" id="categoryTitle">Category</h1>
+
+            <!-- 🏁 카테고리 필터(shape) 컨테이너: 분류하기 라벨 및 탭 형식 UI -->
             <div class="filter-container">
-                <span class="filter-label">shape</span>
+                <span class="filter-label">분류하기</span>
                 <div id="categoryFilter" class="filter-tabs">
                     <!-- JS 코드가 버튼(탭)들을 자동 렌더링합니다 -->
                 </div>
             </div>
-            
-            <!-- 현재 페이지의 카테고리 타이틀 (JS가 자동으로 경로를 읽어와 주입) -->
-            <h1 class="category-page-title" id="categoryTitle">Category</h1>
             
             <!-- 딱 붙어있는 1:1 사진 전용 카테고리 3열 그리드 컨테이너 -->
             <div class="category-grid-container" id="categoryGrid">

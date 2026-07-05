@@ -96,24 +96,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 /* 햄버거 버튼 (B2B/B2C 통합 1024px 이하 노출) */
                 .menu-toggle-btn {
                     display: none; align-items: center; justify-content: center;
-                    width: 40px; height: 40px; background-color: #F8DEC9; border: none;
-                    border-radius: 4px; cursor: pointer; z-index: 10005 !important;
+                    width: var(--hamburger-btn-size); height: var(--hamburger-btn-size); background-color: #0e3b5d; border: none;
+                    border-radius: 4px; cursor: pointer; z-index: 10050 !important;
                 }
                 .hamburger-box {
-                    display: block; width: 20px; height: 2px; background: #0E3B5D;
+                    display: block; width: var(--hamburger-bar-width); height: 2px; background: #FFFFFF;
                     position: relative; transition: background 0.3s;
                 }
                 .hamburger-box::before, .hamburger-box::after {
-                    content: ""; position: absolute; width: 100%; height: 2px; background: #0E3B5D;
+                    content: ""; position: absolute; width: 100%; height: 2px; background: #FFFFFF;
                     left: 0; transition: all 0.3s;
                 }
-                .hamburger-box::before { top: -6px; }
-                .hamburger-box::after { bottom: -6px; }
+                .hamburger-box::before { top: var(--hamburger-bar-spacing); }
+                .hamburger-box::after { bottom: var(--hamburger-bar-spacing); }
 
                 /* 모바일 메뉴바 */
                 .page-nav {
-                    position: fixed; top: 0; right: -300px; width: 250px; height: 100vh !important;
-                    background: #F4F3F0 !important; z-index: 10030 !important; 
+                    position: fixed; top: 0; right: -40vw; width: 40vw; height: 100vh !important;
+                    background: #F4F3F0 !important; z-index: 10065 !important; 
                     transition: right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
                     padding: 80px 0 40px 0;
                     box-shadow: -5px 0 25px rgba(0, 0, 0, 0.08);
@@ -121,13 +121,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 .page-nav.open { right: 0; }
                 .close-menu-btn {
-                    position: absolute; top: 1.5rem; right: 1.5rem;
+                    display: block !important;
+                    position: absolute; top: 20px; right: 20px;
                     background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: #222;
                 }
                 .nav-overlay {
                     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                    background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px);
-                    z-index: 10025 !important; display: none; opacity: 0; transition: opacity 0.3s;
+                    background: transparent;
+                    z-index: 10060 !important; display: none; opacity: 0; transition: opacity 0.3s;
                 }
                 .nav-overlay.active { display: block; opacity: 1; }
                 
@@ -135,13 +136,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 .nav-links li { margin-bottom: 20px; }
                 .nav-links li .nav-switch-btn {
                     width: 100%; text-align: left; padding: 10px 0; 
-                    font-size: 1.2rem; border-bottom: 1px solid #f0f0f0; display: block;
+                    font-size: 1.2rem; border: none; display: block;
                 }
 
                 /* 📱 모바일 반응형 처리 */
                 @media (max-width: 1024px) {
                     body {
-                        padding-top: calc(10vw + 20px) !important;
+                        padding-top: 0 !important;
                     }
                     .main-header {
                         position: fixed !important;
@@ -295,6 +296,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 @media (max-width: 1024px) {
                     .pc-only-wholesale-menu { display: none !important; }
                 }
+                /* ==========================================================================
+                   🌐 GLOBAL NAVIGATION (Mobile Bottom Nav)
+                   - PC: 숨김
+                   - Wild Mobile & Mobile: 노출
+                   ========================================================================== */
                 .mobile-common-bottom-nav {
                     display: none;
                     position: fixed;
@@ -312,8 +318,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     padding-bottom: env(safe-area-inset-bottom);
                     box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
                 }
+                /* 와일드 모바일 & 모바일 환경 하단 메뉴바 노출 */
                 @media (max-width: 1024px) {
-                    .mobile-common-bottom-nav { display: flex; }
+                    .mobile-common-bottom-nav { display: flex; z-index: 10025; }
                     body { padding-bottom: 70px !important; }
                 }
                 .bottom-nav-item {

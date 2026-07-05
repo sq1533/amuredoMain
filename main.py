@@ -287,10 +287,10 @@ async def serve_payment_success_page(request: Request):
 
 
 
-# 🏁 통합 회원가입 및 로그인 페이지 라우팅
+# 🏁 회원가입 라우트
 @app.get("/register", response_class=HTMLResponse)
 async def serve_register():
-    path = os.path.join(static_dir, "login.html")
+    path = os.path.join(static_dir, "register.html")
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8", errors="replace") as f:
             return HTMLResponse(content=f.read())

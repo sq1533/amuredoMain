@@ -1,5 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');
 
+/* ==========================================================================
+   🌐 GLOBAL DECLARATION (Variables, Fonts, Grid Systems)
+   ========================================================================== */
+:root {
+    /* Color Palette */
+    --color-bg-primary: #F4F3F0;
+    --color-text-primary: #222222;
+    --color-hamburger-bg: #E5E3DD;
+    --color-hamburger-line: #222222;
+
+    /* Typography */
+    --font-primary: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-serif: 'Nanum Myeongjo', serif;
+
+    /* Grid System */
+    --grid-cols-pc: 12;
+    --grid-cols-tablet: 6;
+    --grid-cols-mobile: 4;
+
+    /* Responsive UI Elements */
+    --hamburger-btn-size: clamp(36px, 5vw, 48px);
+    --hamburger-bar-width: clamp(18px, 2.5vw, 24px);
+    --hamburger-bar-spacing: clamp(-7px, -0.8vw, -5px);
+}
+
 /* 기본 리셋 */
 * {
     box-sizing: border-box;
@@ -25,12 +50,43 @@ button, input, select, textarea {
 }
 
 body {
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--font-primary);
     font-size: 16px; 
     line-height: 1.2;
-    background-color: #F4F3F0; /* 풀와이드 배너의 자연스러운 연출을 위해 기본 배경을 화이트톤으로 통일 */
-    color: #222;
+    background-color: var(--color-bg-primary); 
+    color: var(--color-text-primary);
     overflow-x: hidden; /* 가로 스크롤바 원천 차단 */
+}
+
+/* 글로벌 폰트 유틸리티 */
+.font-serif {
+    font-family: var(--font-serif) !important;
+}
+
+/* ==========================================================================
+   🌐 GLOBAL GRID SYSTEM (PC: 12, Tablet: 6, Mobile: 4)
+   ========================================================================== */
+.main-grid-layout, .grid-system-12 {
+    display: grid !important;
+    grid-template-columns: repeat(var(--grid-cols-pc), 1fr) !important;
+    grid-auto-rows: calc(100vw / var(--grid-cols-pc)) !important;
+    gap: 0 !important;
+}
+
+@media screen and (max-width: 1024px) {
+    .main-grid-layout, .grid-system-6 {
+        display: grid !important;
+        grid-template-columns: repeat(var(--grid-cols-tablet), 1fr) !important;
+        grid-auto-rows: calc(100vw / var(--grid-cols-tablet)) !important;
+    }
+}
+
+@media screen and (max-width: 640px) {
+    .main-grid-layout, .grid-system-4 {
+        display: grid !important;
+        grid-template-columns: repeat(var(--grid-cols-mobile), 1fr) !important;
+        grid-auto-rows: calc(100vw / var(--grid-cols-mobile)) !important;
+    }
 }
 
 /* 
@@ -39,7 +95,6 @@ body {
  */
 .app-container {
     width: 100%;
-    max-width: 1024px;
     margin: 0 auto;
     position: relative;
     /* 분리된 컨테이너 구조이므로 개별 그림자나 별도 배경색은 제거하여 플랫하게 연결 */
@@ -146,14 +201,14 @@ body {
 /* ========= 2.5 서브 페이지 공통 레이아웃 (여백 처리) ========= */
 /* 메인 페이지를 제외한 모든 서브 페이지의 본문 상단 여백 설정 (헤더 오버레이 대응) */
 .sub-page-main {
-    padding-top: calc(4vw + 30px); /* PC 환경: 헤더 가변 높이(4vw) + 여유 여백 */
+    padding-top: 0; /* 사용자 요청으로 여백 제거 (그리드로 대체) */
     padding-bottom: 5rem;
     min-height: 80vh; /* 푸터가 너무 올라오지 않게 최소 높이 확보 */
 }
 
 @media screen and (max-width: 1024px) {
     .sub-page-main {
-        padding-top: 100px; /* 모바일 환경: 헤더 높이 대응 */
+        padding-top: 0; /* 모바일 환경 여백 제거 */
     }
 }
 
@@ -383,7 +438,7 @@ body {
     font-size: 1.4rem; 
     line-height: 1.5;
     color: #0e3a5b; /* 시그니처 블루 색상 유지 */
-    font-family: 'Pretendard', sans-serif;
+    font-family: var(--font-primary);
     font-weight: 400;
     word-break: keep-all;
     letter-spacing: 0.8px;
@@ -693,7 +748,7 @@ body {
     padding: 0.4rem 0;
     transition: all 0.3s ease;
     position: relative;
-    font-family: 'Pretendard', sans-serif;
+    font-family: var(--font-primary);
 }
 
 .filter-tab:hover {
@@ -731,7 +786,7 @@ body {
 
 /* 페이지 상단 타이틀 (sunglasses 등) */
 .category-page-title {
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--font-primary);
     font-size: 1.8rem;     /* 메인 서브타이틀(1.5rem) 기조에 맞추되 해당 페이지의 메인 간판이므로 약간의 크기 보전 */
     text-align: center;
     color: #0e3a5b;       /* 시그니처 블루 적용 */
@@ -766,6 +821,229 @@ body {
         max-width: 50%;
     }
 }
+
+/* PC 환경 12그리드 설계 적용 및 3열 상품카드, 세로 1열 필터 세팅 */
+@media screen and (min-width: 1025px) {
+    .sub-page-main.main-grid-layout {
+        column-gap: 24px !important;
+        row-gap: 0px !important;
+        padding-top: 0px !important;
+    }
+    
+    .category-page-title {
+        grid-column: 3 / span 8 !important;
+        grid-row: 2 / span 1 !important; /* 2행 배치 (1행은 상단 1높이 여백) */
+        margin-bottom: 0 !important;
+        text-align: left !important;
+        font-size: 2.2rem !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    
+    .category-grid-container {
+        grid-column: 3 / span 6 !important;
+        grid-row: 3 / span 12 !important; /* 3행부터 세로 12격자 칸 점유 */
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 0px !important;
+        row-gap: 20px !important;
+        width: 100% !important;
+    }
+    
+    .category-item-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: none !important;
+    }
+    
+    .filter-container {
+        grid-column: 9 / span 2 !important;
+        grid-row: 3 / span 12 !important; /* 3행부터 세로 12격자 칸 점유 */
+        align-items: flex-start !important;
+        margin-bottom: 0 !important;
+        padding: 0 !important;
+        gap: 1.2rem !important;
+    }
+    
+    .filter-label {
+        font-size: 1.0rem !important;
+        font-weight: 700 !important;
+        color: #0e3a5b !important;
+        text-transform: capitalize !important;
+        letter-spacing: 0 !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .filter-tabs {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.8rem !important;
+        width: 100% !important;
+    }
+    
+    .filter-tab {
+        font-size: 1.0rem !important;
+        padding: 0.2rem 0 !important;
+        text-align: left !important;
+        width: 100% !important;
+    }
+    
+    .filter-tab.active::after {
+        display: none !important;
+    }
+}
+
+/* 와일드 모바일 환경 (태블릿: 641px ~ 1024px) - 6열 그리드 대응 */
+@media screen and (min-width: 641px) and (max-width: 1024px) {
+    .sub-page-main.main-grid-layout {
+        column-gap: 16px !important;
+        row-gap: 0px !important;
+        padding-top: 0px !important;
+    }
+    
+    .category-page-title {
+        grid-column: 1 / span 6 !important;
+        grid-row: 2 / span 1 !important; /* 2행 배치 (1행은 상단 1높이 여백) */
+        margin-bottom: 0 !important;
+        text-align: left !important;
+        font-size: 1.8rem !important;
+        padding-left: 20px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    
+    .category-grid-container {
+        grid-column: 1 / span 5 !important;
+        grid-row: 3 / span 15 !important; /* 3행부터 세로 15격자 칸 점유 */
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 0px !important;
+        row-gap: 16px !important;
+        width: 100% !important;
+        padding-left: 20px !important;
+    }
+    
+    .category-item-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: none !important;
+    }
+    
+    .filter-container {
+        grid-column: 6 / span 1 !important;
+        grid-row: 3 / span 15 !important; /* 3행부터 세로 15격자 칸 점유 */
+        align-items: flex-start !important;
+        margin-bottom: 0 !important;
+        padding: 0 20px 0 0 !important;
+        gap: 1.0rem !important;
+    }
+    
+    .filter-label {
+        font-size: 0.9rem !important;
+        font-weight: 700 !important;
+        color: #0e3a5b !important;
+        text-transform: capitalize !important;
+        letter-spacing: 0 !important;
+        margin-bottom: 0.3rem !important;
+    }
+    
+    .filter-tabs {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.6rem !important;
+        width: 100% !important;
+    }
+    
+    .filter-tab {
+        font-size: 0.9rem !important;
+        padding: 0.1rem 0 !important;
+        text-align: left !important;
+        width: 100% !important;
+    }
+    
+    .filter-tab.active::after {
+        display: none !important;
+    }
+}
+
+/* 모바일 환경 (640px 이하) - 4열 그리드 상하 배치 대응 */
+@media screen and (max-width: 640px) {
+    .sub-page-main.main-grid-layout {
+        column-gap: 0px !important;
+        row-gap: 0px !important;
+        padding-top: 0px !important;
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+    }
+    
+    .category-page-title {
+        grid-column: 1 / span 4 !important;
+        grid-row: 2 / span 1 !important; /* 2행 배치 (1행은 상단 1높이 여백) */
+        margin-bottom: 0 !important;
+        text-align: center !important;
+        font-size: 1.5rem !important;
+        padding-left: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .filter-container {
+        grid-column: 1 / span 4 !important; /* 필터 4그리드 */
+        grid-row: 3 / span 1 !important;    /* 3행 배치 (1높이) */
+        align-items: center !important;
+        margin-bottom: 0 !important;
+        padding: 0 !important;
+        gap: 0.5rem !important;
+    }
+    
+    .filter-label {
+        font-size: 0.8rem !important;
+        font-weight: 700 !important;
+        color: #0e3a5b !important;
+        text-transform: capitalize !important;
+        letter-spacing: 0 !important;
+        margin-bottom: 0.1rem !important;
+    }
+    
+    .filter-tabs {
+        flex-direction: row !important; /* 가로 탭 배치 */
+        justify-content: center !important;
+        gap: 1.2rem !important;
+        width: auto !important;
+    }
+    
+    .filter-tab {
+        font-size: 0.95rem !important;
+        padding: 0.3rem 0 !important;
+        text-align: center !important;
+        width: auto !important;
+    }
+    
+    .filter-tab.active::after {
+        display: block !important; /* 활성 밑줄 표시 */
+        height: 2px !important;
+        background-color: #0e3a5b !important;
+    }
+    
+    .category-grid-container {
+        grid-column: 1 / span 4 !important; /* 상품 리스트 4그리드 */
+        grid-row: 4 / span 20 !important;   /* 4행부터 세로 20격자 칸 점유 */
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important; /* 2열 배치 */
+        gap: 0px !important;
+        row-gap: 12px !important;
+        width: 100% !important;
+        padding-left: 0 !important;
+    }
+    
+    .category-item-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: none !important;
+    }
+}
+
 
 /* ------------------------------------------------------------- 
    사진 영역 (1:1 종횡비율 고정 - 가장 안전한 padding hack 기법) 
@@ -963,48 +1241,128 @@ body {
 }
 
 /* ==========================================================
-   PC 환경 (640px 초과) : 좌측 500px 이미지 / 우측 정보 텍스트 분할 UI
+   🌐 상품 상세 글로벌 12/6/4 그리드 설계 및 환경별 규격 적용
    ========================================================== */
-@media screen and (min-width: 641px) {
-    .detail-content {
-        display: flex;
-        flex-direction: row; /* 컨텐츠를 좌우로 가릅니다 */
-        flex-wrap: wrap; /* 추가: 100% 크기의 연관 상품 섹션이 밑으로 줄바꿈 되도록 허용 */
-        align-items: flex-start; /* 상단 라인을 깔끔하게 맞춥니다 */
-    }
+.detail-content.main-grid-layout {
+    /* 글로벌 정사각형 그리드(grid-auto-rows)를 침범 없이 그대로 상속 */
+    background-color: #F4F3F0;
+}
 
-    /* 왼쪽 사진 영역 (유저 요구사항: 500px 고정 및 왼쪽 마진 10px) */
-    .detail-left-column {
-        width: 500px;
-        flex: 0 0 500px;
-        margin-left: 10px;
-    }
-
-    /* PC에서는 래퍼 자체가 10px 마진을 가지고 500px을 유지하므로 내부 이중 여백을 뺍니다 */
-    .detail-slide {
-        padding: 0;
-    }
-
-    /* 오른쪽 텍스트 정보 영역 (사용자 변경 요청: 좌측 정렬) */
-    .detail-info-area {
-        flex: 1; /* 남는 우측 공간을 모두 가져갑니다 */
-        text-align: left; /* 상품명, 가격 등을 우측 구역 내 왼쪽으로 정렬 */
-        padding: 0 1.5rem 0 2rem; /* 사진과 너무 붙지 않게 띄우고, 우측 벽과의 마진도 확보 */
-    }
-
-    /* 반응형 폭발: PC 모니터에서는 브랜드명이 2.0rem으로 웅장하게 확대됨 */
-    .detail-item-name {
-        font-size: 2.0rem; /* 사용자 요청 반영 (PC) */
-        margin-bottom: 0.8rem;
+/* PC 환경 (1025px 이상, 12열 중 8그리드 차지 및 좌우 2그리드 여백) */
+@media screen and (min-width: 1025px) {
+    .detail-content.main-grid-layout {
+        column-gap: 24px !important;
+        row-gap: 0px !important;
     }
     
-    /* PC 모드: 아이템 텍스트들과 열(Column) 맞춤 */
+    /* 좌측 이미지 4그리드 */
+    .detail-left-column {
+        grid-column: 3 / span 4 !important; /* 3~6열 */
+        grid-row: 2 / span 7 !important;    /* 2행부터 7격자 점유 (1행은 빈 여백) */
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+    
+    /* 우측 상세정보 4그리드 */
+    .detail-info-area {
+        grid-column: 7 / span 4 !important; /* 7~10열 */
+        grid-row: 2 / span 7 !important;    /* 2행부터 7격자 점유 */
+        width: 100% !important;
+        padding: 0 !important;
+        text-align: left !important;
+    }
+    
+    .related-items-section {
+        grid-column: 3 / span 8 !important;
+        grid-row: 9 / span 2 !important;    /* 9행부터 세로 2칸 점유 */
+        padding: 0 !important;
+    }
+    
+    .detail-images-section {
+        grid-column: 3 / span 8 !important;
+        grid-row: 11 / span 30 !important;  /* 11행부터 세로 30칸 점유 */
+        padding: 0 !important;
+    }
+    
+    .detail-slide {
+        padding: 0 !important;
+    }
+    
+    .detail-item-name {
+        font-size: 2.0rem !important;
+        margin-bottom: 0.8rem !important;
+    }
+    
     .detail-item-desc {
-        font-size: 1.0rem; /* PC 환경은 기존 1.0rem 기조 유지 */
-        max-width: 100%;
-        margin: 2.5rem 0; /* 우측 정렬 기준이므로 가로 마진 풀기 */
-        padding: 0.6rem 0 0.6rem 1.5rem; /* PC 환경은 선과의 간격을 좀 더 시원하게 확장 */
-        background-color: transparent; /* PC에서는 흰 벽에 선만 있는 깔끔함 추구 */
+        font-size: 1.0rem !important;
+        max-width: 100% !important;
+        margin: 2.5rem 0 !important;
+        padding: 0.6rem 0 0.6rem 1.5rem !important;
+        background-color: transparent !important;
+    }
+}
+
+/* 와일드 모바일 환경 (태블릿: 641px ~ 1024px, 6열 중 6그리드 차지) */
+@media screen and (min-width: 641px) and (max-width: 1024px) {
+    /* 좌측 이미지 3그리드 */
+    .detail-left-column {
+        grid-column: 1 / span 3 !important;
+        grid-row: 2 / span 8 !important;    /* 2행부터 세로 8칸 점유 (1행은 빈 여백) */
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+    
+    /* 우측 상세정보 3그리드 */
+    .detail-info-area {
+        grid-column: 4 / span 3 !important;
+        grid-row: 2 / span 8 !important;    /* 2행부터 세로 8칸 점유 */
+        width: 100% !important;
+        padding: 0 !important;
+        text-align: left !important;
+    }
+    
+    .related-items-section {
+        grid-column: 1 / span 6 !important;
+        grid-row: 10 / span 2 !important;
+        padding: 0 !important;
+    }
+    
+    .detail-images-section {
+        grid-column: 1 / span 6 !important;
+        grid-row: 12 / span 35 !important;
+        padding: 0 !important;
+    }
+}
+
+/* 모바일 환경 (640px 이하, 4열 중 4그리드 차지) */
+@media screen and (max-width: 640px) {
+    /* 이미지 4그리드 */
+    .detail-left-column {
+        grid-column: 1 / span 4 !important;
+        grid-row: 2 / span 6 !important;    /* 2행부터 세로 6칸 점유 (1행은 빈 여백) */
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+    
+    /* 상세정보 4그리드 */
+    .detail-info-area {
+        grid-column: 1 / span 4 !important;
+        grid-row: 8 / span 6 !important;    /* 이미지 하단인 8행부터 세로 6칸 점유 */
+        width: 100% !important;
+        padding: 0 !important;
+        text-align: left !important;
+    }
+    
+    .related-items-section {
+        grid-column: 1 / span 4 !important;
+        grid-row: 14 / span 3 !important;
+        padding: 0 !important;
+    }
+    
+    .detail-images-section {
+        grid-column: 1 / span 4 !important;
+        grid-row: 17 / span 40 !important;
+        padding: 0 !important;
     }
 }
 
@@ -1069,7 +1427,7 @@ body {
 
 .about-philosophy h2 {
     font-size: 1.5rem;
-    font-family: 'Nanum Myeongjo', serif;
+    font-family: var(--font-serif);
     font-weight: 700;
     color: #111;
     margin-bottom: 3.5rem;
@@ -1089,7 +1447,7 @@ body {
 
 .philosophy-content p {
     font-size: 1.0rem;
-    font-family: 'Nanum Myeongjo', serif;
+    font-family: var(--font-serif);
     line-height: 2; /* 넉넉한 줄간격 허용 */
     color: #444;
     margin-bottom: 2.2rem;
@@ -1165,8 +1523,8 @@ body {
 /* 기본 컨테이너 여백 통제 영역: .detail-content 와 독립 */
 .related-items-section {
     width: 100%;
-    margin-top: 5rem;
-    padding-top: 3rem;
+    margin-top: 0;
+    padding-top: 0;
     border-top: 1px solid #eee; /* 시각적 분리선 */
 }
 
@@ -1315,7 +1673,7 @@ body {
 .form-group textarea {
     width: 100%;
     padding: 1.2rem 1rem;
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--font-primary);
     font-size: 1.0rem;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -1353,7 +1711,7 @@ body {
     padding: 0.7rem 2.0rem;
     font-size: 1.0rem;
     font-weight: 700;
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--font-primary);
     border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -1518,7 +1876,7 @@ body {
     padding: 1rem 4rem;
     font-size: 1.2rem;
     font-weight: 700;
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--font-primary);
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -1587,7 +1945,7 @@ body {
 }
 
 .footer-info p {
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--font-primary);
     font-size: 0.8rem;
     color: #999999;
     margin-bottom: 0.3rem;
@@ -1926,7 +2284,7 @@ body {
 }
 
 .partner-title {
-    font-family: 'Nanum Myeongjo', serif;
+    font-family: var(--font-serif);
     font-size: 2.5rem;
     font-weight: 700;
     color: #0e3a5b;
@@ -2115,7 +2473,7 @@ body {
 }
 
 .partner-card .card-name {
-    font-family: 'Nanum Myeongjo', serif;
+    font-family: var(--font-serif);
     font-size: 1.4rem;
     font-weight: 700;
     color: #111;
@@ -2205,7 +2563,7 @@ body {
 }
 
 .partner-empty-state h3 {
-    font-family: 'Nanum Myeongjo', serif;
+    font-family: var(--font-serif);
     font-size: 1.3rem;
     font-weight: 700;
     color: #333;
@@ -2556,30 +2914,13 @@ body.main-body {
 }
 
 .app-container.main-page {
-    max-width: none !important;
-    width: 100% !important;
     margin: 0 !important;
     background-color: #F7F7F7 !important;
 }
 
 .app-container.main-page .main-content {
-    max-width: none !important;
-    width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
-    background-color: #F7F7F7 !important;
-}
-
-/* 12열 정사각형 그리드 레이아웃 */
-.main-grid-layout {
-    display: grid !important;
-    grid-template-columns: repeat(12, 1fr) !important;
-    grid-auto-rows: calc(100vw / 12) !important; /* 1:1 정사각형 기저 형성 */
-    gap: 0 !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    box-sizing: border-box !important;
     background-color: #F7F7F7 !important;
 }
 
@@ -2684,12 +3025,7 @@ body.main-body {
    🏁 와일드 모바일 (6그리드) & 모바일 (4그리드) 메인 페이지 그리드 반응형 오버라이드
    ========================================================================== */
 
-/* 와일드 모바일 환경 (6그리드) */
 @media screen and (max-width: 1024px) and (min-width: 641px) {
-    .main-grid-layout {
-        grid-template-columns: repeat(6, 1fr) !important;
-        grid-auto-rows: calc(100vw / 6) !important;
-    }
     .banner-cell {
         grid-column: span 6 !important;
         grid-row: span 6 !important;
@@ -2719,21 +3055,21 @@ body.main-body {
     }
     .mini-banner-03-text {
         grid-column: 1 / span 3 !important;
-        grid-row: span 3 !important;
+        grid-row: 13 / span 3 !important;
         justify-content: center !important;
         text-align: center !important;
     }
     .mini-banner-03-img {
         grid-column: 4 / span 3 !important;
-        grid-row: span 3 !important;
+        grid-row: 13 / span 3 !important;
     }
     .series-gap-empty {
         grid-column: span 6 !important;
-        grid-row: span 1 !important;
+        grid-row: 16 / span 1 !important;
     }
     .series-gap-title {
         grid-column: span 6 !important;
-        grid-row: span 1 !important;
+        grid-row: 17 / span 1 !important;
         justify-content: center !important;
         text-align: center !important;
         padding-left: 0 !important;
@@ -2772,6 +3108,7 @@ body.main-body {
     }
     .search-panel {
         width: 100% !important;
+        max-width: 600px !important;
         right: -100% !important;
         padding: 60px 20px !important;
     }
@@ -2779,18 +3116,14 @@ body.main-body {
         right: 0 !important;
     }
     .search-close-btn {
-        top: calc(10vw + 20px) !important;
-        right: 1.5rem !important;
+        top: 20px !important;
+        right: 20px !important;
         font-size: 1.8rem !important;
     }
 }
 
 /* 모바일 환경 (4그리드) */
 @media screen and (max-width: 640px) {
-    .main-grid-layout {
-        grid-template-columns: repeat(4, 1fr) !important;
-        grid-auto-rows: calc(100vw / 4) !important;
-    }
     .banner-cell {
         grid-column: span 4 !important;
         grid-row: span 8 !important;
@@ -2820,21 +3153,21 @@ body.main-body {
     }
     .mini-banner-03-img {
         grid-column: span 4 !important;
-        grid-row: span 4 !important;
+        grid-row: 19 / span 4 !important;
     }
     .mini-banner-03-text {
         grid-column: span 4 !important;
-        grid-row: span 1 !important;
+        grid-row: 23 / span 1 !important;
         justify-content: center !important;
         text-align: center !important;
     }
     .series-gap-empty {
         grid-column: span 4 !important;
-        grid-row: span 1 !important;
+        grid-row: 24 / span 1 !important;
     }
     .series-gap-title {
         grid-column: span 4 !important;
-        grid-row: span 1 !important;
+        grid-row: 25 / span 1 !important;
         justify-content: center !important;
         text-align: center !important;
         padding-left: 0 !important;
@@ -2873,6 +3206,7 @@ body.main-body {
     }
     .search-panel {
         width: 100% !important;
+        max-width: 600px !important;
         right: -100% !important;
         padding: 60px 20px !important;
     }
@@ -2880,8 +3214,8 @@ body.main-body {
         right: 0 !important;
     }
     .search-close-btn {
-        top: calc(10vw + 20px) !important;
-        right: 1.5rem !important;
+        top: 20px !important;
+        right: 20px !important;
         font-size: 1.8rem !important;
     }
 }
@@ -2966,7 +3300,7 @@ body.main-body {
     background: rgba(0, 0, 0, 0.4) !important;
     backdrop-filter: blur(5px) !important;
     -webkit-backdrop-filter: blur(5px) !important;
-    z-index: 10025 !important;
+    z-index: 10060 !important;
     opacity: 0 !important;
     visibility: hidden !important;
     transition: opacity 0.35s ease, visibility 0.35s ease !important;
@@ -2980,8 +3314,9 @@ body.main-body {
 .search-panel {
     position: absolute !important;
     top: 0 !important;
-    right: -420px !important; /* 화면 우측 바깥에 대기 */
-    width: 400px !important;
+    right: -400px !important;
+    width: 100% !important;
+    max-width: 600px !important;
     height: 100% !important;
     background: #ffffff !important;
     box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1) !important;
@@ -3000,8 +3335,8 @@ body.main-body {
 /* 닫기 버튼 */
 .search-close-btn {
     position: absolute !important;
-    top: calc(4vw + 40px) !important;
-    right: 2rem !important;
+    top: 20px !important;
+    right: 20px !important;
     background: transparent !important;
     border: none !important;
     font-size: 1.6rem !important;
@@ -3053,18 +3388,7 @@ body.main-body {
 }
 
 /* 🏁 전역 반응형 그리드 시스템 정의 */
-.grid-system-12 {
-    display: grid !important;
-    grid-template-columns: repeat(12, 1fr) !important;
-}
-.grid-system-6 {
-    display: grid !important;
-    grid-template-columns: repeat(6, 1fr) !important;
-}
-.grid-system-4 {
-    display: grid !important;
-    grid-template-columns: repeat(4, 1fr) !important;
-}
+
 
 
 
