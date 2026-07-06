@@ -70,46 +70,7 @@
             style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
 
-    <!-- 최상단 헤더(Header) 영역: 모든 페이지 공통 레이아웃 -->
-    <header class="main-header">
-        <!-- PC 좌측 메뉴 -->
-        <nav class="pc-nav-left">
-            <button class="nav-switch-btn" onclick="location.href='/about'">About</button>
-            <button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button>
-        </nav>
 
-        <!-- 모바일 전용 햄버거 메뉴 버튼 -->
-        <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
-            <span class="hamburger-box"></span>
-        </button>
-
-        <!-- 중앙 로고 -->
-        <div class="logo-wrapper">
-            <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;"
-                onclick="location.href='/'">
-        </div>
-
-        <!-- PC 우측 메뉴 -->
-        <nav class="pc-nav-right">
-            <button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button>
-            <button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button>
-            <button class="nav-switch-btn" onclick="location.href='/antioch'">Antioch</button>
-        </nav>
-
-        <!-- 모바일 네비게이션 드로어 -->
-        <nav class="page-nav" id="pageNav">
-            <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
-            <ul class="nav-links">
-                <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
-                <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
-                <li><button class="nav-switch-btn" onclick="location.href='/antioch'">Antioch</button></li>
-                <li><button class="nav-switch-btn" onclick="location.href='/about'">About</button></li>
-                <li><button class="nav-switch-btn" onclick="location.href='/contact'">Connect</button></li>
-            </ul>
-        </nav>
-
-        <div class="nav-overlay" id="navOverlay"></div>
-    </header>
 
     <div class="main-grid-layout" id="contactView" style="display: grid; min-height: 100vh; box-sizing: border-box;">
         <div class="contact-container">
@@ -154,26 +115,6 @@
             </div>
         </div>
     </div>
-
-    <!-- 공통 푸터(Footer): 사업자 정보 -->
-    <footer class="main-footer">
-        <hr class="footer-divider">
-        <div class="footer-info">
-            <p class="footer-terms-wrap">
-                <a href="/about" class="footer-terms-link">about us</a>
-                <span style="color: #ccc; margin: 0 8px;">|</span>
-                <a href="/static/terms.html" class="footer-terms-link">이용약관</a> 
-                <span style="color: #ccc; margin: 0 8px;">|</span> 
-                <a href="/static/privacy.html" class="footer-terms-link">개인정보처리방침</a>
-            </p>
-            <p>상호명 및 호스트 서비스 제공 : 주식회사 키제이</p>
-            <p>대표 : 서명원 / 연락처 : 070-8064-4598</p>
-            <p>email : amuredo_shop@naver.com</p>
-            <p>서울시 관악구 난곡로 128, 1층</p>
-            <p>사업자 등록 번호 : 257-87-03297</p>
-            <p>통신판매업 신고 : 2026-서울관악-0029</p>
-        </div>
-    </footer>
 
     <!-- Contact 페이지 로직 스크립트 (Firebase 연동 등) -->
     <script src="/static/contact.js?v=2.2"></script>

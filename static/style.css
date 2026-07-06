@@ -309,108 +309,78 @@ body {
 
     /* 모바일에서는 햄버거 토글 버튼(가로/세로 똑같은 정사각형 모양)만 노출 시킵니다 */
     .menu-toggle-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px; 
-        height: 40px; 
-        background-color: #E5E3DD; /* 배경색 기준 살짝 더 어두운 톤으로 변경 */
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        position: absolute; /* 중앙 정렬된 로고와 간섭 없도록 우측에 절대 띄움 */
-        right: 1.5rem;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: var(--hamburger-btn-size) !important;
+        height: var(--hamburger-btn-size) !important;
+        background-color: #0e3b5d !important;
+        border: none !important;
+        border-radius: 4px !important;
+        cursor: pointer !important;
+        position: absolute !important;
+        right: 1.5rem !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
     }
     
     /* 햄버거 선(라인 아이콘) 디자인 */
     .hamburger-box {
-        display: block;
-        width: 20px;
-        height: 2px;
-        background-color: #222; /* 어두운 아이콘 색상으로 변경 */
-        position: relative;
+        display: block !important;
+        width: var(--hamburger-bar-width) !important;
+        height: 2px !important;
+        background-color: #FFFFFF !important;
+        position: relative !important;
     }
     .hamburger-box::before, .hamburger-box::after {
-        content: "";
-        position: absolute;
-        width: 100%;
-        height: 2px;
-        background-color: #222; /* 어두운 아이콘 색상으로 변경 */
-        left: 0;
+        content: "" !important;
+        position: absolute !important;
+        width: 100% !important;
+        height: 2px !important;
+        background-color: #FFFFFF !important;
+        left: 0 !important;
     }
-    .hamburger-box::before { top: -6px; }
-    .hamburger-box::after { bottom: -6px; }
+    .hamburger-box::before { top: var(--hamburger-bar-spacing) !important; }
+    .hamburger-box::after { bottom: var(--hamburger-bar-spacing) !important; }
 
-    /* 드로어 메뉴 창의 위치를 강제로 화면 오른쪽 밖(-300px)으로 뺌 (초기 상태 숨겨짐) */
+    /* 드로어 메뉴 창의 위치를 와일드 모바일 사양에 맞춤 */
     .page-nav {
-        position: fixed;
-        top: 0;
-        right: -300px; /* 창을 화면의 우측 바깥쪽으로 숨킵니다 (좌측->우측 반전) */
-        left: auto; /* 기존 left 속성 무효화 */
-        width: 250px;
-        height: 100%;
-        background-color: #F7F7F7;
-        z-index: 1000;
-        transition: right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); /* 우측에서 튀어나오는 슬라이드 애니메이션 효과 */
-        box-shadow: -2px 0 10px rgba(0,0,0,0.1); /* 그림자 방향도 반대로 수정 */
+        position: fixed !important;
+        top: 0 !important;
+        right: -300px !important; /* 창을 화면의 우측 바깥쪽으로 숨깁니다 */
+        left: auto !important;
+        width: 300px !important;
+        height: 100% !important;
+        background-color: #F4F3F0 !important;
+        z-index: 10065 !important;
+        transition: right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) !important; /* 우측에서 튀어나오는 슬라이드 애니메이션 효과 */
+        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.08) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        padding: 80px 0 40px 0 !important;
     }
     
     /* JS에서 .open 클래스 활성화 시 원래 위치(right:0)로 튀어 나옴 */
     .page-nav.open {
-        right: 0; 
+        right: 0 !important; 
     }
 
     .close-menu-btn {
-        display: block;
-        background: transparent;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-        padding: 1rem;
-        text-align: right;
-        width: 100%;
+        display: block !important;
+        background: transparent !important;
+        border: none !important;
+        font-size: 1.5rem !important;
+        cursor: pointer !important;
+        padding: 1rem !important;
+        text-align: right !important;
+        width: 100% !important;
+        position: absolute !important;
+        top: 20px !important;
+        right: 20px !important;
+        color: #222 !important;
     }
 
-    .nav-links {
-        flex-direction: column; /* 메뉴 항목 리스트를 세로 방향으로 정렬시킵니다 */
-        padding: 0 1.5rem;
-        margin: 0;
-        list-style-type: none !important; /* 점(bullet) 강제 제거 */
-    }
-    
-    .nav-links li {
-        list-style-type: none !important; /* 점(bullet) 강제 제거 */
-        margin: 0;
-        padding: 0;
-    }
-
-    .nav-switch-btn {
-        font-size: 1.2rem; /* 모바일 환경: 사용자 요청 크기 조정 */
-        padding: 1rem 0;
-        display: block;
-        width: 100%;
-        text-align: left;
-        border-bottom: 1px solid #f0f0f0; /* 모바일 메뉴 구분선 */
-    }
-
-    /* 🏁 3번째 상품 리스트 항목(Antioch) 하단에 상품군/기타 구분선 및 마진 확보 */
-    .nav-links li:nth-child(3) .nav-switch-btn {
-        border-bottom: none; /* 이중선 방지를 위해 개별 버튼 밑줄 해제 */
-    }
-    .nav-links li:nth-child(3) {
-        border-bottom: 1px solid #dcdcdc; /* 상품 그룹과 기타 그룹을 나눌 얇은 회색 구분선 */
-        margin-bottom: 15px; /* 아래 항목들과의 공간 분리 */
-        padding-bottom: 15px; /* 구분선과 글자 사이의 공간 */
-    }
-
-    /* 토스트 창 노출 시 화면 전체 배경을 어둡게 까는 반투명 오버레이 요소 */
-    .nav-overlay.open {
-        display: block;
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 999;
-    }
 }
 
 /* ========= 3. 메인 배너 영역 (Main Video Banner) ========= */
@@ -3411,7 +3381,7 @@ body.main-body {
     background: rgba(0, 0, 0, 0.4) !important;
     backdrop-filter: blur(5px) !important;
     -webkit-backdrop-filter: blur(5px) !important;
-    z-index: 10060 !important;
+    z-index: 10080 !important;
     opacity: 0 !important;
     visibility: hidden !important;
     transition: opacity 0.35s ease, visibility 0.35s ease !important;

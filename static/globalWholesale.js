@@ -141,6 +141,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 /* 📱 모바일 반응형 처리 */
                 @media (max-width: 1024px) {
+                    :root {
+                        --hamburger-btn-size: 6vw !important;
+                        --hamburger-bar-width: 3vw !important;
+                        --hamburger-bar-spacing: -0.9vw !important;
+                    }
                     body {
                         padding-top: 0 !important;
                     }
@@ -159,10 +164,34 @@ document.addEventListener("DOMContentLoaded", () => {
                         justify-content: center !important;
                         z-index: 10020 !important;
                     }
+                    /* 모바일 스크롤 발생 시 PC 규격(top:20px, width:80%)으로 쪼그라드는 현상 방지 오버라이드 */
+                    .main-header.scrolled {
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100% !important;
+                        height: 10vw !important;
+                        border-radius: 0 !important;
+                        border: none !important;
+                        border-bottom: 1px solid #eaeaea !important;
+                        background: rgba(244, 243, 240, 0.95) !important;
+                        padding: 1rem 1.5rem !important;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important;
+                        z-index: 10020 !important;
+                    }
                     .pc-nav-center, .pc-nav-right { display: none !important; }
                     .menu-toggle-btn { display: flex !important; position: absolute; right: 1.5rem !important; left: auto !important; top: 50% !important; transform: translateY(-50%) !important; }
                     .logo-wrapper { width: auto !important; position: absolute; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; }
-                    .page-nav { display: flex !important; }
+                    
+                    /* 모바일 메뉴 사이드바 고정 크기 및 위치 세팅 */
+                    .page-nav { 
+                        display: flex !important; 
+                        width: 300px !important; 
+                        right: -300px !important; 
+                    }
+                    .page-nav.open { 
+                        right: 0 !important; 
+                    }
                 }
             </style>
             <header class="main-header">
@@ -186,7 +215,13 @@ document.addEventListener("DOMContentLoaded", () => {
                         <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
                         <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
                         <li><button class="nav-switch-btn antioch-nav-btn" onclick="location.href='/antioch'">ANTIOCH</button></li>
-                        <li style="margin-top: 30px; border-top: 1px solid #eaeaea; padding-top: 20px;">
+                        <li style="margin-top: 25px; border-top: 1px solid #0e3a5b; padding-top: 15px;">
+                            <button class="nav-switch-btn" id="sidebarSearchBtn" style="display: inline-flex; align-items: center; gap: 10px; color: #555; font-weight: 600;">
+                                <span class="material-icons" style="font-size: 1.45rem;">search</span>
+                                <span>Search</span>
+                            </button>
+                        </li>
+                        <li style="margin-top: 25px; border-top: 1px solid #0e3a5b; padding-top: 15px;">
                             <button class="nav-switch-btn" onclick="location.href='/contact'" style="display: inline-flex; align-items: center; gap: 10px; color: #0e3a5b; font-weight: 700;">
                                 <span class="material-icons" style="font-size: 1.4rem;">support_agent</span>
                                 <span>Connect</span>
@@ -200,7 +235,36 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.insertAdjacentHTML("afterbegin", headerHTML);
     };
 
+    // 🏁 전역 공통 푸터 주입 로직
+    const injectGlobalFooter = () => {
+        const existingFooter = document.querySelector(".main-footer");
+        if (existingFooter) existingFooter.remove();
+
+        const footerHTML = `
+            <footer class="main-footer">
+                <hr class="footer-divider">
+                <div class="footer-info">
+                    <p class="footer-terms-wrap">
+                        <a href="/about" class="footer-terms-link">about us</a>
+                        <span style="color: #ccc; margin: 0 8px;">|</span>
+                        <a href="/static/terms.html" class="footer-terms-link">이용약관</a> 
+                        <span style="color: #ccc; margin: 0 8px;">|</span> 
+                        <a href="/static/privacy.html" class="footer-terms-link">개인정보처리방침</a>
+                    </p>
+                    <p>상호명 및 호스트 서비스 제공 : 주식회사 키제이</p>
+                    <p>대표 : 서명원 / 연락처 : 070-8064-4598</p>
+                    <p>email : amuredo_shop@naver.com</p>
+                    <p>서울시 관악구 난곡로 128, 1층</p>
+                    <p>사업자 등록 번호 : 257-87-03297</p>
+                    <p>통신판매업 신고 : 2026-서울관악-0029</p>
+                </div>
+            </footer>
+        `;
+        document.body.insertAdjacentHTML("beforeend", footerHTML);
+    };
+
     injectGlobalHeader();
+    injectGlobalFooter();
 
     const bindMenuEvents = () => {
         const menuBtn = document.getElementById("menuToggleBtn");
@@ -543,6 +607,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     e.preventDefault();
                     executeGlobalSearch();
                 }
+            };
+        }
+
+        // 🏁 모바일 사이드바 검색 연동
+        const sidebarSearchBtn = document.getElementById("sidebarSearchBtn");
+        if (sidebarSearchBtn && searchOverlay && searchInput) {
+            sidebarSearchBtn.onclick = (e) => {
+                e.preventDefault();
+                searchOverlay.classList.add("active");
+                setTimeout(() => searchInput.focus(), 150);
             };
         }
         if (quickTopBtn) {

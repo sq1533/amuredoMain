@@ -13,11 +13,12 @@
             background-color: #F7F7F7 !important;
         }
         
-        .search-main-layout {
-            grid-auto-rows: min-content !important;
+        .search-main-layout.main-grid-layout {
+            grid-template-rows: calc(100vw / 12) auto !important;
+            grid-auto-rows: auto !important;
             padding-bottom: 120px;
         }
-
+        
         /* 1행은 빈 여백(1유닛 높이)을 유지하기 위해 높이 지정 및 grid-row 지정 배제 */
         .search-spacer {
             grid-column: 1 / span 12;
@@ -113,14 +114,19 @@
             width: 100%;
         }
 
-        /* 반응형: 1024px 이하 태블릿/모바일 */
+        /* 반응형: 1024px 이하 태블릿/와일드 모바일 */
         @media screen and (max-width: 1024px) {
+            .search-main-layout.main-grid-layout {
+                grid-template-rows: calc(100vw / 6) auto auto !important;
+                grid-auto-rows: auto !important; /* 글로벌 그리드의 모바일/태블릿 고정 픽셀 오버라이드 */
+            }
             .search-spacer {
-                height: 40px; /* 모바일에서는 여백을 고정 픽셀로 슬림하게 대응 */
+                height: calc(100vw / var(--grid-cols-tablet)) !important;
+                grid-column: 1 / span 6 !important;
             }
 
             .search-sidebar-right {
-                grid-column: 2 / span 10 !important;
+                grid-column: 2 / span 4 !important; /* 좌우 1칸씩 여백, 중간 4칸 검색창 */
                 grid-row: 2 !important;
                 position: static !important;
                 margin-bottom: 40px !important;
@@ -128,21 +134,34 @@
             }
 
             .search-results-left {
-                grid-column: 2 / span 10 !important;
+                grid-column: 2 / span 4 !important; /* 좌우 1칸씩 여백, 중간 4칸 결과 카드 */
                 grid-row: 3 !important;
             }
         }
 
+        /* 반응형: 640px 이하 모바일 */
         @media screen and (max-width: 640px) {
+            .search-main-layout.main-grid-layout {
+                grid-template-rows: calc(100vw / 4) auto auto !important;
+                grid-auto-rows: auto !important; /* 글로벌 그리드의 모바일 고정 픽셀 오버라이드 */
+            }
+            .search-spacer {
+                height: calc(100vw / var(--grid-cols-mobile)) !important;
+                grid-column: 1 / span 4 !important;
+            }
+
             .search-sidebar-right {
-                grid-column: 1 / span 12 !important;
+                grid-column: 1 / span 4 !important; /* 모바일 4열 전체 검색창 */
+                grid-row: 2 !important;
                 border-radius: 0 !important;
                 border-left: none !important;
                 border-right: none !important;
+                margin-bottom: 30px !important;
             }
 
             .search-results-left {
-                grid-column: 1 / span 12 !important;
+                grid-column: 1 / span 4 !important; /* 모바일 4열 전체 결과 카드 */
+                grid-row: 3 !important;
                 padding: 0 15px !important;
             }
         }
