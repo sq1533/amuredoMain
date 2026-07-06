@@ -39,7 +39,8 @@
     <!-- 🏁 일반 장바구니 버튼 & 상세 이미지 섹션 전용 미니멀 프리미엄 스타일 -->
     <style>
         .cart-add-btn {
-            width: 100%;
+            width: 85%;
+            display: block;
             padding: 16px;
             background: #0e3a5b; /* 브랜드 시그니처 블루 */
             color: #ffffff;
@@ -52,6 +53,10 @@
             box-shadow: 0 4px 12px rgba(14, 58, 91, 0.15);
             margin-top: 15px;
             text-align: center;
+            
+            /* 기본값: PC & 와일드 모바일 (오른쪽 정렬) */
+            margin-left: auto;
+            margin-right: 0;
         }
         .cart-add-btn:hover {
             background: #0b2d47;
@@ -88,6 +93,12 @@
                 text-align: center !important;
                 gap: 15px !important;
                 padding: 20px 15px !important;
+            }
+        }
+        @media (max-width: 640px) {
+            .cart-add-btn {
+                margin-left: auto !important;
+                margin-right: auto !important;
             }
         }
     </style>
@@ -270,6 +281,8 @@
             <hr class="footer-divider">
             <div class="footer-info">
                 <p class="footer-terms-wrap">
+                    <a href="/about" class="footer-terms-link">about us</a>
+                    <span style="color: #ccc; margin: 0 8px;">|</span>
                     <a href="/static/terms.html" class="footer-terms-link">이용약관</a> 
                     <span style="color: #ccc; margin: 0 8px;">|</span> 
                     <a href="/static/privacy.html" class="footer-terms-link">개인정보처리방침</a>

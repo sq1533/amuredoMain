@@ -16,17 +16,10 @@
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
         .success-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: calc(100vh - 200px);
-            padding: 120px 20px 80px 20px;
             box-sizing: border-box;
             background: #fafafa;
         }
         .success-card {
-            max-width: 600px;
-            width: 100%;
             background: #fff;
             border-radius: 16px;
             padding: 50px 40px;
@@ -34,6 +27,14 @@
             border: 1px solid #eaeaea;
             text-align: center;
             box-sizing: border-box;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            
+            /* 기본: PC (공백 3, 안내 요소 6, 공백 3) */
+            grid-column: 4 / span 6 !important;
+            grid-row: 2 !important;
+            align-self: start;
         }
         
         /* 로티 아이콘 전용 프레임 */
@@ -138,13 +139,20 @@
         }
 
         /* 📱 모바일 디바이스 수직 최적화 */
-        @media (max-width: 600px) {
-            .success-wrapper {
-                padding: 100px 15px 60px 15px;
-                min-height: calc(100vh - 150px);
-            }
+        @media screen and (max-width: 1024px) {
             .success-card {
-                padding: 40px 20px;
+                /* 와일드 모바일: 공백 1, 안내 요소 4, 공백 1 */
+                grid-column: 2 / span 4 !important;
+                grid-row: 2 !important;
+            }
+        }
+        
+        @media screen and (max-width: 640px) {
+            .success-card {
+                /* 모바일: 안내 요소 4 */
+                grid-column: 1 / span 4 !important;
+                grid-row: 2 !important;
+                padding: 40px 20px !important;
             }
             .success-title {
                 font-size: 1.5rem;
@@ -170,7 +178,7 @@
 <body>
     <!-- <header>는 globalWholesale.js가 동적으로 삽입합니다. -->
 
-    <div class="success-wrapper">
+    <div class="success-wrapper main-grid-layout" id="paymentResultView" style="display: grid; min-height: 100vh; padding-bottom: 50px; box-sizing: border-box;">
         <div class="success-card">
             
             <!-- 🏁 1. 아이콘: 사용자가 준비해주신 로티 파일 (circle.json) 적용 -->
@@ -212,7 +220,25 @@
         </div>
     </div>
 
-    <!-- 푸터는 globalWholesale.js가 동적으로 주입합니다. -->
+    <!-- 공통 푸터(Footer): 사업자 정보 -->
+    <footer class="main-footer">
+        <hr class="footer-divider">
+        <div class="footer-info">
+            <p class="footer-terms-wrap">
+                <a href="/about" class="footer-terms-link">about us</a>
+                    <span style="color: #ccc; margin: 0 8px;">|</span>
+                    <a href="/static/terms.html" class="footer-terms-link">이용약관</a> 
+                <span style="color: #ccc; margin: 0 8px;">|</span> 
+                <a href="/static/privacy.html" class="footer-terms-link">개인정보처리방침</a>
+            </p>
+            <p>상호명 및 호스트 서비스 제공 : 주식회사 키제이</p>
+            <p>대표 : 서명원 / 연락처 : 070-8064-4598</p>
+            <p>email : amuredo_shop@naver.com</p>
+            <p>서울시 관악구 난곡로 128, 1층</p>
+            <p>사업자 등록 번호 : 257-87-03297</p>
+            <p>통신판매업 신고 : 2026-서울관악-0029</p>
+        </div>
+    </footer>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {

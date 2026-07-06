@@ -35,6 +35,175 @@
 
       gtag('config', 'AW-17793333010');
     </script>
+    <style>
+        /* 메인 배너 및 이미지 셀들의 와이어프레임 보더 및 패딩 제거 */
+        .banner-cell, 
+        .mini-banner-01-img, 
+        .mini-banner-02-img, 
+        .mini-banner-03-img {
+            padding: 0 !important;
+            border: none !important;
+        }
+
+        /* 미니 배너 공통 텍스트 레이아웃 */
+        .mini-banner-text-content {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            background-color: #F7F7F7 !important;
+            padding: clamp(20px, 4vw, 40px) !important;
+            box-sizing: border-box !important;
+            border: none !important;
+        }
+
+        .mini-banner-text-content h3 {
+            font-size: clamp(1.2rem, 2.2vw, 1.8rem);
+            font-weight: 700;
+            color: #111;
+            margin-bottom: clamp(8px, 1.5vw, 15px);
+            line-height: 1.35;
+            letter-spacing: -0.3px;
+        }
+
+        .mini-banner-text-content p {
+            font-size: clamp(0.85rem, 1.1vw, 1.0rem);
+            color: #555;
+            line-height: 1.6;
+            word-break: keep-all;
+            max-width: 500px;
+        }
+
+        /* 미니 배너 01: 왼쪽 정렬 */
+        .mini-banner-01-text {
+            align-items: flex-start !important;
+            text-align: left !important;
+            padding-left: clamp(20px, 8vw, 60px) !important;
+        }
+
+        /* 미니 배너 02: 중앙 정렬 */
+        .mini-banner-02-text {
+            align-items: center !important;
+            text-align: center !important;
+        }
+
+        /* 미니 배너 02 서브타이틀 블록 (PC 전용) */
+        .mini-banner-02-sub {
+            align-items: center !important;
+            text-align: center !important;
+            background-color: #ECEAE4 !important;
+            border: none !important;
+            padding: 20px !important;
+        }
+
+        .mini-banner-02-sub h4 {
+            font-size: clamp(0.8rem, 1.2vw, 1.0rem);
+            font-weight: 700;
+            color: #777;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* 미니 배너 03: 오른쪽 정렬 */
+        .mini-banner-03-text {
+            align-items: flex-end !important;
+            text-align: right !important;
+            padding-right: clamp(20px, 8vw, 60px) !important;
+            transition: background-color 0.3s ease !important;
+        }
+        .mini-banner-03-text:hover {
+            background-color: #EAE9E4 !important; /* 호버 시 피드백 제공 */
+        }
+        .mini-banner-03-text:hover .arrow {
+            transform: translateX(6px);
+        }
+
+        /* 미디어 쿼리 대응: 와일드 모바일(1024px 이하) 및 모바일 정렬/패딩 조정 */
+        @media screen and (max-width: 1024px) {
+            .mini-banner-text-content {
+                padding: 25px 20px !important;
+            }
+            .mini-banner-01-text,
+            .mini-banner-03-text {
+                align-items: center !important;
+                text-align: center !important;
+                padding-left: 20px !important;
+                padding-right: 20px !important;
+            }
+        }
+
+        @media screen and (max-width: 640px) {
+            .mini-banner-03-text {
+                padding-top: 5px !important;
+                padding-bottom: 5px !important;
+            }
+        }
+
+        /* 시리즈 이미지 및 텍스트 보더/패딩 제거 */
+        .series-img-01, .series-img-02, .series-img-03, .series-img-04,
+        .series-txt-01, .series-txt-02, .series-txt-03, .series-txt-04 {
+            padding: 0 !important;
+            border: none !important;
+        }
+
+        /* 시리즈 제목 스타일 */
+        .series-gap-title {
+            border: none !important;
+            padding-left: clamp(20px, 4vw, 40px) !important;
+        }
+        .series-gap-title h2 {
+            font-size: clamp(1.4rem, 2.3vw, 2.0rem);
+            font-weight: 700;
+            color: #111;
+            letter-spacing: -0.5px;
+        }
+
+        /* 이미지 페이드 및 미세 줌인 전환 효과 */
+        .series-img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .series-img-wrapper .hover-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 0.45s ease-in-out;
+            z-index: 2;
+        }
+        .series-img-wrapper .base-img {
+            transition: transform 0.6s ease-in-out;
+            z-index: 1;
+        }
+        .series-img-wrapper:hover .hover-img {
+            opacity: 1 !important;
+        }
+        .series-img-wrapper:hover .base-img {
+            transform: scale(1.04);
+        }
+
+        /* 시리즈 텍스트 스타일 */
+        .series-txt-content {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 10px 0 !important;
+            cursor: pointer;
+        }
+        .series-txt-content span {
+            font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+            font-weight: 700;
+            color: #222;
+            letter-spacing: 1px;
+            transition: color 0.3s ease;
+        }
+        .series-txt-content:hover span {
+            color: #888;
+        }
+    </style>
 </head>
 
 <body class="main-body">
@@ -88,72 +257,93 @@
         <main class="main-content main-grid-layout">
             <!-- 4-1 배너 (12x6) -->
             <div class="grid-cell banner-cell">
-                <div class="wireframe-text">배너 이미지 (12x6)</div>
+                <div class="banner-wrapper" style="position: relative; width: 100%; height: 100%; overflow: hidden;">
+                    <img src="/static/img/00_bn.jpg" alt="Main Banner" class="banner-fallback-img" style="width: 100%; height: 100%; object-fit: cover; transition: opacity 0.8s ease; position: absolute; top: 0; left: 0; z-index: 2;">
+                    <div class="video-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></div>
+                </div>
             </div>
 
             <!-- 4-2 미니 배너 01 (8x4 + 4x4) -->
-            <div class="grid-cell mini-banner-01-text">
-                <div class="wireframe-text">미니 배너 01 텍스트 (8x4)</div>
+            <div class="grid-cell mini-banner-01-text mini-banner-text-content">
+                <h3 class="font-serif">당신의 퍼포먼스를 높이는 법</h3>
+                <p>단순한 패션을 넘어, 당신의 비즈니스 효율을 극대화하는 가장 완벽한 도구입니다.</p>
             </div>
             <div class="grid-cell mini-banner-01-img">
-                <div class="wireframe-text">미니 배너 01 이미지 (4x4)</div>
+                <img src="/static/img/02_mini_bn01.webp" alt="Performance Eyewear" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
 
             <!-- 4-3 미니 배너 02 (4x4 + 4x4 + 4x4) -->
             <div class="grid-cell mini-banner-02-sub">
-                <div class="wireframe-text">미니 배너 02 서브타이틀 (4x4)</div>
+                <h4 class="font-serif" style="color: #666; font-size: 0.9rem; line-height: 1.5; text-align: center;">LIGHT & COMFORT<br><span style="font-size: 0.75rem; color: #999; display: block; margin-top: 5px;">내 몸과 같은 편안함</span></h4>
             </div>
             <div class="grid-cell mini-banner-02-img">
-                <div class="wireframe-text">미니 배너 02 이미지 (4x4)</div>
+                <img src="/static/img/02_mini_bn02.webp" alt="Natural Fit" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
-            <div class="grid-cell mini-banner-02-text">
-                <div class="wireframe-text">미니 배너 02 텍스트 (4x4)</div>
+            <div class="grid-cell mini-banner-02-text mini-banner-text-content">
+                <h3 class="font-serif">쓴 듯 안 쓴 듯 자연스럽게</h3>
+                <p>내 몸처럼 편안한 소재와 정밀한 디자인으로, 하루 종일 거부감 없는 착용감을 선사합니다.</p>
             </div>
 
             <!-- 4-4 미니 배너 03 (4x4 + 8x4) -->
             <div class="grid-cell mini-banner-03-img">
-                <div class="wireframe-text">미니 배너 03 이미지 (4x4)</div>
+                <img src="/static/img/02_mini_bn03.webp" alt="Fitting Service" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
-            <div class="grid-cell mini-banner-03-text">
-                <div class="wireframe-text">미니 배너 03 텍스트 (8x4)</div>
+            <div class="grid-cell mini-banner-03-text mini-banner-text-content" onclick="location.href='/about'" style="cursor: pointer;">
+                <h3 class="font-serif">찾아가는 안경원, 부담 없는 피팅</h3>
+                <p>매장에 가지 않아도 내가 원하는 시간과 장소에서 편안하게 써보고 결정할 수 있습니다.</p>
+                <div class="more-btn" style="margin-top: 15px; font-size: 0.9rem; font-weight: 600; color: #111; display: flex; align-items: center; gap: 5px;">
+                    자세히 알아보기 <span class="arrow" style="transition: transform 0.3s ease; display: inline-block;">→</span>
+                </div>
             </div>
 
             <!-- 미니 배너와 시리즈 간 12x2 공간 확보 -->
             <!-- 상단: 빈 공간 (12x1) -->
-            <div class="grid-cell series-gap-empty">
-                <div class="wireframe-text">빈 공간 (12x1)</div>
+            <div class="grid-cell series-gap-empty" style="border: none !important;">
+                <!-- 빈 영역 -->
             </div>
             <!-- 하단: 시리즈 제목 텍스트 (12x1) -->
             <div class="grid-cell series-gap-title">
-                <div class="wireframe-text">시리즈 제목 텍스트 (12x1)</div>
+                <h2>아무래도 안경 컬렉션</h2>
             </div>
 
             <!-- 5. 시리즈 이미지 요소 3그리드 배치 4개 (3x5) -->
             <div class="grid-cell series-img-01">
-                <div class="wireframe-text">시리즈 01 이미지 (3x5)</div>
+                <div class="series-img-wrapper" onclick="location.href='/glasses'">
+                    <img src="/static/img/03_series_01.webp" alt="오피스" class="base-img" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="/static/img/03_series_m01.webp" alt="오피스 호버" class="hover-img" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
             </div>
             <div class="grid-cell series-img-02">
-                <div class="wireframe-text">시리즈 02 이미지 (3x5)</div>
+                <div class="series-img-wrapper" onclick="location.href='/glasses'">
+                    <img src="/static/img/03_series_02.webp" alt="엔지니어" class="base-img" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="/static/img/03_series_m02.webp" alt="엔지니어 호버" class="hover-img" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
             </div>
             <div class="grid-cell series-img-03">
-                <div class="wireframe-text">시리즈 03 이미지 (3x5)</div>
+                <div class="series-img-wrapper" onclick="location.href='/sunglasses'">
+                    <img src="/static/img/03_series_03.webp" alt="홀리데이" class="base-img" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="/static/img/03_series_m03.webp" alt="홀리데이 호버" class="hover-img" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
             </div>
             <div class="grid-cell series-img-04">
-                <div class="wireframe-text">시리즈 04 이미지 (3x5)</div>
+                <div class="series-img-wrapper" onclick="location.href='/antioch'">
+                    <img src="/static/img/03_series_04.webp" alt="안티오크" class="base-img" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="/static/img/03_series_m04.webp" alt="안티오크 호버" class="hover-img" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
             </div>
 
             <!-- 6. 시리즈 텍스트 요소 3그리드 배치 4개 (3x1) -->
-            <div class="grid-cell series-txt-01">
-                <div class="wireframe-text">시리즈 01 제목 및 설명 (3x1)</div>
+            <div class="grid-cell series-txt-01 series-txt-content" onclick="location.href='/glasses'">
+                <span>오피스</span>
             </div>
-            <div class="grid-cell series-txt-02">
-                <div class="wireframe-text">시리즈 02 제목 및 설명 (3x1)</div>
+            <div class="grid-cell series-txt-02 series-txt-content" onclick="location.href='/glasses'">
+                <span>엔지니어</span>
             </div>
-            <div class="grid-cell series-txt-03">
-                <div class="wireframe-text">시리즈 03 제목 및 설명 (3x1)</div>
+            <div class="grid-cell series-txt-03 series-txt-content" onclick="location.href='/sunglasses'">
+                <span>홀리데이</span>
             </div>
-            <div class="grid-cell series-txt-04">
-                <div class="wireframe-text">시리즈 04 제목 및 설명 (3x1)</div>
+            <div class="grid-cell series-txt-04 series-txt-content" onclick="location.href='/antioch'">
+                <span>안티오크</span>
             </div>
         </main>
 
@@ -162,6 +352,8 @@
             <hr class="footer-divider">
             <div class="footer-info">
                 <p class="footer-terms-wrap">
+                    <a href="/about" class="footer-terms-link">about us</a>
+                    <span style="color: #ccc; margin: 0 8px;">|</span>
                     <a href="/static/terms.html" class="footer-terms-link">이용약관</a> 
                     <span style="color: #ccc; margin: 0 8px;">|</span> 
                     <a href="/static/privacy.html" class="footer-terms-link">개인정보처리방침</a>

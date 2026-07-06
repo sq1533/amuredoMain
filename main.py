@@ -191,6 +191,15 @@ async def serve_about_page():
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>About 템플릿(about.html)을 찾을 수 없습니다.</h1>", status_code=404)
 
+# 검색(Search) 화면 HTML 서빙용 프론트엔드 라우팅
+@app.get("/search", response_class=HTMLResponse)
+async def serve_search_page():
+    search_path = os.path.join(static_dir, "search.html")
+    if os.path.exists(search_path):
+        with open(search_path, "r", encoding="utf-8", errors="replace") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>검색 템플릿(search.html)을 찾을 수 없습니다.</h1>", status_code=404)
+
 # 문의하기(Contact) 화면 HTML 서빙용 프론트엔드 라우팅
 @app.get("/contact", response_class=HTMLResponse)
 async def serve_contact_page():
@@ -352,6 +361,59 @@ async def get_best_items(request: Request, event_type: str):
         
     except Exception as e:
         print(f"🔥 Best 아이템({event_type}) 조회 에러: {e}")
+        return {"items": [], "error": str(e)}
+
+@app.get("/api/items/search")
+async def search_items(request: Request, q: str = ""):
+    """
+    상품 name 기준 검색어가 포함된 상품 리스트 조회 (대소문자 무시)
+    """
+    if db is None:
+        return {"items": [], "error": "Firebase DB가 연결되지 않았습니다."}
+    
+    try:
+        q_clean = q.strip()
+        if not q_clean:
+            return {"items": []}
+            
+        docs = db.collection('item').stream()
+        is_wholesale = request.session.get("is_wholesale", False)
+        
+        q_lower = q_clean.lower()
+        real_items = []
+        
+        for doc in docs:
+            data = doc.to_dict()
+            name = data.get("name", "")
+            
+            if q_lower not in name.lower():
+                continue
+                
+            paths = data.get("paths", [])
+            image_url = paths[0] if (paths and len(paths) > 0) else "/static/img/ready.webp"
+            
+            raw_price = data.get("price", "0")
+            if is_wholesale and "wsPrice" in data:
+                raw_price = data.get("wsPrice", raw_price)
+                
+            try:
+                formatted_price = f"{int(float(raw_price)):,}"
+            except (ValueError, TypeError):
+                formatted_price = str(raw_price)
+                
+            real_items.append({
+                "id": doc.id,
+                "name": name,
+                "price": formatted_price,
+                "image_url": image_url,
+                "category": str(data.get("category", ""))
+            })
+            
+        print(f"🔍 검색 완료: 키워드 '{q_clean}'로 {len(real_items)}개 상품 매칭됨.")
+        return {"items": real_items}
+        
+    except Exception as e:
+        print(f"🔥 상품 검색 중 에러 발생: {e}")
         return {"items": [], "error": str(e)}
 
 @app.get("/api/items")

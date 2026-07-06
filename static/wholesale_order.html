@@ -22,9 +22,32 @@
         }
 
         .order-container {
-            max-width: 800px;
-            margin: 60px auto;
-            padding: 30px;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box;
+            
+            /* 기본: PC (공백 3, 주문 진행 요소 6, 공백 3) */
+            grid-column: 4 / span 6 !important;
+            grid-row: 2 !important;
+        }
+        
+        @media screen and (max-width: 1024px) {
+            .order-container {
+                /* 와일드 모바일: 공백 1, 주문 진행 요소 4, 공백 1 */
+                grid-column: 2 / span 4 !important;
+                grid-row: 2 !important;
+            }
+        }
+        
+        @media screen and (max-width: 640px) {
+            .order-container {
+                /* 모바일: 주문 진행 요소 4 */
+                grid-column: 1 / span 4 !important;
+                grid-row: 2 !important;
+                padding: 0 !important;
+            }
         }
         
         .back-link {
@@ -154,7 +177,6 @@
         }
 
         @media (max-width: 768px) {
-            .order-container { padding: 20px 15px; margin: 90px auto 40px auto; } /* 상단 플로팅 메뉴바(70px) 고려하여 90px로 수정 */
             .order-title { font-size: 1.5rem; margin-bottom: 20px; }
             .form-row { grid-template-columns: 1fr; gap: 0; }
             .summary-dashboard { flex-direction: column; gap: 10px; padding: 15px 20px; align-items: stretch; }
@@ -244,112 +266,109 @@
     </style>
 </head>
 <body>
-    <div class="order-container">
-        <a href="#" class="back-link" onclick="history.back(); return false;">← 장바구니로 돌아가기</a>
-        <h1 class="order-title">결제 진행</h1>
-        
-        <!-- 1행 요약 대시보드 -->
-        <div class="summary-dashboard ws-card">
-            <div class="summary-block">
-                <div class="summary-label">총 상품 금액</div>
-                <div class="summary-value" id="totalAmount">₩ 0</div>
-            </div>
-            <div class="summary-operator">-</div>
-            <div class="summary-block">
-                <div class="summary-label">할인 혜택</div>
-                <div class="summary-value">₩ 0</div>
-            </div>
-            <div class="summary-operator">=</div>
-            <div class="summary-block">
-                <div class="summary-label">최종 결제 금액</div>
-                <div class="summary-value final-value" id="finalAmount">₩ 0</div>
-            </div>
-        </div>
-
-        <!-- 🏁 수정된 배송지 정보 UI -->
-        <div class="shipping-section ws-card">
-            <h2 class="section-title">📦 배송지 정보</h2>
+    <div id="wholesaleOrderView" class="main-grid-layout" style="display: grid; min-height: 100vh; background-color: #F7F7F7; padding-bottom: 50px; box-sizing: border-box;">
+        <div class="order-container">
+            <a href="#" class="back-link" onclick="history.back(); return false;">← 장바구니로 돌아가기</a>
+            <h1 class="order-title">결제 진행</h1>
             
-            <!-- 1행: 수령인 + 연락처 -->
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">수령인</label>
-                    <input type="text" id="recipientName" class="form-input" placeholder="이름">
+            <!-- 1행 요약 대시보드 -->
+            <div class="summary-dashboard ws-card">
+                <div class="summary-block">
+                    <div class="summary-label">총 상품 금액</div>
+                    <div class="summary-value" id="totalAmount">₩ 0</div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">연락처</label>
-                    <input type="text" id="recipientPhone" class="form-input" placeholder="010-0000-0000">
+                <div class="summary-operator">-</div>
+                <div class="summary-block">
+                    <div class="summary-label">할인 혜택</div>
+                    <div class="summary-value">₩ 0</div>
+                </div>
+                <div class="summary-operator">=</div>
+                <div class="summary-block">
+                    <div class="summary-label">최종 결제 금액</div>
+                    <div class="summary-value final-value" id="finalAmount">₩ 0</div>
                 </div>
             </div>
-
-            <!-- 2행: 우편번호 + 주소 (1:3 비율 적용) -->
-            <div class="form-row address-row">
-                <div class="form-group">
-                    <label class="form-label">우편번호</label>
-                    <input type="text" id="postcode" class="form-input" placeholder="우편번호" readonly>
+    
+            <!-- 🏁 수정된 배송지 정보 UI -->
+            <div class="shipping-section ws-card">
+                <h2 class="section-title">📦 배송지 정보</h2>
+                
+                <!-- 1행: 수령인 + 연락처 -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">수령인</label>
+                        <input type="text" id="recipientName" class="form-input" placeholder="이름">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">연락처</label>
+                        <input type="text" id="recipientPhone" class="form-input" placeholder="010-0000-0000">
+                    </div>
                 </div>
+    
+                <!-- 2행: 주소 (우편번호는 UI에서 삭제하고 hidden input으로 처리) -->
+                <input type="hidden" id="postcode">
                 <div class="form-group">
                     <label class="form-label">주소</label>
                     <input type="text" id="address" class="form-input" placeholder="기본 주소" readonly>
                 </div>
+    
+                <!-- 3행: 주소찾기 버튼 -->
+                <button class="address-search-btn" onclick="openDaumPostcode()">주소 찾기</button>
+    
+                <!-- 4행: 상세 주소 -->
+                <div class="form-group">
+                    <label class="form-label">상세 주소</label>
+                    <input type="text" id="detailAddress" class="form-input" placeholder="상세 주소를 입력하세요">
+                </div>
             </div>
-
-            <!-- 3행: 주소찾기 버튼 -->
-            <button class="address-search-btn" onclick="openDaumPostcode()">주소 찾기</button>
-
-            <!-- 4행: 상세 주소 -->
-            <div class="form-group">
-                <label class="form-label">상세 주소</label>
-                <input type="text" id="detailAddress" class="form-input" placeholder="상세 주소를 입력하세요">
+    
+            <!-- 다날 결제 수단 선택 영역 -->
+            <div class="ws-card">
+                <h2 class="section-title">💳 결제 수단</h2>
+                <div class="payment-methods-grid">
+                    <label class="pay-method-label" for="method-card">
+                        <input type="radio" id="method-card" name="danal-payment-method" value="CARD">
+                        <div class="pay-method-card" style="min-height: 92px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #333; margin-bottom: 8px;" class="pay-method-icon-svg">
+                                <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+                                <line x1="2" y1="10" x2="22" y2="10"></line>
+                            </svg>
+                            <span class="pay-method-name">신용카드</span>
+                        </div>
+                    </label>
+                    <label class="pay-method-label" for="method-vaccount">
+                        <input type="radio" id="method-vaccount" name="danal-payment-method" value="VACCOUNT">
+                        <div class="pay-method-card" style="min-height: 92px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #333; margin-bottom: 8px;" class="pay-method-icon-svg">
+                                <path d="M3 21h18"></path>
+                                <path d="M3 10h18"></path>
+                                <path d="M5 6l7-3 7 3"></path>
+                                <path d="M4 10v11"></path>
+                                <path d="M20 10v11"></path>
+                                <path d="M8 14v3"></path>
+                                <path d="M12 14v3"></path>
+                                <path d="M16 14v3"></path>
+                            </svg>
+                            <span class="pay-method-name">가상계좌</span>
+                        </div>
+                    </label>
+                    <label class="pay-method-label" for="method-kakaopay">
+                        <input type="radio" id="method-kakaopay" name="danal-payment-method" value="KAKAOPAY">
+                        <div class="pay-method-card" style="min-height: 92px; padding: 0; border: none; background: transparent; box-shadow: none; display: flex; align-items: center; justify-content: center;">
+                            <img src="/static/img/kakaopay.webp" alt="카카오페이" style="width: 80px; height: auto; object-fit: contain;">
+                        </div>
+                    </label>
+                    <label class="pay-method-label" for="method-tosspay">
+                        <input type="radio" id="method-tosspay" name="danal-payment-method" value="TOSSPAY">
+                        <div class="pay-method-card" style="min-height: 92px; padding: 0; border: none; background: transparent; box-shadow: none; display: flex; align-items: center; justify-content: center;">
+                            <img src="/static/img/tosspay.webp" alt="토스페이" style="width: 100%; height: 92px; object-fit: contain;">
+                        </div>
+                    </label>
+                </div>
             </div>
+    
+            <button class="payment-btn" id="payment-request-button" style="display: none;">결제하기</button>
         </div>
-
-        <!-- 다날 결제 수단 선택 영역 -->
-        <div class="ws-card">
-            <h2 class="section-title">💳 결제 수단</h2>
-            <div class="payment-methods-grid">
-                <label class="pay-method-label" for="method-card">
-                    <input type="radio" id="method-card" name="danal-payment-method" value="CARD">
-                    <div class="pay-method-card" style="min-height: 92px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #333; margin-bottom: 8px;" class="pay-method-icon-svg">
-                            <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
-                            <line x1="2" y1="10" x2="22" y2="10"></line>
-                        </svg>
-                        <span class="pay-method-name">신용카드</span>
-                    </div>
-                </label>
-                <label class="pay-method-label" for="method-vaccount">
-                    <input type="radio" id="method-vaccount" name="danal-payment-method" value="VACCOUNT">
-                    <div class="pay-method-card" style="min-height: 92px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #333; margin-bottom: 8px;" class="pay-method-icon-svg">
-                            <path d="M3 21h18"></path>
-                            <path d="M3 10h18"></path>
-                            <path d="M5 6l7-3 7 3"></path>
-                            <path d="M4 10v11"></path>
-                            <path d="M20 10v11"></path>
-                            <path d="M8 14v3"></path>
-                            <path d="M12 14v3"></path>
-                            <path d="M16 14v3"></path>
-                        </svg>
-                        <span class="pay-method-name">가상계좌</span>
-                    </div>
-                </label>
-                <label class="pay-method-label" for="method-kakaopay">
-                    <input type="radio" id="method-kakaopay" name="danal-payment-method" value="KAKAOPAY">
-                    <div class="pay-method-card" style="min-height: 92px; padding: 0; border: none; background: transparent; box-shadow: none; display: flex; align-items: center; justify-content: center;">
-                        <img src="/static/img/kakaopay.webp" alt="카카오페이" style="width: 80px; height: auto; object-fit: contain;">
-                    </div>
-                </label>
-                <label class="pay-method-label" for="method-tosspay">
-                    <input type="radio" id="method-tosspay" name="danal-payment-method" value="TOSSPAY">
-                    <div class="pay-method-card" style="min-height: 92px; padding: 0; border: none; background: transparent; box-shadow: none; display: flex; align-items: center; justify-content: center;">
-                        <img src="/static/img/tosspay.webp" alt="토스페이" style="width: 100%; height: 92px; object-fit: contain;">
-                    </div>
-                </label>
-            </div>
-        </div>
-
-        <button class="payment-btn" id="payment-request-button" style="display: none;">결제하기</button>
     </div>
 
     <!-- 결제 취소/실패 모달 -->
@@ -362,20 +381,7 @@
         </div>
     </div>
 
-    <div id="postcodeLayerWrapper" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10005; backdrop-filter: blur(5px); justify-content: center; align-items: center;">
-        <div id="postcodeLayer" style="position: relative; background: #fff; overflow: hidden;">
-            <button id="postcodeLayerCloseBtn" onclick="closeDaumPostcode()">✕</button>
-        </div>
-    </div>
-
     <script>
-        const layerWrapper = document.getElementById('postcodeLayerWrapper');
-        const layer = document.getElementById('postcodeLayer');
-
-        function closeDaumPostcode() {
-            layerWrapper.style.display = 'none';
-        }
-
         function showCancelModal(msg) {
             if(msg) document.getElementById("cancelMessage").innerHTML = msg;
             document.getElementById("paymentCancelModal").style.display = "flex";
@@ -389,36 +395,15 @@
         }
 
         function openDaumPostcode() {
-            // 1. 먼저 레이어를 화면에 노출 (Flex)
-            layerWrapper.style.display = 'flex';
-            
-            // 2. 현재 화면 크기에 맞게 컨테이너 크기 조절
-            updateLayerPosition();
-
-            // 3. 노출된 컨테이너 안에 주소 검색창 임베딩 (순서 중요)
             new daum.Postcode({
                 oncomplete: function(data) {
-                    let addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
                     document.getElementById('postcode').value = data.zonecode;
+                    let addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
                     document.getElementById("address").value = addr;
                     document.getElementById("detailAddress").focus();
-                    closeDaumPostcode();
-                },
-                width : '100%', height : '100%'
-            }).embed(layer);
+                }
+            }).open();
         }
-
-        function updateLayerPosition(){
-            const isMobile = window.innerWidth <= 768;
-            const width = isMobile ? window.innerWidth : 600;
-            const height = isMobile ? 450 : 480; // 모바일에서는 높이를 약간 줄여 안정감 확보
-
-            layer.style.width = width + 'px';
-            layer.style.height = height + 'px';
-            layer.style.borderRadius = isMobile ? '0' : '12px';
-            layer.style.boxShadow = '0 10px 40px rgba(0,0,0,0.3)';
-        }
-        window.addEventListener('resize', updateLayerPosition);
 
         document.addEventListener("DOMContentLoaded", async () => {
             const payBtn = document.getElementById("payment-request-button");

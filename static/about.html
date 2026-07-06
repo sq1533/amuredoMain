@@ -41,10 +41,42 @@
     <style>
         /* 탭 메뉴 스타일 */
         .about-tabs-container {
-            max-width: 900px;
-            margin: 100px auto 30px auto;
-            padding: 0 20px;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
             box-sizing: border-box;
+            grid-column: 4 / span 6 !important;
+            grid-row: 2 !important;
+            align-self: start;
+        }
+        .about-main {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            box-sizing: border-box;
+            grid-column: 4 / span 6 !important;
+            grid-row: 3 !important;
+            align-self: start;
+        }
+        @media screen and (max-width: 1024px) {
+            .about-tabs-container {
+                grid-column: 2 / span 4 !important;
+                grid-row: 2 !important;
+            }
+            .about-main {
+                grid-column: 2 / span 4 !important;
+                grid-row: 3 !important;
+            }
+        }
+        @media screen and (max-width: 640px) {
+            .about-tabs-container {
+                grid-column: 1 / span 4 !important;
+                grid-row: 2 !important;
+            }
+            .about-main {
+                grid-column: 1 / span 4 !important;
+                grid-row: 3 !important;
+            }
         }
         .about-tabs {
             display: flex;
@@ -272,15 +304,15 @@
         <div class="nav-overlay" id="navOverlay"></div>
     </header>
 
-    <!-- 🏁 탭 선택 버튼 영역 -->
-    <div class="about-tabs-container">
-        <div class="about-tabs">
-            <button class="about-tab-btn active" id="tabVisionBtn">아무래도 안경 비전</button>
-            <button class="about-tab-btn" id="tabServiceBtn">아무래도 안경 서비스</button>
+    <!-- 🏁 탭 선택 버튼 영역 및 본문 영역을 그리드 레이아웃으로 감쌈 -->
+    <div class="main-grid-layout" id="aboutView" style="display: grid; min-height: 100vh; box-sizing: border-box;">
+        <div class="about-tabs-container">
+            <div class="about-tabs">
+                <button class="about-tab-btn active" id="tabVisionBtn">아무래도 안경 비전</button>
+                <button class="about-tab-btn" id="tabServiceBtn">아무래도 안경 서비스</button>
+            </div>
         </div>
-    </div>
 
-    <div class="app-container">
         <!-- About 메인 컨텐츠 영역 -->
         <main class="about-main sub-page-main" style="padding-top: 0;">
             
@@ -401,60 +433,31 @@
                 </section>
             </div>
         </main>
-
-        <!-- 공통 푸터(Footer): 사업자 정보 -->
-        <footer class="main-footer">
-            <hr class="footer-divider">
-            <div class="footer-info">
-                <p class="footer-terms-wrap">
-                    <a href="/static/terms.html" class="footer-terms-link">이용약관</a> 
-                    <span style="color: #ccc; margin: 0 8px;">|</span> 
-                    <a href="/static/privacy.html" class="footer-terms-link">개인정보처리방침</a>
-                </p>
-                <p>상호명 및 호스트 서비스 제공 : 주식회사 키제이</p>
-                <p>대표 : 서명원 / 연락처 : 070-8064-4598</p>
-                <p>email : amuredo_shop@naver.com</p>
-                <p>서울시 관악구 난곡로 128, 1층</p>
-                <p>사업자 등록 번호 : 257-87-03297</p>
-                <p>통신판매업 신고 : 2026-서울관악-0029</p>
-            </div>
-        </footer>
     </div>
+
+    <!-- 공통 푸터(Footer): 사업자 정보 -->
+    <footer class="main-footer">
+        <hr class="footer-divider">
+        <div class="footer-info">
+            <p class="footer-terms-wrap">
+                <a href="/about" class="footer-terms-link">about us</a>
+                <span style="color: #ccc; margin: 0 8px;">|</span>
+                <a href="/static/terms.html" class="footer-terms-link">이용약관</a> 
+                <span style="color: #ccc; margin: 0 8px;">|</span> 
+                <a href="/static/privacy.html" class="footer-terms-link">개인정보처리방침</a>
+            </p>
+            <p>상호명 및 호스트 서비스 제공 : 주식회사 키제이</p>
+            <p>대표 : 서명원 / 연락처 : 070-8064-4598</p>
+            <p>email : amuredo_shop@naver.com</p>
+            <p>서울시 관악구 난곡로 128, 1층</p>
+            <p>사업자 등록 번호 : 257-87-03297</p>
+            <p>통신판매업 신고 : 2026-서울관악-0029</p>
+        </div>
+    </footer>
 
     <!-- 공통 메뉴 및 애니메이션 동작용 스크립트 -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // 1. 메뉴 토글 로직
-            const menuToggleBtn = document.getElementById("menuToggleBtn");
-            const closeMenuBtn = document.getElementById("closeMenuBtn");
-            const pageNav = document.getElementById("pageNav");
-            const navOverlay = document.getElementById("navOverlay");
-
-            function toggleMenu() {
-                pageNav.classList.toggle("open");
-                navOverlay.classList.toggle("active");
-            }
-
-            if(menuToggleBtn) menuToggleBtn.addEventListener("click", toggleMenu);
-            if(closeMenuBtn) closeMenuBtn.addEventListener("click", toggleMenu);
-            if(navOverlay) navOverlay.addEventListener("click", toggleMenu);
-
-            // 2. 스크롤 등장 애니메이션 로직 복구
-            const observerOptions = {
-                threshold: 0.1
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('is-visible');
-                    }
-                });
-            }, observerOptions);
-
-            const fadeElements = document.querySelectorAll('.fade-in-section');
-            fadeElements.forEach(el => observer.observe(el));
-
             // 🏁 3. 탭 스위칭 및 비디오 재생 제어 최적화 로직
             const tabVisionBtn = document.getElementById("tabVisionBtn");
             const tabServiceBtn = document.getElementById("tabServiceBtn");

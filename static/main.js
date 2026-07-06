@@ -2,60 +2,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     
     /* ====================================================
-       1. 모바일 기기의 슬라이딩 토스트(드로어) 메뉴 팝업 로직 구현
-       ==================================================== */
-       
-    const menuToggleBtn = document.getElementById("menuToggleBtn");
-    const closeMenuBtn = document.getElementById("closeMenuBtn");
-    const pageNav = document.getElementById("pageNav");
-    const navOverlay = document.getElementById("navOverlay");
-
-    // 메뉴 창을 열기/닫기 처리 해 주는 토글 함수
-    function toggleMenu() {
-        // 내부 CSS의 toggle 기능을 이용하여 '.open' 클래스의 유무를 판단해 추가/삭제 합니다.
-        // open 클래스가 들어가면 CSS에서 left: 0 으로 설정되어 화면 밖 좌측에 숨겨진 상자가 튀어나옵니다.
-        pageNav.classList.toggle("open");
-        navOverlay.classList.toggle("open");
-    }
-
-    /* 🏁 신규: 스크롤 감지하여 헤더 배경색 토글 (오버레이 모드) */
-    const mainHeader = document.querySelector(".main-header");
-    window.addEventListener("scroll", () => {
-        if (window.scrollY > 50) {
-            mainHeader.classList.add("scrolled");
-        } else {
-            mainHeader.classList.remove("scrolled");
-        }
-    });
-
-    // 모바일 햄버거 버튼 클릭 시 여는 이벤트 연결
-    menuToggleBtn.addEventListener("click", toggleMenu);
-    
-    // 메뉴 안의 X(닫기) 버튼 또는 바깥의 반투명 검은 배경 클릭 시 닫히도록 이벤트 연동
-    closeMenuBtn.addEventListener("click", toggleMenu);
-    navOverlay.addEventListener("click", toggleMenu);
-
-    /* ====================================================
-       1.5. 스크롤 위치 감지(IntersectionObserver) 애니메이션 등록
-       ==================================================== */
-    const fadeElements = document.querySelectorAll(".fade-in-section");
-    // 사용자가 스크롤을 내려 해당 요소가 뷰포트에 살짝(10%) 걸치면 노출시킴
-    const observer = new IntersectionObserver((entries, obs) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add("is-visible");
-                obs.unobserve(entry.target); // 한번 렌더링된 후에는 감지 해제 (퍼포먼스 향상)
-            }
-        });
-    }, { 
-        threshold: 0.1 
-    });
-    
-    // HTML에 class="fade-in-section" 가 붙은 모든 요소들을 감시 대상에 넣음
-    fadeElements.forEach(el => observer.observe(el));
-
-    /* ====================================================
-       2. 메인 베스트 상품 탭(Tab) 전환 및 데이터 로딩 로직
+       1. 메인 베스트 상품 탭(Tab) 전환 및 데이터 로딩 로직
        ==================================================== */
     const bestTabs = document.querySelectorAll(".best-tab");
     const bestItemsGrid = document.getElementById("bestItemsGrid");
@@ -358,34 +305,130 @@ document.addEventListener("DOMContentLoaded", () => {
     loadReviews();
 
     /* ====================================================
-       🏁 6. 메인 비디오 배너 반응형 로딩 및 포스터 이미지 설정 로직
+       🏁 6. 메인 비디오 배너 반응형 로딩 및 순차 재생 로직
        ==================================================== */
+    let currentEnv = null; // 'mo' 또는 'pc'
+    let activeVideos = [];
+    let activeVideoUrls = [];
+    let resizeTimer = null;
+
     const setupResponsiveBanner = () => {
-        const videoEl = document.getElementById("mainBannerVideo");
-        if (!videoEl) return;
+        const bannerCell = document.querySelector('.banner-cell');
+        if (!bannerCell) return;
 
-        const isMobile = window.innerWidth <= 640;
-        const targetSrc = isMobile ? "/static/img/banner_vod_mo.mp4" : "/static/img/banner_vod_pc.mp4";
-        const targetPoster = isMobile ? "/static/img/banner_img_mo.jpg" : "/static/img/banner_img_pc.jpg";
+        const isMobileOrTablet = window.innerWidth <= 1024;
+        const env = isMobileOrTablet ? 'mo' : 'pc';
 
-        // 현재 설정되어 있는 소스가 타겟 소스와 같다면 리로드 방지 (중복 리로드 차단)
-        if (videoEl.getAttribute("data-loaded-src") === targetSrc) {
-            return;
+        // 이미 동일한 환경의 비디오가 로딩 중이거나 로드된 경우 리턴 (불필요한 리로드 방지)
+        if (currentEnv === env) return;
+        currentEnv = env;
+
+        // 비디오 컨테이너 초기화
+        const videoContainer = bannerCell.querySelector('.video-container');
+        if (!videoContainer) return;
+        videoContainer.innerHTML = '';
+        activeVideos = [];
+
+        // 이미지 복구 (영상 로딩 중 이미지 보이기)
+        const fallbackImg = bannerCell.querySelector('.banner-fallback-img');
+        if (fallbackImg) {
+            fallbackImg.style.opacity = '1';
+            fallbackImg.style.display = 'block';
         }
 
-        // 포스터 이미지 및 비디오 소스 주입
-        videoEl.setAttribute("poster", targetPoster);
-        videoEl.innerHTML = `<source src="${targetSrc}" type="video/mp4">`;
-        videoEl.setAttribute("data-loaded-src", targetSrc);
+        const suffix = env === 'mo' ? '_mo' : '_pc';
+        activeVideoUrls = [
+            `/static/img/00_bn01${suffix}.mp4`,
+            `/static/img/00_bn02${suffix}.mp4`,
+            `/static/img/00_bn03${suffix}.mp4`
+        ];
 
-        // 비디오 소스가 변경되었으므로 비디오 데이터를 다시 로드하고 자동 재생 시도
-        videoEl.load();
-        videoEl.play().catch(err => {
-            console.log("비디오 자동재생 실패(브라우저 정책):", err);
+        let loadedCount = 0;
+        const totalVideos = activeVideoUrls.length;
+
+        // 비디오가 모두 로딩(canplay)되었을 때 첫 비디오 재생 및 이미지 페이드아웃
+        const onAllVideosLoaded = () => {
+            // 이번에 로드된 환경이 여전히 현재 환경과 같은지 최종 확인
+            if (currentEnv !== env) return;
+
+            if (fallbackImg) {
+                fallbackImg.style.opacity = '0';
+                setTimeout(() => {
+                    if (currentEnv === env) fallbackImg.style.display = 'none';
+                }, 800); // transition 시간만큼 대기 후 숨김
+            }
+            playVideoSequence(0);
+        };
+
+        const playVideoSequence = (index) => {
+            if (currentEnv !== env) return;
+
+            activeVideos.forEach((v, idx) => {
+                if (idx === index) {
+                    v.style.display = 'block';
+                    v.currentTime = 0;
+                    v.play().catch(err => {
+                        console.log("비디오 자동재생 시도 실패:", err);
+                    });
+                } else {
+                    v.style.display = 'none';
+                    v.pause();
+                }
+            });
+
+            const activeVideo = activeVideos[index];
+            if (activeVideo) {
+                activeVideo.onended = () => {
+                    const nextIndex = (index + 1) % totalVideos;
+                    playVideoSequence(nextIndex);
+                };
+            }
+        };
+
+        activeVideoUrls.forEach((url, index) => {
+            const video = document.createElement('video');
+            video.src = url;
+            video.muted = true;
+            video.playsInline = true;
+            video.autoplay = false;
+            video.controls = false;
+            video.style.display = 'none';
+            video.style.width = '100%';
+            video.style.height = '100%';
+            video.style.objectFit = 'cover';
+
+            // 00_bn03_pc / 00_bn03_mo 비디오는 상단 기준으로 맞춰 안경이 잘려 나가는 것을 방지
+            if (index === 2) {
+                video.style.objectPosition = 'top center';
+            }
+
+            const handleLoad = () => {
+                if (video.dataset.loaded) return;
+                video.dataset.loaded = 'true';
+                loadedCount++;
+                if (loadedCount === totalVideos) {
+                    onAllVideosLoaded();
+                }
+            };
+
+            // canplay 및 loadeddata 모두 등록하여 안전하게 확인
+            video.addEventListener('canplay', handleLoad);
+            video.addEventListener('loadeddata', handleLoad);
+
+            videoContainer.appendChild(video);
+            activeVideos.push(video);
+            video.load();
         });
     };
 
-    // 초기 실행 및 윈도우 리사이즈 이벤트 바인딩
+    // 초기 실행
     setupResponsiveBanner();
-    window.addEventListener("resize", setupResponsiveBanner);
+
+    // 윈도우 리사이즈 이벤트 바인딩 (디바운스 적용하여 과도한 실행 차단)
+    window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            setupResponsiveBanner();
+        }, 250);
+    });
 });

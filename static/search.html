@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>검색 | 아무래도(amuredo)</title>
+    <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=23.0">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            background-color: #F7F7F7 !important;
+        }
+        
+        .search-main-layout {
+            grid-auto-rows: min-content !important;
+            padding-bottom: 120px;
+        }
+
+        /* 1행은 빈 여백(1유닛 높이)을 유지하기 위해 높이 지정 및 grid-row 지정 배제 */
+        .search-spacer {
+            grid-column: 1 / span 12;
+            grid-row: 1;
+            height: calc(100vw / var(--grid-cols-pc)); /* 1유닛 높이만큼의 빈 여백 */
+        }
+
+        /* PC 기준: 좌측 결과(span 6), 우측 검색창(span 3) */
+        .search-results-left {
+            grid-column: 2 / span 6;
+            grid-row: 2;
+            align-self: start;
+        }
+
+        .search-sidebar-right {
+            grid-column: 9 / span 3;
+            grid-row: 2;
+            align-self: start;
+            position: sticky;
+            top: 120px;
+            background: #ffffff;
+            border: 1px solid #eaeaea;
+            padding: 30px;
+            box-sizing: border-box;
+            border-radius: 8px;
+        }
+
+        /* 검색 입력창 */
+        .search-box-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0e3a5b;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .search-input-wrapper {
+            display: flex;
+            border-bottom: 2px solid #0e3a5b;
+            padding-bottom: 8px;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 1.1rem;
+            font-family: inherit;
+            color: #333;
+        }
+
+        .search-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #0e3a5b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            transition: transform 0.2s;
+        }
+        
+        .search-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .search-info-text {
+            font-size: 0.85rem;
+            color: #777;
+            margin-top: 15px;
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+
+        .result-count-bar {
+            font-size: 0.95rem;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 700;
+            border-bottom: 1px solid #eaeaea;
+            padding-bottom: 15px;
+        }
+
+        .search-empty-msg {
+            text-align: center;
+            font-size: 1rem;
+            color: #888;
+            padding: 80px 0;
+            grid-column: 1 / -1;
+            width: 100%;
+        }
+
+        /* 반응형: 1024px 이하 태블릿/모바일 */
+        @media screen and (max-width: 1024px) {
+            .search-spacer {
+                height: 40px; /* 모바일에서는 여백을 고정 픽셀로 슬림하게 대응 */
+            }
+
+            .search-sidebar-right {
+                grid-column: 2 / span 10 !important;
+                grid-row: 2 !important;
+                position: static !important;
+                margin-bottom: 40px !important;
+                padding: 20px !important;
+            }
+
+            .search-results-left {
+                grid-column: 2 / span 10 !important;
+                grid-row: 3 !important;
+            }
+        }
+
+        @media screen and (max-width: 640px) {
+            .search-sidebar-right {
+                grid-column: 1 / span 12 !important;
+                border-radius: 0 !important;
+                border-left: none !important;
+                border-right: none !important;
+            }
+
+            .search-results-left {
+                grid-column: 1 / span 12 !important;
+                padding: 0 15px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container main-page">
+        <main class="main-content sub-page-main search-main-layout main-grid-layout">
+            <!-- 상단 높이 1 빈 여백 영역 -->
+            <div class="search-spacer"></div>
+
+            <!-- 좌측: 검색 결과 상품 리스트 -->
+            <section class="search-results-left">
+                <div class="result-count-bar" id="resultCountBar">
+                    검색어를 입력해 주세요.
+                </div>
+                <!-- 기존의 3열 상품 격자판 UI 그대로 상속 -->
+                <div class="category-grid-container" id="searchResultGrid">
+                    <p class="search-empty-msg">검색 결과가 여기에 표시됩니다.</p>
+                </div>
+            </section>
+
+            <!-- 우측: 검색창 및 안내 영역 -->
+            <aside class="search-sidebar-right">
+                <h2 class="search-box-title">SEARCH</h2>
+                <div class="search-input-wrapper">
+                    <input type="text" id="searchInput" class="search-input" placeholder="상품명 입력" autocomplete="off">
+                    <button id="searchSubmitBtn" class="search-btn" aria-label="검색하기">
+                        <span class="material-icons">search</span>
+                    </button>
+                </div>
+                <p class="search-info-text">
+                    상품의 이름을 입력하여 빠르게 검색할 수 있습니다.<br>
+                    (예: 안티오크, 홀리데이)
+                </p>
+            </aside>
+        </main>
+    </div>
+
+    <!-- 푸터 및 레이아웃을 위한 전역 스크립트 -->
+    <script src="/static/search.js?v=1.0"></script>
+    <script src="/static/globalWholesale.js?v=3.5"></script>
+</body>
+</html>

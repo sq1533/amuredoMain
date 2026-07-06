@@ -186,6 +186,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
                         <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
                         <li><button class="nav-switch-btn antioch-nav-btn" onclick="location.href='/antioch'">ANTIOCH</button></li>
+                        <li style="margin-top: 30px; border-top: 1px solid #eaeaea; padding-top: 20px;">
+                            <button class="nav-switch-btn" onclick="location.href='/contact'" style="display: inline-flex; align-items: center; gap: 10px; color: #0e3a5b; font-weight: 700;">
+                                <span class="material-icons" style="font-size: 1.4rem;">support_agent</span>
+                                <span>Connect</span>
+                            </button>
+                        </li>
                     </ul>
                 </nav>
                 <div class="nav-overlay" id="navOverlay"></div>
@@ -213,6 +219,43 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
     bindMenuEvents();
+
+    const bindScrollHeaderEvent = () => {
+        const mainHeader = document.querySelector(".main-header");
+        if (mainHeader) {
+            window.addEventListener("scroll", () => {
+                if (window.scrollY > 50) {
+                    mainHeader.classList.add("scrolled");
+                } else {
+                    mainHeader.classList.remove("scrolled");
+                }
+            });
+            // 초기 스크롤 상태도 확인
+            if (window.scrollY > 50) {
+                mainHeader.classList.add("scrolled");
+            }
+        }
+    };
+    bindScrollHeaderEvent();
+
+    const initGlobalIntersectionObserver = () => {
+        const fadeElements = document.querySelectorAll(".fade-in-section");
+        if (fadeElements.length > 0) {
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("is-visible");
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            fadeElements.forEach(el => observer.observe(el));
+        }
+    };
+    initGlobalIntersectionObserver();
+
     const renderQuickMenu = (role) => {
         // 기존 퀵 메뉴 및 모바일 탭바, 모달창이 있다면 중복 렌더링 방지를 위해 말끔히 청소
         const oldPcMenu = document.getElementById("globalWholesaleMenuContainer");
@@ -226,21 +269,68 @@ document.addEventListener("DOMContentLoaded", () => {
         const oldLogoutModal = document.getElementById("customGlobalLogoutModal");
         if (oldLogoutModal) oldLogoutModal.remove();
 
-        const menuHTML = `
-            <div id="globalWholesaleMenuContainer" class="pc-only-wholesale-menu floating-quick-menu">
-                <button class="quick-btn search-btn" id="quickSearchBtn">검색</button>
-                <div class="diagonal-divider"></div>
-                <button class="quick-btn top-btn" id="quickTopBtn">TOP</button>
-            </div>
-            
-            <nav class="mobile-common-bottom-nav">
+        let mobileNavItemsHTML = "";
+        if (role === "general") {
+            mobileNavItemsHTML = `
+                <a href="/" class="bottom-nav-item">
+                    <span class="material-icons">home</span>
+                    <span>Home</span>
+                </a>
+                <a href="/general/cart" class="bottom-nav-item" style="position: relative;">
+                    <div class="mobile-cart-icon-wrapper">
+                        <span class="material-icons">local_mall</span>
+                        <span class="cart-count-badge mobile-cart-badge" id="mobileBottomCartBadge" style="display: none;">0</span>
+                    </div>
+                    <span>장바구니</span>
+                </a>
+                <a href="/general/bookings" class="bottom-nav-item">
+                    <span class="material-icons">event_note</span>
+                    <span>예약현황</span>
+                </a>
+                <a href="/general/mypage" class="bottom-nav-item">
+                    <span class="material-icons">person</span>
+                    <span>My Page</span>
+                </a>
+                <a href="#" class="bottom-nav-item" id="bottomNavTopTrigger">
+                    <span class="material-icons">arrow_upward</span>
+                    <span>Top</span>
+                </a>
+            `;
+        } else if (role === "wholesale") {
+            mobileNavItemsHTML = `
+                <a href="/" class="bottom-nav-item">
+                    <span class="material-icons">home</span>
+                    <span>Home</span>
+                </a>
+                <a href="/wholesale/cart" class="bottom-nav-item" style="position: relative;">
+                    <div class="mobile-cart-icon-wrapper">
+                        <span class="material-icons">local_mall</span>
+                        <span class="cart-count-badge mobile-cart-badge" id="mobileBottomCartBadge" style="display: none;">0</span>
+                    </div>
+                    <span>장바구니</span>
+                </a>
+                <a href="/wholesale/orders" class="bottom-nav-item">
+                    <span class="material-icons">receipt_long</span>
+                    <span>구매현황</span>
+                </a>
+                <a href="/wholesale/mypage" class="bottom-nav-item">
+                    <span class="material-icons">business</span>
+                    <span>My Page</span>
+                </a>
+                <a href="#" class="bottom-nav-item" id="bottomNavTopTrigger">
+                    <span class="material-icons">arrow_upward</span>
+                    <span>Top</span>
+                </a>
+            `;
+        } else {
+            mobileNavItemsHTML = `
                 <a href="/" class="bottom-nav-item">
                     <span class="material-icons">home</span>
                     <span>Home</span>
                 </a>
                 <a href="/login" class="bottom-nav-item">
                     <span class="material-icons">login</span>
-                    <span>Login</span>
+                    <span>로그인</span>
                 </a>
                 <a href="#" class="bottom-nav-item" id="bottomNavSearchTrigger">
                     <span class="material-icons">search</span>
@@ -250,6 +340,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="material-icons">arrow_upward</span>
                     <span>Top</span>
                 </a>
+            `;
+        }
+
+        const menuHTML = `
+            <div id="globalWholesaleMenuContainer" class="pc-only-wholesale-menu floating-quick-menu">
+                <button class="quick-btn search-btn" id="quickSearchBtn">검색</button>
+                <div class="diagonal-divider"></div>
+                <button class="quick-btn top-btn" id="quickTopBtn">TOP</button>
+            </div>
+            
+            <nav class="mobile-common-bottom-nav">
+                ${mobileNavItemsHTML}
             </nav>
 
             <!-- 글로벌 검색 오버레이 패널 (오른쪽 -> 왼쪽 슬라이드인) -->
@@ -259,7 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div style="font-size: 1.5rem; font-weight: 800; color: #0e3a5b; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">Search Gear</div>
                     <div class="search-input-wrapper">
                         <input type="text" id="globalSearchInput" placeholder="검색어를 입력하세요..." autocomplete="off">
-                        <button class="search-submit-btn" id="searchSubmitBtn">검색</button>
+                        <button class="search-submit-btn" id="globalSearchSubmitBtn">검색</button>
                     </div>
                 </div>
             </div>
@@ -418,6 +520,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             };
         }
+
+        // 🏁 전역 검색 제출(Submit) 처리 로직
+        const globalSearchSubmitBtn = document.getElementById("globalSearchSubmitBtn");
+        const executeGlobalSearch = () => {
+            const query = searchInput.value.trim();
+            if (query) {
+                searchOverlay.classList.remove("active");
+                location.href = `/search?q=${encodeURIComponent(query)}`;
+            } else {
+                alert("검색어를 입력해 주세요.");
+            }
+        };
+
+        if (globalSearchSubmitBtn && searchInput) {
+            globalSearchSubmitBtn.onclick = (e) => {
+                e.preventDefault();
+                executeGlobalSearch();
+            };
+            searchInput.onkeypress = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    executeGlobalSearch();
+                }
+            };
+        }
         if (quickTopBtn) {
             quickTopBtn.onclick = (e) => {
                 e.preventDefault();
@@ -535,6 +662,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const pcBadge = document.getElementById("pcCartBadge");
         const pcHeaderBadge = document.getElementById("pcHeaderCartBadge");
         const mobileBadge = document.getElementById("mobileCartBadge");
+        const mobileBottomBadge = document.getElementById("mobileBottomCartBadge");
 
         const setBadgeText = (count) => {
             if (count > 0) {
@@ -550,10 +678,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     mobileBadge.textContent = count;
                     mobileBadge.style.display = "inline-flex";
                 }
+                if (mobileBottomBadge) {
+                    mobileBottomBadge.textContent = count;
+                    mobileBottomBadge.style.display = "inline-flex";
+                }
             } else {
                 if (pcBadge) pcBadge.style.display = "none";
                 if (pcHeaderBadge) pcHeaderBadge.style.display = "none";
                 if (mobileBadge) mobileBadge.style.display = "none";
+                if (mobileBottomBadge) mobileBottomBadge.style.display = "none";
             }
         };
 
@@ -659,7 +792,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     checkSignupSuccess();
 
-    // 🏁 모바일 메뉴 재구조화 함수 (Antioch 이동 및 도매 섹션 처리)
+    // 🏁 모바일 메뉴 재구조화 함수 (모든 상품 도매 판매 통합으로 분리 구분선 제거)
     function reorganizeMobileMenu(isWholesale) {
         const navLinks = document.querySelector(".nav-links");
         if (!navLinks) return;
@@ -672,30 +805,11 @@ document.addEventListener("DOMContentLoaded", () => {
         let antiochLi = links.find(li => li.innerText.trim().toLowerCase().includes("antioch"));
         
         if (antiochLi) {
-            if (isWholesale) {
-                // 도매 회원인 경우 최하단에 구분선과 함께 재배치
-                antiochLi.remove();
-                const wholesaleDivider = document.createElement("li");
-                wholesaleDivider.className = "wholesale-menu-divider";
-                wholesaleDivider.style.cssText = "margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; margin-bottom: 10px;";
-                wholesaleDivider.innerHTML = `
-                    <span style="font-size: 0.75rem; color: #aaa; margin-left: 10px; font-weight: 700; letter-spacing: 1px;">도매 (WHOLESALE)</span>
-                `;
-                navLinks.appendChild(wholesaleDivider);
-                navLinks.appendChild(antiochLi);
-
-                const antiochBtn = antiochLi.querySelector("button");
-                if (antiochBtn) {
-                    antiochBtn.style.color = "#0e3a5b";
-                    antiochBtn.style.fontWeight = "800";
-                }
-            } else {
-                // 도매 회원이 아닌 경우 일반적인 메뉴 스타일로 리셋
-                const antiochBtn = antiochLi.querySelector("button");
-                if (antiochBtn) {
-                    antiochBtn.style.color = "";
-                    antiochBtn.style.fontWeight = "";
-                }
+            // Antioch 버튼의 스타일을 일반 메뉴와 동일하게 일체화
+            const antiochBtn = antiochLi.querySelector("button");
+            if (antiochBtn) {
+                antiochBtn.style.color = "";
+                antiochBtn.style.fontWeight = "";
             }
         }
     }

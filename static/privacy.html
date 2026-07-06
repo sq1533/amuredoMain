@@ -12,14 +12,32 @@
             font-family: 'Pretendard', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #F4F3F0;
+            background-color: #F7F7F7;
             color: #333;
             line-height: 1.6;
         }
         .terms-container {
-            max-width: 800px;
-            margin: 0 auto;
             padding: 40px 20px 80px 20px;
+            box-sizing: border-box;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            grid-column: 4 / span 6 !important;
+            grid-row: 2 !important;
+            align-self: start;
+        }
+        @media screen and (max-width: 1024px) {
+            .terms-container {
+                grid-column: 2 / span 4 !important;
+                grid-row: 2 !important;
+            }
+        }
+        @media screen and (max-width: 640px) {
+            .terms-container {
+                grid-column: 1 / span 4 !important;
+                grid-row: 2 !important;
+                padding: 40px 10px 60px 10px !important;
+            }
         }
         h1 {
             text-align: center;
@@ -69,9 +87,8 @@
     </style>
 </head>
 <body>
-    <main class="sub-page-main">
-        <div class="app-container">
-            <div class="terms-container">
+    <div class="main-grid-layout" id="privacyView" style="display: grid; min-height: 100vh; padding-bottom: 50px; box-sizing: border-box;">
+        <div class="terms-container">
                 <h1>개인정보 처리방침</h1>
         
         <p>주식회사 키제이(이하 "회사")는 회사가 운영하는 amuredo 웹사이트(이하 "서비스")를 이용하는 정보주체의 자유와 권리 보호를 위해 “개인정보 보호법” 및 관계 법령이 정한 바를 준수하여, 적법하게 개인정보를 처리하고 안전하게 관리하고 있습니다.<br>
@@ -246,9 +263,29 @@
         개인정보침해신고센터 : (국번없이) 118 (privacy.kisa.or.kr)<br>
         대검찰청 : (국번없이) 1301 (www.spo.go.kr)<br>
         경찰청 : (국번없이) 182 (ecrm.cyber.go.kr)</p>
-            </div>
         </div>
-    </main>
-<script src="/static/globalWholesale.js?v=3.4"></script>
+    </div>
+
+    <!-- 공통 푸터(Footer): 사업자 정보 -->
+    <footer class="main-footer">
+        <hr class="footer-divider">
+        <div class="footer-info">
+            <p class="footer-terms-wrap">
+                <a href="/about" class="footer-terms-link">about us</a>
+                <span style="color: #ccc; margin: 0 8px;">|</span>
+                <a href="/static/terms.html" class="footer-terms-link">이용약관</a> 
+                <span style="color: #ccc; margin: 0 8px;">|</span> 
+                <a href="/static/privacy.html" class="footer-terms-link">개인정보처리방침</a>
+            </p>
+            <p>상호명 및 호스트 서비스 제공 : 주식회사 키제이</p>
+            <p>대표 : 서명원 / 연락처 : 070-8064-4598</p>
+            <p>email : amuredo_shop@naver.com</p>
+            <p>서울시 관악구 난곡로 128, 1층</p>
+            <p>사업자 등록 번호 : 257-87-03297</p>
+            <p>통신판매업 신고 : 2026-서울관악-0029</p>
+        </div>
+    </footer>
+
+    <script src="/static/globalWholesale.js?v=3.4"></script>
 </body>
 </html>

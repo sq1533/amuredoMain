@@ -16,13 +16,35 @@
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
         .reserve-container {
-            max-width: 900px;
-            margin: 100px auto 60px auto;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
             padding: 45px 30px;
             background: #fff;
             border-radius: 16px;
             box-shadow: 0 20px 50px rgba(14, 58, 91, 0.04);
             box-sizing: border-box;
+            
+            /* 기본: PC (공백 3, 예약 요소 6, 공백 3) */
+            grid-column: 4 / span 6 !important;
+            grid-row: 2 !important;
+        }
+        
+        @media screen and (max-width: 1024px) {
+            .reserve-container {
+                /* 와일드 모바일: 공백 1, 예약 요소 4, 공백 1 */
+                grid-column: 2 / span 4 !important;
+                grid-row: 2 !important;
+            }
+        }
+        
+        @media screen and (max-width: 640px) {
+            .reserve-container {
+                /* 모바일: 예약 요소 4 */
+                grid-column: 1 / span 4 !important;
+                grid-row: 2 !important;
+                border-radius: 0 !important;
+            }
         }
         .reserve-title {
             font-size: 2.2rem;
@@ -338,61 +360,63 @@
 <body>
     <!-- <header>는 globalWholesale.js가 동적 로딩 및 삽입합니다. -->
 
-    <div class="reserve-container">
-        <h1 class="reserve-title">피팅 예약</h1>
-
-        <!-- 🏁 1. 서비스 소개 섹션 -->
-        <div class="intro-section">
-            <div class="intro-grid">
-                <!-- 카드 1 -->
-                <div class="intro-card">
-                    <lottie-player src="/static/img/calendar.json" background="transparent" speed="1" class="intro-lottie-icon" loop autoplay></lottie-player>
-                    <h3 class="card-keyword">마음껏 예약하기</h3>
-                    <p class="card-desc">예약은 언제, 어디서든 무료니까</p>
-                </div>
-                <!-- 카드 2 -->
-                <div class="intro-card">
-                    <lottie-player src="/static/img/search.json" background="transparent" speed="1" class="intro-lottie-icon" loop autoplay></lottie-player>
-                    <h3 class="card-keyword">상품 비교하며 살펴보기</h3>
-                    <p class="card-desc">최대 5개의 상품을 비교할 수 있으니까</p>
-                </div>
-                <!-- 카드 3 -->
-                <div class="intro-card">
-                    <lottie-player src="/static/img/gift.json" background="transparent" speed="1" class="intro-lottie-icon" loop autoplay></lottie-player>
-                    <h3 class="card-keyword">현장에서 바로 구매</h3>
-                    <p class="card-desc">새상품을 현장에서 바로 가져갈 수 있으니까</p>
+    <div id="reserveView" class="main-grid-layout" style="display: grid; min-height: 100vh; background-color: #F7F7F7; padding-bottom: 50px; box-sizing: border-box;">
+        <div class="reserve-container">
+            <h1 class="reserve-title">피팅 예약</h1>
+    
+            <!-- 🏁 1. 서비스 소개 섹션 -->
+            <div class="intro-section">
+                <div class="intro-grid">
+                    <!-- 카드 1 -->
+                    <div class="intro-card">
+                        <lottie-player src="/static/img/calendar.json" background="transparent" speed="1" class="intro-lottie-icon" loop autoplay></lottie-player>
+                        <h3 class="card-keyword">마음껏 예약하기</h3>
+                        <p class="card-desc">예약은 언제, 어디서든 무료니까</p>
+                    </div>
+                    <!-- 카드 2 -->
+                    <div class="intro-card">
+                        <lottie-player src="/static/img/search.json" background="transparent" speed="1" class="intro-lottie-icon" loop autoplay></lottie-player>
+                        <h3 class="card-keyword">상품 비교하며 살펴보기</h3>
+                        <p class="card-desc">최대 5개의 상품을 비교할 수 있으니까</p>
+                    </div>
+                    <!-- 카드 3 -->
+                    <div class="intro-card">
+                        <lottie-player src="/static/img/gift.json" background="transparent" speed="1" class="intro-lottie-icon" loop autoplay></lottie-player>
+                        <h3 class="card-keyword">현장에서 바로 구매</h3>
+                        <p class="card-desc">새상품을 현장에서 바로 가져갈 수 있으니까</p>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- 🏁 2. 예약 상품 정보 연동 섹션 -->
-        <div class="goods-section">
-            <h2 class="section-subtitle">예약 신청 안경</h2>
-            <div class="goods-info-box">
-                <div class="goods-text" id="goodsText">예약 신청 안경 정보를 불러오고 있습니다...</div>
-            </div>
-        </div>
-
-        <!-- 🏁 3. 예약 장소 선정하기 섹션 -->
-        <div class="place-section">
-            <h2 class="section-subtitle">예약 장소 선택</h2>
-            <div class="place-row-wrapper">
-                <div class="place-info-box">
-                    <div class="place-text" id="placeText">장소를 선택해 주세요</div>
+    
+            <!-- 🏁 2. 예약 상품 정보 연동 섹션 -->
+            <div class="goods-section">
+                <h2 class="section-subtitle">예약 신청 안경</h2>
+                <div class="goods-info-box">
+                    <div class="goods-text" id="goodsText">예약 신청 안경 정보를 불러오고 있습니다...</div>
                 </div>
-                <button class="place-select-btn" id="placeSelectBtn">어디서 만날까요?</button>
             </div>
-        </div>
-
-        <!-- 🏁 4. 최종 예약하기 버튼 및 주의 안내사항 -->
-        <div class="submit-section">
-            <button class="reserve-submit-btn" id="submitReserveBtn" disabled>예약 확정하기</button>
-            
-            <!-- 🏁 유저 요청: 안내 문구 및 사용안내 자세히보기 버튼 -->
-            <div class="policy-notice-container">
-                <span class="policy-notice-text">· 파트너 안경점에서 상품 준비까지 영업일 기준 약 2~3일이 소요될 수 있습니다. 준비가 완료되면 고객님의 연락처로 안내될 예정입니다.</span>
-                <span class="policy-notice-text">· 안내 후 7일 내 미방문(노쇼) 시, 예약이 제한될 수 있습니다.</span>
-                <button type="button" id="btnOpenGuide" style="background: none; border: none; color: #0076a8; font-weight: 700; font-size: 0.88rem; cursor: pointer; padding: 4px 0; margin-top: 8px; display: inline-flex; align-items: center; gap: 4px; font-family: inherit; text-decoration: underline;">서비스 이용안내 자세히 보기 ➔</button>
+    
+            <!-- 🏁 3. 예약 장소 선정하기 섹션 -->
+            <div class="place-section">
+                <h2 class="section-subtitle">예약 장소 선택</h2>
+                <div class="place-row-wrapper">
+                    <div class="place-info-box">
+                        <div class="place-text" id="placeText">장소를 선택해 주세요</div>
+                    </div>
+                    <button class="place-select-btn" id="placeSelectBtn">어디서 만날까요?</button>
+                </div>
+            </div>
+    
+            <!-- 🏁 4. 최종 예약하기 버튼 및 주의 안내사항 -->
+            <div class="submit-section">
+                <button class="reserve-submit-btn" id="submitReserveBtn" disabled>예약 확정하기</button>
+                
+                <!-- 🏁 유저 요청: 안내 문구 및 사용안내 자세히보기 버튼 -->
+                <div class="policy-notice-container">
+                    <span class="policy-notice-text">· 파트너 안경점에서 상품 준비까지 영업일 기준 약 2~3일이 소요될 수 있습니다. 준비가 완료되면 고객님의 연락처로 안내될 예정입니다.</span>
+                    <span class="policy-notice-text">· 안내 후 7일 내 미방문(노쇼) 시, 예약이 제한될 수 있습니다.</span>
+                    <button type="button" id="btnOpenGuide" style="background: none; border: none; color: #0076a8; font-weight: 700; font-size: 0.88rem; cursor: pointer; padding: 4px 0; margin-top: 8px; display: inline-flex; align-items: center; gap: 4px; font-family: inherit; text-decoration: underline;">서비스 이용안내 자세히 보기 ➔</button>
+                </div>
             </div>
         </div>
     </div>

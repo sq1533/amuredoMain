@@ -13,14 +13,36 @@
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <style>
         .select-container {
-            max-width: 900px;
-            margin: 100px auto 60px auto;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
             padding: 40px 30px;
             background: #fff;
             border-radius: 16px;
             box-shadow: 0 20px 50px rgba(14, 58, 91, 0.04);
             box-sizing: border-box;
             overflow: hidden;
+            
+            /* 기본: PC (공백 3, 예약 상세 설정 요소 6, 공백 3) */
+            grid-column: 4 / span 6 !important;
+            grid-row: 2 !important;
+        }
+        
+        @media screen and (max-width: 1024px) {
+            .select-container {
+                /* 와일드 모바일: 공백 1, 예약 상세 설정 요소 4, 공백 1 */
+                grid-column: 2 / span 4 !important;
+                grid-row: 2 !important;
+            }
+        }
+        
+        @media screen and (max-width: 640px) {
+            .select-container {
+                /* 모바일: 예약 상세 설정 요소 4 */
+                grid-column: 1 / span 4 !important;
+                grid-row: 2 !important;
+                border-radius: 0 !important;
+            }
         }
         /* 🏁 2개 탭 버튼 영역 */
         .select-tabs {
@@ -369,15 +391,17 @@
             box-sizing: border-box;
             position: relative;
             transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
         }
         .partner-card:hover {
             box-shadow: 0 8px 25px rgba(14, 58, 91, 0.06);
             border-color: #0e3a5b;
         }
         .card-badge {
-            position: absolute;
-            top: 24px;
-            right: 24px;
+            display: inline-block;
+            align-self: flex-end;
+            margin-bottom: 12px;
             background: rgba(14, 58, 91, 0.06);
             color: #0e3a5b;
             font-size: 0.65rem;
@@ -390,8 +414,10 @@
             font-size: 1.25rem;
             font-weight: 800;
             color: #0e3a5b;
+            margin-top: 0;
             margin-bottom: 12px;
             word-break: keep-all;
+            text-align: left;
         }
         .card-divider {
             width: 30px;
@@ -707,103 +733,105 @@
     </style>
 </head>
 <body>
-    <div class="select-container">
-        <!-- 2개 탭 버튼 헤더 -->
-        <div class="select-tabs">
-            <button class="select-tab-btn active" id="tabVisitBtn">희망 장소와 시간 선택하기</button>
-            <button class="select-tab-btn" id="tabStoreBtn">원하는 안경점 선택하기</button>
-        </div>
-
-        <!-- 🏁 탭 패널 1: 희망 장소와 시간 선택 (본사 방문 피팅) -->
-        <div class="tab-panel active" id="panelVisit">
-            <!-- 시범 운영 안내 문구 -->
-            <div style="margin-bottom: 25px; padding: 14px 18px; background-color: #f4f7f9; border-left: 4px solid #0e3a5b; border-radius: 4px; font-size: 0.92rem; color: #0e3a5b; font-weight: 700; line-height: 1.4; letter-spacing: -0.2px;">
-                📢 서울권 시범 운영 중입니다. 추후 타 지역으로 확장 예정입니다.
+    <div id="selectStoreView" class="main-grid-layout" style="display: grid; min-height: 100vh; background-color: #F7F7F7; padding-bottom: 50px; box-sizing: border-box;">
+        <div class="select-container">
+            <!-- 2개 탭 버튼 헤더 -->
+            <div class="select-tabs">
+                <button class="select-tab-btn active" id="tabVisitBtn">희망 장소와 시간 선택하기</button>
+                <button class="select-tab-btn" id="tabStoreBtn">원하는 안경점 선택하기</button>
             </div>
-            <div class="visit-slider-container">
-                <div class="visit-slider-track" id="visitSliderTrack">
-                    <!-- Step 1: 날짜 및 시간 선택 -->
-                    <div class="visit-step" id="stepDateTime">
-                        <!-- 달력 헤더 -->
-                        <div class="calendar-header">
-                            <span id="calendarMonthYear">2026년 6월</span>
+    
+            <!-- 🏁 탭 패널 1: 희망 장소와 시간 선택 (본사 방문 피팅) -->
+            <div class="tab-panel active" id="panelVisit">
+                <!-- 시범 운영 안내 문구 -->
+                <div style="margin-bottom: 25px; padding: 14px 18px; background-color: #f4f7f9; border-left: 4px solid #0e3a5b; border-radius: 4px; font-size: 0.92rem; color: #0e3a5b; font-weight: 700; line-height: 1.4; letter-spacing: -0.2px;">
+                    📢 서울권 시범 운영 중입니다. 추후 타 지역으로 확장 예정입니다.
+                </div>
+                <div class="visit-slider-container">
+                    <div class="visit-slider-track" id="visitSliderTrack">
+                        <!-- Step 1: 날짜 및 시간 선택 -->
+                        <div class="visit-step" id="stepDateTime">
+                            <!-- 달력 헤더 -->
+                            <div class="calendar-header">
+                                <span id="calendarMonthYear">2026년 6월</span>
+                            </div>
+                            <!-- 요일 라벨 -->
+                            <div class="calendar-days">
+                                <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+                            </div>
+                            <!-- 캘린더 날짜 격자 -->
+                            <div class="calendar-grid" id="calendarGrid"></div>
+    
+                            <!-- 시간 슬롯 아코디언 -->
+                            <div class="time-expander" id="timeExpander">
+                                <h4 class="time-title">피팅 시간 선택</h4>
+                                <div class="time-grid" id="timeGrid"></div>
+                            </div>
+    
+                            <!-- 네비게이션 (시간선택 단계) -->
+                            <div class="step-nav-buttons" style="margin-top: 35px;">
+                                <button class="btn-prev" onclick="location.href='/general/cart'">장바구니로</button>
+                                <button class="btn-next" id="btnToLocation" disabled>장소 입력하기</button>
+                            </div>
                         </div>
-                        <!-- 요일 라벨 -->
-                        <div class="calendar-days">
-                            <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
-                        </div>
-                        <!-- 캘린더 날짜 격자 -->
-                        <div class="calendar-grid" id="calendarGrid"></div>
-
-                        <!-- 시간 슬롯 아코디언 -->
-                        <div class="time-expander" id="timeExpander">
-                            <h4 class="time-title">피팅 시간 선택</h4>
-                            <div class="time-grid" id="timeGrid"></div>
-                        </div>
-
-                        <!-- 네비게이션 (시간선택 단계) -->
-                        <div class="step-nav-buttons" style="margin-top: 35px;">
-                            <button class="btn-prev" onclick="location.href='/general/cart'">장바구니로</button>
-                            <button class="btn-next" id="btnToLocation" disabled>장소 입력하기</button>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: 희망 방문 장소 입력 -->
-                    <div class="visit-step" id="stepLocation">
-                        <div class="location-step-content">
-                            <h3 class="location-header">📍 방문 피팅 희망 주소 입력</h3>
-                            <div class="location-form">
-                                <div class="location-input-group">
-                                    <label for="addressInput">방문 주소</label>
-                                    <div class="address-search-wrapper" style="display: flex; gap: 8px;">
-                                        <input type="text" id="addressInput" placeholder="우측 주소 검색 버튼을 눌러주세요" readonly style="flex: 1; background-color: #fafafa; cursor: pointer;" required>
-                                        <button type="button" id="btnSearchAddress" style="padding: 0 16px; background-color: #0e3a5b; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.2s;">주소 검색</button>
+    
+                        <!-- Step 2: 희망 방문 장소 입력 -->
+                        <div class="visit-step" id="stepLocation">
+                            <div class="location-step-content">
+                                <h3 class="location-header">📍 방문 피팅 희망 주소 입력</h3>
+                                <div class="location-form">
+                                    <div class="location-input-group">
+                                        <label for="addressInput">방문 주소</label>
+                                        <div class="address-search-wrapper" style="display: flex; gap: 8px;">
+                                            <input type="text" id="addressInput" placeholder="우측 주소 검색 버튼을 눌러주세요" readonly style="flex: 1; background-color: #fafafa; cursor: pointer;" required>
+                                            <button type="button" id="btnSearchAddress" style="padding: 0 16px; background-color: #0e3a5b; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.2s;">주소 검색</button>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="location-input-group">
-                                    <label for="detailAddressInput">상세 주소 (건물명, 호수 등)</label>
-                                    <input type="text" id="detailAddressInput" placeholder="예: 1층 아무래도 안경" required>
-                                </div>
-                                <!-- 네비게이션 (주소입력 단계) -->
-                                <div class="step-nav-buttons">
-                                    <button class="btn-prev" id="btnBackToDateTime">이전으로</button>
-                                    <button class="btn-next" id="btnConfirmVisit" disabled>설정하기</button>
+                                    <div class="location-input-group">
+                                        <label for="detailAddressInput">상세 주소 (건물명, 호수 등)</label>
+                                        <input type="text" id="detailAddressInput" placeholder="예: 1층 아무래도 안경" required>
+                                    </div>
+                                    <!-- 네비게이션 (주소입력 단계) -->
+                                    <div class="step-nav-buttons">
+                                        <button class="btn-prev" id="btnBackToDateTime">이전으로</button>
+                                        <button class="btn-next" id="btnConfirmVisit" disabled>설정하기</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- 🏁 탭 패널 2: 원하는 안경점 선택 (파트너 안경점 목록) -->
-        <div class="tab-panel" id="panelStore">
-            <!-- 시/도, 구/군 필터링 섹션 -->
-            <div class="filter-section">
-                <select class="filter-select" id="citySelect">
-                    <option value="">시/도 전체</option>
-                </select>
-                <select class="filter-select" id="countrySelect" disabled>
-                    <option value="">구/군 전체</option>
-                </select>
-                <button class="btn-reset" id="resetFilterBtn">초기화</button>
-            </div>
-
-            <!-- 가까운 안경점 찾기 신규 버튼 -->
-            <div class="near-store-area">
-                <button class="near-store-btn" id="nearStoreBtn">원하는 안경점 찾기</button>
-            </div>
-
-            <!-- 파트너 안경점 그리드 영역 -->
-            <div class="partner-grid" id="partnerGrid">
-                <!-- 로더 스켈레톤 -->
-                <div class="partner-loader" id="partnerLoader">
-                    <div class="spinner"></div>
+    
+            <!-- 🏁 탭 패널 2: 원하는 안경점 선택 (파트너 안경점 목록) -->
+            <div class="tab-panel" id="panelStore">
+                <!-- 시/도, 구/군 필터링 섹션 -->
+                <div class="filter-section">
+                    <select class="filter-select" id="citySelect">
+                        <option value="">시/도 전체</option>
+                    </select>
+                    <select class="filter-select" id="countrySelect" disabled>
+                        <option value="">구/군 전체</option>
+                    </select>
+                    <button class="btn-reset" id="resetFilterBtn">초기화</button>
                 </div>
-            </div>
-            <!-- 빈 검색 상태 안내 -->
-            <div id="partnerEmptyState" class="partner-empty" style="display: none;">
-                등록된 파트너 안경점이 존재하지 않습니다.
+    
+                <!-- 가까운 안경점 찾기 신규 버튼 -->
+                <div class="near-store-area">
+                    <button class="near-store-btn" id="nearStoreBtn">원하는 안경점 찾기</button>
+                </div>
+    
+                <!-- 파트너 안경점 그리드 영역 -->
+                <div class="partner-grid" id="partnerGrid">
+                    <!-- 로더 스켈레톤 -->
+                    <div class="partner-loader" id="partnerLoader">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+                <!-- 빈 검색 상태 안내 -->
+                <div id="partnerEmptyState" class="partner-empty" style="display: none;">
+                    등록된 파트너 안경점이 존재하지 않습니다.
+                </div>
             </div>
         </div>
     </div>

@@ -23,11 +23,11 @@
 @media (min-width: 1025px) {
     #loginFormPane {
         grid-column: 5 / span 4 !important;
-        grid-row: 2 / span 4 !important;
+        grid-row: 2 !important;
     }
     #switchRegisterBtn {
         grid-column: 5 / span 4 !important;
-        grid-row: 6 / span 1 !important;
+        grid-row: 3 !important;
     }
 }
 
@@ -35,11 +35,11 @@
 @media (min-width: 641px) and (max-width: 1024px) {
     #loginFormPane {
         grid-column: 2 / span 4 !important;
-        grid-row: 2 / span 4 !important;
+        grid-row: 2 !important;
     }
     #switchRegisterBtn {
         grid-column: 2 / span 4 !important;
-        grid-row: 6 / span 1 !important;
+        grid-row: 3 !important;
     }
 }
 
@@ -47,12 +47,12 @@
 @media (max-width: 640px) {
     #loginFormPane {
         grid-column: 1 / span 4 !important;
-        grid-row: 2 / span 4 !important;
+        grid-row: 2 !important;
         padding: 20px !important;
     }
     #switchRegisterBtn {
         grid-column: 1 / span 4 !important;
-        grid-row: 6 / span 1 !important;
+        grid-row: 3 !important;
     }
 }
 
@@ -281,7 +281,7 @@
     <!-- 로그인 뷰 -->
     <div id="loginView" class="main-grid-layout" style="display: grid; min-height: 100vh; background-color: #F7F7F7; padding-bottom: 50px;">
         <!-- 상단 1~2행은 자동 여백 -->
-        <div id="loginFormPane" class="auth-form-container" style="grid-column: 5 / span 4; grid-row: 2 / span 4; border: 1px solid #eaeaea; background: transparent; padding: 40px; box-sizing: border-box; overflow-y: auto; border-radius: 8px; position: relative; overflow: hidden;">
+        <div id="loginFormPane" class="auth-form-container" style="grid-column: 5 / span 4; border: 1px solid #eaeaea; background: transparent; padding: 40px; box-sizing: border-box; overflow-y: auto; border-radius: 8px; position: relative; overflow: hidden;">
             <!-- 파도 애니메이션을 품을 이중 오버레이 슬라이더 레이어 -->
                 <div class="auth-bg-overlay bg-blue" id="loginBgOverlay"></div>
                 <div class="auth-bg-overlay bg-white" id="loginBgOverlayWhite"></div>
@@ -493,6 +493,32 @@
                         submitBtn.disabled = false;
                         submitBtn.innerText = originalText;
                     }
+                });
+            }
+
+            // 5. 일반고객 소셜 로그인 연동
+            const naverLoginBtn = document.getElementById("naverLoginBtn");
+            const kakaoLoginBtn = document.getElementById("kakaoLoginBtn");
+
+            if (naverLoginBtn) {
+                naverLoginBtn.addEventListener("click", () => {
+                    const redirectTo = sessionStorage.getItem("login_redirect_to") || "";
+                    let url = "/api/user/login/naver";
+                    if (redirectTo) {
+                        url += `?next=${encodeURIComponent(redirectTo)}`;
+                    }
+                    location.href = url;
+                });
+            }
+
+            if (kakaoLoginBtn) {
+                kakaoLoginBtn.addEventListener("click", () => {
+                    const redirectTo = sessionStorage.getItem("login_redirect_to") || "";
+                    let url = "/api/user/login/kakao";
+                    if (redirectTo) {
+                        url += `?next=${encodeURIComponent(redirectTo)}`;
+                    }
+                    location.href = url;
                 });
             }
         });

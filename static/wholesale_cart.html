@@ -8,12 +8,34 @@
     <link rel="stylesheet" href="/static/style.css?v=21.0">
     <style>
         .cart-container {
-            max-width: 900px;
-            margin: 80px auto;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
             padding: 40px 20px;
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            
+            /* 기본: PC (공백 3, 장바구니 6, 공백 3) */
+            grid-column: 4 / span 6 !important;
+            grid-row: 2 !important;
+        }
+        
+        @media screen and (max-width: 1024px) {
+            .cart-container {
+                /* 와일드 모바일: 공백 1, 장바구니 4, 공백 1 */
+                grid-column: 2 / span 4 !important;
+                grid-row: 2 !important;
+            }
+        }
+        
+        @media screen and (max-width: 640px) {
+            .cart-container {
+                /* 모바일: 장바구니 4 */
+                grid-column: 1 / span 4 !important;
+                grid-row: 2 !important;
+                border-radius: 0 !important;
+            }
         }
         .cart-title {
             font-size: 2.2rem;
@@ -222,22 +244,24 @@
 <body>
     <!-- [다이어트] <header> 태그가 삭제되었습니다. globalWholesale.js에서 자동 주입됩니다. -->
 
-    <div class="cart-container">
-        <h1 class="cart-title">B2B 도매 장바구니</h1>
-        
-        <div class="cart-list" id="cartList">
-            <!-- 자바스크립트로 쿠키 데이터를 바탕으로 렌더링 됩니다. -->
-        </div>
-
-        <div class="summary-section" id="summarySection">
-            <div class="summary-total">
-                <span>최종 결제 예상 금액</span>
-                <span id="grandTotal">₩ 0</span>
+    <div id="cartView" class="main-grid-layout" style="display: grid; min-height: 100vh; background-color: #F7F7F7; padding-bottom: 50px; box-sizing: border-box;">
+        <div class="cart-container">
+            <h1 class="cart-title">B2B 도매 장바구니</h1>
+            
+            <div class="cart-list" id="cartList">
+                <!-- 자바스크립트로 쿠키 데이터를 바탕으로 렌더링 됩니다. -->
             </div>
-            <button class="order-btn" id="orderBtn">주문하기</button>
+    
+            <div class="summary-section" id="summarySection">
+                <div class="summary-total">
+                    <span>최종 결제 예상 금액</span>
+                    <span id="grandTotal">₩ 0</span>
+                </div>
+                <button class="order-btn" id="orderBtn">주문하기</button>
+            </div>
+            
+            <a href="javascript:history.back()" class="home-link">← 이전 페이지로 돌아가기</a>
         </div>
-        
-        <a href="javascript:history.back()" class="home-link">← 이전 페이지로 돌아가기</a>
     </div>
 
     <script>

@@ -5,7 +5,7 @@
    ========================================================================== */
 :root {
     /* Color Palette */
-    --color-bg-primary: #F4F3F0;
+    --color-bg-primary: #F7F7F7;
     --color-text-primary: #222222;
     --color-hamburger-bg: #E5E3DD;
     --color-hamburger-line: #222222;
@@ -66,15 +66,27 @@ body {
 /* ==========================================================================
    🌐 GLOBAL GRID SYSTEM (PC: 12, Tablet: 6, Mobile: 4)
    ========================================================================== */
-.main-grid-layout, .grid-system-12 {
+.main-grid-layout, 
+.grid-system-12,
+#loginView,
+#registerView,
+#cartView,
+#reserveView,
+#selectStoreView {
     display: grid !important;
     grid-template-columns: repeat(var(--grid-cols-pc), 1fr) !important;
-    grid-auto-rows: calc(100vw / var(--grid-cols-pc)) !important;
+    grid-auto-rows: calc(100vw / var(--grid-cols-pc)) !important; /* 1:1 정사각형 배치 */
     gap: 0 !important;
 }
 
 @media screen and (max-width: 1024px) {
-    .main-grid-layout, .grid-system-6 {
+    .main-grid-layout, 
+    .grid-system-6,
+    #loginView,
+    #registerView,
+    #cartView,
+    #reserveView,
+    #selectStoreView {
         display: grid !important;
         grid-template-columns: repeat(var(--grid-cols-tablet), 1fr) !important;
         grid-auto-rows: calc(100vw / var(--grid-cols-tablet)) !important;
@@ -82,10 +94,69 @@ body {
 }
 
 @media screen and (max-width: 640px) {
-    .main-grid-layout, .grid-system-4 {
+    .main-grid-layout, 
+    .grid-system-4,
+    #loginView,
+    #registerView,
+    #cartView,
+    #reserveView,
+    #selectStoreView {
         display: grid !important;
         grid-template-columns: repeat(var(--grid-cols-mobile), 1fr) !important;
         grid-auto-rows: calc(100vw / var(--grid-cols-mobile)) !important;
+    }
+}
+
+/* 로그인/회원가입/장바구니/예약/장소선택/도매주문/안내페이지 뷰 전용 가변성 높이 설정 */
+#loginView,
+#registerView,
+#aboutView {
+    grid-template-rows: calc(100vw / 12) auto auto !important; /* 1행은 정사각형 여백, 2~3행은 가변 auto */
+}
+#cartView,
+#reserveView,
+#selectStoreView,
+#wholesaleOrderView,
+#paymentResultView,
+#contactView,
+#termsView,
+#privacyView {
+    grid-template-rows: calc(100vw / 12) auto !important; /* 1행은 정사각형 여백, 2행은 가변 auto */
+}
+
+@media screen and (max-width: 1024px) {
+    #loginView,
+    #registerView,
+    #aboutView {
+        grid-template-rows: calc(100vw / 6) auto auto !important;
+    }
+    #cartView,
+    #reserveView,
+    #selectStoreView,
+    #wholesaleOrderView,
+    #paymentResultView,
+    #contactView,
+    #termsView,
+    #privacyView {
+        grid-template-rows: calc(100vw / 6) auto !important;
+    }
+}
+
+@media screen and (max-width: 640px) {
+    #loginView,
+    #registerView,
+    #aboutView {
+        grid-template-rows: calc(100vw / 4) auto auto !important;
+    }
+    #cartView,
+    #reserveView,
+    #selectStoreView,
+    #wholesaleOrderView,
+    #paymentResultView,
+    #contactView,
+    #termsView,
+    #privacyView {
+        grid-template-rows: calc(100vw / 4) auto !important;
     }
 }
 
@@ -278,7 +349,7 @@ body {
         left: auto; /* 기존 left 속성 무효화 */
         width: 250px;
         height: 100%;
-        background-color: #F4F3F0;
+        background-color: #F7F7F7;
         z-index: 1000;
         transition: right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); /* 우측에서 튀어나오는 슬라이드 애니메이션 효과 */
         box-shadow: -2px 0 10px rgba(0,0,0,0.1); /* 그림자 방향도 반대로 수정 */
@@ -355,7 +426,7 @@ body {
     aspect-ratio: auto; 
     position: relative;
     overflow: hidden; 
-    background-color: #F4F3F0; /* 검은 여백 방지를 위해 사이트 기본 배경색과 통일 */
+    background-color: #F7F7F7; /* 검은 여백 방지를 위해 사이트 기본 배경색과 통일 */
 }
 
 /* 비디오 요소 스타일 (가로 100%로 맞추고 세로는 영상 고유 비율에 따라 자동 조절) */
@@ -372,7 +443,7 @@ body {
 .brand-story-section {
     width: 100%;
     padding: 100px 40px; 
-    background-color: #F4F3F0;
+    background-color: #F7F7F7;
     
     /* 🏁 상하 구조로 변경 (헤더 / 콘텐츠) */
     display: flex;
@@ -527,7 +598,7 @@ body {
     width: 100%;
     /* 상단 10px, 하단 10px로 고정하여 섹션 간 간격 통일 */
     padding: 10px 1.5rem 10px 1.5rem; 
-    background-color: #F4F3F0;
+    background-color: #F7F7F7;
 }
 
 /* 서브 타이틀 공통 스타일 */
@@ -825,6 +896,7 @@ body {
 /* PC 환경 12그리드 설계 적용 및 3열 상품카드, 세로 1열 필터 세팅 */
 @media screen and (min-width: 1025px) {
     .sub-page-main.main-grid-layout {
+        grid-template-rows: calc(100vw / 12) calc(100vw / 12) auto !important; /* ◀ 1, 2행은 1:1 정사각형 높이, 3행은 가변 auto */
         column-gap: 24px !important;
         row-gap: 0px !important;
         padding-top: 0px !important;
@@ -832,7 +904,7 @@ body {
     
     .category-page-title {
         grid-column: 3 / span 8 !important;
-        grid-row: 2 / span 1 !important; /* 2행 배치 (1행은 상단 1높이 여백) */
+        grid-row: 2 !important; /* 2행 배치 (1행은 빈 여백) */
         margin-bottom: 0 !important;
         text-align: left !important;
         font-size: 2.2rem !important;
@@ -842,7 +914,7 @@ body {
     
     .category-grid-container {
         grid-column: 3 / span 6 !important;
-        grid-row: 3 / span 12 !important; /* 3행부터 세로 12격자 칸 점유 */
+        grid-row: 3 !important; /* 3행 배치 (콘텐츠 유동 격자 자동 확장) */
         display: grid !important;
         grid-template-columns: repeat(3, 1fr) !important;
         gap: 0px !important;
@@ -858,7 +930,7 @@ body {
     
     .filter-container {
         grid-column: 9 / span 2 !important;
-        grid-row: 3 / span 12 !important; /* 3행부터 세로 12격자 칸 점유 */
+        grid-row: 3 !important; /* 3행 배치 */
         align-items: flex-start !important;
         margin-bottom: 0 !important;
         padding: 0 !important;
@@ -896,6 +968,7 @@ body {
 /* 와일드 모바일 환경 (태블릿: 641px ~ 1024px) - 6열 그리드 대응 */
 @media screen and (min-width: 641px) and (max-width: 1024px) {
     .sub-page-main.main-grid-layout {
+        grid-template-rows: calc(100vw / 6) calc(100vw / 6) auto !important; /* ◀ 1, 2행은 1:1 정사각형 높이, 3행은 가변 auto */
         column-gap: 16px !important;
         row-gap: 0px !important;
         padding-top: 0px !important;
@@ -903,7 +976,7 @@ body {
     
     .category-page-title {
         grid-column: 1 / span 6 !important;
-        grid-row: 2 / span 1 !important; /* 2행 배치 (1행은 상단 1높이 여백) */
+        grid-row: 2 !important; /* 2행 배치 (1행은 빈 여백) */
         margin-bottom: 0 !important;
         text-align: left !important;
         font-size: 1.8rem !important;
@@ -914,7 +987,7 @@ body {
     
     .category-grid-container {
         grid-column: 1 / span 5 !important;
-        grid-row: 3 / span 15 !important; /* 3행부터 세로 15격자 칸 점유 */
+        grid-row: 3 !important; /* 3행 배치 */
         display: grid !important;
         grid-template-columns: repeat(3, 1fr) !important;
         gap: 0px !important;
@@ -931,7 +1004,7 @@ body {
     
     .filter-container {
         grid-column: 6 / span 1 !important;
-        grid-row: 3 / span 15 !important; /* 3행부터 세로 15격자 칸 점유 */
+        grid-row: 3 !important; /* 3행 배치 */
         align-items: flex-start !important;
         margin-bottom: 0 !important;
         padding: 0 20px 0 0 !important;
@@ -969,6 +1042,7 @@ body {
 /* 모바일 환경 (640px 이하) - 4열 그리드 상하 배치 대응 */
 @media screen and (max-width: 640px) {
     .sub-page-main.main-grid-layout {
+        grid-template-rows: calc(100vw / 4) calc(100vw / 4) auto auto !important; /* ◀ 1, 2행은 1:1 정사각형 높이, 3, 4행은 가변 auto */
         column-gap: 0px !important;
         row-gap: 0px !important;
         padding-top: 0px !important;
@@ -978,7 +1052,7 @@ body {
     
     .category-page-title {
         grid-column: 1 / span 4 !important;
-        grid-row: 2 / span 1 !important; /* 2행 배치 (1행은 상단 1높이 여백) */
+        grid-row: 2 !important; /* 2행 배치 (1행은 빈 여백) */
         margin-bottom: 0 !important;
         text-align: center !important;
         font-size: 1.5rem !important;
@@ -989,8 +1063,8 @@ body {
     }
     
     .filter-container {
-        grid-column: 1 / span 4 !important; /* 필터 4그리드 */
-        grid-row: 3 / span 1 !important;    /* 3행 배치 (1높이) */
+        grid-column: 1 / span 4 !important;
+        grid-row: 3 !important;    /* 3행 배치 */
         align-items: center !important;
         margin-bottom: 0 !important;
         padding: 0 !important;
@@ -1027,8 +1101,8 @@ body {
     }
     
     .category-grid-container {
-        grid-column: 1 / span 4 !important; /* 상품 리스트 4그리드 */
-        grid-row: 4 / span 20 !important;   /* 4행부터 세로 20격자 칸 점유 */
+        grid-column: 1 / span 4 !important;
+        grid-row: 4 !important;   /* 4행 배치 */
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important; /* 2열 배치 */
         gap: 0px !important;
@@ -1114,7 +1188,7 @@ body {
 /* ========= 7. 상품 상세 페이지 (Item Detail) ========= */
 .detail-content {
     padding-bottom: 5rem;
-    background-color: #F4F3F0;
+    background-color: #F7F7F7;
 }
 
 /* 유저 요구사항: 상단 이미지 마진 좌우 10px로 고정 */
@@ -1244,21 +1318,23 @@ body {
    🌐 상품 상세 글로벌 12/6/4 그리드 설계 및 환경별 규격 적용
    ========================================================== */
 .detail-content.main-grid-layout {
-    /* 글로벌 정사각형 그리드(grid-auto-rows)를 침범 없이 그대로 상속 */
-    background-color: #F4F3F0;
+    background-color: #F7F7F7;
 }
 
 /* PC 환경 (1025px 이상, 12열 중 8그리드 차지 및 좌우 2그리드 여백) */
 @media screen and (min-width: 1025px) {
     .detail-content.main-grid-layout {
+        grid-template-columns: repeat(var(--grid-cols-pc), 1fr) !important;
+        grid-template-rows: calc(100vw / 12) auto auto auto !important; /* ◀ 1행은 1:1 정사각형 높이, 나머지 가변 행은 auto */
         column-gap: 24px !important;
         row-gap: 0px !important;
+        padding-top: 0px !important;
     }
     
     /* 좌측 이미지 4그리드 */
     .detail-left-column {
         grid-column: 3 / span 4 !important; /* 3~6열 */
-        grid-row: 2 / span 7 !important;    /* 2행부터 7격자 점유 (1행은 빈 여백) */
+        grid-row: 2 !important;    /* 2행 배치 (1행은 빈 여백) */
         width: 100% !important;
         margin-left: 0 !important;
     }
@@ -1266,7 +1342,7 @@ body {
     /* 우측 상세정보 4그리드 */
     .detail-info-area {
         grid-column: 7 / span 4 !important; /* 7~10열 */
-        grid-row: 2 / span 7 !important;    /* 2행부터 7격자 점유 */
+        grid-row: 2 !important;    /* 2행 배치 */
         width: 100% !important;
         padding: 0 !important;
         text-align: left !important;
@@ -1274,13 +1350,14 @@ body {
     
     .related-items-section {
         grid-column: 3 / span 8 !important;
-        grid-row: 9 / span 2 !important;    /* 9행부터 세로 2칸 점유 */
+        grid-row: 3 !important;    /* 3행 배치 */
         padding: 0 !important;
+        margin-top: 3.125vw !important; /* ◀ 1024px 너비 기준 32px 가변 여백 */
     }
     
     .detail-images-section {
         grid-column: 3 / span 8 !important;
-        grid-row: 11 / span 30 !important;  /* 11행부터 세로 30칸 점유 */
+        grid-row: 4 !important;  /* 4행 배치 */
         padding: 0 !important;
     }
     
@@ -1304,10 +1381,16 @@ body {
 
 /* 와일드 모바일 환경 (태블릿: 641px ~ 1024px, 6열 중 6그리드 차지) */
 @media screen and (min-width: 641px) and (max-width: 1024px) {
+    .detail-content.main-grid-layout {
+        grid-template-columns: repeat(var(--grid-cols-tablet), 1fr) !important;
+        grid-template-rows: calc(100vw / 6) auto auto auto !important; /* ◀ 1행은 1:1 정사각형 높이, 나머지 가변 행은 auto */
+        padding-top: 0px !important;
+    }
+
     /* 좌측 이미지 3그리드 */
     .detail-left-column {
         grid-column: 1 / span 3 !important;
-        grid-row: 2 / span 8 !important;    /* 2행부터 세로 8칸 점유 (1행은 빈 여백) */
+        grid-row: 2 !important;    /* 2행 배치 (1행은 빈 여백) */
         width: 100% !important;
         margin-left: 0 !important;
     }
@@ -1315,7 +1398,7 @@ body {
     /* 우측 상세정보 3그리드 */
     .detail-info-area {
         grid-column: 4 / span 3 !important;
-        grid-row: 2 / span 8 !important;    /* 2행부터 세로 8칸 점유 */
+        grid-row: 2 !important;    /* 2행 배치 */
         width: 100% !important;
         padding: 0 !important;
         text-align: left !important;
@@ -1323,23 +1406,30 @@ body {
     
     .related-items-section {
         grid-column: 1 / span 6 !important;
-        grid-row: 10 / span 2 !important;
+        grid-row: 3 !important;    /* 3행 배치 */
         padding: 0 !important;
+        margin-top: 3.125vw !important; /* ◀ 1024px 너비 기준 32px 가변 여백 */
     }
     
     .detail-images-section {
         grid-column: 1 / span 6 !important;
-        grid-row: 12 / span 35 !important;
+        grid-row: 4 !important;    /* 4행 배치 */
         padding: 0 !important;
     }
 }
 
 /* 모바일 환경 (640px 이하, 4열 중 4그리드 차지) */
 @media screen and (max-width: 640px) {
+    .detail-content.main-grid-layout {
+        grid-template-columns: repeat(var(--grid-cols-mobile), 1fr) !important;
+        grid-template-rows: calc(100vw / 4) auto auto auto auto !important; /* ◀ 1행은 1:1 정사각형 높이, 나머지 가변 행은 auto */
+        padding-top: 0px !important;
+    }
+
     /* 이미지 4그리드 */
     .detail-left-column {
         grid-column: 1 / span 4 !important;
-        grid-row: 2 / span 6 !important;    /* 2행부터 세로 6칸 점유 (1행은 빈 여백) */
+        grid-row: 2 !important;    /* 2행 배치 (1행은 빈 여백) */
         width: 100% !important;
         margin-left: 0 !important;
     }
@@ -1347,21 +1437,43 @@ body {
     /* 상세정보 4그리드 */
     .detail-info-area {
         grid-column: 1 / span 4 !important;
-        grid-row: 8 / span 6 !important;    /* 이미지 하단인 8행부터 세로 6칸 점유 */
+        grid-row: 3 !important;    /* 3행 배치 */
         width: 100% !important;
         padding: 0 !important;
-        text-align: left !important;
+        text-align: center !important; /* ◀ 중앙정렬로 변경 */
+    }
+    
+    .detail-item-name {
+        text-align: center !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+    
+    .detail-item-price {
+        text-align: center !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+    
+    .detail-item-desc {
+        text-align: center !important;
+        margin: 1.5rem auto !important;
+        padding: 0.5rem 1.0rem !important;
+        border-left: none !important; /* 모바일 중앙정렬을 위해 좌측선 제거 */
+        background-color: transparent !important;
+        max-width: 100% !important;
     }
     
     .related-items-section {
         grid-column: 1 / span 4 !important;
-        grid-row: 14 / span 3 !important;
+        grid-row: 4 !important;    /* 4행 배치 */
         padding: 0 !important;
+        margin-top: 3.125vw !important; /* ◀ 1024px 너비 기준 32px 가변 여백 */
     }
     
     .detail-images-section {
         grid-column: 1 / span 4 !important;
-        grid-row: 17 / span 40 !important;
+        grid-row: 5 !important;    /* 5행 배치 */
         padding: 0 !important;
     }
 }
@@ -1371,7 +1483,7 @@ body {
     width: 100%;
     margin-top: 0;
     padding-bottom: 5rem;
-    background-color: #F4F3F0;
+    background-color: #F7F7F7;
 }
 
 /* 1) 히어로 배너 섹션 (화면을 넓고 꽉 채우는 프리미엄 뷰) */
@@ -1621,14 +1733,13 @@ body {
 /* ========= 11. 문의하기(Contact Us) 페이지 전용 스타일 ========= */
 .contact-main {
     padding-bottom: 8rem;
-    background-color: #F4F3F0;
+    background-color: #F7F7F7;
     min-height: 100vh;
 }
 
 .contact-container {
     max-width: 800px;
     margin: 0 auto;
-    padding: 0 1.5rem;
 }
 
 .contact-title {
@@ -1926,7 +2037,7 @@ body {
 .main-footer {
     margin-top: 5rem;
     padding: 3rem 1.5rem 5rem;
-    background-color: #F4F3F0;
+    background-color: #F7F7F7 !important;
     text-align: center;
 }
 
@@ -2076,7 +2187,7 @@ body {
 
 .gear-tag {
     font-size: 0.7rem;
-    background-color: #f4f3f0;
+    background-color: #F7F7F7;
     color: #666;
     padding: 0.3rem 0.6rem;
     border-radius: 4px;
@@ -3134,7 +3245,7 @@ body.main-body {
     }
     .mini-banner-01-text {
         grid-column: span 4 !important;
-        grid-row: 13 / span 1 !important;
+        grid-row: 13 / span 2 !important;
         justify-content: center !important;
         text-align: center !important;
     }
@@ -3147,62 +3258,62 @@ body.main-body {
     }
     .mini-banner-02-text {
         grid-column: span 4 !important;
-        grid-row: span 1 !important;
+        grid-row: span 2 !important;
         justify-content: center !important;
         text-align: center !important;
     }
     .mini-banner-03-img {
         grid-column: span 4 !important;
-        grid-row: 19 / span 4 !important;
+        grid-row: 21 / span 4 !important;
     }
     .mini-banner-03-text {
         grid-column: span 4 !important;
-        grid-row: 23 / span 1 !important;
+        grid-row: 25 / span 2 !important;
         justify-content: center !important;
         text-align: center !important;
     }
     .series-gap-empty {
         grid-column: span 4 !important;
-        grid-row: 24 / span 1 !important;
+        grid-row: 27 / span 1 !important;
     }
     .series-gap-title {
         grid-column: span 4 !important;
-        grid-row: 25 / span 1 !important;
+        grid-row: 28 / span 1 !important;
         justify-content: center !important;
         text-align: center !important;
         padding-left: 0 !important;
     }
     .series-img-01 {
         grid-column: 1 / span 2 !important;
-        grid-row: 26 / span 4 !important;
+        grid-row: 29 / span 4 !important;
     }
     .series-img-02 {
         grid-column: 3 / span 2 !important;
-        grid-row: 26 / span 4 !important;
+        grid-row: 29 / span 4 !important;
     }
     .series-txt-01 {
         grid-column: 1 / span 2 !important;
-        grid-row: 30 / span 1 !important;
+        grid-row: 33 / span 1 !important;
     }
     .series-txt-02 {
         grid-column: 3 / span 2 !important;
-        grid-row: 30 / span 1 !important;
+        grid-row: 33 / span 1 !important;
     }
     .series-img-03 {
         grid-column: 1 / span 2 !important;
-        grid-row: 31 / span 4 !important;
+        grid-row: 34 / span 4 !important;
     }
     .series-img-04 {
         grid-column: 3 / span 2 !important;
-        grid-row: 31 / span 4 !important;
+        grid-row: 34 / span 4 !important;
     }
     .series-txt-03 {
         grid-column: 1 / span 2 !important;
-        grid-row: 35 / span 1 !important;
+        grid-row: 38 / span 1 !important;
     }
     .series-txt-04 {
         grid-column: 3 / span 2 !important;
-        grid-row: 35 / span 1 !important;
+        grid-row: 38 / span 1 !important;
     }
     .search-panel {
         width: 100% !important;
