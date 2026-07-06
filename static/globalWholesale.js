@@ -52,28 +52,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const headerHTML = `
             <style id="globalWholesaleStyles">
-                /* 🏁 전역 헤더 & 햄버거 메뉴 필수 스타일 */
-                .main-header {
-                    position: fixed; top: 20px; left: 10%; width: 80%; height: 4vw;
-                    background: rgba(244, 243, 240, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-                    display: flex; justify-content: space-between; align-items: center;
-                    padding: 0 4rem; z-index: 10020 !important; border: 1px solid rgba(234, 234, 234, 0.5);
-                    border-radius: 24px;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-                    transition: all 0.4s ease;
-                }
-                .main-header.scrolled {
-                    position: fixed !important;
-                    top: 20px !important;
-                    left: 10% !important;
-                    width: 80% !important;
-                    height: 4vw !important;
-                    border-radius: 24px !important;
-                    background: rgba(244, 243, 240, 0.85) !important;
-                    border: 1px solid rgba(234, 234, 234, 0.6) !important;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
-                    padding: 0 4rem !important;
-                    z-index: 10020 !important;
+                /* 🏁 PC 환경 헤더 스타일 (1025px 이상) */
+                @media (min-width: 1025px) {
+                    .main-header {
+                        position: fixed; top: 20px; left: 10%; width: 80%; height: 4vw;
+                        background: rgba(244, 243, 240, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+                        display: flex; justify-content: space-between; align-items: center;
+                        padding: 0 4rem; z-index: 10020 !important; border: 1px solid rgba(234, 234, 234, 0.5);
+                        border-radius: 24px;
+                        box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+                        transition: all 0.4s ease;
+                    }
+                    .main-header.scrolled {
+                        position: fixed !important;
+                        top: 20px !important;
+                        left: 10% !important;
+                        width: 80% !important;
+                        height: 4vw !important;
+                        border-radius: 24px !important;
+                        background: rgba(244, 243, 240, 0.85) !important;
+                        border: 1px solid rgba(234, 234, 234, 0.6) !important;
+                        box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+                        padding: 0 4rem !important;
+                        z-index: 10020 !important;
+                    }
                 }
                 .logo-wrapper { flex: 0 0 auto; width: auto !important; height: 100% !important; display: flex !important; align-items: center !important; justify-content: flex-start; }
                 .logo { height: 60% !important; max-height: 60% !important; width: auto !important; object-fit: contain; display: block; }
