@@ -11,7 +11,7 @@
     
     <!-- 전역 메인 폰트 Pretendard 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <link rel="stylesheet" href="/static/style.css?v=52.0">
     <style>
         .bookings-wrapper {
             max-width: 900px;
@@ -20,7 +20,7 @@
             box-sizing: border-box;
         }
         .bookings-title {
-            font-size: 2.2rem;
+            font-size: var(--fs-t);
             font-weight: 800;
             color: #0e3a5b;
             margin-bottom: 12px;
@@ -28,7 +28,7 @@
             letter-spacing: -0.5px;
         }
         .bookings-subtitle {
-            font-size: 1rem;
+            font-size: var(--fs-m);
             color: #666;
             text-align: center;
             margin-bottom: 45px;
@@ -51,7 +51,7 @@
             margin-bottom: 20px;
         }
         .empty-text {
-            font-size: 1.1rem;
+            font-size: var(--fs-m);
             font-weight: 700;
             color: #555;
             margin-bottom: 25px;
@@ -62,7 +62,7 @@
             background: #0e3a5b;
             color: #fff;
             font-weight: 800;
-            font-size: 0.95rem;
+            font-size: var(--fs-m);
             border-radius: 12px;
             text-decoration: none;
             transition: all 0.25s ease;
@@ -121,13 +121,13 @@
             text-align: left;
         }
         .expander-store {
-            font-size: 1.25rem;
+            font-size: var(--fs-st);
             font-weight: 800;
             color: #0e3a5b;
             letter-spacing: -0.3px;
         }
         .expander-summary {
-            font-size: 0.95rem;
+            font-size: var(--fs-sm);
             font-weight: 700;
             color: #666;
         }
@@ -166,7 +166,7 @@
         }
 
         .section-sub {
-            font-size: 1rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             color: #0e3a5b;
             margin-bottom: 15px;
@@ -182,7 +182,7 @@
             border-radius: 12px;
             padding: 18px 20px;
             margin-bottom: 25px;
-            font-size: 0.95rem;
+            font-size: var(--fs-sm);
             color: #555;
             display: flex;
             justify-content: space-between;
@@ -196,7 +196,7 @@
             display: inline-block;
             padding: 5px 10px;
             border-radius: 6px;
-            font-size: 0.8rem;
+            font-size: var(--fs-s);
             font-weight: 800;
             background: #eef7fe;
             color: #0e3a5b;
@@ -264,12 +264,12 @@
             gap: 4px;
         }
         .goods-name {
-            font-size: 0.95rem;
+            font-size: var(--fs-sm);
             font-weight: 800;
             color: #333;
         }
         .goods-cat-tag {
-            font-size: 0.75rem;
+            font-size: var(--fs-s);
             font-weight: 700;
             color: #0e3a5b;
             background: #eef7fe;
@@ -354,27 +354,27 @@
                 margin: 95px auto 40px auto;
             }
             .bookings-title {
-                font-size: 1.7rem;
+                font-size: var(--fs-st) !important;
             }
             .bookings-subtitle {
-                font-size: 0.9rem;
+                font-size: var(--fs-sm) !important;
                 margin-bottom: 30px;
             }
             .expander-header {
                 padding: 18px 20px;
             }
             .expander-store {
-                font-size: 1.1rem;
+                font-size: var(--fs-m) !important;
             }
             .expander-summary {
-                font-size: 0.85rem;
+                font-size: var(--fs-sm) !important;
             }
             .expander-content-inner {
                 padding: 20px;
             }
             .info-panel {
                 padding: 14px 16px;
-                font-size: 0.85rem;
+                font-size: var(--fs-sm) !important;
             }
             .goods-row {
                 padding: 10px 12px;
@@ -385,7 +385,7 @@
                 height: 46px;
             }
             .goods-name {
-                font-size: 0.85rem;
+                font-size: var(--fs-s) !important;
             }
             .card-action-bar {
                 justify-content: stretch;
@@ -1086,6 +1086,6 @@
         </div>
     </div>
 
-    <script src="/static/globalWholesale.js?v=3.4"></script>
+    <script src="/static/globalWholesale.js?v=52.0"></script>
 </body>
 </html>

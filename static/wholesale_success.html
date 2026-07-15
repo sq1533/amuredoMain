@@ -6,7 +6,7 @@
     <title>주문 완료 - 아무래도 안경</title>
     <link rel="icon" href="/static/img/icon.webp" type="image/webp">
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <link rel="stylesheet" href="/static/style.css?v=52.0">
     <style>
         body {
             background: radial-gradient(circle at top, #162a45, #0a1424);
@@ -62,7 +62,7 @@
         }
 
         .success-title {
-            font-size: 1.8rem;
+            font-size: var(--fs-st);
             font-weight: 800;
             color: #f3f4f6;
             margin-bottom: 12px;
@@ -70,7 +70,7 @@
         }
 
         .success-desc {
-            font-size: 0.98rem;
+            font-size: var(--fs-m);
             color: #9ca3af;
             margin-bottom: 35px;
             line-height: 1.6;
@@ -92,7 +92,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding-bottom: 15px;
             margin-bottom: 20px;
-            font-size: 0.85rem;
+            font-size: var(--fs-sm);
             color: #9ca3af;
             display: flex;
             justify-content: space-between;
@@ -118,7 +118,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.92rem;
+            font-size: var(--fs-m);
         }
 
         .item-details {
@@ -133,7 +133,7 @@
         }
 
         .item-qty {
-            font-size: 0.78rem;
+            font-size: var(--fs-s);
             color: #6b7280;
         }
 
@@ -151,20 +151,20 @@
         }
 
         .summary-label {
-            font-size: 1rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             color: #f3f4f6;
         }
 
         .summary-value {
-            font-size: 1.5rem;
+            font-size: var(--fs-st);
             font-weight: 900;
             color: #3b82f6;
         }
 
         .receipt-footer-info {
             margin-top: 15px;
-            font-size: 0.8rem;
+            font-size: var(--fs-s);
             color: #6b7280;
             display: flex;
             flex-direction: column;
@@ -193,7 +193,7 @@
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 1.05rem;
+            font-size: var(--fs-m);
             font-weight: 700;
             cursor: pointer;
             text-decoration: none;
@@ -239,7 +239,7 @@
                 padding: 40px 20px !important;
             }
             .success-title {
-                font-size: 1.5rem;
+                font-size: var(--fs-st) !important;
             }
         }
     </style>
@@ -433,6 +433,6 @@
             }
         });
     </script>
-<script src="/static/globalWholesale.js?v=3.5"></script>
+<script src="/static/globalWholesale.js?v=52.0"></script>
 </body>
 </html>

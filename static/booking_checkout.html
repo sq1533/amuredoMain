@@ -10,7 +10,7 @@
     
     <!-- Pretendard 메인 폰트 & 전역 style 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=45.0">
+    <link rel="stylesheet" href="/static/style.css?v=52.0">
 
     <!-- 다날 결제 SDK -->
     <script src="https://static.danalpay.com/d1/sdk/index.js"></script>
@@ -322,6 +322,8 @@
             font-size: 1.15rem;
             font-weight: 800;
             color: #333;
+            text-align: center;
+            line-height: 1.25;
         }
         .pay-method-label input[type="radio"]:checked + .pay-method-card .pay-method-name {
             color: #1b64da;
@@ -426,7 +428,7 @@
                                 <path d="M12 14v3"></path>
                                 <path d="M16 14v3"></path>
                             </svg>
-                            <span class="pay-method-name">실시간 계좌이체</span>
+                            <span class="pay-method-name">실시간<br>계좌이체</span>
                         </div>
                     </label>
                     <label class="pay-method-label" for="method-kakaopay">
@@ -709,6 +711,6 @@
             });
         });
     </script>
-    <script src="/static/globalWholesale.js?v=3.5"></script>
+    <script src="/static/globalWholesale.js?v=52.0"></script>
 </body>
 </html>

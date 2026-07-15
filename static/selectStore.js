@@ -244,18 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let allPartners = []; // 전체 안경점 원본 데이터
 
-    // 1) 11자리 또는 10자리 번호 하이픈 자동 포맷터
-    const formatPhoneNumber = (phone) => {
-        if (!phone) return "";
-        const clean = phone.toString().replace(/[^0-9]/g, "");
-        if (clean.startsWith("02")) {
-            if (clean.length === 9) return clean.replace(/(\d{2})(\d{3})(\d{4})/, "$1-$2-$3");
-            if (clean.length === 10) return clean.replace(/(\d{2})(\d{4})(\d{4})/, "$1-$2-$3");
-        }
-        if (clean.length === 10) return clean.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
-        if (clean.length === 11) return clean.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
-        return phone;
-    };
+
 
     // 2) 파트너 안경점 카드 목록 렌더링
     const renderPartners = (partners) => {
@@ -271,7 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
         partnerGrid.style.display = "grid";
 
         partners.forEach((partner, index) => {
-            const formattedPhone = formatPhoneNumber(partner.called);
+            const formattedPhone = window.formatPhoneNumber(partner.called);
             const queryAddress = `${partner.city} ${partner.country} ${partner.details} ${partner.name}`;
             const encodedQuery = encodeURIComponent(queryAddress);
             

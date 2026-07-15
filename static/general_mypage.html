@@ -21,7 +21,7 @@
     
     <!-- 전역 메인 폰트 Pretendard 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <link rel="stylesheet" href="/static/style.css?v=52.0">
     <style>
         .mypage-wrapper {
             display: flex;
@@ -60,7 +60,7 @@
         }
         
         .user-greeting {
-            font-size: 1.6rem;
+            font-size: var(--fs-st);
             font-weight: 800;
             color: #0e3a5b;
             margin-bottom: 35px;
@@ -69,7 +69,7 @@
         .user-greeting span {
             color: #777;
             font-weight: 500;
-            font-size: 1.3rem;
+            font-size: var(--fs-m);
             margin-left: 2px;
         }
 
@@ -92,13 +92,13 @@
             box-sizing: border-box;
         }
         .info-label {
-            font-size: 0.85rem;
+            font-size: var(--fs-sm);
             font-weight: 800;
             color: #777;
             letter-spacing: -0.1px;
         }
         .info-value {
-            font-size: 1.05rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             color: #333;
             letter-spacing: -0.2px;
@@ -115,7 +115,7 @@
             width: 100%;
             padding: 16px 0;
             border-radius: 12px;
-            font-size: 0.95rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             cursor: pointer;
             transition: all 0.25s ease;
@@ -154,18 +154,18 @@
                 padding: 40px 20px;
             }
             .user-greeting {
-                font-size: 1.35rem;
+                font-size: var(--fs-st) !important;
                 margin-bottom: 25px;
             }
             .info-panel-row {
                 padding: 14px 18px;
             }
             .info-value {
-                font-size: 0.95rem;
+                font-size: var(--fs-m) !important;
             }
             .btn-mypage-action {
                 padding: 14px 0;
-                font-size: 0.9rem;
+                font-size: var(--fs-sm) !important;
             }
         }
     </style>
@@ -296,6 +296,6 @@
             });
         });
     </script>
-    <script src="/static/globalWholesale.js?v=3.4"></script>
+    <script src="/static/globalWholesale.js?v=52.0"></script>
 </body>
 </html>

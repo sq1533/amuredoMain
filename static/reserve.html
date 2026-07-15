@@ -11,7 +11,7 @@
     
     <!-- 전역 메인 폰트 Pretendard 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <link rel="stylesheet" href="/static/style.css?v=52.0">
     <!-- 🏁 에어비앤비 Lottie 애니메이션 웹 플레이어 라이브러리 추가 -->
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
@@ -47,7 +47,7 @@
             }
         }
         .reserve-title {
-            font-size: 2.2rem;
+            font-size: var(--fs-t);
             font-weight: 800;
             color: #0e3a5b;
             margin-bottom: 40px;
@@ -86,14 +86,14 @@
             display: block;
         }
         .card-keyword {
-            font-size: 1.15rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             color: #0e3a5b;
             margin-bottom: 10px;
             letter-spacing: -0.3px;
         }
         .card-desc {
-            font-size: 0.9rem;
+            font-size: var(--fs-sm);
             color: #666;
             line-height: 1.4;
             word-break: keep-all;
@@ -101,7 +101,7 @@
 
         /* 공통 서브헤더 */
         .section-subtitle {
-            font-size: 1.25rem;
+            font-size: var(--fs-st);
             font-weight: 800;
             color: #0e3a5b;
             margin-bottom: 15px;
@@ -122,7 +122,7 @@
             box-sizing: border-box;
         }
         .goods-text {
-            font-size: 1.1rem;
+            font-size: var(--fs-m);
             font-weight: 700;
             color: #333;
             letter-spacing: -0.3px;
@@ -150,7 +150,7 @@
             align-items: center;
         }
         .place-text {
-            font-size: 1.05rem;
+            font-size: var(--fs-m);
             font-weight: 700;
             color: #777; /* 미지정 시 장소를 선택해 주세요 안내 회색 */
             letter-spacing: -0.3px;
@@ -166,7 +166,7 @@
             color: #fff;
             border: 1px solid #0e3a5b;
             border-radius: 12px;
-            font-size: 1rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             cursor: pointer;
             transition: all 0.25s ease;
@@ -191,7 +191,7 @@
             color: #fff;
             border: none;
             border-radius: 12px;
-            font-size: 1.2rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -221,7 +221,7 @@
             margin-right: auto; /* 버튼 영역과의 시각적 밸런스를 위한 가운데 중심 좌측정렬 */
         }
         .policy-notice-text {
-            font-size: 0.85rem; /* 0.7rem에서 0.85rem으로 상향하여 가독성 개선 */
+            font-size: var(--fs-sm); /* 0.7rem에서 0.85rem으로 상향하여 가독성 개선 */
             color: #888;
             margin: 4px 0;
             letter-spacing: -0.2px;
@@ -306,7 +306,7 @@
                 border-radius: 12px;
             }
             .reserve-title {
-                font-size: 1.7rem;
+                font-size: var(--fs-st) !important;
                 margin-bottom: 30px;
             }
             
@@ -325,10 +325,10 @@
                 margin: 0 0 10px 0; /* 마진 정리 */
             }
             .card-keyword {
-                font-size: 1.05rem;
+                font-size: var(--fs-m) !important;
             }
             .card-desc {
-                font-size: 0.85rem;
+                font-size: var(--fs-sm) !important;
             }
 
             /* 예약 장소 선정하기 수직 2열 분할 */
@@ -351,7 +351,7 @@
             .reserve-submit-btn {
                 width: 100%; /* 모바일에서는 400px 대신 100% 가로 폭으로 편안하게 확장 */
                 max-width: 400px;
-                font-size: 1.1rem;
+                font-size: var(--fs-m) !important;
                 padding: 16px 0;
             }
         }
@@ -641,6 +641,6 @@
             });
         });
     </script>
-    <script src="/static/globalWholesale.js?v=3.4"></script>
+    <script src="/static/globalWholesale.js?v=52.0"></script>
 </body>
 </html>

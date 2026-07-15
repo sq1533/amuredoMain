@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>주문 현황 - 아무래도 안경</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <link rel="stylesheet" href="/static/style.css?v=52.0">
     <style>
         .orders-container {
             max-width: 1000px;
@@ -16,7 +16,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
         .page-title {
-            font-size: 1.8rem;
+            font-size: var(--fs-st);
             font-weight: 800;
             color: #0e3a5b;
             margin-bottom: 30px;
@@ -47,19 +47,19 @@
             align-items: center;
         }
         .order-date {
-            font-size: 0.9rem;
+            font-size: var(--fs-sm);
             color: #666;
             font-weight: 600;
         }
         .order-name {
-            font-size: 1.1rem;
+            font-size: var(--fs-m);
             font-weight: 700;
             color: #333;
         }
         .order-status {
             padding: 6px 12px;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: var(--fs-s);
             font-weight: 700;
         }
         .status-pending { background: #fff3cd; color: #856404; } /* 결제대기 */
@@ -87,7 +87,7 @@
             margin-bottom: 25px;
         }
         .detail-title {
-            font-size: 1rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             color: #0e3a5b;
             margin-bottom: 12px;
@@ -98,7 +98,7 @@
         .detail-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9rem;
+            font-size: var(--fs-sm);
         }
         .detail-table th, .detail-table td {
             padding: 12px;
@@ -114,7 +114,7 @@
             display: grid;
             grid-template-columns: 100px 1fr;
             gap: 10px;
-            font-size: 0.95rem;
+            font-size: var(--fs-sm);
             line-height: 1.6;
         }
         .shipping-label { color: #888; font-weight: 600; }
@@ -131,7 +131,7 @@
             margin-top: 40px;
             color: #666;
             text-decoration: none;
-            font-size: 0.95rem;
+            font-size: var(--fs-sm);
         }
         .home-link:hover { text-decoration: underline; }
         .arrow-icon {
@@ -158,12 +158,12 @@
                 width: 100%;
             }
             .order-date {
-                font-size: 0.85rem;
+                font-size: var(--fs-s) !important;
                 margin-bottom: 4px;
                 display: block;
             }
             .order-name {
-                font-size: 1.05rem;
+                font-size: var(--fs-m) !important;
                 margin-bottom: 8px;
                 display: block;
                 width: 100%;
@@ -414,6 +414,6 @@
             }
         }
     </script>
-<script src="/static/globalWholesale.js?v=3.4"></script>
+<script src="/static/globalWholesale.js?v=52.0"></script>
 </body>
 </html>

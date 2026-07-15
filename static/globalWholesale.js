@@ -4,6 +4,19 @@ window.formatWon = function(num) {
     return "₩ " + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
+// 🏁 전역 유틸리티 함수: 전화번호 하이픈 포맷팅
+window.formatPhoneNumber = function(phone) {
+    if (!phone) return "";
+    const clean = phone.toString().replace(/[^0-9]/g, "");
+    if (clean.startsWith("02")) {
+        if (clean.length === 9) return clean.replace(/(\d{2})(\d{3})(\d{4})/, "$1-$2-$3");
+        if (clean.length === 10) return clean.replace(/(\d{2})(\d{4})(\d{4})/, "$1-$2-$3");
+    }
+    if (clean.length === 10) return clean.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+    if (clean.length === 11) return clean.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+    return phone;
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     // 🏁 전역 공통 역할 획득 유틸리티
     const getRoleFromCookie = () => {
@@ -53,151 +66,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const headerHTML = `
-            <style id="globalWholesaleStyles">
-                /* 🏁 PC 환경 헤더 스타일 (1025px 이상) */
-                @media (min-width: 1025px) {
-                    .main-header {
-                        position: fixed; top: 20px; left: 10%; width: 80%; height: 4vw;
-                        background: rgba(244, 243, 240, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-                        display: flex; justify-content: space-between; align-items: center;
-                        padding: 0 4rem; z-index: 10020 !important; border: 1px solid rgba(234, 234, 234, 0.5);
-                        border-radius: 24px;
-                        box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-                        transition: all 0.4s ease;
-                    }
-                    .main-header.scrolled {
-                        position: fixed !important;
-                        top: 20px !important;
-                        left: 10% !important;
-                        width: 80% !important;
-                        height: 4vw !important;
-                        border-radius: 24px !important;
-                        background: rgba(244, 243, 240, 0.85) !important;
-                        border: 1px solid rgba(234, 234, 234, 0.6) !important;
-                        box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
-                        padding: 0 4rem !important;
-                        z-index: 10020 !important;
-                    }
-                }
-                .logo-wrapper { flex: 0 0 auto; width: auto !important; height: 100% !important; display: flex !important; align-items: center !important; justify-content: flex-start; }
-                .logo { height: 60% !important; max-height: 60% !important; width: auto !important; object-fit: contain; display: block; }
-                
-                /* PC 네비게이션 */
-                .pc-nav-center { display: flex; gap: 2.5rem; align-items: center; justify-content: center; flex: 1; height: 100% !important; pointer-events: auto !important; }
-                .pc-nav-right { display: flex; gap: 2.5rem; align-items: center; justify-content: flex-end; flex: 0 0 auto; height: 100% !important; }
-                .nav-switch-btn { 
-                    background: transparent; border: none; font-size: 1.1rem; font-weight: 600; 
-                    color: #222; cursor: pointer; letter-spacing: 1px; transition: color 0.2s ease;
-                    text-transform: none !important;
-                }
-                .nav-switch-btn:hover { color: #4a90e2; }
-                .antioch-nav-btn {
-                    font-family: 'Nanum Myeongjo', serif !important;
-                    font-weight: 800 !important;
-                    text-transform: uppercase !important;
-                }
-
-                /* 햄버거 버튼 (B2B/B2C 통합 1024px 이하 노출) */
-                .menu-toggle-btn {
-                    display: none; align-items: center; justify-content: center;
-                    width: var(--hamburger-btn-size); height: var(--hamburger-btn-size); background-color: #0e3b5d; border: none;
-                    border-radius: 4px; cursor: pointer; z-index: 10050 !important;
-                }
-                .hamburger-box {
-                    display: block; width: var(--hamburger-bar-width); height: 2px; background: #FFFFFF;
-                    position: relative; transition: background 0.3s;
-                }
-                .hamburger-box::before, .hamburger-box::after {
-                    content: ""; position: absolute; width: 100%; height: 2px; background: #FFFFFF;
-                    left: 0; transition: all 0.3s;
-                }
-                .hamburger-box::before { top: var(--hamburger-bar-spacing); }
-                .hamburger-box::after { bottom: var(--hamburger-bar-spacing); }
-
-                /* 모바일 메뉴바 */
-                .page-nav {
-                    position: fixed; top: 0; right: -40vw; width: 40vw; height: 100vh !important;
-                    background: #F4F3F0 !important; z-index: 10065 !important; 
-                    transition: right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-                    padding: 80px 0 40px 0;
-                    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.08);
-                    display: none !important; flex-direction: column; justify-content: flex-start;
-                }
-                .page-nav.open { right: 0; }
-                .close-menu-btn {
-                    display: block !important;
-                    position: absolute; top: 20px; right: 20px;
-                    background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: #222;
-                }
-                .nav-overlay {
-                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                    background: transparent;
-                    z-index: 10060 !important; display: none; opacity: 0; transition: opacity 0.3s;
-                }
-                .nav-overlay.active { display: block; opacity: 1; }
-                
-                .nav-links { list-style: none; padding: 0 2rem; margin: 0; }
-                .nav-links li { margin-bottom: 20px; }
-                .nav-links li .nav-switch-btn {
-                    width: 100%; text-align: left; padding: 10px 0; 
-                    font-size: 1.2rem; border: none; display: block;
-                }
-
-                /* 📱 모바일 반응형 처리 */
-                @media (max-width: 1024px) {
-                    :root {
-                        --hamburger-btn-size: 6vw !important;
-                        --hamburger-bar-width: 3vw !important;
-                        --hamburger-bar-spacing: -0.9vw !important;
-                    }
-                    body {
-                        padding-top: 0 !important;
-                    }
-                    .main-header {
-                        position: fixed !important;
-                        top: 0 !important;
-                        left: 0 !important;
-                        width: 100% !important;
-                        height: 10vw !important;
-                        border-radius: 0 !important;
-                        border: none !important;
-                        border-bottom: 1px solid #eaeaea !important;
-                        background: rgba(244, 243, 240, 0.95) !important;
-                        padding: 1rem 1.5rem !important;
-                        box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
-                        justify-content: center !important;
-                        z-index: 10020 !important;
-                    }
-                    /* 모바일 스크롤 발생 시 PC 규격(top:20px, width:80%)으로 쪼그라드는 현상 방지 오버라이드 */
-                    .main-header.scrolled {
-                        position: fixed !important;
-                        top: 0 !important;
-                        left: 0 !important;
-                        width: 100% !important;
-                        height: 10vw !important;
-                        border-radius: 0 !important;
-                        border: none !important;
-                        border-bottom: 1px solid #eaeaea !important;
-                        background: rgba(244, 243, 240, 0.95) !important;
-                        padding: 1rem 1.5rem !important;
-                        box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important;
-                        z-index: 10020 !important;
-                    }
-                    .pc-nav-center, .pc-nav-right { display: none !important; }
-                    .menu-toggle-btn { display: flex !important; position: absolute; right: 1.5rem !important; left: auto !important; top: 50% !important; transform: translateY(-50%) !important; }
-                    .logo-wrapper { width: auto !important; position: absolute; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; }
-                    
-                    /* 모바일 메뉴 사이드바 고정 크기 및 위치 세팅 */
-                    .page-nav { 
-                        display: flex !important; 
-                        width: 300px !important; 
-                        right: -300px !important; 
-                    }
-                    .page-nav.open { 
-                        right: 0 !important; 
-                    }
-                }
-            </style>
             <header class="main-header">
                 <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
                     <span class="hamburger-box"></span>

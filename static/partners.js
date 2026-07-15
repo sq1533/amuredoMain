@@ -14,31 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-    // 🏁 11자리 또는 10자리 번호 하이픈 자동 포맷터
-    const formatPhoneNumber = (phone) => {
-        if (!phone) return "";
-        // 숫자만 추출
-        const clean = phone.toString().replace(/[^0-9]/g, "");
 
-        // 서울(02) 국번 처리
-        if (clean.startsWith("02")) {
-            if (clean.length === 9) {
-                return clean.replace(/(\d{2})(\d{3})(\d{4})/, "$1-$2-$3");
-            } else if (clean.length === 10) {
-                return clean.replace(/(\d{2})(\d{4})(\d{4})/, "$1-$2-$3");
-            }
-        }
-
-        // 일반 3자리 번호 (010, 031, 051 등)
-        if (clean.length === 10) {
-            return clean.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
-        } else if (clean.length === 11) {
-            return clean.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
-        }
-
-        // 포맷팅 대상이 아니면 원본 그대로 반환
-        return phone;
-    };
 
     // 🏁 파트너 카드 목록 렌더링 함수
     const renderPartners = (partners) => {
@@ -55,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
         partnerGrid.style.display = "grid";
 
         partners.forEach((partner, index) => {
-            const formattedPhone = formatPhoneNumber(partner.called);
+            const formattedPhone = window.formatPhoneNumber(partner.called);
             
             // 🏁 주소 및 매장명을 결합한 네이버 지도 위치(상세보기) 연동 HTML 구성
             // 만약 DB에 등록된 공식 단축/전용 map_url이 존재하면 이를 우선 노출하고, 없으면 주소+상호명 결합 검색 URL을 폴백(Fallback)으로 연동

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>도매 파트너 장바구니 - 아무래도 안경</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <link rel="stylesheet" href="/static/style.css?v=52.0">
     <style>
         .cart-container {
             width: 100% !important;
@@ -38,7 +38,7 @@
             }
         }
         .cart-title {
-            font-size: 2.2rem;
+            font-size: var(--fs-t);
             font-weight: 800;
             color: #0e3a5b;
             margin-bottom: 30px;
@@ -67,13 +67,13 @@
             flex: 1;
         }
         .item-name {
-            font-size: 1.2rem;
+            font-size: var(--fs-m);
             font-weight: 700;
             color: #333;
             margin-bottom: 8px;
         }
         .item-price {
-            font-size: 0.95rem;
+            font-size: var(--fs-sm);
             color: #666;
         }
         .item-controls {
@@ -95,7 +95,7 @@
             border: none;
             background: #f8f9fa;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: var(--fs-m);
             color: #333;
             transition: background 0.2s;
         }
@@ -107,7 +107,7 @@
             border: none;
             border-left: 1px solid #ccc;
             border-right: 1px solid #ccc;
-            font-size: 1.05rem;
+            font-size: var(--fs-m);
             font-weight: bold;
             outline: none;
             -moz-appearance: textfield;
@@ -118,7 +118,7 @@
             margin: 0; 
         }
         .item-total {
-            font-size: 1.2rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             color: #0e3a5b;
             min-width: 120px;
@@ -128,7 +128,7 @@
             background: none;
             border: none;
             color: #dc3545;
-            font-size: 1.5rem;
+            font-size: var(--fs-st);
             font-weight: bold;
             cursor: pointer;
             padding: 5px;
@@ -142,7 +142,7 @@
             text-align: center;
             padding: 50px 0;
             color: #888;
-            font-size: 1.1rem;
+            font-size: var(--fs-m);
         }
         .summary-section {
             border-top: 2px solid #0e3a5b;
@@ -150,14 +150,14 @@
             text-align: right;
         }
         .summary-total {
-            font-size: 1.8rem;
+            font-size: var(--fs-st);
             font-weight: 800;
             color: #d32f2f;
             margin-bottom: 20px;
         }
         .summary-total span {
             color: #333;
-            font-size: 1.2rem;
+            font-size: var(--fs-m);
             margin-right: 15px;
         }
         .order-btn {
@@ -167,7 +167,7 @@
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1.3rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             cursor: pointer;
             transition: background 0.3s;
@@ -190,7 +190,7 @@
                 padding: 20px;
                 border-radius: 0;
             }
-            .cart-title { font-size: 1.8rem; margin-bottom: 20px; }
+            .cart-title { font-size: var(--fs-st) !important; margin-bottom: 20px; }
             
             .cart-item {
                 display: grid;
@@ -203,6 +203,7 @@
                 position: relative; /* 삭제 버튼 절대 위치 기준 */
             }
             .item-info { grid-area: info; }
+            .item-info .item-name { font-size: var(--fs-m) !important; }
             .item-controls { 
                 display: contents; 
             }
@@ -214,7 +215,7 @@
                 grid-area: total; 
                 text-align: right !important; /* 모바일에서도 가격은 우측 정렬 */
                 min-width: auto !important;
-                font-size: 1.3rem;
+                font-size: var(--fs-st) !important;
                 padding-top: 10px;
                 border-top: 1px dashed #eee; /* 구분선 추가 */
             }
@@ -484,6 +485,6 @@
             });
         });
     </script>
-<script src="/static/globalWholesale.js?v=3.4"></script>
+<script src="/static/globalWholesale.js?v=52.0"></script>
 </body>
 </html>

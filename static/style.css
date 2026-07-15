@@ -293,6 +293,12 @@ body {
     color: #4a90e2; 
 }
 
+.antioch-nav-btn {
+    font-family: var(--font-serif) !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+}
+
 /* ========= 2.5 서브 페이지 공통 레이아웃 (여백 처리) ========= */
 /* 메인 페이지를 제외한 모든 서브 페이지의 본문 상단 여백 설정 (헤더 오버레이 대응) */
 .sub-page-main {
@@ -3296,6 +3302,200 @@ body.main-body {
     }
 }
 
+/* 🏁 전역 반응형 그리드 시스템 정의 */
+
+/* 📱 1024px 이하 모바일/태블릿 헤더 및 드로어 반응형 오버라이드 (가변 햄버거/로고 복구) */
+@media (max-width: 1024px) {
+    body {
+        padding-top: 0 !important;
+    }
+    .main-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 10vw !important;
+        border-radius: 0 !important;
+        border: none !important;
+        border-bottom: 1px solid #eaeaea !important;
+        background: rgba(244, 243, 240, 0.95) !important;
+        padding: 1rem 1.5rem !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
+        justify-content: center !important;
+        z-index: 10020 !important;
+        pointer-events: none;
+    }
+    .main-header.scrolled {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 10vw !important;
+        border-radius: 0 !important;
+        border: none !important;
+        border-bottom: 1px solid #eaeaea !important;
+        background: rgba(244, 243, 240, 0.95) !important;
+        padding: 1rem 1.5rem !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important;
+        z-index: 10020 !important;
+    }
+    .pc-nav-center, .pc-nav-right { display: none !important; }
+    
+    .menu-toggle-btn { 
+        display: flex !important; 
+        align-items: center !important;
+        justify-content: center !important;
+        width: 6vw !important;
+        height: 6vw !important;
+        background-color: #0e3b5d !important;
+        border: none !important;
+        border-radius: 4px !important;
+        cursor: pointer !important;
+        position: absolute !important;
+        right: 1.5rem !important;
+        left: auto !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        pointer-events: auto;
+    }
+    .hamburger-box {
+        display: block !important;
+        width: 3vw !important;
+        height: 2px !important;
+        background-color: #FFFFFF !important;
+        position: relative !important;
+    }
+    .hamburger-box::before, .hamburger-box::after {
+        content: "" !important;
+        position: absolute !important;
+        width: 100% !important;
+        height: 2px !important;
+        background-color: #FFFFFF !important;
+        left: 0 !important;
+    }
+    .hamburger-box::before { top: -0.9vw !important; }
+    .hamburger-box::after { bottom: -0.9vw !important; }
+
+    .logo-wrapper { 
+        width: auto !important; 
+        height: 100% !important;
+        position: absolute !important; 
+        left: 50% !important; 
+        top: 50% !important; 
+        transform: translate(-50%, -50%) !important; 
+        pointer-events: auto; 
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .logo {
+        height: 60% !important;
+        max-height: 60% !important;
+        width: auto !important;
+        object-fit: contain !important;
+        display: block !important;
+    }
+    
+    .page-nav { 
+        display: flex !important; 
+        position: fixed !important;
+        top: 0 !important;
+        width: 300px !important; 
+        right: -300px !important; 
+        height: 100vh !important;
+        background: #F4F3F0 !important;
+        z-index: 10065 !important;
+        transition: right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+        padding: 80px 0 40px 0 !important;
+        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.08) !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        pointer-events: auto;
+    }
+    .page-nav.open { 
+        right: 0 !important; 
+    }
+    .close-menu-btn {
+        display: block !important;
+        position: absolute !important;
+        top: 20px !important;
+        right: 20px !important;
+        background: transparent !important;
+        border: none !important;
+        font-size: 1.5rem !important;
+        cursor: pointer !important;
+        color: #222 !important;
+    }
+    .nav-overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: transparent !important;
+        z-index: 10060 !important;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s !important;
+    }
+    .nav-overlay.active {
+        display: block !important;
+        opacity: 1 !important;
+    }
+    .nav-links {
+        list-style: none !important;
+        padding: 0 2rem !important;
+        margin: 0 !important;
+    }
+    .nav-links li {
+        margin-bottom: 20px !important;
+    }
+    .nav-links li .nav-switch-btn {
+        width: 100% !important;
+        text-align: left !important;
+        padding: 10px 0 !important;
+        font-size: 1.2rem !important;
+        border: none !important;
+        display: block !important;
+    }
+}
+
+/* 💻 PC 환경 헤더 스타일 - 알약 플로팅 형태 복구 (1025px 이상) */
+@media (min-width: 1025px) {
+    .main-header {
+        position: fixed !important;
+        top: 20px !important;
+        left: 10% !important;
+        width: 80% !important;
+        height: 4vw !important;
+        background: rgba(244, 243, 240, 0.75) !important;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 0 4rem !important;
+        z-index: 10020 !important;
+        border: 1px solid rgba(234, 234, 234, 0.5) !important;
+        border-radius: 24px !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.06) !important;
+        transition: all 0.4s ease;
+    }
+    .main-header.scrolled {
+        position: fixed !important;
+        top: 20px !important;
+        left: 10% !important;
+        width: 80% !important;
+        height: 4vw !important;
+        border-radius: 24px !important;
+        background: rgba(244, 243, 240, 0.85) !important;
+        border: 1px solid rgba(234, 234, 234, 0.6) !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        padding: 0 4rem !important;
+        z-index: 10020 !important;
+    }
+}
+
 /* 모바일 환경 (4그리드) */
 @media screen and (max-width: 640px) {
     .banner-cell {
@@ -3573,6 +3773,110 @@ body.main-body {
 
 /* 🏁 전역 반응형 그리드 시스템 정의 */
 
-
-
-
+/* 📱 1024px 이하 모바일 헤더/드로어 반응형 오버라이드 */
+@media (max-width: 1024px) {
+    :root {
+        --hamburger-btn-size: 6vw !important;
+        --hamburger-bar-width: 3vw !important;
+        --hamburger-bar-spacing: -0.9vw !important;
+    }
+    body {
+        padding-top: 0 !important;
+    }
+    .main-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 10vw !important;
+        border-radius: 0 !important;
+        border: none !important;
+        border-bottom: 1px solid #eaeaea !important;
+        background: rgba(244, 243, 240, 0.95) !important;
+        padding: 1rem 1.5rem !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
+        justify-content: center !important;
+        z-index: 10020 !important;
+        pointer-events: none;
+    }
+    .main-header.scrolled {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 10vw !important;
+        border-radius: 0 !important;
+        border: none !important;
+        border-bottom: 1px solid #eaeaea !important;
+        background: rgba(244, 243, 240, 0.95) !important;
+        padding: 1rem 1.5rem !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important;
+        z-index: 10020 !important;
+    }
+    .pc-nav-center, .pc-nav-right { display: none !important; }
+    .menu-toggle-btn { display: flex !important; position: absolute; right: 1.5rem !important; left: auto !important; top: 50% !important; transform: translateY(-50%) !important; pointer-events: auto; }
+    .logo-wrapper { width: auto !important; position: absolute; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; pointer-events: auto; }
+    
+    .page-nav { 
+        display: flex !important; 
+        position: fixed !important;
+        top: 0 !important;
+        width: 300px !important; 
+        right: -300px !important; 
+        height: 100vh !important;
+        background: #F4F3F0 !important;
+        z-index: 10065 !important;
+        transition: right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+        padding: 80px 0 40px 0 !important;
+        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.08) !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        pointer-events: auto;
+    }
+    .page-nav.open { 
+        right: 0 !important; 
+    }
+    .close-menu-btn {
+        display: block !important;
+        position: absolute !important;
+        top: 20px !important;
+        right: 20px !important;
+        background: transparent !important;
+        border: none !important;
+        font-size: 1.5rem !important;
+        cursor: pointer !important;
+        color: #222 !important;
+    }
+    .nav-overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: transparent !important;
+        z-index: 10060 !important;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s !important;
+    }
+    .nav-overlay.active {
+        display: block !important;
+        opacity: 1 !important;
+    }
+    .nav-links {
+        list-style: none !important;
+        padding: 0 2rem !important;
+        margin: 0 !important;
+    }
+    .nav-links li {
+        margin-bottom: 20px !important;
+    }
+    .nav-links li .nav-switch-btn {
+        width: 100% !important;
+        text-align: left !important;
+        padding: 10px 0 !important;
+        font-size: 1.2rem !important;
+        border: none !important;
+        display: block !important;
+    }
+}

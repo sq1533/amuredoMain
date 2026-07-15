@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>도매 결제 - 아무래도 안경</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <link rel="stylesheet" href="/static/style.css?v=52.0">
     <!-- 다날 결제 SDK -->
     <script src="https://static.danalpay.com/d1/sdk/index.js"></script>
     <!-- 카카오(다음) 우편번호 서비스 API -->
@@ -56,7 +56,7 @@
             color: #666;
             text-decoration: none;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: var(--fs-sm);
             padding: 8px 12px;
             background: #f8f9fa;
             border-radius: 6px;
@@ -65,7 +65,7 @@
         .back-link:hover { color: #0e3a5b; background: #e2e6ea; }
         
         .order-title {
-            font-size: 1.8rem;
+            font-size: var(--fs-st);
             font-weight: 800;
             color: #0e3a5b;
             margin-bottom: 30px;
@@ -79,10 +79,10 @@
             background: #f8f9fa;
         }
         .summary-block { text-align: center; flex: 1; }
-        .summary-label { font-size: 0.9rem; color: #666; margin-bottom: 10px; font-weight: 600; }
-        .summary-value { font-size: 1.5rem; font-weight: 800; color: #333; }
-        .summary-operator { font-size: 1.5rem; color: #ccc; font-weight: 300; }
-        .final-value { color: #d32f2f; font-size: 1.8rem; }
+        .summary-label { font-size: var(--fs-sm); color: #666; margin-bottom: 10px; font-weight: 600; }
+        .summary-value { font-size: var(--fs-st); font-weight: 800; color: #333; }
+        .summary-operator { font-size: var(--fs-st); color: #ccc; font-weight: 300; }
+        .final-value { color: #d32f2f; font-size: var(--fs-st); }
         
         /* 결제 버튼 */
         .payment-btn {
@@ -92,7 +92,7 @@
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1.25rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             cursor: pointer;
             margin-top: 20px;
@@ -102,7 +102,7 @@
         .payment-btn:hover { background-color: #1b64da; }
         
         .section-title {
-            font-size: 1.3rem;
+            font-size: var(--fs-st);
             font-weight: 700;
             color: #333;
             margin-bottom: 25px;
@@ -127,7 +127,7 @@
             margin-bottom: 15px;
         }
         .form-label {
-            font-size: 0.9rem;
+            font-size: var(--fs-sm);
             font-weight: 700;
             color: #666;
         }
@@ -136,7 +136,7 @@
             padding: 12px 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: var(--fs-m);
             outline: none;
             transition: border-color 0.2s;
         }
@@ -150,7 +150,7 @@
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: var(--fs-m);
             font-weight: 600;
             cursor: pointer;
             margin: 5px 0 15px 0;
@@ -177,7 +177,7 @@
         }
 
         @media (max-width: 768px) {
-            .order-title { font-size: 1.5rem; margin-bottom: 20px; }
+            .order-title { font-size: var(--fs-st) !important; margin-bottom: 20px; }
             .form-row { grid-template-columns: 1fr; gap: 0; }
             .summary-dashboard { flex-direction: column; gap: 10px; padding: 15px 20px; align-items: stretch; }
             .summary-operator { display: none; }
@@ -191,12 +191,12 @@
             .summary-block:last-child { border-bottom: none; padding-top: 15px; border-top: 1px solid #eee; }
             
             /* 텍스트 크기 축소 (줄바꿈 방지) */
-            .summary-label { font-size: 0.85rem; margin-bottom: 0; }
-            .summary-value { font-size: 1.1rem; }
-            .final-value { font-size: 1.3rem; }
+            .summary-label { font-size: var(--fs-sm) !important; margin-bottom: 0; }
+            .summary-value { font-size: var(--fs-m) !important; }
+            .final-value { font-size: var(--fs-st) !important; }
             
             .ws-card { padding: 20px; }
-            .section-title { font-size: 1.1rem; margin-bottom: 20px; }
+            .section-title { font-size: var(--fs-m) !important; margin-bottom: 20px; }
         }
 
         /* 🏁 다날 결제수단 그리드 UI 스타일 */
@@ -235,6 +235,8 @@
             font-size: 1.15rem;
             font-weight: 800;
             color: #333;
+            text-align: center;
+            line-height: 1.25;
         }
         .pay-method-label input[type="radio"]:checked + .pay-method-card .pay-method-name {
             color: #1b64da;
@@ -349,7 +351,7 @@
                                 <path d="M12 14v3"></path>
                                 <path d="M16 14v3"></path>
                             </svg>
-                            <span class="pay-method-name">실시간 계좌이체</span>
+                            <span class="pay-method-name">실시간<br>계좌이체</span>
                         </div>
                     </label>
                     <label class="pay-method-label" for="method-kakaopay">
@@ -582,6 +584,6 @@
             if (urlParams.get('status') === 'fail') showCancelModal(urlParams.get('message') || "결제에 실패했습니다.");
         });
     </script>
-<script src="/static/globalWholesale.js?v=3.4"></script>
+<script src="/static/globalWholesale.js?v=52.0"></script>
 </body>
 </html>
