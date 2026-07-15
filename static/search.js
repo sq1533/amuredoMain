@@ -52,42 +52,12 @@ document.addEventListener("DOMContentLoaded", () => {
         resultCountBar.textContent = `"${query}" 검색 결과 (${items.length}개)`;
 
         items.forEach(item => {
-            // 카테고리 전용 아이템 카드(사진+하단텍스트) 컨테이너 생성
-            const card = document.createElement("article");
-            card.className = "category-item-card";
+            // 모바일 화면(640px 이하)일 경우 무조건 버전 2로 오버라이드하여 렌더링
+            const isMobile = window.matchMedia("(max-width: 640px)").matches;
+            const activeVersion = isMobile ? 2 : 1; // 1: 기본 UI, 2: 가로 1:1 대칭형
 
-            // 이미지 래퍼 (정사각형 1:1 비율 세팅 구역)
-            const imgWrapper = document.createElement("div");
-            imgWrapper.className = "category-image-wrapper";
-            imgWrapper.addEventListener("click", () => {
-                location.href = `/item/${item.id}`;
-            });
-
-            // 썸네일 이미지 태그
-            const img = document.createElement("img");
-            img.src = item.image_url || "/static/img/ready.webp";
-            img.className = "category-image";
-            img.loading = "lazy";
-            imgWrapper.appendChild(img);
-
-            // 미니멀 하단 정보 래퍼
-            const infoWrapper = document.createElement("div");
-            infoWrapper.className = "category-info-wrapper";
-
-            // 상품명 DOM
-            const itemName = document.createElement("h3");
-            itemName.className = "category-item-name";
-            itemName.textContent = item.name;
-
-            // 가격 DOM
-            const itemPrice = document.createElement("p");
-            itemPrice.className = "category-item-price";
-            itemPrice.textContent = `₩ ${item.price}`;
-
-            infoWrapper.appendChild(itemName);
-            infoWrapper.appendChild(itemPrice);
-            card.appendChild(imgWrapper);
-            card.appendChild(infoWrapper);
+            // 글로벌 공통 컴포넌트 함수를 호출하여 상품 카드 DOM 생성
+            const card = createProductCard(item, activeVersion);
             searchResultGrid.appendChild(card);
         });
     }

@@ -1,3 +1,6 @@
+// 상품 카드 디자인 버전 제어 스위치 (1: 기본 수직 구조, 2: 가로 1:1 대칭 무배경 구조)
+const CARD_VERSION = 1;
+
 document.addEventListener("DOMContentLoaded", () => {
     const categoryGrid = document.getElementById("categoryGrid");
     const categoryTitle = document.getElementById("categoryTitle");
@@ -124,49 +127,17 @@ document.addEventListener("DOMContentLoaded", () => {
             categoryGrid.innerHTML = '<p style="text-align:center; grid-column: 1 / -1; padding: 2rem;">데이터를 불러오는 데 실패했습니다.</p>';
         });
 
-    // 화면 그리기 함수 (가격/이름 제거 버전. 오로지 1:1 비율 사진만 사용)
+    // 화면 그리기 함수 (글로벌 공통 카드 컴포넌트 호출)
     function renderCategoryItems(items) {
         categoryGrid.innerHTML = ''; // 기본 요소 청소
 
         items.forEach(item => {
-            // 카테고리 전용 아이템 카드(사진+하단텍스트) 컨테이너 생성
-            const card = document.createElement('article');
-            card.className = 'category-item-card';
+            // 모바일 화면(640px 이하)일 경우 무조건 버전 2로 오버라이드하여 렌더링
+            const isMobile = window.matchMedia("(max-width: 640px)").matches;
+            const activeVersion = isMobile ? 2 : CARD_VERSION;
 
-            // 이미지 래퍼 (정사각형 1:1 비율 세팅 구역)
-            const imgWrapper = document.createElement('div');
-            imgWrapper.className = 'category-image-wrapper';
-            // 사진 클릭 시 상세페이지 스위치 이동 로직 바인딩 (백엔드 대칭 리다이렉트 필터가 있으므로 일괄 /item으로 이동)
-            imgWrapper.addEventListener('click', () => {
-                location.href = `/item/${item.id}`;
-            });
-
-            // 썸네일 이미지 태그 생성 및 부착
-            const img = document.createElement('img');
-            img.src = item.image_url || "/static/img/ready.webp"; 
-            img.className = 'category-image';
-            img.loading = 'lazy'; // 🏁 UX/성능 최적화를 위해 lazy loading 속성 부여
-            imgWrapper.appendChild(img);
-
-            // 미니멀 하단 텍스트(Minimal Bottom) 정보 래퍼 생성
-            const infoWrapper = document.createElement('div');
-            infoWrapper.className = 'category-info-wrapper';
-            
-            // 상품명 DOM (매우 모던하고 얇게)
-            const itemName = document.createElement('h3');
-            itemName.className = 'category-item-name';
-            itemName.textContent = item.name;
-
-            // 가격 DOM (백엔드 쉼표 포맷팅 + 프리미엄 원화 ₩ 감성 부착)
-            const itemPrice = document.createElement('p');
-            itemPrice.className = 'category-item-price';
-            itemPrice.textContent = `₩ ${item.price}`; 
-
-            // 조립: 카드 안에 사진과 하단 정보를 순서대로 밀어넣기
-            infoWrapper.appendChild(itemName);
-            infoWrapper.appendChild(itemPrice);
-            card.appendChild(imgWrapper);
-            card.appendChild(infoWrapper);
+            // 글로벌 공통 컴포넌트 함수를 호출하여 상품 카드 DOM 생성
+            const card = createProductCard(item, activeVersion);
             categoryGrid.appendChild(card);
         });
     }

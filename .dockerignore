@@ -21,3 +21,7 @@ yarn-error.log*
 implementation_plan.md
 task.md
 walkthrough.md
+realtime_db_guide.md
+
+# 기록용 md 파일
+web.md

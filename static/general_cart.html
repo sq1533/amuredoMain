@@ -10,7 +10,7 @@
     <link rel="apple-touch-icon" href="/static/img/icon.webp">
     
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <link rel="stylesheet" href="/static/style.css?v=45.0">
     <style>
         .cart-container {
             width: 100% !important;
@@ -44,7 +44,7 @@
             }
         }
         .cart-title {
-            font-size: 2.2rem;
+            font-size: var(--fs-t);
             font-weight: 800;
             color: #0e3a5b;
             margin-bottom: 30px;
@@ -94,7 +94,7 @@
             flex-shrink: 0;
         }
         .item-name {
-            font-size: 1.2rem;
+            font-size: var(--fs-m);
             font-weight: 700;
             color: #333;
             flex: 1;
@@ -129,7 +129,7 @@
             padding-top: 30px;
         }
         .summary-total {
-            font-size: 1.15rem;
+            font-size: var(--fs-m);
             font-weight: 700;
             color: #555;
             margin-bottom: 20px;
@@ -140,7 +140,7 @@
             padding-bottom: 18px;
         }
         .summary-total span.count-num {
-            font-size: 1.6rem;
+            font-size: var(--fs-st);
             font-weight: 800;
             color: #0e3a5b;
         }
@@ -151,7 +151,7 @@
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1.25rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -196,7 +196,7 @@
             color: #fff;
             padding: 18px 28px;
             border-radius: 12px;
-            font-size: 0.95rem;
+            font-size: var(--fs-sm);
             font-weight: 700;
             z-index: 1000000;
             box-shadow: 0 10px 30px rgba(0,0,0,0.25);
@@ -218,7 +218,7 @@
                 padding: 25px 15px;
                 border-radius: 12px;
             }
-            .cart-title { font-size: 1.8rem; margin-bottom: 20px; }
+            .cart-title { font-size: var(--fs-st) !important; margin-bottom: 20px; }
             .cart-item {
                 padding: 15px;
                 gap: 12px;
@@ -228,17 +228,17 @@
                 height: 60px;
             }
             .item-name {
-                font-size: 1.05rem;
+                font-size: var(--fs-m) !important;
             }
             .delete-btn {
                 font-size: 1.4rem;
                 padding: 3px;
             }
             .summary-total {
-                font-size: 1.05rem;
+                font-size: var(--fs-sm) !important;
             }
             .summary-total span.count-num {
-                font-size: 1.4rem;
+                font-size: var(--fs-st) !important;
             }
         }
     </style>

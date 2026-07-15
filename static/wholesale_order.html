@@ -336,8 +336,8 @@
                             <span class="pay-method-name">신용카드</span>
                         </div>
                     </label>
-                    <label class="pay-method-label" for="method-vaccount">
-                        <input type="radio" id="method-vaccount" name="danal-payment-method" value="VACCOUNT">
+                    <label class="pay-method-label" for="method-transfer">
+                        <input type="radio" id="method-transfer" name="danal-payment-method" value="TRANSFER">
                         <div class="pay-method-card" style="min-height: 92px;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #333; margin-bottom: 8px;" class="pay-method-icon-svg">
                                 <path d="M3 21h18"></path>
@@ -349,7 +349,7 @@
                                 <path d="M12 14v3"></path>
                                 <path d="M16 14v3"></path>
                             </svg>
-                            <span class="pay-method-name">가상계좌</span>
+                            <span class="pay-method-name">실시간 계좌이체</span>
                         </div>
                     </label>
                     <label class="pay-method-label" for="method-kakaopay">
@@ -557,13 +557,7 @@
                         paymentsMethod: selectedMethod
                     };
 
-                    if (selectedMethod === "VACCOUNT") {
-                        paymentParams.notiUrl = window.location.origin + "/api/payment/danal_noti";
-                        if (configData && configData.expire_date && configData.expire_time) {
-                            paymentParams.expireDate = configData.expire_date;
-                            paymentParams.expireTime = configData.expire_time;
-                        }
-                    }
+
 
                     await danalPayments.requestPayment(paymentParams);
                 } catch (error) {

@@ -210,19 +210,19 @@ document.addEventListener("DOMContentLoaded", () => {
             // 구매 완료 스티커 이미지 태그
             let stickerHTML = "";
             if (review.is_purchased) {
-                stickerHTML = `<img src="/static/img/buy.svg" class="purchase-sticker" alt="구매 완료 스티커">`;
+                stickerHTML = `<span class="material-icons purchase-sticker" title="구매 완료">receipt</span>`;
             }
 
             card.innerHTML = `
                 ${stickerHTML}
                 <div class="review-header-info">
-                    <span class="review-stars">${starText}</span>
-                    <span class="review-date">${displayDate} 피팅</span>
+                    <span class="review-stars fs-sm">${starText}</span>
+                    <span class="review-date fs-s">${displayDate} 피팅</span>
                 </div>
-                <p class="review-body">${escapeHTML(review.content || "")}</p>
+                <p class="review-body fs-m">${escapeHTML(review.content || "")}</p>
                 <div class="review-footer">
-                    <span class="review-author">${review.customerName} 고객님</span>
-                    <span class="review-badge">피팅 후기</span>
+                    <span class="review-author fs-sm">${review.customerName} 고객님</span>
+                    <span class="review-badge fs-s">피팅 후기</span>
                 </div>
             `;
             reviewsContainer.appendChild(card);

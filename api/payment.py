@@ -117,113 +117,7 @@ def confirm_danal_payment(method: str, transaction_id: str, merchant_id: str, am
 def sanitize_email(email: str):
     return email.replace(".", ",")
 
-def send_virtual_account_email(to_email: str, customer_name: str, order_id: str, order_name: str, amount: int, va_info: dict):
-    # 이메일 주소 유효성 검사
-    if not to_email or "@" not in to_email:
-        print(f"⚠️ 이메일 발송 스킵: 유효하지 않은 이메일 주소 ({to_email})")
-        return
 
-    import smtplib
-    from email.mime.text import MIMEText
-    from email.mime.multipart import MIMEMultipart
-    
-    email_config_path = os.path.join(os.path.dirname(__file__), "..", "database", "email.json")
-    if not os.path.exists(email_config_path):
-        print("⚠️ 이메일 설정 파일(email.json)이 존재하지 않아 메일을 발송하지 못했습니다.")
-        return
-        
-    try:
-        with open(email_config_path, "r", encoding="utf-8") as f:
-            config = json.load(f)
-            
-        smtp_server = config.get("smtp_server")
-        smtp_port = config.get("smtp_port", 587)
-        sender_email = config.get("sender_email")
-        sender_password = config.get("sender_password")
-    except Exception as e:
-        print(f"🔥 이메일 설정 로딩 실패: {e}")
-        return
-
-    # 다날 입금 기한 포맷팅
-    raw_expire = va_info.get("expireDateTime", "-")
-    formatted_expire = raw_expire
-    if raw_expire and len(raw_expire) == 14:  # YYYYMMDDHHmmss
-        try:
-            dt = datetime.strptime(raw_expire, "%Y%m%d%H%M%S")
-            formatted_expire = dt.strftime("%Y-%m-%d %H:%M:%S")
-        except Exception:
-            pass
-    elif "T" in raw_expire:
-        try:
-            dt_str = raw_expire.split("+")[0]
-            dt = datetime.fromisoformat(dt_str)
-            formatted_expire = dt.strftime("%Y-%m-%d %H:%M:%S")
-        except Exception:
-            pass
-
-    # HTML 템플릿 구성
-    html_content = f"""
-    <div style="max-width: 600px; margin: 0 auto; padding: 30px; font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; border: 1px solid #eaeaea; border-radius: 12px; background: #ffffff;">
-        <h2 style="color: #0e3a5b; border-bottom: 2px solid #0e3a5b; padding-bottom: 15px; margin-top: 0;">🏦 가상계좌 입금 안내 [아무래도 안경]</h2>
-        <p style="font-size: 1rem; color: #333; line-height: 1.6;">
-            안녕하세요, <strong>{customer_name}</strong> 고객님.<br>
-            요청하신 주문의 가상계좌가 정상적으로 발급되었습니다. 아래의 정보를 확인하시어 기한 내에 입금해 주시기 바랍니다.
-        </p>
-        <div style="background-color: #f8f9fa; border-radius: 8px; padding: 20px; margin: 25px 0; border: 1px solid #f0f0f0;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
-                <tr>
-                    <td style="padding: 10px 0; color: #666; font-weight: bold; width: 30%; border-bottom: 1px solid #eee;">주문번호</td>
-                    <td style="padding: 10px 0; color: #333; border-bottom: 1px solid #eee;">{order_id}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px 0; color: #666; font-weight: bold; border-bottom: 1px solid #eee;">상품명</td>
-                    <td style="padding: 10px 0; color: #333; border-bottom: 1px solid #eee;">{order_name}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px 0; color: #666; font-weight: bold; border-bottom: 1px solid #eee;">입금은행</td>
-                    <td style="padding: 10px 0; color: #0e3a5b; font-weight: bold; border-bottom: 1px solid #eee;">{va_info.get('bankName')}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px 0; color: #666; font-weight: bold; border-bottom: 1px solid #eee;">계좌번호</td>
-                    <td style="padding: 10px 0; color: #d32f2f; font-weight: bold; font-size: 1.1rem; border-bottom: 1px solid #eee;">{va_info.get('accountNumber')}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px 0; color: #666; font-weight: bold; border-bottom: 1px solid #eee;">예금주</td>
-                    <td style="padding: 10px 0; color: #333; border-bottom: 1px solid #eee;">주식회사 키제이</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px 0; color: #666; font-weight: bold; border-bottom: 1px solid #eee;">입금금액</td>
-                    <td style="padding: 10px 0; color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee;">₩{amount:,}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px 0; color: #666; font-weight: bold; border-bottom: 1px solid #eee;">입금기한</td>
-                    <td style="padding: 10px 0; color: #e53935; font-weight: bold; border-bottom: 1px solid #eee;">{formatted_expire} 까지</td>
-                </tr>
-            </table>
-        </div>
-        <p style="font-size: 0.85rem; color: #666; line-height: 1.6; border-top: 1px dashed #eaeaea; padding-top: 15px; margin-bottom: 0;">
-            ※ 입금 금액이 일치하지 않거나 입금 기한이 경과할 경우 입금 처리가 불가능합니다.<br>
-            ※ 가상계좌 입금이 완료되면 자동으로 주문이 접수되며 알림톡/메시지가 발송됩니다.<br>
-            ※ 문의사항은 고객센터 또는 이메일로 연락 바랍니다.
-        </p>
-    </div>
-    """
-    
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = to_email
-    msg['Subject'] = f"[아무래도 안경] 가상계좌 입금 안내 - {order_name}"
-    msg.attach(MIMEText(html_content, 'html', 'utf-8'))
-    
-    try:
-        server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, [to_email], msg.as_string())
-        server.quit()
-        print(f"📧 이메일 발송 완료: {to_email}")
-    except Exception as e:
-        print(f"🔥 이메일 발송 실패: {e}")
 
 
 
@@ -1103,47 +997,17 @@ async def process_wholesale_success(
             return RedirectResponse(url=f"/wholesale/order?status=fail&message={err_msg}", status_code=303)
             
         confirm_method = confirm_res.get("method") or method or "DANAL"
-        is_vaccount = confirm_method.upper() == "VACCOUNT"
-        status_text = "입금 대기" if is_vaccount else "결제 완료"
+        status_text = "결제 완료"
         
         update_payload = {
             "status": status_text,
             "transactionId": transactionId,
             "method": confirm_method,
-            "pgProvider": "danal"
+            "pgProvider": "danal",
+            "paidAt": datetime.now().isoformat()
         }
         
-        if not is_vaccount:
-            update_payload["paidAt"] = datetime.now().isoformat()
-        else:
-            va_info = confirm_res.get("virtualAccount")
-            if isinstance(va_info, dict):
-                update_payload["virtualAccount"] = {
-                    "accountNumber": va_info.get("accountNumber"),
-                    "bankCode": va_info.get("bankCode"),
-                    "bankName": va_info.get("bankName"),
-                    "expireDateTime": va_info.get("expireDateTime")
-                }
-            else:
-                update_payload["virtualAccount"] = {
-                    "accountNumber": confirm_res.get("accountNumber") or confirm_res.get("virtualAccountNumber"),
-                    "bankCode": confirm_res.get("bankCode"),
-                    "bankName": confirm_res.get("bankName"),
-                    "expireDateTime": confirm_res.get("expireDateTime") or confirm_res.get("expireDate")
-                }
-                
         ref.update(update_payload)
-        
-        if is_vaccount:
-            background_tasks.add_task(
-                send_virtual_account_email,
-                to_email=email,
-                customer_name=order_data.get("customer", {}).get("name", "가맹점주"),
-                order_id=final_order_id,
-                order_name=order_data.get("orderName", "도매 상품"),
-                amount=int(order_data.get("amount", 0)),
-                va_info=update_payload["virtualAccount"]
-            )
         
         redirect_response = RedirectResponse(url=f"/wholesale/success?orderId={final_order_id}", status_code=303)
         redirect_response.delete_cookie(key="wholesale_cart", path="/")
@@ -1322,8 +1186,7 @@ async def process_booking_success(
     if not customer_email:
         customer_email = order_data.get("customer", {}).get("email")
         
-    is_vaccount = selected_method.upper() == "VACCOUNT"
-    status_text = "입금 대기" if is_vaccount else "결제 완료"
+    status_text = "결제 완료"
     
     payment_payload = {
         "orderId": final_order_id,
@@ -1332,28 +1195,10 @@ async def process_booking_success(
         "paidItems": order_data.get("items", []),
         "status": status_text,
         "method": selected_method,
-        "pgProvider": pg_provider
+        "pgProvider": pg_provider,
+        "paidAt": datetime.now().isoformat()
     }
     
-    if not is_vaccount:
-        payment_payload["paidAt"] = datetime.now().isoformat()
-    else:
-        va_info = confirm_res.get("virtualAccount")
-        if isinstance(va_info, dict):
-            payment_payload["virtualAccount"] = {
-                "accountNumber": va_info.get("accountNumber"),
-                "bankCode": va_info.get("bankCode"),
-                "bankName": va_info.get("bankName"),
-                "expireDateTime": va_info.get("expireDateTime")
-            }
-        else:
-            payment_payload["virtualAccount"] = {
-                "accountNumber": confirm_res.get("accountNumber") or confirm_res.get("virtualAccountNumber"),
-                "bankCode": confirm_res.get("bankCode"),
-                "bankName": confirm_res.get("bankName"),
-                "expireDateTime": confirm_res.get("expireDateTime") or confirm_res.get("expireDate")
-            }
-            
     # 결제 상태 저장
     payment_ref = rtdb.reference(f"booking_payments/{booking_id}/{final_order_id}")
     payment_ref.set(payment_payload)
@@ -1363,12 +1208,9 @@ async def process_booking_success(
         "status": status_text,
         "transactionId": resolved_transaction_id,
         "method": selected_method,
-        "pgProvider": pg_provider
+        "pgProvider": pg_provider,
+        "paidAt": datetime.now().isoformat()
     }
-    if not is_vaccount:
-        booking_order_update["paidAt"] = datetime.now().isoformat()
-    else:
-        booking_order_update["virtualAccount"] = payment_payload["virtualAccount"]
     booking_order_ref.update(booking_order_update)
 
     # 예약 상태 업데이트
@@ -1376,21 +1218,20 @@ async def process_booking_success(
     booking_ref = rtdb.reference(f"booking/{safe_email}/{booking_id}")
     booking_ref.update({"status": status_text})
 
-    # 결제 완료 시 작성된 리뷰가 있다면 구매 완료 스티커 부착 상태로 업데이트 (카드 등 일반결제일때만)
-    if not is_vaccount:
-        try:
-            bdata = booking_ref.get()
-            if bdata:
-                r_date = bdata.get("reservedDate")
-                r_time = bdata.get("reservedTime")
-                if r_date and r_time:
-                    review_doc_id = f"{r_date}_{r_time}"
-                    db_fs = firestore.client()
-                    review_ref = db_fs.collection("fitting_reviews").document(review_doc_id)
-                    if review_ref.get().exists:
-                        review_ref.update({"is_purchased": True})
-        except Exception as re_err:
-            print(f"🔥 결제 완료 후 리뷰 상태 업데이트 실패: {re_err}")
+    # 결제 완료 시 작성된 리뷰가 있다면 구매 완료 스티커 부착 상태로 업데이트
+    try:
+        bdata = booking_ref.get()
+        if bdata:
+            r_date = bdata.get("reservedDate")
+            r_time = bdata.get("reservedTime")
+            if r_date and r_time:
+                review_doc_id = f"{r_date}_{r_time}"
+                db_fs = firestore.client()
+                review_ref = db_fs.collection("fitting_reviews").document(review_doc_id)
+                if review_ref.get().exists:
+                    review_ref.update({"is_purchased": True})
+    except Exception as re_err:
+        print(f"🔥 결제 완료 후 리뷰 상태 업데이트 실패: {re_err}")
 
     # 텔레그램 접수 안내
     customer_name = order_data.get("customer", {}).get("name", "알 수 없음")
@@ -1408,7 +1249,7 @@ async def process_booking_success(
             pass
     goods_summary = f"{first_item_name} 포함 총 {len(paid_items_ids)}개"
     
-    status_msg = "가상계좌 발급" if is_vaccount else "결제 완료"
+    status_msg = "결제 완료"
     tg_message = (
         f"🏦 <b>[피팅 완료 상품 {status_msg} ({selected_method})]</b>\n\n"
         f"<b>예약번호:</b> {booking_id}\n"
@@ -1420,24 +1261,9 @@ async def process_booking_success(
         f"<b>결제수단:</b> {selected_method}\n"
         f"<b>일시:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
     )
-    if is_vaccount:
-        va = payment_payload["virtualAccount"]
-        tg_message += f"\n<b>[발급 계좌 정보]</b>\n<b>은행:</b> {va.get('bankName')}\n<b>계좌번호:</b> {va.get('accountNumber')}\n<b>기한:</b> {va.get('expireDateTime')}\n"
 
     if REQUEST_CHAT_ID:
         background_tasks.add_task(send_telegram_message, REQUEST_CHAT_ID, tg_message)
-
-    if is_vaccount:
-        order_name_val = first_item_name if len(paid_items_ids) <= 1 else f"{first_item_name} 외 {len(paid_items_ids)-1}건"
-        background_tasks.add_task(
-            send_virtual_account_email,
-            to_email=customer_email,
-            customer_name=customer_name,
-            order_id=final_order_id,
-            order_name=order_name_val,
-            amount=int(resolved_amount),
-            va_info=payment_payload["virtualAccount"]
-        )
 
     return RedirectResponse(url=f"/general/payment_success?orderId={final_order_id}", status_code=303)
 
@@ -1741,189 +1567,7 @@ async def payment_fail_post(
     final_order_id = orderId or orderNo
     return await process_payment_fail(request, code, message, final_order_id)
 
-@router.post("/danal_noti")
-@router.get("/danal_noti")
-async def danal_noti(request: Request, background_tasks: BackgroundTasks):
-    """
-    다날 가상계좌 입금 통보 (Noti) 수신 API (웹훅)
-    """
-    try:
-        body_json = {}
-        if request.method == "POST":
-            try:
-                body_json = await request.json()
-            except Exception:
-                form_data = await request.form()
-                body_json = dict(form_data)
-        else:
-            body_json = dict(request.query_params)
-            
-        print(f"📥 다날 가상계좌 입금 통보 수신 데이터: {body_json}")
-        
-        code = body_json.get("code")
-        if code != "SUCCESS":
-            print(f"⚠️ 다날 가상계좌 노티 실패 코드 수신: {code} - {body_json.get('message')}")
-            return HTMLResponse(content="OK", status_code=200)
-            
-        order_id = body_json.get("orderId")
-        amount = body_json.get("amount")
-        transaction_id = body_json.get("transactionId")
-        deposit_time = body_json.get("depositDateTime")
-        bank_name = body_json.get("bankName")
-        depositor_name = body_json.get("depositorName")
-        
-        if not order_id:
-            print("⚠️ 다날 가상계좌 노티에 orderId가 누락되었습니다.")
-            return HTMLResponse(content="FAIL", status_code=400)
-            
-        order_type = "booking" if order_id.startswith("BKORD") else "wholesale"
-        
-        paid_at_time = datetime.now().isoformat()
-        if deposit_time and len(deposit_time) == 14:
-            try:
-                dt = datetime.strptime(deposit_time, "%Y%m%d%H%M%S")
-                paid_at_time = dt.isoformat()
-            except Exception:
-                pass
-                
-        if order_type == "wholesale":
-            customer_email = body_json.get("userEmail") or body_json.get("userId")
-            safe_email = None
-            if customer_email and "@" in customer_email:
-                safe_email = sanitize_email(customer_email)
-                
-            if not safe_email:
-                orders_ref = rtdb.reference("ws_orders")
-                all_orders = orders_ref.get() or {}
-                for user_key, user_orders in all_orders.items():
-                    if order_id in user_orders:
-                        safe_email = user_key
-                        break
-                        
-            if not safe_email:
-                print(f"⚠️ 다날 Noti 수신: 주문번호 {order_id} 에 해당하는 도매 주문 노드를 찾을 수 없습니다.")
-                return HTMLResponse(content="FAIL", status_code=404)
-                
-            order_ref = rtdb.reference(f"ws_orders/{safe_email}/{order_id}")
-            order_data = order_ref.get()
-            if not order_data:
-                print(f"⚠️ 다날 Noti 수신: ws_orders/{safe_email}/{order_id} 노드가 비어있습니다.")
-                return HTMLResponse(content="FAIL", status_code=404)
-                
-            # 🏁 [중복 차단 필터] 이미 결제 완료 상태인 주문은 처리 스킵
-            if order_data.get("status") == "결제 완료":
-                print(f"ℹ️ 이미 결제 완료된 도매 주문입니다. (주문ID: {order_id}) Noti 처리 생략 및 성공 응답.")
-                return HTMLResponse(content="OK", status_code=200)
-                
-            db_amount = int(order_data.get("amount", 0))
-            if amount is not None and int(amount) != db_amount:
-                print(f"⚠️ 금액 위조 의심: DB금액 {db_amount} != 노티금액 {amount}")
-                return HTMLResponse(content="FAIL", status_code=400)
-                
-            order_ref.update({
-                "status": "결제 완료",
-                "paidAt": paid_at_time,
-                "danalDepositDetail": {
-                    "depositorName": depositor_name,
-                    "bankName": bank_name,
-                    "depositDateTime": deposit_time,
-                    "transactionId": transaction_id
-                }
-            })
-            
-            customer_name = order_data.get("customer", {}).get("name", "가맹점주")
-            tg_message = (
-                f"🏦 <b>[도매 가상계좌 입금 완료]</b>\n\n"
-                f"<b>주문번호:</b> {order_id}\n"
-                f"<b>가맹점명:</b> {customer_name} ({customer_email or '이메일 미획득'})\n"
-                f"<b>입금금액:</b> ₩{db_amount:,}\n"
-                f"<b>입금자명:</b> {depositor_name or '미지정'}\n"
-                f"<b>입금은행:</b> {bank_name or '미지정'}\n"
-                f"<b>입금일시:</b> {paid_at_time.replace('T', ' ')}\n"
-            )
-            if REQUEST_CHAT_ID:
-                background_tasks.add_task(send_telegram_message, REQUEST_CHAT_ID, tg_message)
-                        
-        else:
-            order_ref = rtdb.reference(f"booking_orders/{order_id}")
-            order_data = order_ref.get()
-            if not order_data:
-                print(f"⚠️ 다날 Noti 수신: booking_orders/{order_id} 가결제 정보를 찾을 수 없습니다.")
-                return HTMLResponse(content="FAIL", status_code=404)
-                
-            # 🏁 [중복 차단 필터] 이미 결제 완료 상태인 주문은 처리 스킵
-            if order_data.get("status") == "결제 완료":
-                print(f"ℹ️ 이미 결제 완료된 피팅 주문입니다. (주문ID: {order_id}) Noti 처리 생략 및 성공 응답.")
-                return HTMLResponse(content="OK", status_code=200)
-                
-            booking_id = order_data.get("bookingId")
-            customer_email = order_data.get("customer", {}).get("email")
-            db_amount = int(order_data.get("amount", 0))
-            
-            if amount is not None and int(amount) != db_amount:
-                print(f"⚠️ 금액 위조 의심 (피팅결제): DB금액 {db_amount} != 노티금액 {amount}")
-                return HTMLResponse(content="FAIL", status_code=400)
-                
-            order_ref.update({
-                "status": "결제 완료",
-                "paidAt": paid_at_time,
-                "danalDepositDetail": {
-                    "depositorName": depositor_name,
-                    "bankName": bank_name,
-                    "depositDateTime": deposit_time,
-                    "transactionId": transaction_id
-                }
-            })
-            
-            payments_ref = rtdb.reference(f"booking_payments/{booking_id}/{order_id}")
-            payments_ref.update({
-                "status": "결제 완료",
-                "paidAt": paid_at_time,
-                "danalDepositDetail": {
-                    "depositorName": depositor_name,
-                    "bankName": bank_name,
-                    "depositDateTime": deposit_time,
-                    "transactionId": transaction_id
-                }
-            })
-            
-            if customer_email:
-                safe_email = sanitize_email(customer_email)
-                booking_ref = rtdb.reference(f"booking/{safe_email}/{booking_id}")
-                booking_ref.update({"status": "결제 완료"})
-                
-                try:
-                    bdata = booking_ref.get()
-                    if bdata:
-                        r_date = bdata.get("reservedDate")
-                        r_time = bdata.get("reservedTime")
-                        if r_date and r_time:
-                            review_doc_id = f"{r_date}_{r_time}"
-                            db_fs = firestore.client()
-                            review_ref = db_fs.collection("fitting_reviews").document(review_doc_id)
-                            if review_ref.get().exists:
-                                review_ref.update({"is_purchased": True})
-                except Exception as re_err:
-                    print(f"🔥 피팅 Noti 입금 완료 후 리뷰 상태 업데이트 실패: {re_err}")
-            
-            customer_name = order_data.get("customer", {}).get("name", "알 수 없음")
-            tg_message = (
-                f"🏦 <b>[일반 피팅 가상계좌 입금 완료]</b>\n\n"
-                f"<b>예약 ID:</b> {booking_id}\n"
-                f"<b>주문번호:</b> {order_id}\n"
-                f"<b>결제고객:</b> {customer_name} ({customer_email or '이메일 없음'})\n"
-                f"<b>입금금액:</b> ₩{db_amount:,}\n"
-                f"<b>입금자명:</b> {depositor_name or '미지정'}\n"
-                f"<b>입금은행:</b> {bank_name or '미지정'}\n"
-                f"<b>입금일시:</b> {paid_at_time.replace('T', ' ')}\n"
-            )
-            if REQUEST_CHAT_ID:
-                background_tasks.add_task(send_telegram_message, REQUEST_CHAT_ID, tg_message)
-                        
-        return HTMLResponse(content="OK", status_code=200)
-    except Exception as e:
-        print(f"🔥 다날 가상계좌 노티 처리 중 에러: {e}")
-        return HTMLResponse(content="FAIL", status_code=500)
+
 
 
 # -------------------------------------------------------------
@@ -2124,8 +1768,7 @@ async def get_wholesale_order_detail(request: Request, order_id: str):
             "customerName": order_data.get("customer", {}).get("name", "가맹점주"),
             "amount": order_data.get("amount", 0),
             "items": order_data.get("cart", []),
-            "method": order_data.get("method", ""),
-            "virtualAccount": order_data.get("virtualAccount")
+            "method": order_data.get("method", "")
         }
     except Exception as e:
         print(f"🔥 도매 주문 단건 조회 에러: {e}")
@@ -2177,8 +1820,7 @@ async def get_booking_order_detail(request: Request, order_id: str):
             "customerName": order_data.get("customer", {}).get("name", "고객"),
             "amount": order_data.get("amount", 0),
             "items": items_list,
-            "method": order_data.get("method", ""),
-            "virtualAccount": order_data.get("virtualAccount")
+            "method": order_data.get("method", "")
         }
     except Exception as e:
         print(f"🔥 피팅 주문 단건 조회 에러: {e}")

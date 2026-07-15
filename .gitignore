@@ -11,7 +11,10 @@ venv/
 amuredo/
 static/img
 
-
 # OS 환경 파일 제외
 .DS_Store
 Thumbs.db
+realtime_db_guide.md
+
+# 기록용 md 파일
+web.md

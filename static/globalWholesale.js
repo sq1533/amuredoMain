@@ -34,12 +34,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (role === "wholesale") {
             rightNavHTML = `
                 <button class="nav-switch-btn" onclick="location.href='/wholesale/cart'" style="position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="Cart"><span class="material-icons" style="font-size: 1.45rem;">local_mall</span><span class="cart-count-badge" id="pcHeaderCartBadge" style="display: none; position: absolute; top: -5px; right: -5px;">0</span></button>
+                <button class="nav-switch-btn" onclick="location.href='/wholesale/orders'" style="display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="주문현황"><span class="material-icons" style="font-size: 1.45rem;">receipt_long</span></button>
                 <button class="nav-switch-btn" onclick="location.href='/contact'" style="display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="Connect"><span class="material-icons" style="font-size: 1.45rem;">support_agent</span></button>
                 <button class="nav-switch-btn globalLogoutBtnTrigger" style="color: #d32f2f; display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="Logout"><span class="material-icons" style="font-size: 1.45rem;">logout</span></button>
             `;
         } else if (role === "general") {
             rightNavHTML = `
                 <button class="nav-switch-btn" onclick="location.href='/general/cart'" style="position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="Cart"><span class="material-icons" style="font-size: 1.45rem;">local_mall</span><span class="cart-count-badge" id="pcHeaderCartBadge" style="display: none; position: absolute; top: -5px; right: -5px;">0</span></button>
+                <button class="nav-switch-btn" onclick="location.href='/general/bookings'" style="display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="예약 확인"><span class="material-icons" style="font-size: 1.45rem;">event_note</span></button>
                 <button class="nav-switch-btn" onclick="location.href='/contact'" style="display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="Connect"><span class="material-icons" style="font-size: 1.45rem;">support_agent</span></button>
                 <button class="nav-switch-btn globalLogoutBtnTrigger" style="color: #d32f2f; display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="Logout"><span class="material-icons" style="font-size: 1.45rem;">logout</span></button>
             `;

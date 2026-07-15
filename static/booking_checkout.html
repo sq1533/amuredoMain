@@ -10,7 +10,7 @@
     
     <!-- Pretendard 메인 폰트 & 전역 style 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=21.0">
+    <link rel="stylesheet" href="/static/style.css?v=45.0">
 
     <!-- 다날 결제 SDK -->
     <script src="https://static.danalpay.com/d1/sdk/index.js"></script>
@@ -23,7 +23,7 @@
             box-sizing: border-box;
         }
         .checkout-title {
-            font-size: 2rem;
+            font-size: var(--fs-t);
             font-weight: 800;
             color: #0e3a5b;
             margin-bottom: 8px;
@@ -31,7 +31,7 @@
             letter-spacing: -0.5px;
         }
         .checkout-subtitle {
-            font-size: 0.95rem;
+            font-size: var(--fs-m);
             color: #666;
             text-align: center;
             margin-bottom: 40px;
@@ -48,7 +48,7 @@
         }
 
         .section-title {
-            font-size: 1.1rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             color: #0e3a5b;
             margin-bottom: 20px;
@@ -64,7 +64,7 @@
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 30px;
-            font-size: 0.95rem;
+            font-size: var(--fs-m);
             color: #555;
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -125,12 +125,12 @@
             gap: 4px;
         }
         .item-name {
-            font-size: 0.95rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             color: #333;
         }
         .item-cat {
-            font-size: 0.75rem;
+            font-size: var(--fs-s);
             font-weight: 700;
             color: #0e3a5b;
             background: #eef7fe;
@@ -139,7 +139,7 @@
             align-self: flex-start;
         }
         .item-price {
-            font-size: 1.05rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             color: #0e3a5b;
             text-align: right;
@@ -152,7 +152,7 @@
         }
         .item-row.already-paid .item-price::after {
             content: " (결제 완료)";
-            font-size: 0.8rem;
+            font-size: var(--fs-s);
             color: #28a745;
             font-weight: 800;
         }
@@ -175,7 +175,7 @@
             gap: 4px;
         }
         .price-count-text {
-            font-size: 0.9rem;
+            font-size: var(--fs-sm);
             color: #666;
             font-weight: 700;
         }
@@ -184,12 +184,12 @@
             font-weight: 800;
         }
         .price-total-label {
-            font-size: 1.1rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             color: #0e3a5b;
         }
         .price-total-amount {
-            font-size: 1.7rem;
+            font-size: var(--fs-st);
             font-weight: 900;
             color: #0e3a5b;
             letter-spacing: -0.5px;
@@ -205,7 +205,7 @@
             color: #fff;
             border: none;
             border-radius: 12px;
-            font-size: 1.1rem;
+            font-size: var(--fs-m);
             font-weight: 800;
             cursor: pointer;
             transition: all 0.25s ease;
@@ -248,10 +248,12 @@
                 margin: 95px auto 40px auto;
             }
             .checkout-title {
-                font-size: 1.6rem;
+                font-size: var(--fs-st) !important;
+                margin-bottom: 6px;
             }
-            .checkout-card {
-                padding: 20px;
+            .checkout-subtitle {
+                font-size: var(--fs-sm) !important;
+                margin-bottom: 30px;
             }
             .booking-summary-board {
                 grid-template-columns: 1fr;
@@ -384,7 +386,7 @@
                 </div>
 
                 <!-- 2. 구매 선택 리스트 -->
-                <div class="section-title">구매 상품 선택 (일반 소비자가격 기준)</div>
+                <div class="section-title">구매 상품 선택</div>
                 <div class="items-checklist" id="itemsChecklist">
                     <!-- 동적 바인딩 -->
                 </div>
@@ -411,8 +413,8 @@
                             <span class="pay-method-name">신용카드</span>
                         </div>
                     </label>
-                    <label class="pay-method-label" for="method-vaccount">
-                        <input type="radio" id="method-vaccount" name="danal-payment-method" value="VACCOUNT">
+                    <label class="pay-method-label" for="method-transfer">
+                        <input type="radio" id="method-transfer" name="danal-payment-method" value="TRANSFER">
                         <div class="pay-method-card" style="min-height: 92px;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #333; margin-bottom: 8px;" class="pay-method-icon-svg">
                                 <path d="M3 21h18"></path>
@@ -424,7 +426,7 @@
                                 <path d="M12 14v3"></path>
                                 <path d="M16 14v3"></path>
                             </svg>
-                            <span class="pay-method-name">가상계좌</span>
+                            <span class="pay-method-name">실시간 계좌이체</span>
                         </div>
                     </label>
                     <label class="pay-method-label" for="method-kakaopay">
@@ -681,13 +683,7 @@
                         paymentsMethod: selectedMethod
                     };
 
-                    if (selectedMethod === "VACCOUNT") {
-                        paymentParams.notiUrl = window.location.origin + "/api/payment/danal_noti";
-                        if (expireDate && expireTime) {
-                            paymentParams.expireDate = expireDate;
-                            paymentParams.expireTime = expireTime;
-                        }
-                    }
+
 
                     await danalPayments.requestPayment(paymentParams);
 
