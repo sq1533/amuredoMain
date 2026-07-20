@@ -191,6 +191,17 @@ async def serve_about_page():
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>About 템플릿(about.html)을 찾을 수 없습니다.</h1>", status_code=404)
 
+# 🏁 도매 파트너 전용 이벤트 혜택 안내 화면 HTML 서빙용 프론트엔드 라우팅
+@app.get("/wholesale/event", response_class=HTMLResponse)
+@app.get("/event.html", response_class=HTMLResponse)
+@app.get("/event", response_class=HTMLResponse)
+async def serve_wholesale_event_page():
+    event_path = os.path.join(static_dir, "event.html")
+    if os.path.exists(event_path):
+        with open(event_path, "r", encoding="utf-8", errors="replace") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>이벤트 템플릿(event.html)을 찾을 수 없습니다.</h1>", status_code=404)
+
 # 검색(Search) 화면 HTML 서빙용 프론트엔드 라우팅
 @app.get("/search", response_class=HTMLResponse)
 async def serve_search_page():

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B2B 도매 파트너 혜택 - 아무래도 안경</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=60.0">
+    <style>
+        .sub-page-main.main-grid-layout {
+            margin-bottom: 80px !important;
+            padding-bottom: 40px !important;
+            clear: both !important;
+        }
+
+        .event-container {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 40px 20px 50px 20px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(14, 58, 91, 0.05);
+            
+            /* 🏁 PC 12분할 그리드 중 10그리드(span 10) 중앙 배치 및 3행(auto) 적용 */
+            grid-column: 2 / span 10 !important;
+            grid-row: 3 !important;
+        }
+        
+        @media screen and (max-width: 1024px) {
+            .event-container {
+                /* 와이드 모바일 (1/4/1) */
+                grid-column: 1 / span 6 !important;
+                grid-row: 3 !important;
+                padding: 30px 15px 40px 15px;
+                margin-bottom: 0 !important;
+            }
+        }
+        
+        @media screen and (max-width: 640px) {
+            .event-container {
+                /* 모바일 (4) */
+                grid-column: 1 / span 4 !important;
+                grid-row: 3 !important;
+                border-radius: 0 !important;
+                padding: 20px 15px 40px 15px;
+                margin-bottom: 0 !important;
+            }
+        }
+
+        .event-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .event-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(14, 58, 91, 0.08);
+            color: #0E3A5B;
+            font-size: var(--fs-s);
+            font-weight: 800;
+            border-radius: 20px;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .event-title {
+            font-size: var(--fs-t);
+            font-weight: 800;
+            color: #0E3A5B;
+            margin-bottom: 12px;
+            word-break: keep-all;
+        }
+
+        .event-sub {
+            font-size: var(--fs-m);
+            color: #666;
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+
+        /* 3대 핵심 혜택 이벤트 카드 그리드 */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 900px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        .event-card {
+            background: #F7F7F7;
+            border: 1px solid rgba(14, 58, 91, 0.1);
+            border-radius: 14px;
+            padding: 30px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            background: #ffffff;
+            border-color: #0E3A5B;
+            box-shadow: 0 12px 30px rgba(14, 58, 91, 0.12);
+        }
+
+        .card-icon-wrapper {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #0E3A5B;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 15px rgba(14, 58, 91, 0.2);
+        }
+
+        .card-keyword {
+            font-size: var(--fs-st);
+            font-weight: 800;
+            color: #0E3A5B;
+            margin-bottom: 10px;
+            word-break: keep-all;
+        }
+
+        .card-desc {
+            font-size: var(--fs-m);
+            color: #444;
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+
+        .card-highlight {
+            margin-top: 15px;
+            padding: 6px 12px;
+            background: rgba(14, 58, 91, 0.06);
+            border-radius: 6px;
+            color: #d32f2f;
+            font-size: var(--fs-sm);
+            font-weight: 700;
+        }
+
+        /* 중복 혜택 및 예시 섹션 */
+        .duplicate-info-box {
+            background: linear-gradient(135deg, #0E3A5B 0%, #0b2d47 100%);
+            border-radius: 14px;
+            padding: 30px;
+            color: #ffffff;
+            margin-bottom: 0;
+        }
+
+        .dup-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .dup-title {
+            font-size: var(--fs-st);
+            font-weight: 800;
+        }
+
+        .dup-tag {
+            background: #ffd700;
+            color: #0E3A5B;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: var(--fs-s);
+            font-weight: 800;
+        }
+
+        .dup-desc {
+            font-size: var(--fs-m);
+            line-height: 1.6;
+            color: #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .example-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .example-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: var(--fs-sm);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .example-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .ex-label {
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        .ex-val {
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .ex-val .final-price {
+            color: #ffd700;
+            font-size: var(--fs-m);
+        }
+
+        .cta-btn-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .cta-btn {
+            padding: 16px 36px;
+            border-radius: 8px;
+            font-size: var(--fs-m);
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #0E3A5B;
+            color: #ffffff;
+            border: none;
+            box-shadow: 0 4px 15px rgba(14, 58, 91, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #0b2d47;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #0E3A5B;
+            border: 1px solid #0E3A5B;
+        }
+
+        .btn-secondary:hover {
+            background: #F7F7F7;
+        }
+
+        @media (max-width: 640px) {
+            .cta-btn-group {
+                flex-direction: column;
+            }
+            .cta-btn {
+                width: 100%;
+            }
+            .example-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            .ex-val {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 동적 헤더 바 주입 공간 -->
+    <div id="globalHeader"></div>
+
+    <div class="sub-page-main main-grid-layout">
+        <div class="event-container">
+            <div class="event-header">
+                <span class="event-badge">B2B Wholesale Membership</span>
+                <h1 class="event-title">아무래도 안경 도매 파트너 전용 혜택</h1>
+                <p class="event-sub">안경원 파트너 사장님들의 성공적인 비즈니스를 지원하기 위한 아무래도 안경의 독점 도매 혜택을 소개합니다.</p>
+            </div>
+
+            <!-- 3대 핵심 혜택 카드 -->
+            <div class="cards-grid">
+                <!-- 카드 1: 무료배송 -->
+                <div class="event-card">
+                    <div class="card-icon-wrapper">🚚</div>
+                    <h2 class="card-keyword">전 상품 무료배송</h2>
+                    <p class="card-desc">수량과 금액 상관없이 도매 고객 세션 주문건은 모든 상품에 대해 <strong>무조건 배송비 0원</strong> 혜택을 제공합니다.</p>
+                    <div class="card-highlight">배송비 전액 면제</div>
+                </div>
+
+                <!-- 카드 2: 5개 이상 5% 할인 -->
+                <div class="event-card">
+                    <div class="card-icon-wrapper">📦</div>
+                    <h2 class="card-keyword">수량 5개↑ 5% 추가 할인</h2>
+                    <p class="card-desc">도매 장바구니 총 담은 상품 수량이 <strong>5개 이상</strong>일 경우, 전체 결제 금액의 <strong>5% 자동 할인</strong>이 적용됩니다.</p>
+                    <div class="card-highlight">5개 이상 구매 시 5% OFF</div>
+                </div>
+
+                <!-- 카드 3: 30만원 이상 5% 할인 -->
+                <div class="event-card">
+                    <div class="card-icon-wrapper">💰</div>
+                    <h2 class="card-keyword">30만원↑ 5% 추가 할인</h2>
+                    <p class="card-desc">도매 구매 총 결제 금액(원금)이 <strong>30만원 이상</strong>일 경우, 전체 결제 금액의 <strong>5% 자동 할인</strong>이 적용됩니다.</p>
+                    <div class="card-highlight">30만원 이상 구매 시 5% OFF</div>
+                </div>
+            </div>
+
+            <!-- 중복 적용 안내 및 예시 섹션 -->
+            <div class="duplicate-info-box">
+                <div class="dup-header">
+                    <span class="dup-title">혜택 중복 적용 안내 (Max 10% OFF)</span>
+                    <span class="dup-tag">중복 할인 가능</span>
+                </div>
+                <p class="dup-desc">
+                    수량 혜택(5개 이상 5%)과 금액 혜택(30만원 이상 5%)은 <strong>중복으로 동시 적용</strong> 가능합니다.<br>
+                    두 조건을 모두 충족하시면 <strong>최대 10%의 파격적인 도매 할인</strong>을 받으실 수 있습니다.
+                </p>
+
+                <div class="example-list">
+                    <div class="example-item">
+                        <span class="ex-label">💡 24,000원 상품 5개 구매 (총 120,000원)</span>
+                        <span class="ex-val">수량 5개 혜택(5%) 적용 ➔ <strong class="final-price">114,000원</strong> (6,000원 할인)</span>
+                    </div>
+                    <div class="example-item">
+                        <span class="ex-label">💡 99,000원 상품 4개 구매 (총 396,000원)</span>
+                        <span class="ex-val">금액 30만원 혜택(5%) 적용 ➔ <strong class="final-price">376,200원</strong> (19,800원 할인)</span>
+                    </div>
+                    <div class="example-item">
+                        <span class="ex-label">🔥 99,000원 상품 5개 구매 (총 495,000원)</span>
+                        <span class="ex-val">수량(5%) + 금액(5%) <strong style="color: #ffd700;">총 10% 중복 할인</strong> 적용 ➔ <strong class="final-price">445,500원</strong> (49,500원 할인)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/globalWholesale.js?v=60.0"></script>
+</body>
+</html>

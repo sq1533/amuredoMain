@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>도매 결제 - 아무래도 안경</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=52.0">
+    <link rel="stylesheet" href="/static/style.css?v=60.0">
     <!-- 다날 결제 SDK -->
     <script src="https://static.danalpay.com/d1/sdk/index.js"></script>
     <!-- 카카오(다음) 우편번호 서비스 API -->
@@ -271,18 +271,22 @@
     <div id="wholesaleOrderView" class="main-grid-layout" style="display: grid; min-height: 100vh; background-color: #F7F7F7; padding-bottom: 50px; box-sizing: border-box;">
         <div class="order-container">
             <a href="#" class="back-link" onclick="history.back(); return false;">← 장바구니로 돌아가기</a>
-            <h1 class="order-title">결제 진행</h1>
-            
+            <!-- B2B 도매 혜택 안내 배너 -->
+            <div style="background: rgba(14, 58, 91, 0.06); border: 1px solid rgba(14, 58, 91, 0.15); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; font-size: var(--fs-sm); color: #0e3a5b; font-weight: 700; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <span>🎁 B2B 도매 파트너 혜택: 수량 5개↑ (5%) / 30만원↑ (5%) 중복 할인 & 무료배송 적용</span>
+                <a href="/wholesale/event" style="color: #0076a8; text-decoration: underline; font-weight: 800;">혜택 상세 안내 →</a>
+            </div>
+
             <!-- 1행 요약 대시보드 -->
             <div class="summary-dashboard ws-card">
                 <div class="summary-block">
-                    <div class="summary-label">총 상품 금액</div>
+                    <div class="summary-label">총 상품 원금</div>
                     <div class="summary-value" id="totalAmount">₩ 0</div>
                 </div>
                 <div class="summary-operator">-</div>
                 <div class="summary-block">
-                    <div class="summary-label">할인 혜택</div>
-                    <div class="summary-value">₩ 0</div>
+                    <div class="summary-label">도매 혜택 할인</div>
+                    <div class="summary-value" id="discountAmountText" style="color: #d32f2f;">₩ 0</div>
                 </div>
                 <div class="summary-operator">=</div>
                 <div class="summary-block">
@@ -441,7 +445,8 @@
             if (!cartData) { location.href = "/wholesale/cart"; return; }
 
             const cart = JSON.parse(cartData);
-            let amount = 0;
+            let totalQty = 0;
+            let rawAmount = 0;
             
             cart.forEach(item => { 
                 let price = 0;
@@ -456,15 +461,27 @@
                 } else {
                     qty = parseInt(item.quantity) || 0;
                 }
-                amount += price * qty;
+                totalQty += qty;
+                rawAmount += price * qty;
             });
 
-            if (isNaN(amount) || amount <= 0) {
+            if (isNaN(rawAmount) || rawAmount <= 0) {
                 alert("결제 금액을 계산하는 중 오류가 발생했습니다.");
                 return;
             }
 
-            document.getElementById("totalAmount").textContent = formatWon(amount);
+            // 🏁 도매 혜택 할인 계산 (수량 5개↑ 5%, 금액 30만원↑ 5% 중복 할인)
+            let qtyDiscountRate = totalQty >= 5 ? 0.05 : 0.0;
+            let amountDiscountRate = rawAmount >= 300000 ? 0.05 : 0.0;
+            let totalDiscountRate = qtyDiscountRate + amountDiscountRate;
+
+            let discountAmount = Math.floor(rawAmount * totalDiscountRate);
+            let amount = rawAmount - discountAmount; // 실시간 최종 결제 금액
+
+            document.getElementById("totalAmount").textContent = formatWon(rawAmount);
+            if (document.getElementById("discountAmountText")) {
+                document.getElementById("discountAmountText").textContent = `- ${formatWon(discountAmount)}`;
+            }
             document.getElementById("finalAmount").textContent = formatWon(amount);
 
             // 🏁 3. 사용자 정보 연동
@@ -584,6 +601,6 @@
             if (urlParams.get('status') === 'fail') showCancelModal(urlParams.get('message') || "결제에 실패했습니다.");
         });
     </script>
-<script src="/static/globalWholesale.js?v=52.0"></script>
+<script src="/static/globalWholesale.js?v=60.0"></script>
 </body>
 </html>
