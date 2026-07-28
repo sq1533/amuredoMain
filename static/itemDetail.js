@@ -86,14 +86,43 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 }
 
-                // 3) info 이미지
-                if (detailInfoImg) {
-                    if (data.info && data.info.trim() !== "") {
-                        detailInfoImg.src = data.info;
-                        detailInfoImg.style.display = 'block';
+                // 3) B2B/B2C 공통 사이즈 스펙 정보 (info + size 데이터 바인딩)
+                const detailInfoSection = document.getElementById("detailInfoSection");
+                const detailSizeList = document.getElementById("detailSizeList");
+                
+                if (detailInfoSection && detailSizeList) {
+                    if (data.size && Object.keys(data.size).length > 0) {
+                        const size = data.size;
+                        
+                        // 데이터 정렬 순서 정의
+                        const specs = [
+                            { label: "1 프레임", value: size.frame },
+                            { label: "2 렌즈 가로", value: size.lens1 },
+                            { label: "3 렌즈 세로", value: size.lens2 },
+                            { label: "4 브릿지", value: size.bridge },
+                            { label: "5 안경 다리", value: size.temple }
+                        ];
+                        
+                        detailSizeList.innerHTML = "";
+                        specs.forEach(spec => {
+                            const li = document.createElement("li");
+                            
+                            const labelSpan = document.createElement("span");
+                            labelSpan.className = "label";
+                            labelSpan.textContent = spec.label;
+                            
+                            const valueSpan = document.createElement("span");
+                            valueSpan.className = "value";
+                            valueSpan.textContent = (spec.value !== undefined && spec.value !== null && spec.value !== "") ? `${spec.value}mm` : "-";
+                            
+                            li.appendChild(labelSpan);
+                            li.appendChild(valueSpan);
+                            detailSizeList.appendChild(li);
+                        });
+                        
+                        detailInfoSection.style.display = 'flex';
                     } else {
-                        detailInfoImg.removeAttribute('src');
-                        detailInfoImg.style.display = 'none';
+                        detailInfoSection.style.display = 'none';
                     }
                 }
             }

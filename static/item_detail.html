@@ -24,7 +24,7 @@
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <!-- 외부 공통 스타일시트 연결 (캐시 무효화) -->
-    <link rel="stylesheet" href="/static/style.css?v=61.0">
+    <link rel="stylesheet" href="/static/style.css?v=63.0">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
     <script>
@@ -202,8 +202,20 @@
                     <!-- 파트 3: 모델 이미지 리스트 (동적 JS 바인딩) -->
                     <div id="detailModelImagesContainer" style="width: 100%; margin: 0; padding: 0;"></div>
                     
-                    <!-- 파트 4: info 이미지 (동적 URL 바인딩) -->
-                    <img id="detailInfoImg" src="" alt="공통 정보 이미지" loading="lazy" style="width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;">
+                    <!-- 파트 4: B2B/B2C 공통 사이즈 정보 (2:3 비율 레이아웃) -->
+                    <div id="detailInfoSection" class="detail-info-section" style="display: none;">
+                        <!-- 왼쪽: sizeGuide.webp 정사각형 이미지 (비율 2) -->
+                        <div class="info-img-wrapper">
+                            <img src="/static/img/sizeGuide.webp" alt="사이즈 가이드" loading="lazy">
+                        </div>
+                        <!-- 오른쪽: 사이즈 스펙 텍스트 표기 (비율 3) -->
+                        <div class="info-text-wrapper">
+                            <h3>SIZE SPEC</h3>
+                            <ul id="detailSizeList" class="info-size-list">
+                                <!-- 동적 텍스트 데이터 바인딩 공간 -->
+                            </ul>
+                        </div>
+                    </div>
                     
                     <!-- 파트 5: 공통 맞춤 피팅 서비스 안내 컴포넌트 -->
                     <div class="fitting-service-container" style="background-color: #fafafa; border: 1px solid #eaeaea; border-radius: 16px; padding: 40px 30px; margin-top: 50px; font-family: inherit; box-sizing: border-box; width: 100%; text-align: left;">
@@ -298,7 +310,7 @@
     </div>
 
     <!-- 상세 페이지 로직 파일 (V버전 증가) -->
-    <script src="/static/itemDetail.js?v=11.0"></script>
+    <script src="/static/itemDetail.js?v=63.0"></script>
     
     <!-- 공통 메뉴 동작용 스크립트 -->
     <script>
@@ -318,6 +330,6 @@
             if(navOverlay) navOverlay.addEventListener("click", toggleMenu);
         });
     </script>
-<script src="/static/globalWholesale.js?v=61.0"></script>
+<script src="/static/globalWholesale.js?v=63.0"></script>
 </body>
 </html>
