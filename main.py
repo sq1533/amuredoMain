@@ -280,7 +280,6 @@ async def serve_general_mypage_page(request: Request):
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>마이페이지 템플릿(general_mypage.html)을 찾을 수 없습니다.</h1>", status_code=404)
 
-
 # 🏁 일반 회원 예약 피팅 상품 결제(Checkout) 화면 HTML 서빙용 프론트엔드 라우팅 (보안 게이트 적용)
 @app.get("/general/booking_checkout", response_class=HTMLResponse)
 async def serve_booking_checkout_page(request: Request):
@@ -292,7 +291,6 @@ async def serve_booking_checkout_page(request: Request):
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>결제 템플릿(booking_checkout.html)을 찾을 수 없습니다.</h1>", status_code=404)
 
-
 # 🏁 일반 회원 예약 피팅 상품 결제 성공(Payment Success) 화면 HTML 서빙용 프론트엔드 라우팅 (보안 게이트 적용)
 @app.get("/general/payment_success", response_class=HTMLResponse)
 async def serve_payment_success_page(request: Request):
@@ -303,9 +301,6 @@ async def serve_payment_success_page(request: Request):
         with open(success_path, "r", encoding="utf-8", errors="replace") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>결제 완료 템플릿(payment_success.html)을 찾을 수 없습니다.</h1>", status_code=404)
-
-
-
 
 # 🏁 회원가입 라우트
 @app.get("/register", response_class=HTMLResponse)
@@ -327,8 +322,6 @@ async def serve_login():
 # ---------------------------------------------------------
 # 외부 데이터 통신용 API 엔드포인트
 # ---------------------------------------------------------
-
-
 
 @app.get("/api/items/best/{event_type}")
 async def get_best_items(request: Request, event_type: str):
@@ -497,7 +490,6 @@ async def get_item_detail(request: Request, item_id: str):
         data = doc.to_dict()
         
 
-
         paths = data.get("paths", [])
         
         # 만약 이미지가 아예 없다면 임시 이미지라도 할당
@@ -519,8 +511,10 @@ async def get_item_detail(request: Request, item_id: str):
         
         code_val = str(data.get("code", ""))
         models = []
-        info_val = ""
         size_val = {}
+        manufacturer_val = ""
+        country_val = ""
+        material_val = ""
         
         # 1. 일차적으로 개별 아이템(item) 컬렉션에 등록된 기존 desc를 가져옵니다.
         final_desc = str(data.get("desc", ""))
@@ -532,10 +526,12 @@ async def get_item_detail(request: Request, item_id: str):
                     code_data = code_doc.to_dict()
                     # 룩북용 사진 배열 추출 (models 우선, 없으면 path)
                     models = code_data.get("models", code_data.get("path", []))
-                    # info 이미지 추출
-                    info_val = code_data.get("info", "")
                     # 🏁 신규 추가: size(프레임, 렌즈가로, 렌즈세로, 브릿지, 안경다리 스펙) 데이터 추출
                     size_val = code_data.get("size", {})
+                    # 🏁 신규 추가: 제조사, 제조국, 원료 데이터 추출
+                    manufacturer_val = code_data.get("manufacturer", "")
+                    country_val = code_data.get("country", "")
+                    material_val = code_data.get("material", "")
                     
                     # 🏁 신규 로직: code 컬렉션 서랍장에 공통 desc가 작성되어 있다면 이것을 '상품 코멘트'로 덮어씌웁니다.
                     if "desc" in code_data and str(code_data["desc"]).strip():
@@ -559,10 +555,12 @@ async def get_item_detail(request: Request, item_id: str):
             "models": models,      
             # 상세 이미지 데이터 추가
             "details": data.get("details", ""),
-            # code 문서의 info 필드 추가
-            "info": info_val,
             # 🏁 신규 추가: code 컬렉션의 size 데이터 연동
             "size": size_val,
+            # 🏁 신규 추가: 제조사, 제조국, 원료 데이터 연동
+            "manufacturer": manufacturer_val,
+            "country": country_val,
+            "material": material_val,
             # 네이버 구매 링크 파싱 (없을 경우 빈 문자열)
             "naver": str(data.get("naver", "")),
             # 🏁 업데이트: code 기반 통일화된 코멘트 출력
@@ -643,8 +641,6 @@ async def get_related_items(item_id: str):
     except Exception as e:
         print(f"🔥 연관 상품 조회 에러 발생: {e}")
         return {"items": [], "error": str(e)}
-
-
 
 @app.get("/api/promotions")
 async def get_promotions():

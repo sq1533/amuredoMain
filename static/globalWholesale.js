@@ -48,20 +48,19 @@ document.addEventListener("DOMContentLoaded", () => {
             rightNavHTML = `
                 <button class="nav-switch-btn" onclick="location.href='/wholesale/cart'" style="position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="Cart"><span class="material-icons" style="font-size: 1.45rem;">local_mall</span><span class="cart-count-badge" id="pcHeaderCartBadge" style="display: none; position: absolute; top: -5px; right: -5px;">0</span></button>
                 <button class="nav-switch-btn" onclick="location.href='/wholesale/orders'" style="display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="주문현황"><span class="material-icons" style="font-size: 1.45rem;">receipt_long</span></button>
-                <button class="nav-switch-btn" onclick="location.href='/contact'" style="display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="Connect"><span class="material-icons" style="font-size: 1.45rem;">support_agent</span></button>
+                <button class="nav-switch-btn" onclick="location.href='/wholesale/mypage'" style="display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="My Page"><span class="material-icons" style="font-size: 1.45rem;">person</span></button>
                 <button class="nav-switch-btn globalLogoutBtnTrigger" style="color: #d32f2f; display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="Logout"><span class="material-icons" style="font-size: 1.45rem;">logout</span></button>
             `;
         } else if (role === "general") {
             rightNavHTML = `
                 <button class="nav-switch-btn" onclick="location.href='/general/cart'" style="position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="Cart"><span class="material-icons" style="font-size: 1.45rem;">local_mall</span><span class="cart-count-badge" id="pcHeaderCartBadge" style="display: none; position: absolute; top: -5px; right: -5px;">0</span></button>
                 <button class="nav-switch-btn" onclick="location.href='/general/bookings'" style="display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="예약 확인"><span class="material-icons" style="font-size: 1.45rem;">event_note</span></button>
-                <button class="nav-switch-btn" onclick="location.href='/contact'" style="display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="Connect"><span class="material-icons" style="font-size: 1.45rem;">support_agent</span></button>
+                <button class="nav-switch-btn" onclick="location.href='/general/mypage'" style="display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="My Page"><span class="material-icons" style="font-size: 1.45rem;">person</span></button>
                 <button class="nav-switch-btn globalLogoutBtnTrigger" style="color: #d32f2f; display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="Logout"><span class="material-icons" style="font-size: 1.45rem;">logout</span></button>
             `;
         } else { // guest
             rightNavHTML = `
                 <button class="nav-switch-btn" onclick="location.href='/login'" style="display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="Login"><span class="material-icons" style="font-size: 1.45rem;">login</span></button>
-                <button class="nav-switch-btn" onclick="location.href='/contact'" style="display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;" title="Connect"><span class="material-icons" style="font-size: 1.45rem;">support_agent</span></button>
             `;
         }
 
@@ -93,12 +92,6 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <span>Search</span>
                             </button>
                         </li>
-                        <li style="margin-top: 25px; border-top: 1px solid #0e3a5b; padding-top: 15px;">
-                            <button class="nav-switch-btn" onclick="location.href='/contact'" style="display: inline-flex; align-items: center; gap: 10px; color: #0e3a5b; font-weight: 700;">
-                                <span class="material-icons" style="font-size: 1.4rem;">support_agent</span>
-                                <span>Connect</span>
-                            </button>
-                        </li>
                     </ul>
                 </nav>
                 <div class="nav-overlay" id="navOverlay"></div>
@@ -118,6 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="footer-info">
                     <p class="footer-terms-wrap">
                         <a href="/about" class="footer-terms-link">about us</a>
+                        <span style="color: #ccc; margin: 0 8px;">|</span>
+                        <a href="/contact" class="footer-terms-link" style="color: #000000 !important; font-weight: 700;">문의하기</a>
                         <span style="color: #ccc; margin: 0 8px;">|</span>
                         <a href="/static/terms.html" class="footer-terms-link">이용약관</a> 
                         <span style="color: #ccc; margin: 0 8px;">|</span> 

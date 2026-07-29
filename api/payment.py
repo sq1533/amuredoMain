@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Request, HTTPException, BackgroundTasks, Form
 from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
 from starlette.concurrency import run_in_threadpool
 from typing import Optional
@@ -17,7 +17,6 @@ def get_base_url(request: Request) -> str:
     is_local = "localhost" in request.url.netloc or "127.0.0.1" in request.url.netloc
     scheme = "http" if is_local else "https"
     return f"{scheme}://{request.url.netloc}"
-
 
 # -------------------------------------------------------------
 # 다날 결제 설정 로드
@@ -117,11 +116,6 @@ def confirm_danal_payment(method: str, transaction_id: str, merchant_id: str, am
 def sanitize_email(email: str):
     return email.replace(".", ",")
 
-
-
-
-
-
 @router.get("/config")
 async def get_payment_config(request: Request):
     """
@@ -184,8 +178,6 @@ async def create_pending_order(request: Request):
     except Exception as e:
         print(f"🔥 가주문 생성 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
-
-
 
 # -------------------------------------------------------------
 # 텔레그램 설정 로드
@@ -686,7 +678,6 @@ async def cancel_booking(request: Request, booking_id: str, background_tasks: Ba
         print(f"🔥 매장 피팅 예약 취소 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
-
 @router.get("/search_external_store")
 async def search_external_store(request: Request, keyword: str):
     """
@@ -750,7 +741,6 @@ async def search_external_store(request: Request, keyword: str):
     except Exception as e:
         print(f"🔥 외부 매장 검색 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
-
 
 # -------------------------------------------------------------
 # 🏁 피팅 완료 상품 선택 결제 신규 API 엔지니어링 탑재
@@ -827,7 +817,6 @@ async def get_booking_checkout_details(request: Request, booking_id: str):
         print(f"🔥 결제 상세 조회 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
-
 @router.post("/pending_booking_order")
 async def create_pending_booking_order(request: Request):
     """
@@ -895,9 +884,6 @@ async def create_pending_booking_order(request: Request):
     except Exception as e:
         print(f"🔥 피팅 가주문 생성 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
-
-
-
 
 # -------------------------------------------------------------
 # 🏁 다날 결제 전용 성공/실패 콜백 엔드포인트
@@ -1567,9 +1553,6 @@ async def payment_fail_post(
     final_order_id = orderId or orderNo
     return await process_payment_fail(request, code, message, final_order_id)
 
-
-
-
 # -------------------------------------------------------------
 # 🏁 카카오페이 API 엔드포인트
 # -------------------------------------------------------------
@@ -1648,10 +1631,6 @@ async def kakaopay_ready(request: Request):
         print(f"🔥 카카오페이 준비 예외 발생: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
-
-
-
-
 @router.get("/kakaopay_fail")
 async def kakaopay_fail(request: Request, orderNo: str, status: str):
     """
@@ -1659,7 +1638,6 @@ async def kakaopay_fail(request: Request, orderNo: str, status: str):
     """
     msg = "결제가 사용자에 의해 취소되었습니다." if status == "cancel" else "결제 승인 전 단계에서 처리에 실패했습니다."
     return await process_payment_fail(request, code=status, message=msg, orderId=orderNo)
-
 
 # -------------------------------------------------------------
 # 🏁 토스페이 API 엔드포인트 (Toss Pay V2 간편결제)
@@ -1732,10 +1710,6 @@ async def tosspay_ready(request: Request):
         print(f"🔥 토스페이 준비 예외 발생: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
-
-
-
-
 @router.get("/tosspay_fail")
 async def tosspay_fail(request: Request, orderNo: str, status: str):
     """
@@ -1743,7 +1717,6 @@ async def tosspay_fail(request: Request, orderNo: str, status: str):
     """
     msg = "결제가 사용자에 의해 취소되었습니다." if status == "cancel" else "결제 승인 전 단계에서 처리에 실패했습니다."
     return await process_payment_fail(request, code=status, message=msg, orderId=orderNo)
-
 
 # -------------------------------------------------------------
 # 🏁 결제 성공 영수증 조회를 위한 신규 API 2종
@@ -1773,7 +1746,6 @@ async def get_wholesale_order_detail(request: Request, order_id: str):
     except Exception as e:
         print(f"🔥 도매 주문 단건 조회 에러: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @router.get("/booking_order/{order_id}")
 async def get_booking_order_detail(request: Request, order_id: str):
@@ -1825,7 +1797,6 @@ async def get_booking_order_detail(request: Request, order_id: str):
     except Exception as e:
         print(f"🔥 피팅 주문 단건 조회 에러: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
 
 # -------------------------------------------------------------
 # 🏁 피팅 서비스 리뷰(후기) 연동 API 탑재
@@ -1998,7 +1969,6 @@ async def get_fitting_reviews(limit: int = 30):
         print(f"🔥 전체 리뷰 조회 중 에러: {e}")
         return {"status": "error", "message": str(e), "reviews": []}
 
-
 @router.post("/booking_order/cancel_request")
 async def request_booking_order_cancel(request: Request, background_tasks: BackgroundTasks):
     """
@@ -2090,7 +2060,6 @@ async def request_booking_order_cancel(request: Request, background_tasks: Backg
     except Exception as e:
         print(f"🔥 일반 주문 취소 요청 처리 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
-
 
 @router.post("/booking_order/exchange_request")
 async def request_booking_order_exchange(request: Request, background_tasks: BackgroundTasks):

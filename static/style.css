@@ -3662,7 +3662,9 @@ body.main-body {
     text-decoration: none !important;
 }
 
-
+.quick-btn:hover {
+    background: #f8f9fa !important;
+}
 
 /* 대각선 경계 구분선 */
 .diagonal-divider {
@@ -3713,7 +3715,7 @@ body.main-body {
 }
 
 .search-overlay.active .search-panel {
-    right: 0 !important; /* 활성화 시 미끄러져 들어옴 */
+    right: 0 !important;
 }
 
 /* 닫기 버튼 */
@@ -3978,5 +3980,88 @@ body.main-body {
     }
     .detail-info-section .info-text-wrapper {
         width: 100% !important;
+    }
+}
+
+/* 🕶️ 상품 상세페이지 B2B/B2C 공통 제조 정보 아코디언 (1안 숨김 UI) */
+.item-spec-accordion {
+    width: 100%;
+    margin: 25px 0 15px 0;
+    border-top: 1px solid #eaeaea;
+    border-bottom: 1px solid #eaeaea;
+    box-sizing: border-box;
+}
+
+.item-spec-trigger {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 14px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: var(--fs-s) !important; /* 글로벌 가변 폰트 (스몰) */
+    font-weight: 700;
+    color: #888888;
+    text-align: left;
+    transition: color 0.3s;
+}
+
+.item-spec-trigger:hover {
+    color: #333333;
+}
+
+.item-spec-trigger .arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.item-spec-trigger.active .arrow {
+    transform: rotate(180deg);
+}
+
+.item-spec-content {
+    display: none;
+    padding: 0 0 16px 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.item-spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.item-spec-table th, 
+.item-spec-table td {
+    padding: 8px 0;
+    line-height: 1.4;
+    text-align: left;
+}
+
+.item-spec-table th {
+    width: 25%;
+    font-weight: 700;
+    color: #888888;
+    font-size: var(--fs-s) !important; /* 글로벌 가변 폰트 (스몰) */
+}
+
+.item-spec-table td {
+    width: 75%;
+    font-weight: 500;
+    color: #555555;
+    font-size: var(--fs-sm) !important; /* 글로벌 가변 폰트 (부가내용) */
+}
+
+/* 🏁 모바일 환경 전용 제품 정보 고지 섹션 좌우 마진/패딩 보완 */
+@media screen and (max-width: 768px) {
+    .item-spec-accordion {
+        width: calc(100% - 30px) !important; /* 좌우 15px씩 여유를 두고 100%에서 감산 */
+        margin: 25px auto 15px auto !important; /* 중앙 정렬하여 좌우 15px 마진 자동 획득! */
+        box-sizing: border-box !important;
     }
 }

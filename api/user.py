@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException, Response, BackgroundTasks
-from typing import Optional
+from fastapi import APIRouter, Request, Form, HTTPException, BackgroundTasks, Response
+from fastapi.responses import RedirectResponse, JSONResponse
 from starlette.concurrency import run_in_threadpool
+from datetime import date
 from firebase_admin import firestore
 from firebase_admin import db as rtdb
 import requests
@@ -8,10 +9,8 @@ import os
 import re
 import json
 import bcrypt
-import secrets
 import urllib.parse
-from datetime import date
-from fastapi.responses import RedirectResponse
+import secrets
 
 router = APIRouter()
 
@@ -28,8 +27,6 @@ def get_social_redirect_uri(request: Request, provider: str) -> str:
     elif provider == "kakao":
         return KAKAO_TEST_REDIRECT_URI if (is_local and KAKAO_TEST_REDIRECT_URI) else KAKAO_REDIRECT_URI
     return ""
-
-
 
 # 텔레그램 설정 로드 (database/telegram.json)
 TELEGRAM_BOT_TOKEN = None
@@ -292,7 +289,6 @@ async def load_cart(request: Request):
     except Exception as e:
         print(f"🔥 RTDB 장바구니 로드 에러: {e}")
         return {"status": "error", "message": str(e), "cart": []}
-
 
 # 회원 정보 조회 (마이페이지용)
 @router.get("/me")
@@ -749,7 +745,6 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
         print(f"🔥 카카오 로그인 진행 중 심각한 예외 발생: {e}")
         return RedirectResponse(url="/login?error=system_error")
 
-
 # -------------------------------------------------------------
 # 7. 파트너 안경점 조회 API 신설
 # -------------------------------------------------------------
@@ -832,5 +827,4 @@ async def get_general_user_info(request: Request):
     except Exception as e:
         print(f"🔥 일반 회원 정보 로드 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
-
 

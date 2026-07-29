@@ -39,6 +39,42 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
+            // 🏁 B2B/B2C 공통 제조 정보 아코디언 (1안 숨김 UI) 렌더링 및 연동
+            const itemSpecAccordion = document.getElementById("itemSpecAccordion");
+            const specManufacturer = document.getElementById("specManufacturer");
+            const specCountry = document.getElementById("specCountry");
+            const specMaterial = document.getElementById("specMaterial");
+            const itemSpecTrigger = document.getElementById("itemSpecTrigger");
+            const itemSpecContent = document.getElementById("itemSpecContent");
+
+            if (itemSpecAccordion && itemSpecTrigger && itemSpecContent) {
+                const hasSpec = (data.manufacturer && data.manufacturer.trim() !== "") ||
+                                (data.country && data.country.trim() !== "") ||
+                                (data.material && data.material.trim() !== "");
+
+                if (hasSpec) {
+                    if (specManufacturer) specManufacturer.textContent = data.manufacturer || "-";
+                    if (specCountry) specCountry.textContent = data.country || "-";
+                    if (specMaterial) specMaterial.textContent = data.material || "-";
+
+                    itemSpecAccordion.style.display = 'block';
+
+                    itemSpecTrigger.onclick = () => {
+                        const isExpanded = itemSpecTrigger.getAttribute("aria-expanded") === "true";
+                        itemSpecTrigger.setAttribute("aria-expanded", !isExpanded);
+                        itemSpecTrigger.classList.toggle("active");
+
+                        if (!isExpanded) {
+                            itemSpecContent.style.display = "block";
+                        } else {
+                            itemSpecContent.style.display = "none";
+                        }
+                    };
+                } else {
+                    itemSpecAccordion.style.display = 'none';
+                }
+            }
+
             // 🏁 [요청사항 1 & 2] 네이버 스마트스토어 버튼 제거 및 장바구니 담기 버튼 탑재
             const cartAddBtn = document.getElementById("cartAddBtn");
             if (cartAddBtn) {
@@ -53,7 +89,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const detailImagesSection = document.getElementById("detailImagesSection");
             const detailProductImg = document.getElementById("detailProductImg");
             const detailModelImagesContainer = document.getElementById("detailModelImagesContainer");
-            const detailInfoImg = document.getElementById("detailInfoImg");
 
             if (detailImagesSection) {
                 detailImagesSection.style.display = 'block'; // 상세 이미지 섹션 노출 개시

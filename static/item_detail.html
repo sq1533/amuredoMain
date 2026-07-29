@@ -24,7 +24,7 @@
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <!-- 외부 공통 스타일시트 연결 (캐시 무효화) -->
-    <link rel="stylesheet" href="/static/style.css?v=63.0">
+    <link rel="stylesheet" href="/static/style.css?v=71.0">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
     <script>
@@ -173,6 +173,30 @@
                 <!-- 상품 코멘트 (인용 디자인용 컨테이너) -->
                 <div class="detail-item-desc" id="detailItemDesc" style="display: none;"></div>
                 
+                <!-- B2B/B2C 공통 제조 정보 아코디언 (1안 숨김 UI) -->
+                <div class="item-spec-accordion" id="itemSpecAccordion" style="display: none;">
+                    <button class="item-spec-trigger" id="itemSpecTrigger" aria-expanded="false">
+                        <span>제품 정보 고지</span>
+                        <span class="arrow">⌵</span>
+                    </button>
+                    <div class="item-spec-content" id="itemSpecContent">
+                        <table class="item-spec-table">
+                            <tr>
+                                <th>제조자</th>
+                                <td id="specManufacturer">-</td>
+                            </tr>
+                            <tr>
+                                <th>제조국</th>
+                                <td id="specCountry">-</td>
+                            </tr>
+                            <tr>
+                                <th>원료</th>
+                                <td id="specMaterial">-</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
                 <!-- 장바구니 담기 버튼 영역 -->
                 <div class="cart-btn-wrapper" id="cartBtnWrapper">
                     <button class="cart-add-btn" id="cartAddBtn" style="display: none;">장바구니 담기</button>
@@ -310,7 +334,7 @@
     </div>
 
     <!-- 상세 페이지 로직 파일 (V버전 증가) -->
-    <script src="/static/itemDetail.js?v=63.0"></script>
+    <script src="/static/itemDetail.js?v=71.0"></script>
     
     <!-- 공통 메뉴 동작용 스크립트 -->
     <script>
@@ -330,6 +354,6 @@
             if(navOverlay) navOverlay.addEventListener("click", toggleMenu);
         });
     </script>
-<script src="/static/globalWholesale.js?v=63.0"></script>
+<script src="/static/globalWholesale.js?v=71.0"></script>
 </body>
 </html>
