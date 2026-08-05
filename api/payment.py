@@ -831,24 +831,39 @@ async def create_pending_booking_order(request: Request):
         body = await request.json()
         booking_id = body.get("bookingId")
         selected_item_ids = body.get("items", [])
+        address = body.get("address", "")
+        phone = body.get("phone", "")
         
         if not booking_id or not selected_item_ids:
             return JSONResponse(status_code=400, content={"status": "error", "message": "필수 결제 요청 정보가 누락되었습니다."})
             
         safe_email = sanitize_email(email)
         
-        # 1. 예약 건 정보 조회
-        booking_ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
-        booking_data = booking_ref.get()
-        if not booking_data:
-            return JSONResponse(status_code=404, content={"status": "error", "message": "예약 내역을 찾을 수 없습니다."})
+        # 1. 예약 건 정보 조회 및 direct_buy 예외 분기
+        db_fs = firestore.client()
+        if booking_id.startswith("DIRECT-"):
+            user_doc = db_fs.collection("general_users").document(email).get()
+            user_name = "일반 고객"
+            user_phone = ""
+            if user_doc.exists:
+                ud = user_doc.to_dict()
+                user_name = ud.get("name", "일반 고객")
+                user_phone = ud.get("phoneNumber", "")
+            booking_data = {
+                "customerName": user_name,
+                "customerPhone": user_phone,
+                "bookingType": "direct"
+            }
+        else:
+            booking_ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
+            booking_data = booking_ref.get()
+            if not booking_data:
+                return JSONResponse(status_code=404, content={"status": "error", "message": "예약 내역을 찾을 수 없습니다."})
             
         # 2. 서버 측 소비자 가격 합산 연산 (변조 방지)
-        db_fs = firestore.client()
-        
         total_amount = 0
         for item_id in selected_item_ids:
-            if item_id not in booking_data.get("items", []):
+            if not booking_id.startswith("DIRECT-") and item_id not in booking_data.get("items", []):
                 return JSONResponse(status_code=400, content={"status": "error", "message": "예약 내역에 포함되지 않은 상품이 선택되었습니다."})
                 
             item_doc = db_fs.collection("item").document(item_id).get()
@@ -873,9 +888,10 @@ async def create_pending_booking_order(request: Request):
             "items": selected_item_ids,
             "customer": {
                 "name": booking_data.get("customerName", "고객"),
-                "phone": booking_data.get("customerPhone", ""),
+                "phone": phone or booking_data.get("customerPhone", ""),
                 "email": email
             },
+            "address": address or booking_data.get("address", ""),
             "status": "결제대기",
             "createdAt": now.isoformat()
         })
@@ -1200,24 +1216,25 @@ async def process_booking_success(
     booking_order_ref.update(booking_order_update)
 
     # 예약 상태 업데이트
-    safe_email = sanitize_email(customer_email)
-    booking_ref = rtdb.reference(f"booking/{safe_email}/{booking_id}")
-    booking_ref.update({"status": status_text})
+    if not booking_id.startswith("DIRECT-"):
+        safe_email = sanitize_email(customer_email)
+        booking_ref = rtdb.reference(f"booking/{safe_email}/{booking_id}")
+        booking_ref.update({"status": status_text})
 
-    # 결제 완료 시 작성된 리뷰가 있다면 구매 완료 스티커 부착 상태로 업데이트
-    try:
-        bdata = booking_ref.get()
-        if bdata:
-            r_date = bdata.get("reservedDate")
-            r_time = bdata.get("reservedTime")
-            if r_date and r_time:
-                review_doc_id = f"{r_date}_{r_time}"
-                db_fs = firestore.client()
-                review_ref = db_fs.collection("fitting_reviews").document(review_doc_id)
-                if review_ref.get().exists:
-                    review_ref.update({"is_purchased": True})
-    except Exception as re_err:
-        print(f"🔥 결제 완료 후 리뷰 상태 업데이트 실패: {re_err}")
+        # 결제 완료 시 작성된 리뷰가 있다면 구매 완료 스티커 부착 상태로 업데이트
+        try:
+            bdata = booking_ref.get()
+            if bdata:
+                r_date = bdata.get("reservedDate")
+                r_time = bdata.get("reservedTime")
+                if r_date and r_time:
+                    review_doc_id = f"{r_date}_{r_time}"
+                    db_fs = firestore.client()
+                    review_ref = db_fs.collection("fitting_reviews").document(review_doc_id)
+                    if review_ref.get().exists:
+                        review_ref.update({"is_purchased": True})
+        except Exception as re_err:
+            print(f"🔥 결제 완료 후 리뷰 상태 업데이트 실패: {re_err}")
 
     # 텔레그램 접수 안내
     customer_name = order_data.get("customer", {}).get("name", "알 수 없음")
@@ -1236,10 +1253,23 @@ async def process_booking_success(
     goods_summary = f"{first_item_name} 포함 총 {len(paid_items_ids)}개"
     
     status_msg = "결제 완료"
-    tg_message = (
-        f"🏦 <b>[피팅 완료 상품 {status_msg} ({selected_method})]</b>\n\n"
-        f"<b>예약번호:</b> {booking_id}\n"
-        f"<b>주문번호:</b> {final_order_id}\n"
+    if booking_id.startswith("DIRECT-"):
+        tg_message = (
+            f"📦 <b>[온라인 바로 구매 결제 완료 ({selected_method})]</b>\n\n"
+            f"<b>주문번호:</b> {final_order_id}\n"
+            f"<b>고객명:</b> {customer_name} ({customer_email})\n"
+            f"<b>연락처:</b> {customer_phone}\n"
+            f"<b>배송지 주소:</b> {order_data.get('address', '미기재')}\n"
+            f"<b>금액:</b> ₩{int(resolved_amount):,}\n"
+            f"<b>상품:</b> {goods_summary}\n"
+            f"<b>배송유형:</b> 택배 배송 상품\n"
+            f"<b>일시:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        )
+    else:
+        tg_message = (
+            f"🏦 <b>[피팅 완료 상품 {status_msg} ({selected_method})]</b>\n\n"
+            f"<b>예약번호:</b> {booking_id}\n"
+            f"<b>주문번호:</b> {final_order_id}\n"
         f"<b>고객명:</b> {customer_name} ({customer_email})\n"
         f"<b>연락처:</b> {customer_phone}\n"
         f"<b>금액:</b> ₩{int(resolved_amount):,}\n"
