@@ -21,7 +21,7 @@
     
     <!-- 전역 메인 폰트 Pretendard 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=77.0">
+    <link rel="stylesheet" href="/static/style.css?v=89.0">
     <style>
         .mypage-wrapper {
             display: flex;
@@ -290,12 +290,29 @@
                 }
             });
 
-            // 3. 회원탈퇴 보류 처리 안내 팝업
+            // 3. 실시간 회원탈퇴 기동
             btnWithdraw.addEventListener("click", () => {
-                alert("회원탈퇴 서비스는 현재 본사 고객센터를 통해 개별 접수 처리 중입니다.\n입점 제안 및 Connect(문의하기) 채널을 이용해 문의 주시면 전담 부서를 통해 신속하게 도움을 드리겠습니다.");
+                if (confirm("정말로 탈퇴하시겠습니까?\n탈퇴 시 기존 장바구니 내역 및 회원 정보가 만료 처리됩니다.")) {
+                    fetch("/api/user/general/withdraw", {
+                        method: "POST"
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.status === "success") {
+                                alert(data.message);
+                                location.href = "/";
+                            } else {
+                                alert(data.message || "탈퇴 처리 중 에러가 발생했습니다.");
+                            }
+                        })
+                        .catch(err => {
+                            console.error("회원탈퇴 에러:", err);
+                            alert("시스템 에러가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+                        });
+                }
             });
         });
     </script>
-    <script src="/static/globalWholesale.js?v=77.0"></script>
+    <script src="/static/globalWholesale.js?v=89.0"></script>
 </body>
 </html>

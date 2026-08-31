@@ -9,7 +9,7 @@
     <link rel="icon" href="/static/img/icon.webp" type="image/webp">
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=77.0">
+    <link rel="stylesheet" href="/static/style.css?v=89.0">
     <style>
 /* Global Grid based Login/Register */
 
@@ -385,6 +385,21 @@
                 });
             }
 
+            // [🏁 소셜 로그인 콜백 예외 상황 처리]
+            const urlParams = new URLSearchParams(window.location.search);
+            const errParam = urlParams.get('error');
+            if (errParam === 'agreement_required') {
+                showModal('error', '약관 동의 필요', '소셜 가입을 위해 약관 동의가 필요합니다.<br>회원가입 페이지로 이동합니다.', () => {
+                    location.href = "/register";
+                });
+            } else if (errParam === 'cancel') {
+                showModal('error', '로그인 취소', '소셜 로그인이 취소되었습니다.');
+            } else if (errParam === 'under_14') {
+                showModal('error', '가입 제한', '만 14세 미만은 가입이 제한됩니다.');
+            } else if (errParam === 'system_error') {
+                showModal('error', '시스템 오류', '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+            }
+
             // 3. 로그인 패널 일반/도매 전환 애니메이션
             const loginTabCustomer = document.getElementById("loginTabCustomer");
             const loginTabWholesale = document.getElementById("loginTabWholesale");
@@ -523,6 +538,6 @@
             }
         });
     </script>
-    <script src="/static/globalWholesale.js?v=77.0"></script>
+    <script src="/static/globalWholesale.js?v=89.0"></script>
 </body>
 </html>

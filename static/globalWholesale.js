@@ -73,9 +73,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
                 </div>
                 <nav class="pc-nav-center">
-                    <button class="nav-switch-btn antioch-nav-btn" onclick="location.href='/antioch'">ANTIOCH</button>
-                    <button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button>
-                    <button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button>
+                    <button class="nav-switch-btn" onclick="location.href='/trench'">Trench</button>
+                    <button class="nav-switch-btn" onclick="location.href='/ascot'">Ascot</button>
+                    <button class="nav-switch-btn" onclick="location.href='/uncon'">Uncon</button>
+                    <button class="nav-switch-btn" onclick="location.href='/bolero'">Bolero</button>
+                    <button class="nav-switch-btn" onclick="location.href='/dublin'">Dublin</button>
                 </nav>
                 <nav class="pc-nav-right">
                     ${rightNavHTML}
@@ -83,9 +85,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 <nav class="page-nav" id="pageNav">
                     <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
                     <ul class="nav-links">
-                        <li><button class="nav-switch-btn antioch-nav-btn" onclick="location.href='/antioch'">ANTIOCH</button></li>
-                        <li><button class="nav-switch-btn" onclick="location.href='/glasses'">Glasses</button></li>
-                        <li><button class="nav-switch-btn" onclick="location.href='/sunglasses'">Sunwear</button></li>
+                        <li><button class="nav-switch-btn" onclick="location.href='/trench'">Trench</button></li>
+                        <li><button class="nav-switch-btn" onclick="location.href='/ascot'">Ascot</button></li>
+                        <li><button class="nav-switch-btn" onclick="location.href='/uncon'">Uncon</button></li>
+                        <li><button class="nav-switch-btn" onclick="location.href='/bolero'">Bolero</button></li>
+                        <li><button class="nav-switch-btn" onclick="location.href='/dublin'">Dublin</button></li>
                         <li style="margin-top: 25px; border-top: 1px solid #0e3a5b; padding-top: 15px;">
                             <button class="nav-switch-btn" id="sidebarSearchBtn" style="display: inline-flex; align-items: center; gap: 10px; color: #555; font-weight: 600;">
                                 <span class="material-icons" style="font-size: 1.45rem;">search</span>

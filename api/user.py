@@ -469,7 +469,7 @@ async def naver_callback(request: Request, code: str = None, state: str = None, 
         # 세션에서 마지막 방문 페이지 획득 및 제거
         next_url = request.session.pop("social_next", None)
         
-        if user_doc.exists:
+        if user_doc.exists and user_doc.to_dict().get("role") != "out":
             # [A] 기존 일반 회원 로그인 처리
             request.session.pop("social_agree", None)  # 불필요한 동의 세션 정리
             request.session["user_id"] = email
@@ -670,7 +670,7 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
         # 세션에서 마지막 방문 페이지 획득 및 제거
         next_url = request.session.pop("social_next", None)
         
-        if user_doc.exists:
+        if user_doc.exists and user_doc.to_dict().get("role") != "out":
             # [A] 기존 일반 회원 로그인 처리
             request.session.pop("social_agree", None)  # 불필요한 동의 세션 정리
             request.session["user_id"] = email
@@ -826,5 +826,60 @@ async def get_general_user_info(request: Request):
         }
     except Exception as e:
         print(f"🔥 일반 회원 정보 로드 에러: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+# -------------------------------------------------------------
+# 🏁 일반 소셜 로그인 고객 회원 탈퇴 API
+# -------------------------------------------------------------
+@router.post("/general/withdraw")
+async def withdraw_general_user(request: Request, response: Response):
+    """
+    일반 소셜 로그인 고객의 회원 탈퇴를 처리합니다.
+    탈퇴 고객의 Firestore 문서 role 필드를 "out"으로 대체하여 탈퇴 처리를 식별하고, 세션 및 쿠키를 정리합니다.
+    """
+    email = request.session.get("user_id")
+    user_role = request.session.get("user_role", "guest")
+    if not email or user_role != "general":
+        return JSONResponse(status_code=403, content={"status": "error", "message": "권한이 없습니다. 일반 고객 로그인이 필요합니다."})
+        
+    try:
+        db_fs = firestore.client()
+        user_ref = db_fs.collection("general_users").document(email)
+        user_doc = user_ref.get()
+        
+        if not user_doc.exists:
+            return JSONResponse(status_code=404, content={"status": "error", "message": "회원 정보를 찾을 수 없습니다."})
+            
+        user_data = user_doc.to_dict()
+        provider = user_data.get("provider", "")
+        if not provider:
+            # Fallback 도메인 판별
+            if "naver.com" in email.lower():
+                provider = "naver"
+            else:
+                provider = "kakao"
+                
+        # SNS 회원에 한해서 회원 탈퇴 활성화
+        if provider not in ["naver", "kakao"]:
+            return JSONResponse(status_code=400, content={"status": "error", "message": "소셜(SNS) 로그인 가입 회원에 한하여 탈퇴 처리가 가능합니다."})
+            
+        # 식별 필드인 role을 "out"으로 대체 (탈퇴 식별값)
+        user_ref.update({
+            "role": "out",
+            "withdrawn_at": firestore.SERVER_TIMESTAMP
+        })
+        
+        # 세션 초기화
+        request.session.clear()
+        
+        # 쿠키 삭제
+        response.delete_cookie(key="amuredo_role", path="/")
+        response.delete_cookie(key="general_cart", path="/")
+        response.delete_cookie(key="wholesale_cart", path="/")
+        
+        return {"status": "success", "message": "회원 탈퇴가 성공적으로 완료되었습니다."}
+        
+    except Exception as e:
+        print(f"🔥 일반 회원 탈퇴 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 

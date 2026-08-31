@@ -31,11 +31,11 @@ document.addEventListener("DOMContentLoaded", () => {
             allFetchedItems = data.items || [];
             
             if (allFetchedItems.length > 0) {
-                // 1. 유일한(Unique) 하위 카테고리 키워드 추출 (Set)
+                // 1. 유일한(Unique) 컬러 키워드 추출 (Set)
                 const keywords = new Set();
                 allFetchedItems.forEach(item => {
-                    if (item.category) {
-                        keywords.add(item.category);
+                    if (item.color && item.color.trim()) {
+                        keywords.add(item.color.trim());
                     }
                 });
                 
@@ -73,7 +73,9 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (selectedValue === 'ALL') {
                             renderCategoryItems(allFetchedItems);
                         } else {
-                            const filteredItems = allFetchedItems.filter(item => item.category === selectedValue);
+                            const filteredItems = allFetchedItems.filter(item => 
+                                item.color && item.color.trim() === selectedValue.trim()
+                            );
                             renderCategoryItems(filteredItems);
                         }
                     });
@@ -104,7 +106,9 @@ document.addEventListener("DOMContentLoaded", () => {
                             if (selectedValue === 'ALL') {
                                 renderCategoryItems(allFetchedItems);
                             } else {
-                                const filteredItems = allFetchedItems.filter(item => item.category === selectedValue);
+                                const filteredItems = allFetchedItems.filter(item => 
+                                    item.color && item.color.trim() === selectedValue.trim()
+                                );
                                 renderCategoryItems(filteredItems);
                             }
                             filterApplied = true;

@@ -140,10 +140,17 @@ async def serve_wholesale_orders(request: Request):
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>주문 현황 화면을 찾을 수 없습니다.</h1>", status_code=404)
 
-@app.get("/sunglasses", response_class=HTMLResponse)
-@app.get("/glasses", response_class=HTMLResponse)
-@app.get("/antioch", response_class=HTMLResponse)
-@app.get("/goggles", response_class=HTMLResponse)
+@app.get("/glasses")
+@app.get("/sunglasses")
+@app.get("/antioch")
+async def redirect_to_home():
+    return RedirectResponse(url="/")
+
+@app.get("/trench", response_class=HTMLResponse)
+@app.get("/ascot", response_class=HTMLResponse)
+@app.get("/uncon", response_class=HTMLResponse)
+@app.get("/bolero", response_class=HTMLResponse)
+@app.get("/dublin", response_class=HTMLResponse)
 async def serve_category_page(request: Request):
     """
     프론트엔드 카테고리 전용 페이지 서빙 (itemList.html 반환)
@@ -334,7 +341,7 @@ async def get_best_items(request: Request, event_type: str):
         
     try:
         # 요청된 event_type 필드와 일치하는 문서들만 조회
-        docs = db.collection('item').where('event', '==', event_type).stream()
+        docs = db.collection('item_ato').where('event', '==', event_type).stream()
         
         is_wholesale = request.session.get("is_wholesale", False)
         
@@ -380,7 +387,7 @@ async def search_items(request: Request, q: str = ""):
         if not q_clean:
             return {"items": []}
             
-        docs = db.collection('item').stream()
+        docs = db.collection('item_ato').stream()
         is_wholesale = request.session.get("is_wholesale", False)
         
         q_lower = q_clean.lower()
@@ -431,7 +438,7 @@ async def get_items_by_category(request: Request, category: str):
         
     try:
         # sort 필드값이 요쳥된 카테고리와 일치하는 문서들만 조회
-        docs = db.collection('item').where('sort', '==', category).stream()
+        docs = db.collection('item_ato').where('sort', '==', category).stream()
         
         is_wholesale = request.session.get("is_wholesale", False)
         
@@ -458,7 +465,8 @@ async def get_items_by_category(request: Request, category: str):
                 "name": data.get("name", "이름 없음"),
                 "price": formatted_price,
                 "image_url": image_url,
-                "category": str(data.get("category", "")) # 🏁 신규: 프론트엔드 Set 필터 연동용 데이터
+                "category": str(data.get("category", "")),
+                "color": str(data.get("color", ""))
             })
             
         print(f"✅ Firebase 조회 완료: '{category}' 카테고리의 하단 텍스트형 {len(real_items)}개 아이템 전달.")
@@ -481,7 +489,7 @@ async def get_item_detail(request: Request, item_id: str):
         
     try:
         # 단일 문서 직접 포인팅 조회
-        doc_ref = db.collection('item').document(item_id)
+        doc_ref = db.collection('item_ato').document(item_id)
         doc = doc_ref.get()
         
         if not doc.exists:
@@ -607,7 +615,7 @@ async def get_related_items(item_id: str):
         
     try:
         # 1. 현재 타겟팅된 아이템의 원본 문서를 찾아 code 값 파악
-        target_doc = db.collection('item').document(item_id).get()
+        target_doc = db.collection('item_ato').document(item_id).get()
         if not target_doc.exists:
             return {"items": [], "error": "원본 상품이 존재하지 않습니다."}
             
@@ -619,7 +627,7 @@ async def get_related_items(item_id: str):
             return {"items": []}
             
         # 2. 동일한 코드를 가진 컬렉션 전체 스캔 (서버단 필터링)
-        matched_docs = db.collection('item').where('code', '==', target_code).stream()
+        matched_docs = db.collection('item_ato').where('code', '==', target_code).stream()
         
         related_items = []
         for doc in matched_docs:

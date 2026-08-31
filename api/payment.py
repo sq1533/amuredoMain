@@ -866,7 +866,7 @@ async def create_pending_booking_order(request: Request):
             if not booking_id.startswith("DIRECT-") and item_id not in booking_data.get("items", []):
                 return JSONResponse(status_code=400, content={"status": "error", "message": "예약 내역에 포함되지 않은 상품이 선택되었습니다."})
                 
-            item_doc = db_fs.collection("item").document(item_id).get()
+            item_doc = db_fs.collection("item_ato").document(item_id).get()
             if item_doc.exists:
                 idata = item_doc.to_dict()
                 total_amount += int(idata.get("price", 0))
@@ -1245,7 +1245,7 @@ async def process_booking_success(
     first_item_name = "안경 상품"
     if len(paid_items_ids) > 0:
         try:
-            item_doc = db_fs.collection("item").document(paid_items_ids[0]).get()
+            item_doc = db_fs.collection("item_ato").document(paid_items_ids[0]).get()
             if item_doc.exists:
                 first_item_name = item_doc.to_dict().get("name", "안경 상품")
         except Exception:

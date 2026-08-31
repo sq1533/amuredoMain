@@ -3167,19 +3167,7 @@ body.main-body {
     padding-left: 40px !important; /* 약간의 좌측 패딩으로 균형감 확보 */
 }
 
-/* 5. 시리즈 이미지 요소 (3x1 가변) 4개 */
-.series-img-01, .series-img-02, .series-img-03, .series-img-04 {
-    grid-column: span 3 !important;
-    grid-row: span 1 !important;
-}
 
-/* 6. 시리즈 텍스트 요소 (3x1 가변) 4개 */
-.series-txt-01, .series-txt-02, .series-txt-03, .series-txt-04 {
-    grid-column: span 3 !important;
-    grid-row: span 1 !important;
-    justify-content: center !important;
-    text-align: center !important;
-}
 
 /* 와이어프레임 텍스트 스타일 */
 .wireframe-text {
@@ -3254,38 +3242,7 @@ body.main-body {
         height: auto !important;
         min-height: 0 !important;
     }
-    .series-img-01 {
-        grid-column: span 3 !important;
-        grid-row: 22 !important;
-    }
-    .series-img-02 {
-        grid-column: span 3 !important;
-        grid-row: 22 !important;
-    }
-    .series-txt-01 {
-        grid-column: span 3 !important;
-        grid-row: 23 !important;
-    }
-    .series-txt-02 {
-        grid-column: span 3 !important;
-        grid-row: 23 !important;
-    }
-    .series-img-03 {
-        grid-column: span 3 !important;
-        grid-row: 24 !important;
-    }
-    .series-img-04 {
-        grid-column: span 3 !important;
-        grid-row: 24 !important;
-    }
-    .series-txt-03 {
-        grid-column: span 3 !important;
-        grid-row: 25 !important;
-    }
-    .series-txt-04 {
-        grid-column: span 3 !important;
-        grid-row: 25 !important;
-    }
+
     .search-panel {
         width: 100% !important;
         max-width: 600px !important;
@@ -3556,38 +3513,7 @@ body.main-body {
         height: auto !important;
         min-height: 0 !important;
     }
-    .series-img-01 {
-        grid-column: span 2 !important;
-        grid-row: 33 !important;
-    }
-    .series-img-02 {
-        grid-column: span 2 !important;
-        grid-row: 33 !important;
-    }
-    .series-txt-01 {
-        grid-column: span 2 !important;
-        grid-row: 34 !important;
-    }
-    .series-txt-02 {
-        grid-column: span 2 !important;
-        grid-row: 34 !important;
-    }
-    .series-img-03 {
-        grid-column: span 2 !important;
-        grid-row: 35 !important;
-    }
-    .series-img-04 {
-        grid-column: span 2 !important;
-        grid-row: 35 !important;
-    }
-    .series-txt-03 {
-        grid-column: span 2 !important;
-        grid-row: 36 !important;
-    }
-    .series-txt-04 {
-        grid-column: span 2 !important;
-        grid-row: 36 !important;
-    }
+
     .search-panel {
         width: 100% !important;
         max-width: 600px !important;
