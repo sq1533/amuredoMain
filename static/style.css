@@ -4,11 +4,19 @@
    🌐 GLOBAL DECLARATION (Variables, Fonts, Grid Systems)
    ========================================================================== */
 :root {
-    /* Color Palette */
-    --color-bg-primary: #F7F7F7;
-    --color-text-primary: #222222;
-    --color-hamburger-bg: #E5E3DD;
-    --color-hamburger-line: #222222;
+    /* 브랜드 전역 중앙 관리 컬러 팔레트 */
+    --color-bg-primary: #F7F7F7;       /* 기본 메인 바탕 배경색 */
+    --color-bg-white: #FFFFFF;         /* 패널/카드 백그라운드 */
+    
+    --color-walnut: #4A2E1B;           /* 딥 월넛 (메인 브랜드/타이틀/강조) */
+    --color-walnut-hover: #362113;     /* 딥 월넛 호버/클릭 */
+    
+    --color-navy: #1A222D;             /* 미드나이트 네이비 (포인트/버튼/주요 헤더) */
+    --color-navy-hover: #121820;       /* 미드나이트 네이비 호버 */
+    
+    --color-text-primary: #222222;     /* 기본 타이틀/본문 폰트색 */
+    --color-text-sub: #666666;         /* 부제목/보조 텍스트 폰트색 */
+    --color-border: #EAEAEA;           /* 구분선 및 테두리 컬러 */
 
     /* Typography */
     --font-primary: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -344,7 +352,7 @@ body {
         justify-content: center !important;
         width: var(--hamburger-btn-size) !important;
         height: var(--hamburger-btn-size) !important;
-        background-color: #0e3b5d !important;
+        background-color: #1A222D !important;
         border: none !important;
         border-radius: 4px !important;
         cursor: pointer !important;
@@ -465,7 +473,7 @@ body {
 .brand-story-header .eng-title {
     display: block;
     font-size: 1.1rem;
-    color: #8b5e3c; /* 브라운 계열 색상 적용 */
+    color: #4A2E1B; /* 브라운 계열 색상 적용 */
     text-transform: lowercase; /* 요청: 소문자 brand story */
     letter-spacing: 3px;
     font-weight: 500;
@@ -508,7 +516,7 @@ body {
 .story-body {
     font-size: 1.4rem; 
     line-height: 1.5;
-    color: #0e3a5b; /* 시그니처 블루 색상 유지 */
+    color: #4A2E1B; /* 시그니처 블루 색상 유지 */
     font-family: var(--font-primary);
     font-weight: 400;
     word-break: keep-all;
@@ -658,7 +666,7 @@ body {
 
 /* 🏁 신규: 해쉬태그 텍스트 스타일 지정 */
 .hashtag-text {
-    color: #0e3a5b; /* 아무래도 시그니처 색상 */
+    color: #4A2E1B; /* 아무래도 시그니처 색상 */
     font-size: 1.5rem; /* 사이즈 1.5rem으로 하향 조절 */
     font-weight: bold; /* 두껍게 */
     line-height: 1.2; /* 공간 분배는 부모 flex가 담당하므로 자체 줄간격은 타이트하게 묶음 */
@@ -796,7 +804,7 @@ body {
 
 .filter-label {
     font-size: 0.85rem;
-    color: #8b5e3c; /* 브랜드 브라운 컬러 */
+    color: #4A2E1B; /* 브랜드 브라운 컬러 */
     text-transform: lowercase;
     letter-spacing: 2.5px;
     font-weight: 500;
@@ -860,7 +868,7 @@ body {
     font-family: var(--font-primary);
     font-size: 1.8rem;     /* 메인 서브타이틀(1.5rem) 기조에 맞추되 해당 페이지의 메인 간판이므로 약간의 크기 보전 */
     text-align: center;
-    color: #0e3a5b;       /* 시그니처 블루 적용 */
+    color: #4A2E1B;       /* 시그니처 블루 적용 */
     margin: 2.5rem 0 1.5rem 0;
     font-weight: 700;
     letter-spacing: -0.5px;
@@ -940,7 +948,7 @@ body {
     .filter-label {
         font-size: 1.0rem !important;
         font-weight: 700 !important;
-        color: #0e3a5b !important;
+        color: #4A2E1B !important;
         text-transform: capitalize !important;
         letter-spacing: 0 !important;
         margin-bottom: 0.5rem !important;
@@ -1014,7 +1022,7 @@ body {
     .filter-label {
         font-size: 0.9rem !important;
         font-weight: 700 !important;
-        color: #0e3a5b !important;
+        color: #4A2E1B !important;
         text-transform: capitalize !important;
         letter-spacing: 0 !important;
         margin-bottom: 0.3rem !important;
@@ -1074,7 +1082,7 @@ body {
     .filter-label {
         font-size: 0.8rem !important;
         font-weight: 700 !important;
-        color: #0e3a5b !important;
+        color: #4A2E1B !important;
         text-transform: capitalize !important;
         letter-spacing: 0 !important;
         margin-bottom: 0.1rem !important;
@@ -1097,7 +1105,7 @@ body {
     .filter-tab.active::after {
         display: block !important; /* 활성 밑줄 표시 */
         height: 2px !important;
-        background-color: #0e3a5b !important;
+        background-color: #4A2E1B !important;
     }
     
     .category-grid-container {
@@ -1117,7 +1125,6 @@ body {
         flex: none !important;
     }
 }
-
 
 /* ------------------------------------------------------------- 
    사진 영역 (1:1 종횡비율 고정 - 가장 안전한 padding hack 기법) 
@@ -1346,7 +1353,7 @@ body {
     text-align: left; /* 좌측 선 라인 기준이기 때문에 좌측 정렬 고정 */
     
     /* 🏁 핵심 UI: 좌측 세로선 (아무레도 시그니처 딥블루 컬러 + 미세한 배경) */
-    border-left: 3px solid #0e3a5b; 
+    border-left: 3px solid #4A2E1B; 
     background-color: #fafafa;
     border-radius: 0 4px 4px 0; /* 우측만 아주 살짝 둥글게 */
 }
@@ -1629,22 +1636,22 @@ body {
 .naver-store-btn {
     display: inline-block;
     background-color: transparent;
-    color: #0e3a5b; /* 시그니처 폰트 컬러 */
-    border: 2px solid #0e3a5b; /* 아웃라인 디자인 */
+    color: #4A2E1B; /* 시그니처 폰트 컬러 */
+    border: 2px solid #4A2E1B; /* 아웃라인 디자인 */
     padding: 0.8rem 2rem;
     font-size: 0.8rem; /* 사용자 재구성: 0.8rem으로 최소화 */
     font-weight: 700;
     cursor: pointer;
     /* 사용자 요구사항: 입체 효과 (3D Flat 박스 섀도우) */
-    box-shadow: 4px 4px 0px #0e3a5b;
+    box-shadow: 4px 4px 0px #4A2E1B;
     transition: all 0.2s ease;
 }
 
 .naver-store-btn:hover {
-    background-color: #0e3a5b;
+    background-color: #4A2E1B;
     color: #fff;
     /* 호버 시 박스가 그림자 쪽으로 눌리는 입체적인 프레스 효과 */
-    box-shadow: 0px 0px 0px #0e3a5b;
+    box-shadow: 0px 0px 0px #4A2E1B;
     transform: translate(4px, 4px);
 }
 
@@ -1843,7 +1850,7 @@ body {
 
 .form-group input[type="email"]:focus,
 .form-group textarea:focus {
-    border-color: #0e3a5b;
+    border-color: #4A2E1B;
     background-color: #fff;
     box-shadow: 0 0 8px rgba(14, 58, 91, 0.1);
 }
@@ -1865,7 +1872,7 @@ body {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    background-color: #0e3a5b !important;
+    background-color: #4A2E1B !important;
     color: #ffffff !important;
     padding: 0.7rem 2.0rem;
     font-size: 1.0rem;
@@ -1998,7 +2005,7 @@ body {
 }
 
 .checkbox-container input:checked ~ .checkmark {
-    background-color: #0e3a5b;
+    background-color: #4A2E1B;
 }
 
 .checkmark:after {
@@ -2029,7 +2036,7 @@ body {
 }
 
 .submit-btn {
-    background-color: #0e3a5b;
+    background-color: #4A2E1B;
     color: #fff;
     border: none;
     padding: 1rem 4rem;
@@ -2076,10 +2083,6 @@ body {
         width: 100%;
     }
 }
-
-
-
-
 
 /* ========= 12. 공통 푸터 (Footer: 사업자 정보) ========= */
 .main-footer {
@@ -2211,7 +2214,7 @@ body {
 
 .gear-spec-label {
     font-size: 0.75rem;
-    color: #0e3a5b;
+    color: #4A2E1B;
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -2277,7 +2280,6 @@ body {
     }
 }
 
-
 /* 🏁 기어 체크리스트 섹션 스타일링 */
 .checklist-section {
     padding: 4rem 1.5rem;
@@ -2328,7 +2330,7 @@ body {
 }
 
 .check-content strong {
-    color: #0e3a5b;
+    color: #4A2E1B;
 }
 
 /* 🏁 브랜드 채널 연결 섹션 스타일링 */
@@ -2373,7 +2375,7 @@ body {
 }
 
 .channel-card:hover .channel-icon {
-    background-color: #0e3a5b; /* 시그니처 블루로 변화 */
+    background-color: #4A2E1B; /* 시그니처 블루로 변화 */
 }
 
 .channel-name {
@@ -2446,7 +2448,7 @@ body {
     font-family: var(--font-serif);
     font-size: 2.5rem;
     font-weight: 700;
-    color: #0e3a5b;
+    color: #4A2E1B;
     margin-bottom: 1.2rem;
     letter-spacing: -0.5px;
 }
@@ -2487,7 +2489,7 @@ body {
 
 .filter-group .filter-label {
     font-size: 0.85rem;
-    color: #8b5e3c;
+    color: #4A2E1B;
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -2502,7 +2504,7 @@ body {
 .select-wrapper::after {
     content: "▼";
     font-size: 0.65rem;
-    color: #8b5e3c;
+    color: #4A2E1B;
     position: absolute;
     right: 1.2rem;
     top: 50%;
@@ -2528,12 +2530,12 @@ body {
 }
 
 .premium-select:hover:not(:disabled) {
-    border-color: #0e3a5b;
+    border-color: #4A2E1B;
     box-shadow: 0 4px 15px rgba(14, 58, 91, 0.05);
 }
 
 .premium-select:focus {
-    border-color: #0e3a5b;
+    border-color: #4A2E1B;
     box-shadow: 0 0 0 3px rgba(14, 58, 91, 0.1);
 }
 
@@ -2553,7 +2555,7 @@ body {
 }
 
 .count-highlight {
-    color: #0e3a5b;
+    color: #4A2E1B;
     font-weight: 800;
     font-size: 1rem;
 }
@@ -2573,7 +2575,7 @@ body {
     width: 40px;
     height: 40px;
     border: 3px solid rgba(14, 58, 91, 0.1);
-    border-top: 3px solid #0e3a5b;
+    border-top: 3px solid #4A2E1B;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -2623,7 +2625,7 @@ body {
     align-self: flex-start;
     font-size: 0.7rem;
     font-weight: 700;
-    color: #0e3a5b;
+    color: #4A2E1B;
     background: rgba(14, 58, 91, 0.06);
     padding: 0.35rem 0.7rem;
     border-radius: 4px;
@@ -2665,7 +2667,7 @@ body {
 
 .partner-card .info-icon {
     font-size: 1rem;
-    color: #8b5e3c;
+    color: #4A2E1B;
     flex-shrink: 0;
     margin-top: 1px;
 }
@@ -2676,14 +2678,14 @@ body {
 
 /* 전화 걸기 인터랙션 디자인 */
 .partner-card .tel-link {
-    color: #0e3a5b;
+    color: #4A2E1B;
     text-decoration: none;
     font-weight: 600;
     transition: all 0.25s ease;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    border-bottom: 1px dotted #0e3a5b;
+    border-bottom: 1px dotted #4A2E1B;
     padding-bottom: 1px;
 }
 
@@ -2737,7 +2739,7 @@ body {
 
 .reset-filter-btn {
     padding: 0.8rem 2rem;
-    background: #0e3a5b;
+    background: #4A2E1B;
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -2749,7 +2751,7 @@ body {
 }
 
 .reset-filter-btn:hover {
-    background: #0b2d47;
+    background: #362113;
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(14, 58, 91, 0.25);
 }
@@ -2792,32 +2794,31 @@ body {
 }
 
 .partner-card .route-link {
-    color: #8b5e3c;
+    color: #4A2E1B;
     text-decoration: none;
     font-weight: 600;
     transition: all 0.25s ease;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    border-bottom: 1px dotted #8b5e3c;
+    border-bottom: 1px dotted #4A2E1B;
     padding-bottom: 1px;
 }
 
 .partner-card .route-link:hover {
-    color: #0e3a5b;
-    border-bottom-color: #0e3a5b;
+    color: #4A2E1B;
+    border-bottom-color: #4A2E1B;
 }
 
 .partner-card .route-tag {
     font-size: 0.7rem;
     background-color: rgba(139, 94, 60, 0.08);
-    color: #8b5e3c;
+    color: #4A2E1B;
     padding: 0.15rem 0.4rem;
     border-radius: 4px;
     font-weight: 700;
     display: none; /* PC에서는 기본적으로 숨김 */
 }
-
 
 /* -------------------------------------------------------------
    🏁 피팅 서비스 리뷰(후기) 카드 공통 디자인 시스템
@@ -2903,7 +2904,7 @@ body {
 
 .reviews-track .review-card.active:hover {
     transform: translate(-50%, -50%) translateZ(105px) rotateX(0deg);
-    border-color: #0e3a5b;
+    border-color: #4A2E1B;
 }
 
 /* 활성 카드 상태에서만 텍스트 말줄임 해제 및 전체 노출 */
@@ -2933,7 +2934,7 @@ body {
     transform: translateX(-50%);
     background: #ffffff;
     border: 1px solid #eaeaea;
-    color: #0e3a5b;
+    color: #4A2E1B;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -2951,9 +2952,9 @@ body {
 }
 
 .slider-arrow:hover {
-    background: #0e3a5b;
+    background: #4A2E1B;
     color: #ffffff;
-    border-color: #0e3a5b;
+    border-color: #4A2E1B;
     box-shadow: 0 6px 20px rgba(14, 58, 91, 0.15);
 }
 
@@ -3006,13 +3007,13 @@ body {
 .review-author {
     font-size: 0.8rem;
     font-weight: 800;
-    color: #0e3a5b;
+    color: #4A2E1B;
 }
 
 .review-badge {
     font-size: 0.7rem;
     font-weight: 700;
-    color: #8b5e3c;
+    color: #4A2E1B;
     background: rgba(139, 94, 60, 0.08);
     padding: 2px 6px;
     border-radius: 4px;
@@ -3029,7 +3030,7 @@ body {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 2.2rem !important;
-    color: #0e3a5b;
+    color: #4A2E1B;
 }
 
 .review-card.active:hover .purchase-sticker {
@@ -3167,8 +3168,6 @@ body.main-body {
     padding-left: 40px !important; /* 약간의 좌측 패딩으로 균형감 확보 */
 }
 
-
-
 /* 와이어프레임 텍스트 스타일 */
 .wireframe-text {
     font-size: 1.1rem !important;
@@ -3304,7 +3303,7 @@ body.main-body {
         justify-content: center !important;
         width: 6vw !important;
         height: 6vw !important;
-        background-color: #0e3b5d !important;
+        background-color: #1A222D !important;
         border: none !important;
         border-radius: 4px !important;
         cursor: pointer !important;
@@ -3664,7 +3663,7 @@ body.main-body {
 .search-input-wrapper {
     display: flex !important;
     align-items: center !important;
-    border-bottom: 2px solid #0e3a5b !important;
+    border-bottom: 2px solid #4A2E1B !important;
     padding: 10px 0 !important;
     margin-top: 10px !important;
 }
@@ -3684,7 +3683,7 @@ body.main-body {
 }
 
 .search-submit-btn {
-    background: #0e3a5b !important;
+    background: #4A2E1B !important;
     color: #ffffff !important;
     border: none !important;
     border-radius: 4px !important;
@@ -3696,7 +3695,7 @@ body.main-body {
 }
 
 .search-submit-btn:hover {
-    background: #0b2d47 !important;
+    background: #362113 !important;
 }
 
 /* 🏁 전역 반응형 그리드 시스템 정의 */
@@ -3809,7 +3808,6 @@ body.main-body {
     }
 }
 
-
 /* 🕶️ 상품 상세페이지 B2B/B2C 공통 사이즈 정보 (info) 레이아웃 */
 .detail-info-section {
     display: flex !important;
@@ -3857,9 +3855,9 @@ body.main-body {
 .detail-info-section .info-text-wrapper h3 {
     font-size: var(--fs-st) !important;
     font-weight: 800;
-    color: #0e3a5b;
+    color: #4A2E1B;
     margin: 0 0 5px 0;
-    border-bottom: 2px solid #0e3a5b;
+    border-bottom: 2px solid #4A2E1B;
     padding-bottom: 12px;
     letter-spacing: -0.5px;
 }
@@ -3885,7 +3883,7 @@ body.main-body {
 
 .detail-info-section .info-size-list li span.label {
     font-weight: 700;
-    color: #0e3a5b;
+    color: #4A2E1B;
 }
 
 .detail-info-section .info-size-list li span.value {
@@ -3989,5 +3987,230 @@ body.main-body {
         width: calc(100% - 30px) !important; /* 좌우 15px씩 여유를 두고 100%에서 감산 */
         margin: 25px auto 15px auto !important; /* 중앙 정렬하여 좌우 15px 마진 자동 획득! */
         box-sizing: border-box !important;
+    }
+}
+
+/* ==========================================================================
+   🏁 ANTIOCH 컬렉션 하단 신규 브랜드 스토리 섹션 ('안경의 새로운 시선, 안티오크')
+   ========================================================================== */
+
+.antioch-story-section {
+    grid-column: 2 / span 10 !important; /* PC 12그리드 중 가운데 10그리드 물리 트랙 지정 (좌/우 1컬럼 여백) */
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    margin: 20px auto 50px auto !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    border: none !important;
+    background-color: transparent !important; /* 배경색 삭제 */
+}
+
+.antioch-story-container {
+    width: 100% !important;
+    max-width: 1100px !important; /* PC 12그리드 중 10그리드 비례 폭 */
+    background-color: transparent !important; /* 배경색 삭제 */
+    border-radius: 0 !important;
+    padding: 0 !important; /* 여백 및 패딩 삭제 */
+    box-shadow: none !important; /* 그림자 삭제 */
+    border: none !important; /* 테두리 삭제 */
+    box-sizing: border-box !important;
+}
+
+.antioch-story-title {
+    font-weight: 800 !important;
+    color: var(--color-walnut) !important; /* 딥 월넛 */
+    text-align: center !important;
+    margin-bottom: 20px !important;
+    letter-spacing: -0.5px !important;
+    word-break: keep-all !important; /* 단어 미분리 보장 */
+}
+
+/* 제목과 소제목 사이 굵은 선 (딥 월넛 호버 4px) */
+.antioch-story-header-line {
+    width: 100% !important;
+    height: 4px !important;
+    background-color: var(--color-walnut-hover) !important; /* 딥 월넛 마우스 호버 색상 */
+    margin: 20px auto 60px auto !important; /* 아래 여백 20px 추가 (기존 40px -> 60px) */
+    border-radius: 2px !important;
+}
+
+.antioch-story-grid {
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    gap: 0 !important;
+}
+
+.antioch-story-col {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 0 15px !important;
+    box-sizing: border-box !important;
+}
+
+/* 소제목 위 로마자 (I, II, III) 스타일 */
+.antioch-story-roman {
+    font-size: clamp(1.1rem, 1.6vw, 1.35rem) !important;
+    font-weight: 700 !important;
+    color: var(--color-walnut-hover) !important; /* 딥 월넛 마우스 호버 색상 */
+    margin-bottom: 6px !important;
+    letter-spacing: 2px !important;
+}
+
+.antioch-story-subtitle {
+    font-weight: 700 !important;
+    color: var(--color-walnut) !important; /* 딥 월넛 */
+    margin-bottom: 18px !important;
+    text-align: center !important;
+    letter-spacing: -0.3px !important;
+}
+
+.antioch-story-desc {
+    color: var(--color-walnut) !important; /* 딥 월넛 (프리텐다드) */
+    line-height: 1.65 !important;
+    text-align: center !important;
+    word-break: keep-all !important;
+    margin: 0 !important;
+}
+
+/* 3분할 사이 세로 구분선 (연한 회색, 4px 굵기) */
+.antioch-story-divider {
+    width: 4px !important;
+    background-color: #E2E2E2 !important; /* 연한 회색 4px 굵기 */
+    align-self: stretch !important;
+    margin: 5px 10px !important;
+    border-radius: 2px !important;
+}
+
+/* 반응형 오버라이드: 와일드 모바일 (1024px 이하) 및 모바일 (640px 이하) */
+@media screen and (max-width: 1024px) {
+    .antioch-story-section {
+        grid-column: 1 / span 6 !important;
+    }
+}
+
+@media screen and (max-width: 640px) {
+    .antioch-story-section {
+        grid-column: 1 / span 4 !important;
+        margin: 15px 0 35px 0 !important;
+    }
+    .antioch-story-grid {
+        flex-direction: column !important;
+    }
+    .antioch-story-col {
+        padding: 0 !important;
+    }
+    .antioch-story-divider {
+        width: 100% !important;
+        height: 4px !important;
+        background-color: #E2E2E2 !important; /* 연한 회색 */
+        margin: 25px 0 !important;
+    }
+}
+
+/* ==========================================================================
+   🏁 LIFE Essentials 브랜드 배너 섹션 (Full Size)
+   ========================================================================== */
+
+.life-essentials-section {
+    grid-column: span 12 !important;
+    width: 100% !important;
+    position: relative !important;
+    overflow: hidden !important;
+    margin: 40px 0 0 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 480px !important;
+    border: none !important;
+    background-color: var(--color-bg-primary) !important;
+}
+
+.life-essentials-bg-wrapper {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 1 !important;
+}
+
+.life-essentials-bg-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    opacity: 0.8 !important; /* 배경 이미지 80% 투명도 적용 */
+}
+
+.life-essentials-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(247, 247, 247, 0.4) !important; /* 은은한 오버레이 */
+    z-index: 2 !important;
+}
+
+.life-essentials-content {
+    position: relative !important;
+    z-index: 3 !important;
+    text-align: center !important;
+    max-width: 860px !important;
+    padding: clamp(40px, 6vw, 70px) 25px !important;
+    box-sizing: border-box !important;
+    margin: 0 auto !important;
+}
+
+.life-essentials-title {
+    color: var(--color-walnut) !important; /* 딥 월넛 */
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    margin-bottom: 8px !important;
+}
+
+.life-essentials-subtitle {
+    font-weight: 800 !important; /* 굵게 */
+    color: var(--color-walnut) !important; /* 딥 월넛 */
+    margin-bottom: 25px !important;
+    letter-spacing: -0.5px !important;
+}
+
+.life-essentials-desc {
+    color: var(--color-walnut) !important; /* 딥 월넛 (프리텐다드) */
+    line-height: 1.75 !important;
+    word-break: keep-all !important;
+    margin-bottom: 30px !important;
+    font-weight: 500 !important;
+}
+
+.life-essentials-message {
+    font-weight: 700 !important;
+    color: var(--color-walnut) !important; /* 딥 월넛 (프리텐다드) */
+    line-height: 1.5 !important;
+    word-break: keep-all !important;
+    letter-spacing: -0.3px !important;
+}
+
+/* 미디어 쿼리 오버라이드: 와일드 모바일 (1024px 이하) 및 모바일 (640px 이하) */
+@media screen and (max-width: 1024px) {
+    .life-essentials-section {
+        grid-column: span 6 !important;
+    }
+}
+
+@media screen and (max-width: 640px) {
+    .life-essentials-section {
+        grid-column: span 4 !important;
+        min-height: 420px !important;
+    }
+    .life-essentials-content {
+        padding: 40px 20px !important;
     }
 }

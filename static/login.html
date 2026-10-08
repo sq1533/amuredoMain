@@ -9,7 +9,7 @@
     <link rel="icon" href="/static/img/icon.webp" type="image/webp">
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=89.0">
+    <link rel="stylesheet" href="/static/style.css?v=100.0">
     <style>
 /* Global Grid based Login/Register */
 
@@ -69,7 +69,7 @@
     display: flex !important;
     flex-direction: column;
     justify-content: flex-start;
-    color: #0e3a5b;
+    color: #4A2E1B;
     transition: color 0.4s ease;
 }
 
@@ -83,7 +83,7 @@
     letter-spacing: 4px;
     transition: background 0.2s;
     font-weight: bold;
-    color: #0e3a5b;
+    color: #4A2E1B;
     text-decoration: none;
     border-radius: 8px;
     align-self: start;
@@ -102,7 +102,7 @@
     transition: clip-path 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .bg-blue {
-    background: #0e3a5b;
+    background: #4A2E1B;
     z-index: -2;
     clip-path: circle(0% at 50% 50%);
 }
@@ -155,11 +155,11 @@
     border-right: none;
 }
 .auth-tab:hover {
-    color: #0e3a5b;
+    color: #4A2E1B;
 }
 .auth-tab.active {
-    color: #0e3a5b;
-    border-bottom-color: #0e3a5b;
+    color: #4A2E1B;
+    border-bottom-color: #4A2E1B;
 }
 
 /* Wholesale Active State (Inverted Theme) */
@@ -231,7 +231,7 @@
     margin-left: auto;
     margin-right: auto;
     margin-top: clamp(8px, 1.2vw, 12px); /* 인풋↔버튼 간격: PC 기준 10px 가변성 */
-    background: #0e3a5b;
+    background: #4A2E1B;
     color: #fff;
     border: none;
     border-radius: 0;
@@ -244,11 +244,11 @@
 }
 .wholesale-active .submit-btn {
     background: #F1C5A4 !important;
-    color: #0e3a5b !important;
+    color: #4A2E1B !important;
 }
 .wholesale-active .submit-btn:hover {
     background: #f8dfcb !important;
-    color: #0b2d47 !important;
+    color: #362113 !important;
 }
 
 /* Customer SNS Panel (5-split, Vertically Centered) */
@@ -330,9 +330,9 @@
     <div id="customModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
         <div style="background: white; padding: clamp(24px, 5vw, 40px) clamp(20px, 4vw, 30px); border-radius: clamp(12px, 2vw, 16px); box-shadow: 0 15px 40px rgba(0,0,0,0.2); width: clamp(280px, 80vw, 380px); text-align: center; transform: translateY(-20px); animation: modalFadeIn 0.3s forwards;">
             <div id="modalIcon" style="font-size: 2.5rem; margin-bottom: 15px;">👋</div>
-            <div id="modalTitle" style="font-size: 1.3rem; font-weight: 800; color: #0e3a5b; margin-bottom: 10px;">알림</div>
+            <div id="modalTitle" style="font-size: 1.3rem; font-weight: 800; color: #4A2E1B; margin-bottom: 10px;">알림</div>
             <div id="modalMessage" style="font-size: 0.95rem; color: #666; margin-bottom: 30px; line-height: 1.5; word-break: keep-all;">메시지 내용</div>
-            <button id="modalConfirmBtn" style="width: 100%; padding: clamp(10px, 2vw, 14px); background: #0e3a5b; color: white; border: none; border-radius: clamp(6px, 1vw, 8px); font-size: 1.05rem; font-weight: bold; cursor: pointer; transition: background 0.3s;">확인</button>
+            <button id="modalConfirmBtn" style="width: 100%; padding: clamp(10px, 2vw, 14px); background: #4A2E1B; color: white; border: none; border-radius: clamp(6px, 1vw, 8px); font-size: 1.05rem; font-weight: bold; cursor: pointer; transition: background 0.3s;">확인</button>
         </div>
     </div>
 
@@ -364,8 +364,8 @@
 
                 if (type === 'success') {
                     icon.textContent = '✓';
-                    titleEl.style.color = '#0e3a5b';
-                    confirmBtn.style.background = '#0e3a5b';
+                    titleEl.style.color = '#4A2E1B';
+                    confirmBtn.style.background = '#4A2E1B';
                 } else {
                     icon.textContent = '!';
                     titleEl.style.color = '#d32f2f';
@@ -538,6 +538,6 @@
             }
         });
     </script>
-    <script src="/static/globalWholesale.js?v=89.0"></script>
+    <script src="/static/globalWholesale.js?v=100.0"></script>
 </body>
 </html>

@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <li><button class="nav-switch-btn" onclick="location.href='/uncon'">Uncon</button></li>
                         <li><button class="nav-switch-btn" onclick="location.href='/bolero'">Bolero</button></li>
                         <li><button class="nav-switch-btn" onclick="location.href='/dublin'">Dublin</button></li>
-                        <li style="margin-top: 25px; border-top: 1px solid #0e3a5b; padding-top: 15px;">
+                        <li style="margin-top: 25px; border-top: 1px solid #4A2E1B; padding-top: 15px;">
                             <button class="nav-switch-btn" id="sidebarSearchBtn" style="display: inline-flex; align-items: center; gap: 10px; color: #555; font-weight: 600;">
                                 <span class="material-icons" style="font-size: 1.45rem;">search</span>
                                 <span>Search</span>
@@ -293,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div id="globalSearchOverlay" class="search-overlay">
                 <div class="search-panel">
                     <button class="search-close-btn" id="searchCloseBtn">✕</button>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: #0e3a5b; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">Search Gear</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: #4A2E1B; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">Search Gear</div>
                     <div class="search-input-wrapper">
                         <input type="text" id="globalSearchInput" placeholder="검색어를 입력하세요..." autocomplete="off">
                         <button class="search-submit-btn" id="globalSearchSubmitBtn">검색</button>
@@ -393,11 +393,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     transform: translateY(-20px); animation: wsModalFadeIn 0.3s forwards;
                 }
                 .ws-btn-primary {
-                    width: 100%; padding: 15px; background: #0e3a5b; color: white;
+                    width: 100%; padding: 15px; background: #4A2E1B; color: white;
                     border: none; border-radius: 10px; font-size: 1.1rem; font-weight: bold;
                     cursor: pointer; transition: all 0.2s;
                 }
-                .ws-btn-primary:hover { background: #0b2d47; transform: translateY(-2px); }
+                .ws-btn-primary:hover { background: #362113; transform: translateY(-2px); }
                 @keyframes menuFadeIn {
                     from { opacity: 0; transform: translateY(-10px); }
                     to { opacity: 1; transform: translateY(0); }
@@ -410,7 +410,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div id="customGlobalLogoutModal" class="ws-modal-overlay">
                 <div class="ws-modal-content">
                     <div style="font-size: 2.5rem; margin-bottom: 15px;">👋</div>
-                    <div style="font-size: 1.3rem; font-weight: 800; color: #0e3a5b; margin-bottom: 10px;">로그아웃 완료</div>
+                    <div style="font-size: 1.3rem; font-weight: 800; color: #4A2E1B; margin-bottom: 10px;">로그아웃 완료</div>
                     <div style="font-size: 0.95rem; color: #666; margin-bottom: 30px; line-height: 1.5;">안전하게 로그아웃 되었습니다.<br>메인 화면으로 이동합니다.</div>
                     <button id="globalModalConfirmBtn2" class="ws-btn-primary">확인</button>
                 </div>
@@ -706,7 +706,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const signupModalHTML = `
                 <div id="globalSignupSuccessModal" style="display: flex !important; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 999999 !important; justify-content: center; align-items: center; opacity: 1; transition: opacity 0.4s ease;">
                     <div style="background: #ffffff; padding: 35px 45px; border-radius: 16px; width: 300px; text-align: center; box-shadow: 0 20px 50px rgba(14, 58, 91, 0.15); animation: wsModalFadeIn 0.3s forwards; box-sizing: border-box;">
-                        <div style="font-size: 1.25rem; font-weight: 800; color: #0e3a5b; margin-bottom: 14px; text-align: center; letter-spacing: -0.5px;">
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #4A2E1B; margin-bottom: 14px; text-align: center; letter-spacing: -0.5px;">
                             회원가입 완료
                         </div>
                         <div style="font-size: 0.95rem; color: #555; line-height: 1.6; text-align: center; white-space: pre-line; word-break: keep-all;">${contentText}</div>

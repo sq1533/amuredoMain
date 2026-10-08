@@ -274,7 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             data-id="${partner.id}" 
                             data-name="${partner.name}" 
                             data-address="${partner.city} ${partner.country} ${partner.details}"
-                            style="width: 100%; padding: 12px 0; background-color: #0e3a5b; color: #fff; border: 1px solid #0e3a5b; border-radius: 8px; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease;">
+                            style="width: 100%; padding: 12px 0; background-color: #4A2E1B; color: #fff; border: 1px solid #4A2E1B; border-radius: 8px; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease;">
                         이 매장 선택하기
                     </button>
                 </div>
@@ -323,12 +323,12 @@ document.addEventListener("DOMContentLoaded", () => {
             
             // 호버 인터랙션 보정
             btn.addEventListener("mouseenter", (e) => {
-                e.target.style.backgroundColor = "#0b2d47";
-                e.target.style.borderColor = "#0b2d47";
+                e.target.style.backgroundColor = "#362113";
+                e.target.style.borderColor = "#362113";
             });
             btn.addEventListener("mouseleave", (e) => {
-                e.target.style.backgroundColor = "#0e3a5b";
-                e.target.style.borderColor = "#0e3a5b";
+                e.target.style.backgroundColor = "#4A2E1B";
+                e.target.style.borderColor = "#4A2E1B";
             });
         });
     };
@@ -618,8 +618,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <p class="review-body" style="font-size:0.9rem; line-height:1.6; color:#444; word-break:keep-all; white-space:pre-wrap; margin:10px 0; flex-grow:1;">${escapeHTML(review.content || "")}</p>
                 <div class="review-footer" style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #eee; padding-top:10px; margin-top:5px;">
-                    <span class="review-author" style="font-size:0.85rem; font-weight:800; color:#0e3a5b;">${review.customerName} 고객님</span>
-                    <span class="review-badge" style="font-size:0.7rem; font-weight:700; color:#8b5e3c; background:rgba(139, 94, 60, 0.08); padding:2px 6px; border-radius:4px;">피팅 후기</span>
+                    <span class="review-author" style="font-size:0.85rem; font-weight:800; color:#4A2E1B;">${review.customerName} 고객님</span>
+                    <span class="review-badge" style="font-size:0.7rem; font-weight:700; color:#4A2E1B; background:rgba(139, 94, 60, 0.08); padding:2px 6px; border-radius:4px;">피팅 후기</span>
                 </div>
             `;
             reviewsContainer.appendChild(card);

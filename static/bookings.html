@@ -11,7 +11,7 @@
     
     <!-- 전역 메인 폰트 Pretendard 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=89.0">
+    <link rel="stylesheet" href="/static/style.css?v=100.0">
     <style>
         .bookings-wrapper {
             max-width: 900px;
@@ -22,7 +22,7 @@
         .bookings-title {
             font-size: var(--fs-t);
             font-weight: 800;
-            color: #0e3a5b;
+            color: #4A2E1B;
             margin-bottom: 12px;
             text-align: center;
             letter-spacing: -0.5px;
@@ -59,7 +59,7 @@
         .btn-go-shop {
             display: inline-block;
             padding: 15px 30px;
-            background: #0e3a5b;
+            background: #4A2E1B;
             color: #fff;
             font-weight: 800;
             font-size: var(--fs-m);
@@ -68,7 +68,7 @@
             transition: all 0.25s ease;
         }
         .btn-go-shop:hover {
-            background: #0b2d47;
+            background: #362113;
             transform: translateY(-1px);
         }
 
@@ -88,7 +88,7 @@
         }
         .expander-card:hover {
             box-shadow: 0 12px 35px rgba(14, 58, 91, 0.05);
-            border-color: #0e3a5b;
+            border-color: #4A2E1B;
         }
         
         /* 취소되거나 완료된 예약은 흐리게 시인성 제한 */
@@ -123,7 +123,7 @@
         .expander-store {
             font-size: var(--fs-st);
             font-weight: 800;
-            color: #0e3a5b;
+            color: #4A2E1B;
             letter-spacing: -0.3px;
         }
         .expander-summary {
@@ -137,7 +137,7 @@
             width: 24px;
             height: 24px;
             fill: none;
-            stroke: #0e3a5b;
+            stroke: #4A2E1B;
             stroke-width: 2.5;
             stroke-linecap: round;
             stroke-linejoin: round;
@@ -168,10 +168,10 @@
         .section-sub {
             font-size: var(--fs-m);
             font-weight: 800;
-            color: #0e3a5b;
+            color: #4A2E1B;
             margin-bottom: 15px;
             letter-spacing: -0.2px;
-            border-left: 3px solid #0e3a5b;
+            border-left: 3px solid #4A2E1B;
             padding-left: 8px;
         }
 
@@ -199,7 +199,7 @@
             font-size: var(--fs-s);
             font-weight: 800;
             background: #eef7fe;
-            color: #0e3a5b;
+            color: #4A2E1B;
         }
         .status-badge.cancelled-badge {
             background: #ffebeb;
@@ -211,7 +211,7 @@
         }
         .status-badge.paid-badge {
             background: #eef7fe;
-            color: #0e3a5b;
+            color: #4A2E1B;
         }
         .status-badge.cancel-req-badge {
             background: #fff0e6;
@@ -271,7 +271,7 @@
         .goods-cat-tag {
             font-size: var(--fs-s);
             font-weight: 700;
-            color: #0e3a5b;
+            color: #4A2E1B;
             background: #eef7fe;
             padding: 2px 6px;
             border-radius: 4px;
@@ -301,8 +301,8 @@
         }
         .btn-action-modify {
             background: #f4f7f9;
-            color: #0e3a5b;
-            border: 1px solid #0e3a5b;
+            color: #4A2E1B;
+            border: 1px solid #4A2E1B;
         }
         .btn-action-modify:hover {
             background: #eef3f7;
@@ -460,7 +460,7 @@
             color: #ffb703;
         }
         textarea#reviewContent:focus {
-            border-color: #0e3a5b !important;
+            border-color: #4A2E1B !important;
         }
     </style>
 </head>
@@ -475,7 +475,7 @@
         <div id="bookingsContainer">
             <!-- 🏁 로딩 대기 상태 -->
             <div class="loading-state">
-                <div class="booking-spinner" style="width: 40px; height: 40px; border: 4px solid #eaeaea; border-top: 4px solid #0e3a5b; border-radius: 50%; animation: cancel-spin 1s linear infinite; margin: 0 auto 15px auto;"></div>
+                <div class="booking-spinner" style="width: 40px; height: 40px; border: 4px solid #eaeaea; border-top: 4px solid #4A2E1B; border-radius: 50%; animation: cancel-spin 1s linear infinite; margin: 0 auto 15px auto;"></div>
                 <p style="color: #666; font-weight: 700;">예약 내역을 불러오고 있습니다. 잠시만 기다려 주세요...</p>
             </div>
         </div>
@@ -519,7 +519,7 @@
             function loadBookingsList() {
                 container.innerHTML = `
                     <div class="loading-state">
-                        <div class="booking-spinner" style="width: 40px; height: 40px; border: 4px solid #eaeaea; border-top: 4px solid #0e3a5b; border-radius: 50%; animation: cancel-spin 1s linear infinite; margin: 0 auto 15px auto;"></div>
+                        <div class="booking-spinner" style="width: 40px; height: 40px; border: 4px solid #eaeaea; border-top: 4px solid #4A2E1B; border-radius: 50%; animation: cancel-spin 1s linear infinite; margin: 0 auto 15px auto;"></div>
                         <p style="color: #666; font-weight: 700;">예약 내역을 불러오고 있습니다. 잠시만 기다려 주세요...</p>
                     </div>
                 `;
@@ -657,7 +657,7 @@
                                     <div class="section-sub">예약 상세 안내</div>
                                     <div class="info-panel" style="flex-direction: column; align-items: flex-start; gap: 8px;">
                                         <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                            <div style="font-weight: 700; color: #0e3a5b;">예약 ID: ${booking.bookingId}</div>
+                                            <div style="font-weight: 700; color: #4A2E1B;">예약 ID: ${booking.bookingId}</div>
                                             <span class="status-badge ${isCancelled ? 'cancelled-badge' : ''} ${isCompleted ? 'completed-badge' : ''} ${isPaid ? 'paid-badge' : ''} ${isCancelRequested ? 'cancel-req-badge' : ''} ${isExchangeRequested ? 'exchange-req-badge' : ''} ${isRefundOrExchangeCompleted ? 'refund-completed-badge' : ''} ${isVAccountPending ? 'vaccount-pending-badge' : ''}">${displayStatus}</span>
                                         </div>
                                         ${booking.bookingType === 'visit' ? `
@@ -1060,7 +1060,7 @@
     <div id="reviewModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" id="closeReviewModal">&times;</span>
-            <h2 style="margin-bottom: 20px; font-weight: 800; color: #0e3a5b;">피팅 서비스 후기 작성</h2>
+            <h2 style="margin-bottom: 20px; font-weight: 800; color: #4A2E1B;">피팅 서비스 후기 작성</h2>
             <div style="margin-bottom: 15px;">
                 <label style="font-weight: 700; color: #555; display: block; margin-bottom: 5px;">방문 매장</label>
                 <input type="text" id="reviewStoreName" readonly style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa; font-weight: bold; color: #333; box-sizing: border-box;">
@@ -1081,11 +1081,11 @@
             </div>
             <div style="display: flex; gap: 10px;">
                 <button type="button" id="btnCancelReview" class="btn-action" style="flex: 1; background: #fff; border: 1px solid #ddd; color: #666; cursor: pointer; border-radius: 8px; padding: 12px; font-weight: 700;">취소</button>
-                <button type="button" id="btnSubmitReview" class="btn-action" style="flex: 1; background: #0e3a5b; border: 1px solid #0e3a5b; color: #fff; cursor: pointer; border-radius: 8px; padding: 12px; font-weight: 700;">등록하기</button>
+                <button type="button" id="btnSubmitReview" class="btn-action" style="flex: 1; background: #4A2E1B; border: 1px solid #4A2E1B; color: #fff; cursor: pointer; border-radius: 8px; padding: 12px; font-weight: 700;">등록하기</button>
             </div>
         </div>
     </div>
 
-    <script src="/static/globalWholesale.js?v=89.0"></script>
+    <script src="/static/globalWholesale.js?v=100.0"></script>
 </body>
 </html>

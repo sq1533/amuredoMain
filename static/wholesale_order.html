@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>도매 결제 - 아무래도 안경</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=89.0">
+    <link rel="stylesheet" href="/static/style.css?v=100.0">
     <!-- 다날 결제 SDK -->
     <script src="https://static.danalpay.com/d1/sdk/index.js"></script>
     <!-- 카카오(다음) 우편번호 서비스 API -->
@@ -62,12 +62,12 @@
             border-radius: 6px;
             transition: all 0.2s;
         }
-        .back-link:hover { color: #0e3a5b; background: #e2e6ea; }
+        .back-link:hover { color: #4A2E1B; background: #e2e6ea; }
         
         .order-title {
             font-size: var(--fs-st);
             font-weight: 800;
-            color: #0e3a5b;
+            color: #4A2E1B;
             margin-bottom: 30px;
         }
         
@@ -140,7 +140,7 @@
             outline: none;
             transition: border-color 0.2s;
         }
-        .form-input:focus { border-color: #0e3a5b; }
+        .form-input:focus { border-color: #4A2E1B; }
         .form-input[readonly] { background-color: #f9f9f9; color: #888; }
         
         .address-search-btn {
@@ -248,7 +248,7 @@
             color: #1b64da !important;
         }
         .pay-method-card:hover .pay-method-icon-svg {
-            color: #0e3a5b;
+            color: #4A2E1B;
         }
         @media (max-width: 768px) {
             .payment-methods-grid {
@@ -272,7 +272,7 @@
         <div class="order-container">
             <a href="#" class="back-link" onclick="history.back(); return false;">← 장바구니로 돌아가기</a>
             <!-- B2B 도매 혜택 안내 배너 -->
-            <div style="background: rgba(14, 58, 91, 0.06); border: 1px solid rgba(14, 58, 91, 0.15); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; font-size: var(--fs-sm); color: #0e3a5b; font-weight: 700; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="background: rgba(14, 58, 91, 0.06); border: 1px solid rgba(14, 58, 91, 0.15); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; font-size: var(--fs-sm); color: #4A2E1B; font-weight: 700; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
                 <span>🎁 B2B 도매 파트너 혜택: 수량 5개↑ (5%) / 30만원↑ (5%) 중복 할인 & 무료배송 적용</span>
                 <a href="/wholesale/event" style="color: #0076a8; text-decoration: underline; font-weight: 800;">혜택 상세 안내 →</a>
             </div>
@@ -599,6 +599,6 @@
             if (urlParams.get('status') === 'fail') showCancelModal(urlParams.get('message') || "결제에 실패했습니다.");
         });
     </script>
-<script src="/static/globalWholesale.js?v=89.0"></script>
+<script src="/static/globalWholesale.js?v=100.0"></script>
 </body>
 </html>

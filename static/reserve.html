@@ -11,7 +11,7 @@
     
     <!-- 전역 메인 폰트 Pretendard 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=89.0">
+    <link rel="stylesheet" href="/static/style.css?v=100.0">
     <!-- 🏁 에어비앤비 Lottie 애니메이션 웹 플레이어 라이브러리 추가 -->
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
@@ -49,7 +49,7 @@
         .reserve-title {
             font-size: var(--fs-t);
             font-weight: 800;
-            color: #0e3a5b;
+            color: #4A2E1B;
             margin-bottom: 40px;
             text-align: center;
             letter-spacing: -0.5px;
@@ -75,7 +75,7 @@
         }
         .intro-card:hover {
             transform: translateY(-3px);
-            border-color: #0e3a5b;
+            border-color: #4A2E1B;
             box-shadow: 0 6px 15px rgba(14, 58, 91, 0.04);
         }
         /* Lottie 벡터 동적 애니메이션 아이콘용 전용 스타일 */
@@ -88,7 +88,7 @@
         .card-keyword {
             font-size: var(--fs-m);
             font-weight: 800;
-            color: #0e3a5b;
+            color: #4A2E1B;
             margin-bottom: 10px;
             letter-spacing: -0.3px;
         }
@@ -103,9 +103,9 @@
         .section-subtitle {
             font-size: var(--fs-st);
             font-weight: 800;
-            color: #0e3a5b;
+            color: #4A2E1B;
             margin-bottom: 15px;
-            border-left: 4px solid #0e3a5b;
+            border-left: 4px solid #4A2E1B;
             padding-left: 10px;
             text-align: left; /* PC/모바일 전 환경에서 완벽한 왼쪽 정렬 보장 */
         }
@@ -156,15 +156,15 @@
             letter-spacing: -0.3px;
         }
         .place-text.selected {
-            color: #0e3a5b; /* 장소 선정 시 딥블루 굵게 반전 */
+            color: #4A2E1B; /* 장소 선정 시 딥블루 굵게 반전 */
             font-weight: 800;
         }
         .place-select-btn {
             flex: 1;
             padding: 19px 0;
-            background-color: #0e3a5b;
+            background-color: #4A2E1B;
             color: #fff;
-            border: 1px solid #0e3a5b;
+            border: 1px solid #4A2E1B;
             border-radius: 12px;
             font-size: var(--fs-m);
             font-weight: 800;
@@ -175,8 +175,8 @@
             box-shadow: 0 4px 10px rgba(14, 58, 91, 0.1);
         }
         .place-select-btn:hover {
-            background-color: #0b2d47;
-            border-color: #0b2d47;
+            background-color: #362113;
+            border-color: #362113;
             transform: translateY(-1px);
         }
 
@@ -187,7 +187,7 @@
         .reserve-submit-btn {
             width: 400px;
             padding: 18px 0;
-            background-color: #0e3a5b;
+            background-color: #4A2E1B;
             color: #fff;
             border: none;
             border-radius: 12px;
@@ -200,7 +200,7 @@
             margin: 0 auto 20px auto;
         }
         .reserve-submit-btn:hover {
-            background-color: #0b2d47;
+            background-color: #362113;
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(14, 58, 91, 0.25);
         }
@@ -283,7 +283,7 @@
             z-index: 10;
         }
         .close-guide-modal:hover {
-            color: #0e3a5b;
+            color: #4A2E1B;
         }
         .guide-image-container {
             flex: 1;
@@ -425,7 +425,7 @@
     <div id="guideModal" class="guide-modal">
         <div class="guide-modal-content">
             <span class="close-guide-modal" id="btnCloseGuide">&times;</span>
-            <h3 style="font-size: 1.3rem; font-weight: 800; color: #0e3a5b; margin-top: 0; margin-bottom: 5px;">🧭 서비스 이용안내</h3>
+            <h3 style="font-size: 1.3rem; font-weight: 800; color: #4A2E1B; margin-top: 0; margin-bottom: 5px;">🧭 서비스 이용안내</h3>
             <div class="guide-image-container">
                 <img src="/static/img/howTo.webp" alt="서비스 이용안내 및 주의사항" class="guide-image" loading="lazy">
             </div>
@@ -434,8 +434,8 @@
 
     <!-- 🏁 예약 진행 중 안내 풀스크린 오버레이 -->
     <div id="bookingLoadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; flex-direction: column;">
-        <div class="booking-spinner" style="width: 50px; height: 50px; border: 5px solid #eaeaea; border-top: 5px solid #0e3a5b; border-radius: 50%; animation: booking-spin 1s linear infinite; margin-bottom: 20px;"></div>
-        <p style="font-size: 1.15rem; font-weight: 700; color: #0e3a5b; letter-spacing: -0.3px; text-align: center; margin: 0 20px; line-height: 1.5; word-break: keep-all;">고객님의 소중한 예약을 진행 중입니다.<br>잠시만 기다려 주세요...</p>
+        <div class="booking-spinner" style="width: 50px; height: 50px; border: 5px solid #eaeaea; border-top: 5px solid #4A2E1B; border-radius: 50%; animation: booking-spin 1s linear infinite; margin-bottom: 20px;"></div>
+        <p style="font-size: 1.15rem; font-weight: 700; color: #4A2E1B; letter-spacing: -0.3px; text-align: center; margin: 0 20px; line-height: 1.5; word-break: keep-all;">고객님의 소중한 예약을 진행 중입니다.<br>잠시만 기다려 주세요...</p>
     </div>
     
     <style>
@@ -540,13 +540,13 @@
                 // 본사 방문 피팅 복귀
                  const displayTime = `${timeParam.substring(0, 2)}:${timeParam.substring(2, 4)}`;
                  const decodedAddr = decodeURIComponent(addressParam);
-                 placeTextEl.innerHTML = `<span style="font-weight: 800; color: #0e3a5b;">[1:1 안경 피팅]</span><br>일시: ${dateParam} ${displayTime}<br>장소: ${decodedAddr}`;
+                 placeTextEl.innerHTML = `<span style="font-weight: 800; color: #4A2E1B;">[1:1 안경 피팅]</span><br>일시: ${dateParam} ${displayTime}<br>장소: ${decodedAddr}`;
                 placeTextEl.classList.add("selected"); 
                 submitReserveBtn.removeAttribute("disabled"); 
             } else if (typeParam === "store" && placeIdParam && placeNameParam) {
                 // 안경점 매장 피팅 복귀
                 const decodedStore = decodeURIComponent(placeNameParam);
-                let displayText = `<span style="font-weight: 800; color: #0e3a5b;">[안경점 매장 피팅]</span><br>매장: ${decodedStore}`;
+                let displayText = `<span style="font-weight: 800; color: #4A2E1B;">[안경점 매장 피팅]</span><br>매장: ${decodedStore}`;
                 if (addressParam) {
                     displayText += `<br>주소: ${decodeURIComponent(addressParam)}`;
                 }
@@ -641,6 +641,6 @@
             });
         });
     </script>
-    <script src="/static/globalWholesale.js?v=89.0"></script>
+    <script src="/static/globalWholesale.js?v=100.0"></script>
 </body>
 </html>

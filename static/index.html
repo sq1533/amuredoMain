@@ -25,7 +25,7 @@
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <!-- 외부 스타일시트 연결 (캐시 무효화) -->
-    <link rel="stylesheet" href="/static/style.css?v=89.0">
+    <link rel="stylesheet" href="/static/style.css?v=100.0">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
     <script>
@@ -157,8 +157,6 @@
             }
         }
 
-
-
         /* 시리즈 제목 스타일 */
         .series-gap-title {
             border: none !important;
@@ -196,7 +194,6 @@
         .series-img-wrapper:hover .base-img {
             transform: scale(1.04);
         }
-
 
     </style>
 </head>
@@ -291,31 +288,9 @@
                 </div>
             </div>
 
-            <!-- 🏁 피팅 서비스 후기 제목/설명 섹션 -->
-            <div class="grid-cell reviews-header-cell reviews-section fade-in-section" style="width: 100%; margin: 0 !important; padding: 0 20px; box-sizing: border-box; border: none !important;">
-                <div class="brand-story-header" style="margin-bottom: 0;">
-                    <h3 class="fs-st" style="font-weight: 800; color: #0e3a5b; margin: 0; border-left: 4px solid #0e3a5b; padding-left: 10px;">피팅 이용 후기</h3>
-                    <p class="fs-m" style="color: #666; margin-top: 5px; margin-bottom: 0;">1:1 피팅 서비스를 이용하신 고객님들의 실제 후기입니다.</p>
-                </div>
-            </div>
-
-            <!-- 🏁 피팅 서비스 후기 슬라이더 섹션 -->
-            <section class="grid-cell reviews-slider-cell reviews-section fade-in-section" style="width: 100%; margin: 0 !important; padding: 0 20px; box-sizing: border-box; border: none !important;">
-                <div class="reviews-slider-wrapper">
-                    <button class="slider-arrow prev" id="reviewPrevBtn">▲</button>
-                    <div class="reviews-slider-container">
-                        <div class="reviews-track" id="reviewsContainer">
-                            <!-- 동적으로 리뷰 카드 주입 -->
-                        </div>
-                    </div>
-                    <button class="slider-arrow next" id="reviewNextBtn">▼</button>
-                </div>
-            </section>
-
-            <!-- 미니 배너와 시리즈 간 12x2 공간 확보 -->
-            <!-- 하단: 시리즈 제목 텍스트 (12x1) -->
+                        <!-- 하단: 시리즈 제목 텍스트 (12x1) -->
             <div class="grid-cell series-gap-title" style="border: none !important; padding-left: clamp(20px, 4vw, 40px) !important;">
-                <h2 class="fs-t" style="font-weight: 800; color: #0e3a5b; margin: 20px 0 25px 0;">ANTIOCH 컬렉션</h2>
+                <h2 class="font-serif fs-t" style="font-weight: 800; color: #4A2E1B; margin: 20px 0 25px 0;">ANTIOCH 컬렉션</h2>
             </div>
 
             <!-- 5분할 플렉스 박스 컨테이너 -->
@@ -361,6 +336,71 @@
                     <span style="font-size: 1.05rem; font-weight: 700; color: #222; text-align: center; margin-top: 12px; letter-spacing: 0.5px;">Dublin</span>
                 </div>
             </div>
+
+            <!-- 🏁 ANTIOCH 컬렉션 하단 신규 브랜드 스토리 섹션 -->
+            <section class="grid-cell antioch-story-section fade-in-section">
+                <div class="antioch-story-container">
+                    <!-- 대제목 (나눔명조, 딥월넛 #4A2E1B) -->
+                    <h2 class="font-serif fs-t antioch-story-title">안경의 새로운 시선, <span style="white-space: nowrap;">안티오크</span></h2>
+                    
+                    <!-- 제목과 소제목 사이 굵은 선 (딥 월넛 4px) -->
+                    <div class="antioch-story-header-line"></div>
+                    
+                    <!-- 3분할 그리드 / 플렉스 컨테이너 -->
+                    <div class="antioch-story-grid">
+                        <!-- 항목 1 -->
+                        <div class="antioch-story-col">
+                            <span class="font-serif antioch-story-roman">I</span>
+                            <h3 class="font-serif fs-st antioch-story-subtitle">시각적 소음 차단</h3>
+                            <p class="fs-m antioch-story-desc">
+                                업무의 해상도를 높이는<br>완벽한 오피스기어<br><br>몰입을 방해하는 요소를<br>빈틈없이 차단합니다
+                            </p>
+                        </div>
+                        
+                        <!-- 세로 구분선 1 -->
+                        <div class="antioch-story-divider"></div>
+
+                        <!-- 항목 2 -->
+                        <div class="antioch-story-col">
+                            <span class="font-serif antioch-story-roman">II</span>
+                            <h3 class="font-serif fs-st antioch-story-subtitle">미니멀 스펙</h3>
+                            <p class="fs-m antioch-story-desc">
+                                데스크테리어를 완성하는<br>단정한 실루엣<br><br>본질에 집중한 디자인
+                            </p>
+                        </div>
+                        
+                        <!-- 세로 구분선 2 -->
+                        <div class="antioch-story-divider"></div>
+
+                        <!-- 항목 3 -->
+                        <div class="antioch-story-col">
+                            <span class="font-serif antioch-story-roman">III</span>
+                            <h3 class="font-serif fs-st antioch-story-subtitle">인체 공학적 설계</h3>
+                            <p class="fs-m antioch-story-desc">
+                                장시간 착용해도<br>부담없는 편안함<br><br>착용자의 두상을 감싸는<br>정교한 밸런스
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 🏁 LIFE Essentials 신규 브랜드 배너 섹션 (Full Size) -->
+            <section class="grid-cell life-essentials-section fade-in-section">
+                <div class="life-essentials-bg-wrapper">
+                    <img src="/static/img/04_arch.webp" alt="LIFE Essentials Background" class="life-essentials-bg-img">
+                    <div class="life-essentials-overlay"></div>
+                </div>
+                <div class="life-essentials-content">
+                    <h3 class="font-serif fs-st life-essentials-title">LIFE Essentials</h3>
+                    <h2 class="font-serif fs-t life-essentials-subtitle">Antioch</h2>
+                    <p class="fs-m life-essentials-desc">
+                        아무래도 안경의 프리미엄 '안티오크' 라인업은 업무 효율을 극대화하기 위해 탄생했습니다. 가벼우면서도 견고한 최고급 티타늄 소재를 채택하여 내구성과 편안함을 동시에 잡았습니다. 심플하면서도 지적인 프레임 디자인은 비즈니스 미팅과 일상 업무 모두에서 신뢰감을 더해줍니다.
+                    </p>
+                    <div class="fs-st life-essentials-message">
+                        "당신의 비즈니스 라이프스타일에 최적화된 궁극의 기어를 지금 경험해보세요."
+                    </div>
+                </div>
+            </section>
         </main>
 
         <!-- 공통 푸터(Footer): 사업자 정보 -->
@@ -386,7 +426,7 @@
 
     <!-- 공통 로직 자바스크립트 연결 (캐시 무효화 v5.3) -->
     <script src="/static/main.js?v=7.0"></script>
-<script src="/static/globalWholesale.js?v=89.0"></script>
+<script src="/static/globalWholesale.js?v=100.0"></script>
 </body>
 
 </html>

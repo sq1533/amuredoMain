@@ -10,7 +10,7 @@
     
     <!-- Pretendard 메인 폰트 & 전역 style 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=89.0">
+    <link rel="stylesheet" href="/static/style.css?v=100.0">
 
     <!-- 다날 결제 SDK 및 다음 주소검색 API -->
     <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
@@ -26,7 +26,7 @@
         .checkout-title {
             font-size: var(--fs-t);
             font-weight: 800;
-            color: #0e3a5b;
+            color: #4A2E1B;
             margin-bottom: 8px;
             text-align: center;
             letter-spacing: -0.5px;
@@ -51,9 +51,9 @@
         .section-title {
             font-size: var(--fs-m);
             font-weight: 800;
-            color: #0e3a5b;
+            color: #4A2E1B;
             margin-bottom: 20px;
-            border-left: 4px solid #0e3a5b;
+            border-left: 4px solid #4A2E1B;
             padding-left: 10px;
             letter-spacing: -0.3px;
         }
@@ -97,17 +97,17 @@
             user-select: none;
         }
         .item-row:hover {
-            border-color: #0e3a5b;
+            border-color: #4A2E1B;
             background: #fbfdff;
         }
         .item-row.selected {
-            border-color: #0e3a5b;
+            border-color: #4A2E1B;
             background: #f8fbfe;
         }
         .item-checkbox {
             width: 20px;
             height: 20px;
-            accent-color: #0e3a5b;
+            accent-color: #4A2E1B;
             cursor: pointer;
         }
         .item-img {
@@ -133,7 +133,7 @@
         .item-cat {
             font-size: var(--fs-s);
             font-weight: 700;
-            color: #0e3a5b;
+            color: #4A2E1B;
             background: #eef7fe;
             padding: 2px 6px;
             border-radius: 4px;
@@ -142,7 +142,7 @@
         .item-price {
             font-size: var(--fs-m);
             font-weight: 800;
-            color: #0e3a5b;
+            color: #4A2E1B;
             text-align: right;
             flex-shrink: 0;
         }
@@ -181,18 +181,18 @@
             font-weight: 700;
         }
         .price-count-num {
-            color: #0e3a5b;
+            color: #4A2E1B;
             font-weight: 800;
         }
         .price-total-label {
             font-size: var(--fs-m);
             font-weight: 800;
-            color: #0e3a5b;
+            color: #4A2E1B;
         }
         .price-total-amount {
             font-size: var(--fs-st);
             font-weight: 900;
-            color: #0e3a5b;
+            color: #4A2E1B;
             letter-spacing: -0.5px;
         }
 
@@ -202,7 +202,7 @@
         .btn-checkout-submit {
             width: 100%;
             padding: 16px 0;
-            background: #0e3a5b;
+            background: #4A2E1B;
             color: #fff;
             border: none;
             border-radius: 12px;
@@ -213,7 +213,7 @@
             box-shadow: 0 4px 12px rgba(14, 58, 91, 0.15);
         }
         .btn-checkout-submit:hover {
-            background: #0b2d47;
+            background: #362113;
             transform: translateY(-1px);
         }
         .btn-checkout-submit:disabled {
@@ -234,7 +234,7 @@
             width: 45px;
             height: 45px;
             border: 5px solid #eaeaea;
-            border-top: 5px solid #0e3a5b;
+            border-top: 5px solid #4A2E1B;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px auto;
@@ -336,7 +336,7 @@
             color: #1b64da !important;
         }
         .pay-method-card:hover .pay-method-icon-svg {
-            color: #0e3a5b;
+            color: #4A2E1B;
         }
         @media (max-width: 768px) {
             .payment-methods-grid {
@@ -402,18 +402,18 @@
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 6px; box-sizing: border-box;">
                             <label style="font-weight: 700; color: #555; font-size: 0.95rem;">연락처 (필수)</label>
-                            <input type="tel" id="deliveryPhone" placeholder="숫자만 입력해 주세요. (예: 01012345678)" style="padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: var(--fs-m); outline: none; transition: border 0.2s; width: 100%; box-sizing: border-box;" onfocus="this.style.borderColor='#0e3a5b'" onblur="this.style.borderColor='#ddd'">
+                            <input type="tel" id="deliveryPhone" placeholder="숫자만 입력해 주세요. (예: 01012345678)" style="padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: var(--fs-m); outline: none; transition: border 0.2s; width: 100%; box-sizing: border-box;" onfocus="this.style.borderColor='#4A2E1B'" onblur="this.style.borderColor='#ddd'">
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 6px; box-sizing: border-box;">
                             <label style="font-weight: 700; color: #555; font-size: 0.95rem;">기본 주소 (필수)</label>
                             <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
                                 <input type="text" id="deliveryAddress" placeholder="주소 검색을 클릭해 주세요." style="padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: var(--fs-m); outline: none; background: #f9f9f9; color: #666; width: 100%; box-sizing: border-box;" readonly>
-                                <button type="button" id="btnSearchAddress" style="padding: 12px; border: 1px solid #0e3a5b; background: #0e3a5b; color: #fff; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.2s; font-size: 0.95rem; width: 100%; text-align: center; box-sizing: border-box;">주소 검색</button>
+                                <button type="button" id="btnSearchAddress" style="padding: 12px; border: 1px solid #4A2E1B; background: #4A2E1B; color: #fff; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.2s; font-size: 0.95rem; width: 100%; text-align: center; box-sizing: border-box;">주소 검색</button>
                             </div>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 6px; box-sizing: border-box;">
                             <label style="font-weight: 700; color: #555; font-size: 0.95rem;">상세 주소 (필수)</label>
-                            <input type="text" id="detailAddress" placeholder="상세 주소를 입력해 주세요." style="padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: var(--fs-m); outline: none; transition: border 0.2s; width: 100%; box-sizing: border-box;" onfocus="this.style.borderColor='#0e3a5b'" onblur="this.style.borderColor='#ddd'">
+                            <input type="text" id="detailAddress" placeholder="상세 주소를 입력해 주세요." style="padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: var(--fs-m); outline: none; transition: border 0.2s; width: 100%; box-sizing: border-box;" onfocus="this.style.borderColor='#4A2E1B'" onblur="this.style.borderColor='#ddd'">
                         </div>
                     </div>
                 </div>
@@ -917,6 +917,6 @@
             }
         });
     </script>
-    <script src="/static/globalWholesale.js?v=89.0"></script>
+    <script src="/static/globalWholesale.js?v=100.0"></script>
 </body>
 </html>

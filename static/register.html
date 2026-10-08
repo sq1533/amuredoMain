@@ -9,7 +9,7 @@
     <link rel="icon" href="/static/img/icon.webp" type="image/webp">
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <link rel="stylesheet" href="/static/style.css?v=89.0">
+    <link rel="stylesheet" href="/static/style.css?v=100.0">
     <style>
 /* Global Grid based Register — 로그인 페이지와 동일한 그리드 */
 
@@ -69,7 +69,7 @@
     display: flex !important;
     flex-direction: column;
     justify-content: flex-start;
-    color: #0e3a5b;
+    color: #4A2E1B;
     transition: color 0.4s ease;
 }
 
@@ -83,7 +83,7 @@
     letter-spacing: 4px;
     transition: background 0.2s;
     font-weight: bold;
-    color: #0e3a5b;
+    color: #4A2E1B;
     text-decoration: none;
     border-radius: 8px;
     align-self: start;
@@ -99,7 +99,7 @@
     pointer-events: none;
     transition: clip-path 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.bg-blue { background: #0e3a5b; z-index: -2; clip-path: circle(0% at 50% 50%); }
+.bg-blue { background: #4A2E1B; z-index: -2; clip-path: circle(0% at 50% 50%); }
 .bg-white { background: #F7F7F7; z-index: -1; clip-path: circle(150% at 50% 50%); }
 
 /* General Styling */
@@ -119,8 +119,8 @@
     border-bottom: 3px solid transparent; transition: color 0.4s, border-bottom-color 0.4s;
     background: none; border-top: none; border-left: none; border-right: none;
 }
-.auth-tab:hover { color: #0e3a5b; }
-.auth-tab.active { color: #0e3a5b; border-bottom-color: #0e3a5b; }
+.auth-tab:hover { color: #4A2E1B; }
+.auth-tab.active { color: #4A2E1B; border-bottom-color: #4A2E1B; }
 
 /* Wholesale Active State (Inverted Theme) */
 .wholesale-active { color: #F7F7F7; }
@@ -161,14 +161,14 @@
     aspect-ratio: 10 / 1.5 !important;
     padding: 0 !important; margin-left: auto; margin-right: auto;
     margin-top: clamp(8px, 1.2vw, 12px);
-    background: #0e3a5b; color: #fff; border: none; border-radius: 0; box-shadow: none;
+    background: #4A2E1B; color: #fff; border: none; border-radius: 0; box-shadow: none;
     font-size: var(--fs-m) !important; font-weight: 700; cursor: pointer;
     box-sizing: border-box; transition: background 0.3s;
 }
-.submit-btn:hover { background: #0e3a5b; transform: none; box-shadow: none; }
+.submit-btn:hover { background: #4A2E1B; transform: none; box-shadow: none; }
 .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
-.wholesale-active .submit-btn { background: #F1C5A4 !important; color: #0e3a5b !important; }
-.wholesale-active .submit-btn:hover { background: #F1C5A4 !important; color: #0e3a5b !important; }
+.wholesale-active .submit-btn { background: #F1C5A4 !important; color: #4A2E1B !important; }
+.wholesale-active .submit-btn:hover { background: #F1C5A4 !important; color: #4A2E1B !important; }
 
 /* Customer SNS Panel */
 .customer-panel { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; justify-items: center; flex: 1; padding: 20px 0; }
@@ -189,7 +189,7 @@
 .register-checkbox-container input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
 .register-checkmark { position: absolute; top: 50%; transform: translateY(-50%); left: 0; height: 20px; width: 20px; background-color: #fff; border: 1px solid #ccc; border-radius: 3px; }
 .register-checkbox-container:hover input ~ .register-checkmark { background-color: #f1f1f1; }
-.register-checkbox-container input:checked ~ .register-checkmark { background-color: #0e3a5b; border-color: #0e3a5b; }
+.register-checkbox-container input:checked ~ .register-checkmark { background-color: #4A2E1B; border-color: #4A2E1B; }
 .register-checkmark:after { content: ""; position: absolute; display: none; }
 .register-checkbox-container input:checked ~ .register-checkmark:after { display: block; }
 .register-checkbox-container .register-checkmark:after { left: 6px; top: 2px; width: 5px; height: 10px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
@@ -335,9 +335,9 @@
     <div id="customModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
         <div style="background: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); width: 320px; text-align: center; transform: translateY(-20px); animation: modalFadeIn 0.3s forwards;">
             <div id="modalIcon" style="font-size: 2.5rem; margin-bottom: 15px;">👋</div>
-            <div id="modalTitle" style="font-size: 1.3rem; font-weight: 800; color: #0e3a5b; margin-bottom: 10px;">알림</div>
+            <div id="modalTitle" style="font-size: 1.3rem; font-weight: 800; color: #4A2E1B; margin-bottom: 10px;">알림</div>
             <div id="modalMessage" style="font-size: 0.95rem; color: #666; margin-bottom: 30px; line-height: 1.5; word-break: keep-all;">메시지 내용</div>
-            <button id="modalConfirmBtn" style="width: 100%; padding: 14px; background: #0e3a5b; color: white; border: none; border-radius: 8px; font-size: 1.05rem; font-weight: bold; cursor: pointer; transition: background 0.3s;">확인</button>
+            <button id="modalConfirmBtn" style="width: 100%; padding: 14px; background: #4A2E1B; color: white; border: none; border-radius: 8px; font-size: 1.05rem; font-weight: bold; cursor: pointer; transition: background 0.3s;">확인</button>
         </div>
     </div>
     
@@ -371,8 +371,8 @@
 
                 if (type === 'success') {
                     icon.textContent = '✓';
-                    titleEl.style.color = '#0e3a5b';
-                    confirmBtn.style.background = '#0e3a5b';
+                    titleEl.style.color = '#4A2E1B';
+                    confirmBtn.style.background = '#4A2E1B';
                 } else {
                     icon.textContent = '!';
                     titleEl.style.color = '#d32f2f';
@@ -606,6 +606,6 @@
             }
         });
     </script>
-    <script src="/static/globalWholesale.js?v=89.0"></script>
+    <script src="/static/globalWholesale.js?v=100.0"></script>
 </body>
 </html>
