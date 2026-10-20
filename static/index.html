@@ -25,7 +25,7 @@
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <!-- 외부 스타일시트 연결 (캐시 무효화) -->
-    <link rel="stylesheet" href="/static/style.css?v=100.0">
+    <link rel="stylesheet" href="/static/style.css?v=109.0">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
     <script>
@@ -293,52 +293,52 @@
                 <h2 class="font-serif fs-t" style="font-weight: 800; color: #4A2E1B; margin: 20px 0 25px 0;">ANTIOCH 컬렉션</h2>
             </div>
 
-            <!-- 5분할 플렉스 박스 컨테이너 -->
-            <div class="grid-cell series-gap-title" style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: space-between; width: 100%; box-sizing: border-box; border: none !important; margin-bottom: 40px; padding: 0 clamp(20px, 4vw, 40px);">
+            <!-- 5분할 컬렉션 그리드 컨테이너 (PC 5열 / 와이드모바일·모바일 2열 동일 너비) -->
+            <div class="grid-cell series-gap-title antioch-collection-grid">
                 <!-- 1. Trench -->
-                <div onclick="location.href='/trench'" style="flex: 1; min-width: 140px; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <div class="series-img-wrapper" style="aspect-ratio: 4/5; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                        <img src="/static/img/03_series_trench.webp" alt="Trench" class="base-img" style="width: 100%; height: 100%; object-fit: cover;">
-                        <img src="/static/img/03_series_trench_m.webp" alt="Trench Hover" class="hover-img" style="width: 100%; height: 100%; object-fit: cover;">
+                <div class="antioch-collection-card" onclick="location.href='/trench'">
+                    <div class="series-img-wrapper">
+                        <img src="/static/img/03_series_trench.webp" alt="Trench" class="base-img">
+                        <img src="/static/img/03_series_trench_m.webp" alt="Trench Hover" class="hover-img">
                     </div>
-                    <span style="font-size: 1.05rem; font-weight: 700; color: #222; text-align: center; margin-top: 12px; letter-spacing: 0.5px;">Trench</span>
+                    <span class="antioch-collection-label">Trench</span>
                 </div>
                 <!-- 2. Ascot -->
-                <div onclick="location.href='/ascot'" style="flex: 1; min-width: 140px; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <div class="series-img-wrapper" style="aspect-ratio: 4/5; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                        <img src="/static/img/03_series_ascot.webp" alt="Ascot" class="base-img" style="width: 100%; height: 100%; object-fit: cover;">
-                        <img src="/static/img/03_series_ascot_m.webp" alt="Ascot Hover" class="hover-img" style="width: 100%; height: 100%; object-fit: cover;">
+                <div class="antioch-collection-card" onclick="location.href='/ascot'">
+                    <div class="series-img-wrapper">
+                        <img src="/static/img/03_series_ascot.webp" alt="Ascot" class="base-img">
+                        <img src="/static/img/03_series_ascot_m.webp" alt="Ascot Hover" class="hover-img">
                     </div>
-                    <span style="font-size: 1.05rem; font-weight: 700; color: #222; text-align: center; margin-top: 12px; letter-spacing: 0.5px;">Ascot</span>
+                    <span class="antioch-collection-label">Ascot</span>
                 </div>
                 <!-- 3. Uncon -->
-                <div onclick="location.href='/uncon'" style="flex: 1; min-width: 140px; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <div class="series-img-wrapper" style="aspect-ratio: 4/5; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                        <img src="/static/img/03_series_uncon.webp" alt="Uncon" class="base-img" style="width: 100%; height: 100%; object-fit: cover;">
-                        <img src="/static/img/03_series_uncon_m.webp" alt="Uncon Hover" class="hover-img" style="width: 100%; height: 100%; object-fit: cover;">
+                <div class="antioch-collection-card" onclick="location.href='/uncon'">
+                    <div class="series-img-wrapper">
+                        <img src="/static/img/03_series_uncon.webp" alt="Uncon" class="base-img">
+                        <img src="/static/img/03_series_uncon_m.webp" alt="Uncon Hover" class="hover-img">
                     </div>
-                    <span style="font-size: 1.05rem; font-weight: 700; color: #222; text-align: center; margin-top: 12px; letter-spacing: 0.5px;">Uncon</span>
+                    <span class="antioch-collection-label">Uncon</span>
                 </div>
                 <!-- 4. Bolero -->
-                <div onclick="location.href='/bolero'" style="flex: 1; min-width: 140px; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <div class="series-img-wrapper" style="aspect-ratio: 4/5; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                        <img src="/static/img/03_series_bolero.webp" alt="Bolero" class="base-img" style="width: 100%; height: 100%; object-fit: cover;">
-                        <img src="/static/img/03_series_bolero_m.webp" alt="Bolero Hover" class="hover-img" style="width: 100%; height: 100%; object-fit: cover;">
+                <div class="antioch-collection-card" onclick="location.href='/bolero'">
+                    <div class="series-img-wrapper">
+                        <img src="/static/img/03_series_bolero.webp" alt="Bolero" class="base-img">
+                        <img src="/static/img/03_series_bolero_m.webp" alt="Bolero Hover" class="hover-img">
                     </div>
-                    <span style="font-size: 1.05rem; font-weight: 700; color: #222; text-align: center; margin-top: 12px; letter-spacing: 0.5px;">Bolero</span>
+                    <span class="antioch-collection-label">Bolero</span>
                 </div>
                 <!-- 5. Dublin -->
-                <div onclick="location.href='/dublin'" style="flex: 1; min-width: 140px; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <div class="series-img-wrapper" style="aspect-ratio: 4/5; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                        <img src="/static/img/03_series_dublin.webp" alt="Dublin" class="base-img" style="width: 100%; height: 100%; object-fit: cover;">
-                        <img src="/static/img/03_series_dublin_m.webp" alt="Dublin Hover" class="hover-img" style="width: 100%; height: 100%; object-fit: cover;">
+                <div class="antioch-collection-card" onclick="location.href='/dublin'">
+                    <div class="series-img-wrapper">
+                        <img src="/static/img/03_series_dublin.webp" alt="Dublin" class="base-img">
+                        <img src="/static/img/03_series_dublin_m.webp" alt="Dublin Hover" class="hover-img">
                     </div>
-                    <span style="font-size: 1.05rem; font-weight: 700; color: #222; text-align: center; margin-top: 12px; letter-spacing: 0.5px;">Dublin</span>
+                    <span class="antioch-collection-label">Dublin</span>
                 </div>
             </div>
 
-            <!-- 🏁 ANTIOCH 컬렉션 하단 신규 브랜드 스토리 섹션 -->
-            <section class="grid-cell antioch-story-section fade-in-section">
+            <!-- 🏁 ANTIOCH 컬렉션 하단 신규 브랜드 스토리 섹션 (스크롤리텔링 적용) -->
+            <section id="antiochStorySection" class="grid-cell antioch-story-section scrolly-active" data-step="1" data-phase="in">
                 <div class="antioch-story-container">
                     <!-- 대제목 (나눔명조, 딥월넛 #4A2E1B) -->
                     <h2 class="font-serif fs-t antioch-story-title">안경의 새로운 시선, <span style="white-space: nowrap;">안티오크</span></h2>
@@ -346,39 +346,54 @@
                     <!-- 제목과 소제목 사이 굵은 선 (딥 월넛 4px) -->
                     <div class="antioch-story-header-line"></div>
                     
-                    <!-- 3분할 그리드 / 플렉스 컨테이너 -->
+                    <!-- 3분할 그리드 / 스크롤리텔링 스테이지 컨테이너 -->
                     <div class="antioch-story-grid">
                         <!-- 항목 1 -->
-                        <div class="antioch-story-col">
-                            <span class="font-serif antioch-story-roman">I</span>
-                            <h3 class="font-serif fs-st antioch-story-subtitle">시각적 소음 차단</h3>
-                            <p class="fs-m antioch-story-desc">
-                                업무의 해상도를 높이는<br>완벽한 오피스기어<br><br>몰입을 방해하는 요소를<br>빈틈없이 차단합니다
-                            </p>
+                        <div class="antioch-story-col" data-story-step="1">
+                            <div class="antioch-story-img-guide">
+                                <img src="/static/img/web_01_noise.webp" alt="시각적 소음 차단" class="antioch-story-img" loading="lazy">
+                            </div>
+                            <div class="antioch-story-text-group">
+                                <span class="font-serif antioch-story-roman">I</span>
+                                <h3 class="font-serif fs-st antioch-story-subtitle">시각적 소음 차단</h3>
+                                <p class="fs-m antioch-story-desc">
+                                    업무의 해상도를 높이는<br>완벽한 오피스기어<br><br>몰입을 방해하는 요소를<br>빈틈없이 차단합니다
+                                </p>
+                            </div>
                         </div>
                         
                         <!-- 세로 구분선 1 -->
                         <div class="antioch-story-divider"></div>
 
                         <!-- 항목 2 -->
-                        <div class="antioch-story-col">
-                            <span class="font-serif antioch-story-roman">II</span>
-                            <h3 class="font-serif fs-st antioch-story-subtitle">미니멀 스펙</h3>
-                            <p class="fs-m antioch-story-desc">
-                                데스크테리어를 완성하는<br>단정한 실루엣<br><br>본질에 집중한 디자인
-                            </p>
+                        <div class="antioch-story-col" data-story-step="2">
+                            <div class="antioch-story-img-guide">
+                                <img src="/static/img/web_02_minimal.webp" alt="미니멀 스펙" class="antioch-story-img" loading="lazy">
+                            </div>
+                            <div class="antioch-story-text-group">
+                                <span class="font-serif antioch-story-roman">II</span>
+                                <h3 class="font-serif fs-st antioch-story-subtitle">미니멀 스펙</h3>
+                                <p class="fs-m antioch-story-desc">
+                                    데스크테리어를 완성하는<br>단정한 실루엣<br><br>본질에 집중한 디자인
+                                </p>
+                            </div>
                         </div>
                         
                         <!-- 세로 구분선 2 -->
                         <div class="antioch-story-divider"></div>
 
                         <!-- 항목 3 -->
-                        <div class="antioch-story-col">
-                            <span class="font-serif antioch-story-roman">III</span>
-                            <h3 class="font-serif fs-st antioch-story-subtitle">인체 공학적 설계</h3>
-                            <p class="fs-m antioch-story-desc">
-                                장시간 착용해도<br>부담없는 편안함<br><br>착용자의 두상을 감싸는<br>정교한 밸런스
-                            </p>
+                        <div class="antioch-story-col" data-story-step="3">
+                            <div class="antioch-story-img-guide">
+                                <img src="/static/img/web_03_mankind.webp" alt="인체 공학적 설계" class="antioch-story-img" loading="lazy">
+                            </div>
+                            <div class="antioch-story-text-group">
+                                <span class="font-serif antioch-story-roman">III</span>
+                                <h3 class="font-serif fs-st antioch-story-subtitle">인체 공학적 설계</h3>
+                                <p class="fs-m antioch-story-desc">
+                                    장시간 착용해도<br>부담없는 편안함<br><br>착용자의 두상을 감싸는<br>정교한 밸런스
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -425,8 +440,8 @@
     </div>
 
     <!-- 공통 로직 자바스크립트 연결 (캐시 무효화 v5.3) -->
-    <script src="/static/main.js?v=7.0"></script>
-<script src="/static/globalWholesale.js?v=100.0"></script>
+    <script src="/static/main.js?v=109.0"></script>
+<script src="/static/globalWholesale.js?v=109.0"></script>
 </body>
 
 </html>

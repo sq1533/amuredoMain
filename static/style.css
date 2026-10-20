@@ -3991,6 +3991,58 @@ body.main-body {
 }
 
 /* ==========================================================================
+   🏁 ANTIOCH 컬렉션 5분할 / 반응형 2열 동일 너비 그리드 레이아웃
+   ========================================================================== */
+
+.antioch-collection-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 15px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border: none !important;
+    margin-bottom: 40px !important;
+    padding: 0 clamp(20px, 4vw, 40px) !important;
+    justify-content: stretch !important;
+    align-items: start !important;
+}
+
+.antioch-collection-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    cursor: pointer !important;
+    transition: transform 0.3s ease !important;
+}
+
+.antioch-collection-card:hover {
+    transform: translateY(-5px) !important;
+}
+
+.antioch-collection-card .series-img-wrapper {
+    aspect-ratio: 4 / 5 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03) !important;
+}
+
+.antioch-collection-card .series-img-wrapper img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+.antioch-collection-label {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: #222 !important;
+    text-align: center !important;
+    margin-top: 12px !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* ==========================================================================
    🏁 ANTIOCH 컬렉션 하단 신규 브랜드 스토리 섹션 ('안경의 새로운 시선, 안티오크')
    ========================================================================== */
 
@@ -4004,16 +4056,17 @@ body.main-body {
     box-sizing: border-box !important;
     border: none !important;
     background-color: transparent !important; /* 배경색 삭제 */
+    position: relative !important;
 }
 
 .antioch-story-container {
     width: 100% !important;
     max-width: 1100px !important; /* PC 12그리드 중 10그리드 비례 폭 */
-    background-color: transparent !important; /* 배경색 삭제 */
+    background-color: transparent !important;
     border-radius: 0 !important;
-    padding: 0 !important; /* 여백 및 패딩 삭제 */
-    box-shadow: none !important; /* 그림자 삭제 */
-    border: none !important; /* 테두리 삭제 */
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
     box-sizing: border-box !important;
 }
 
@@ -4053,6 +4106,36 @@ body.main-body {
     box-sizing: border-box !important;
 }
 
+/* 단계별 스토리 이미지 래퍼 및 이미지 */
+.antioch-story-img-guide {
+    width: 100% !important;
+    aspect-ratio: 4 / 3 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    border: none !important;
+    background-color: transparent !important;
+    margin-bottom: 22px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1), transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+.antioch-story-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
+.antioch-story-text-group {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    width: 100% !important;
+    transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1), transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
 /* 소제목 위 로마자 (I, II, III) 스타일 */
 .antioch-story-roman {
     font-size: clamp(1.1rem, 1.6vw, 1.35rem) !important;
@@ -4085,32 +4168,162 @@ body.main-body {
     align-self: stretch !important;
     margin: 5px 10px !important;
     border-radius: 2px !important;
+    transition: opacity 0.5s ease !important;
 }
 
-/* 반응형 오버라이드: 와일드 모바일 (1024px 이하) 및 모바일 (640px 이하) */
-@media screen and (max-width: 1024px) {
-    .antioch-story-section {
-        grid-column: 1 / span 6 !important;
+/* ==========================================================================
+   🎬 휠/터치 스냅형 인터랙션 활성 모드 (.scrolly-active) & 완료 모드 (.scrolly-done)
+   ========================================================================== */
+
+.antioch-story-section.scrolly-active {
+    min-height: 0 !important;
+    height: auto !important;
+    align-items: center !important;
+}
+
+.antioch-story-section.scrolly-active .antioch-story-grid {
+    position: relative !important;
+    min-height: 310px !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.antioch-story-section.scrolly-active .antioch-story-divider {
+    opacity: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+    pointer-events: none !important;
+}
+
+/* 애니메이션 진행 중 (.scrolly-active): PC 환경에서 텍스트 왼쪽(order: 1) + 이미지 오른쪽(order: 2) 수평 배치 */
+.antioch-story-section.scrolly-active .antioch-story-col {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 100% !important;
+    max-width: 880px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: clamp(20px, 4vw, 48px) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.antioch-story-section.scrolly-active .antioch-story-col .antioch-story-text-group {
+    order: 1 !important; /* 왼쪽: 텍스트 요소 */
+    flex: 1 1 48% !important;
+    width: auto !important;
+    opacity: 0 !important;
+    transform: translateY(24px) !important;
+}
+
+.antioch-story-section.scrolly-active .antioch-story-col .antioch-story-img-guide {
+    order: 2 !important; /* 오른쪽: 이미지 */
+    flex: 1 1 52% !important;
+    width: auto !important;
+    margin-bottom: 0 !important;
+    opacity: 0 !important;
+    transform: translateY(24px) scale(0.97) !important;
+}
+
+/* 단계별 (1, 2, 3) 페이드 인 (data-phase="in") */
+.antioch-story-section.scrolly-active[data-step="1"][data-phase="in"] .antioch-story-col[data-story-step="1"],
+.antioch-story-section.scrolly-active[data-step="2"][data-phase="in"] .antioch-story-col[data-story-step="2"],
+.antioch-story-section.scrolly-active[data-step="3"][data-phase="in"] .antioch-story-col[data-story-step="3"] {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+.antioch-story-section.scrolly-active[data-step="1"][data-phase="in"] .antioch-story-col[data-story-step="1"] .antioch-story-img-guide,
+.antioch-story-section.scrolly-active[data-step="2"][data-phase="in"] .antioch-story-col[data-story-step="2"] .antioch-story-img-guide,
+.antioch-story-section.scrolly-active[data-step="3"][data-phase="in"] .antioch-story-col[data-story-step="3"] .antioch-story-img-guide {
+    opacity: 1 !important;
+    transform: translateY(0) scale(1) !important;
+}
+
+.antioch-story-section.scrolly-active[data-step="1"][data-phase="in"] .antioch-story-col[data-story-step="1"] .antioch-story-text-group,
+.antioch-story-section.scrolly-active[data-step="2"][data-phase="in"] .antioch-story-col[data-story-step="2"] .antioch-story-text-group,
+.antioch-story-section.scrolly-active[data-step="3"][data-phase="in"] .antioch-story-col[data-story-step="3"] .antioch-story-text-group {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* 단계별 (1, 2, 3) 페이드 아웃 (data-phase="out") */
+.antioch-story-section.scrolly-active[data-step="1"][data-phase="out"] .antioch-story-col[data-story-step="1"],
+.antioch-story-section.scrolly-active[data-step="2"][data-phase="out"] .antioch-story-col[data-story-step="2"],
+.antioch-story-section.scrolly-active[data-step="3"][data-phase="out"] .antioch-story-col[data-story-step="3"] {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.antioch-story-section.scrolly-active[data-step="1"][data-phase="out"] .antioch-story-col[data-story-step="1"] .antioch-story-img-guide,
+.antioch-story-section.scrolly-active[data-step="2"][data-phase="out"] .antioch-story-col[data-story-step="2"] .antioch-story-img-guide,
+.antioch-story-section.scrolly-active[data-step="3"][data-phase="out"] .antioch-story-col[data-story-step="3"] .antioch-story-img-guide {
+    opacity: 0 !important;
+    transform: translateY(-20px) scale(0.97) !important;
+}
+
+.antioch-story-section.scrolly-active[data-step="1"][data-phase="out"] .antioch-story-col[data-story-step="1"] .antioch-story-text-group,
+.antioch-story-section.scrolly-active[data-step="2"][data-phase="out"] .antioch-story-col[data-story-step="2"] .antioch-story-text-group,
+.antioch-story-section.scrolly-active[data-step="3"][data-phase="out"] .antioch-story-col[data-story-step="3"] .antioch-story-text-group {
+    opacity: 0 !important;
+    transform: translateY(-20px) !important;
+}
+
+/* 최종 완료 상태 (.scrolly-done): 현재의 3분할 UI 전체 노출 및 수직 배치 복귀 */
+@keyframes storyFinalReveal {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
-@media screen and (max-width: 640px) {
-    .antioch-story-section {
-        grid-column: 1 / span 4 !important;
-        margin: 15px 0 35px 0 !important;
-    }
-    .antioch-story-grid {
-        flex-direction: column !important;
-    }
-    .antioch-story-col {
-        padding: 0 !important;
-    }
-    .antioch-story-divider {
-        width: 100% !important;
-        height: 4px !important;
-        background-color: #E2E2E2 !important; /* 연한 회색 */
-        margin: 25px 0 !important;
-    }
+.antioch-story-section.scrolly-done {
+    min-height: 0 !important;
+    height: auto !important;
+}
+
+.antioch-story-section.scrolly-done .antioch-story-grid {
+    position: relative !important;
+    min-height: 0 !important;
+    animation: storyFinalReveal 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+
+.antioch-story-section.scrolly-done .antioch-story-col {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    max-width: none !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    gap: 0 !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+.antioch-story-section.scrolly-done .antioch-story-img-guide {
+    order: 1 !important; /* 위쪽: 이미지 */
+    flex: none !important;
+    width: 100% !important;
+    margin-bottom: 22px !important;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+.antioch-story-section.scrolly-done .antioch-story-text-group {
+    order: 2 !important; /* 아래쪽: 텍스트 요소 */
+    flex: none !important;
+    width: 100% !important;
+    opacity: 1 !important;
+    transform: none !important;
 }
 
 /* ==========================================================================
@@ -4132,12 +4345,16 @@ body.main-body {
     background-color: var(--color-bg-primary) !important;
 }
 
-.life-essentials-bg-wrapper {
+.life-essentials-bg-wrapper,
+.life-essentials-overlay {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
     width: 100% !important;
     height: 100% !important;
+}
+
+.life-essentials-bg-wrapper {
     z-index: 1 !important;
 }
 
@@ -4149,11 +4366,6 @@ body.main-body {
 }
 
 .life-essentials-overlay {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
     background: rgba(247, 247, 247, 0.4) !important; /* 은은한 오버레이 */
     z-index: 2 !important;
 }
@@ -4198,14 +4410,68 @@ body.main-body {
     letter-spacing: -0.3px !important;
 }
 
-/* 미디어 쿼리 오버라이드: 와일드 모바일 (1024px 이하) 및 모바일 (640px 이하) */
+/* ==========================================================================
+   📱 통합 반응형 미디어 쿼리 오버라이드: 와이드 모바일(1024px 이하) 및 모바일(640px 이하)
+   ========================================================================== */
+
 @media screen and (max-width: 1024px) {
+    .antioch-collection-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        padding: 0 clamp(20px, 4vw, 40px) !important;
+    }
+    .antioch-story-section {
+        grid-column: 1 / span 6 !important;
+        padding: 0 20px !important;
+    }
+    .antioch-story-section.scrolly-active .antioch-story-grid {
+        min-height: 460px !important;
+    }
+    .antioch-story-section.scrolly-active .antioch-story-col {
+        top: 0 !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        max-width: 460px !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        gap: 0 !important;
+    }
+    .antioch-story-section.scrolly-active .antioch-story-col .antioch-story-img-guide {
+        order: 1 !important; /* 위쪽: 이미지 */
+        flex: none !important;
+        width: 100% !important;
+        margin-bottom: 22px !important;
+    }
+    .antioch-story-section.scrolly-active .antioch-story-col .antioch-story-text-group {
+        order: 2 !important; /* 아래쪽: 텍스트 요소 */
+        flex: none !important;
+        width: 100% !important;
+    }
     .life-essentials-section {
         grid-column: span 6 !important;
     }
 }
 
 @media screen and (max-width: 640px) {
+    .antioch-collection-grid {
+        padding: 0 20px !important;
+    }
+    .antioch-story-section {
+        grid-column: 1 / span 4 !important;
+        margin: 15px 0 35px 0 !important;
+        padding: 0 20px !important;
+    }
+    .antioch-story-section.scrolly-done .antioch-story-grid {
+        flex-direction: column !important;
+    }
+    .antioch-story-section.scrolly-done .antioch-story-col {
+        padding: 0 !important;
+    }
+    .antioch-story-section.scrolly-done .antioch-story-divider {
+        width: 100% !important;
+        height: 4px !important;
+        background-color: #E2E2E2 !important; /* 연한 회색 */
+        margin: 25px 0 !important;
+    }
     .life-essentials-section {
         grid-column: span 4 !important;
         min-height: 420px !important;

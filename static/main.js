@@ -155,8 +155,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-
-
     /* ====================================================
        🏁 5. 피팅 서비스 리뷰(후기) 동적 로딩 및 렌더링 로직
        ==================================================== */
@@ -431,4 +429,178 @@ document.addEventListener("DOMContentLoaded", () => {
             setupResponsiveBanner();
         }, 250);
     });
+
+    /* ====================================================
+       🏁 7. '안경의 새로운 시선, 안티오크' 휠/터치 스냅형 3단계 스토리텔링 로직
+       ==================================================== */
+    const setupAntiochScrollytelling = () => {
+        const storySection = document.getElementById("antiochStorySection");
+        if (!storySection) return;
+
+        let scrollyCompleted = false;
+        let currentStep = 0; // 0: 진입 전, 1: 1단계, 2: 2단계, 3: 3단계
+        let isTransitioning = false;
+        let touchStartY = 0;
+
+        // 초기 상태: 섹션 진입 전 페이드 아웃 대기
+        storySection.setAttribute("data-step", "1");
+        storySection.setAttribute("data-phase", "out");
+
+        // 섹션을 화면 중앙으로 부드럽게 맞춤
+        const snapSectionToCenter = () => {
+            const rect = storySection.getBoundingClientRect();
+            const vh = window.innerHeight;
+            const targetTop = window.scrollY + rect.top - Math.max(60, (vh - rect.height) / 2);
+            window.scrollTo({
+                top: Math.max(0, targetTop),
+                behavior: "smooth"
+            });
+        };
+
+        // 제자리에서 단계 전환 (현재 단계 Fade Out -> 다음 단계 Fade In)
+        const transitionToStep = (nextStep) => {
+            if (isTransitioning || scrollyCompleted) return;
+            isTransitioning = true;
+
+            if (currentStep === 0) {
+                currentStep = nextStep;
+                storySection.setAttribute("data-step", String(currentStep));
+                storySection.setAttribute("data-phase", "in");
+                setTimeout(() => {
+                    isTransitioning = false;
+                }, 550);
+                return;
+            }
+
+            // 1) 현재 단계 페이드 아웃
+            storySection.setAttribute("data-phase", "out");
+
+            setTimeout(() => {
+                if (nextStep <= 3) {
+                    // 2) 다음 단계(1~3) 페이드 인
+                    currentStep = nextStep;
+                    storySection.setAttribute("data-step", String(currentStep));
+                    storySection.setAttribute("data-phase", "in");
+
+                    setTimeout(() => {
+                        isTransitioning = false;
+                    }, 500);
+                } else {
+                    // 3) 3단계 이후 최종 완료: 현재의 3분할 전체 UI 노출 (1회만 실행)
+                    scrollyCompleted = true;
+                    storySection.classList.remove("scrolly-active");
+                    storySection.classList.add("scrolly-done");
+                    storySection.removeAttribute("data-step");
+                    storySection.removeAttribute("data-phase");
+                    isTransitioning = false;
+
+                    cleanupListeners();
+                }
+            }, 320);
+        };
+
+        // 섹션이 화면 유효 영역에 도달했는지 판별
+        const isSectionInSnapZone = () => {
+            const rect = storySection.getBoundingClientRect();
+            const vh = window.innerHeight;
+            const center = rect.top + rect.height / 2;
+            return center >= vh * 0.22 && center <= vh * 0.78;
+        };
+
+        // 스크롤 진입 시 1단계 자동 활성화
+        const onScroll = () => {
+            if (scrollyCompleted || currentStep > 0) return;
+            const rect = storySection.getBoundingClientRect();
+            const vh = window.innerHeight;
+            if (rect.top <= vh * 0.85 && rect.bottom >= vh * 0.15) {
+                transitionToStep(1);
+            }
+        };
+
+        // PC 마우스 휠 조작 감지 (1회 휠마다 1 -> 2 -> 3 -> 최종 3분할 UI)
+        const onWheel = (e) => {
+            if (scrollyCompleted) return;
+
+            const rect = storySection.getBoundingClientRect();
+            const vh = window.innerHeight;
+            const approaching = e.deltaY > 0 && rect.top <= vh * 0.45 && rect.top >= -vh * 0.15;
+
+            if (!isSectionInSnapZone() && !approaching) return;
+
+            // 아직 0단계면 1단계로 먼저 진입
+            if (currentStep === 0 && e.deltaY > 0) {
+                e.preventDefault();
+                snapSectionToCenter();
+                transitionToStep(1);
+                return;
+            }
+
+            // 1단계에서 위로 스크롤할 때는 상단으로 자유롭게 이동 허용
+            if (currentStep === 1 && e.deltaY < -10) {
+                return;
+            }
+
+            // 섹션 내에 머무르는 동안 기본 스크롤 차단 후 제자리에서 단계 전환
+            e.preventDefault();
+            if (isTransitioning) return;
+
+            if (Math.abs(e.deltaY) < 12) return;
+
+            snapSectionToCenter();
+            if (e.deltaY > 0) {
+                transitionToStep(currentStep + 1);
+            } else if (e.deltaY < 0 && currentStep > 1) {
+                transitionToStep(currentStep - 1);
+            }
+        };
+
+        // 모바일 터치 스와이프 감지
+        const onTouchStart = (e) => {
+            if (scrollyCompleted || !e.touches || !e.touches.length) return;
+            touchStartY = e.touches[0].clientY;
+        };
+
+        const onTouchMove = (e) => {
+            if (scrollyCompleted || !e.touches || !e.touches.length) return;
+            if (!isSectionInSnapZone()) return;
+
+            const currentY = e.touches[0].clientY;
+            const deltaY = touchStartY - currentY; // 양수: 아래로 스크롤(위로 드래그)
+
+            // 1단계에서 위로 올라가는 드래그는 허용
+            if (currentStep <= 1 && deltaY < -15) {
+                return;
+            }
+
+            if (Math.abs(deltaY) > 10) {
+                e.preventDefault();
+            }
+
+            if (isTransitioning || Math.abs(deltaY) < 30) return;
+
+            touchStartY = currentY;
+            snapSectionToCenter();
+            if (deltaY > 0) {
+                transitionToStep(currentStep === 0 ? 1 : currentStep + 1);
+            } else if (deltaY < 0 && currentStep > 1) {
+                transitionToStep(currentStep - 1);
+            }
+        };
+
+        const cleanupListeners = () => {
+            window.removeEventListener("scroll", onScroll);
+            window.removeEventListener("wheel", onWheel, { passive: false });
+            window.removeEventListener("touchstart", onTouchStart, { passive: true });
+            window.removeEventListener("touchmove", onTouchMove, { passive: false });
+        };
+
+        window.addEventListener("scroll", onScroll, { passive: true });
+        window.addEventListener("wheel", onWheel, { passive: false });
+        window.addEventListener("touchstart", onTouchStart, { passive: true });
+        window.addEventListener("touchmove", onTouchMove, { passive: false });
+
+        onScroll();
+    };
+
+    setupAntiochScrollytelling();
 });
