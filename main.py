@@ -552,12 +552,29 @@ async def get_item_detail(request: Request, item_id: str):
         if not final_desc.strip():
             final_desc = fallback_desc
 
+        # 3. sort 컬렉션 조건부 이미지 배열 조회 (item_ato.{itemID}.sort == sort.{sort})
+        sort_val = str(data.get("sort", "")).strip()
+        sort_urls = []
+        if sort_val:
+            try:
+                sort_doc = db.collection('sort').document(sort_val).get()
+                if sort_doc.exists:
+                    sort_data = sort_doc.to_dict() or {}
+                    raw_urls = sort_data.get("url", [])
+                    if isinstance(raw_urls, list):
+                        sort_urls = [str(u).strip() for u in raw_urls if u and str(u).strip()]
+                    elif isinstance(raw_urls, str) and raw_urls.strip():
+                        sort_urls = [raw_urls.strip()]
+            except Exception as sort_db_err:
+                print(f"🔥 sort 컬렉션 이미지 연동 에러 발생: {sort_db_err}")
+
         return {
             "id": doc.id,
             "name": data.get("name", "이름 없음"),
             "price": formatted_price,
             "paths": paths,       
             "sort": data.get("sort", "unclassified"),
+            "sort_urls": sort_urls,
             "code": code_val,      
             # 상세 페이지 룩북 전용 모델 배열
             "models": models,      

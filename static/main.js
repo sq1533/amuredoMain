@@ -431,7 +431,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     /* ====================================================
-       🏁 7. '안경의 새로운 시선, 안티오크' 휠/터치 스냅형 3단계 스토리텔링 로직
+       🏁 7. '안경의 새로운 시선, 안티오크' 환경별 스토리텔링 로직
+       - PC(1025px 이상): 휠 스냅형 3단계 수평 -> 최종 3분할 수직 전환
+       - 와이드모바일·모바일(1024px 이하): 스크롤 차단 없이 I -> II -> III 순차 페이드업(Fade-Up)
        ==================================================== */
     const setupAntiochScrollytelling = () => {
         const storySection = document.getElementById("antiochStorySection");
@@ -440,13 +442,35 @@ document.addEventListener("DOMContentLoaded", () => {
         let scrollyCompleted = false;
         let currentStep = 0; // 0: 진입 전, 1: 1단계, 2: 2단계, 3: 3단계
         let isTransitioning = false;
-        let touchStartY = 0;
+        let staggerObserver = null;
 
-        // 초기 상태: 섹션 진입 전 페이드 아웃 대기
-        storySection.setAttribute("data-step", "1");
-        storySection.setAttribute("data-phase", "out");
+        // [와이드모바일·모바일 (1024px 이하)] 스크롤 차단 없이 I -> II -> III 순차 페이드업 활성화
+        const enableMobileStaggerMode = () => {
+            cleanupPcListeners();
+            storySection.classList.remove("scrolly-active");
+            storySection.classList.add("scrolly-done", "scrolly-mobile-stagger");
+            storySection.removeAttribute("data-step");
+            storySection.removeAttribute("data-phase");
 
-        // 섹션을 화면 중앙으로 부드럽게 맞춤
+            const items = storySection.querySelectorAll(".antioch-story-col, .antioch-story-divider");
+            if ("IntersectionObserver" in window) {
+                if (staggerObserver) staggerObserver.disconnect();
+                staggerObserver = new IntersectionObserver((entries, obs) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add("is-visible");
+                            obs.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.15, rootMargin: "0px 0px -30px 0px" });
+
+                items.forEach(el => staggerObserver.observe(el));
+            } else {
+                items.forEach(el => el.classList.add("is-visible"));
+            }
+        };
+
+        // [PC (1025px 이상)] 섹션을 화면 중앙으로 부드럽게 맞춤
         const snapSectionToCenter = () => {
             const rect = storySection.getBoundingClientRect();
             const vh = window.innerHeight;
@@ -457,7 +481,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         };
 
-        // 제자리에서 단계 전환 (현재 단계 Fade Out -> 다음 단계 Fade In)
+        // [PC (1025px 이상)] 제자리에서 단계 전환 (현재 단계 Fade Out -> 다음 단계 Fade In)
         const transitionToStep = (nextStep) => {
             if (isTransitioning || scrollyCompleted) return;
             isTransitioning = true;
@@ -494,7 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     storySection.removeAttribute("data-phase");
                     isTransitioning = false;
 
-                    cleanupListeners();
+                    cleanupPcListeners();
                 }
             }, 320);
         };
@@ -507,7 +531,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return center >= vh * 0.22 && center <= vh * 0.78;
         };
 
-        // 스크롤 진입 시 1단계 자동 활성화
+        // PC 스크롤 진입 시 1단계 자동 활성화
         const onScroll = () => {
             if (scrollyCompleted || currentStep > 0) return;
             const rect = storySection.getBoundingClientRect();
@@ -527,7 +551,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!isSectionInSnapZone() && !approaching) return;
 
-            // 아직 0단계면 1단계로 먼저 진입
             if (currentStep === 0 && e.deltaY > 0) {
                 e.preventDefault();
                 snapSectionToCenter();
@@ -543,7 +566,6 @@ document.addEventListener("DOMContentLoaded", () => {
             // 섹션 내에 머무르는 동안 기본 스크롤 차단 후 제자리에서 단계 전환
             e.preventDefault();
             if (isTransitioning) return;
-
             if (Math.abs(e.deltaY) < 12) return;
 
             snapSectionToCenter();
@@ -554,52 +576,34 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         };
 
-        // 모바일 터치 스와이프 감지
-        const onTouchStart = (e) => {
-            if (scrollyCompleted || !e.touches || !e.touches.length) return;
-            touchStartY = e.touches[0].clientY;
-        };
-
-        const onTouchMove = (e) => {
-            if (scrollyCompleted || !e.touches || !e.touches.length) return;
-            if (!isSectionInSnapZone()) return;
-
-            const currentY = e.touches[0].clientY;
-            const deltaY = touchStartY - currentY; // 양수: 아래로 스크롤(위로 드래그)
-
-            // 1단계에서 위로 올라가는 드래그는 허용
-            if (currentStep <= 1 && deltaY < -15) {
-                return;
-            }
-
-            if (Math.abs(deltaY) > 10) {
-                e.preventDefault();
-            }
-
-            if (isTransitioning || Math.abs(deltaY) < 30) return;
-
-            touchStartY = currentY;
-            snapSectionToCenter();
-            if (deltaY > 0) {
-                transitionToStep(currentStep === 0 ? 1 : currentStep + 1);
-            } else if (deltaY < 0 && currentStep > 1) {
-                transitionToStep(currentStep - 1);
-            }
-        };
-
-        const cleanupListeners = () => {
+        const cleanupPcListeners = () => {
             window.removeEventListener("scroll", onScroll);
             window.removeEventListener("wheel", onWheel, { passive: false });
-            window.removeEventListener("touchstart", onTouchStart, { passive: true });
-            window.removeEventListener("touchmove", onTouchMove, { passive: false });
         };
 
-        window.addEventListener("scroll", onScroll, { passive: true });
-        window.addEventListener("wheel", onWheel, { passive: false });
-        window.addEventListener("touchstart", onTouchStart, { passive: true });
-        window.addEventListener("touchmove", onTouchMove, { passive: false });
+        // 초기 해상도 분기 및 리사이즈 대응
+        const mqMobile = window.matchMedia("(max-width: 1024px)");
+        const handleViewportMode = (e) => {
+            if (e.matches) {
+                enableMobileStaggerMode();
+            } else if (!scrollyCompleted) {
+                if (staggerObserver) staggerObserver.disconnect();
+                storySection.classList.remove("scrolly-done", "scrolly-mobile-stagger");
+                storySection.classList.add("scrolly-active");
+                currentStep = 0;
+                isTransitioning = false;
+                storySection.setAttribute("data-step", "1");
+                storySection.setAttribute("data-phase", "out");
+                window.addEventListener("scroll", onScroll, { passive: true });
+                window.addEventListener("wheel", onWheel, { passive: false });
+                onScroll();
+            }
+        };
 
-        onScroll();
+        handleViewportMode(mqMobile);
+        if (mqMobile.addEventListener) {
+            mqMobile.addEventListener("change", handleViewportMode);
+        }
     };
 
     setupAntiochScrollytelling();

@@ -85,40 +85,43 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
 
-            // 🏁 [수정] 통합 상세 이미지 섹션 동적 렌더링 (details -> models -> info)
+            // 🏁 [수정] 통합 상세 이미지 섹션 동적 렌더링 (sort_urls -> details -> models -> info)
             const detailImagesSection = document.getElementById("detailImagesSection");
+            const detailSortImagesContainer = document.getElementById("detailSortImagesContainer");
             const detailProductImg = document.getElementById("detailProductImg");
             const detailModelImagesContainer = document.getElementById("detailModelImagesContainer");
 
             if (detailImagesSection) {
                 detailImagesSection.style.display = 'block'; // 상세 이미지 섹션 노출 개시
-                
-                // 1) 상품별 고유 상세 이미지
+
+                // 공통 이미지 배열 렌더링 헬퍼 (sort 조건부 이미지 및 모델 이미지 공용)
+                const renderVerticalImageList = (container, urls, altPrefix) => {
+                    if (!container) return;
+                    container.innerHTML = "";
+                    const validUrls = Array.isArray(urls) ? urls.filter(u => u && String(u).trim()) : [];
+                    validUrls.forEach((imgUrl, index) => {
+                        const imgEl = document.createElement('img');
+                        imgEl.src = String(imgUrl).trim();
+                        imgEl.alt = `${altPrefix} ${index + 1}`;
+                        imgEl.loading = 'lazy';
+                        container.appendChild(imgEl);
+                    });
+                    container.style.display = validUrls.length > 0 ? 'block' : 'none';
+                };
+
+                // 0) 카테고리(sort)별 조건부 추가 이미지 리스트 (Part 1 공통 이미지 바로 아래)
+                renderVerticalImageList(detailSortImagesContainer, data.sort_urls, "시리즈 안내 이미지");
+
+                // 1) 모델 이미지 리스트 (세로 스크롤 나열)
+                renderVerticalImageList(detailModelImagesContainer, data.models, "모델 이미지");
+
+                // 2) 상품별 고유 상세 이미지
                 if (data.details && data.details.trim() !== "") {
                     detailProductImg.src = data.details;
                     detailProductImg.style.display = 'block';
                 } else {
                     detailProductImg.removeAttribute('src');
                     detailProductImg.style.display = 'none';
-                }
-
-                // 2) 모델 이미지 리스트 (세로 스크롤 나열)
-                if (detailModelImagesContainer) {
-                    detailModelImagesContainer.innerHTML = "";
-                    const models = data.models || [];
-                    if (models.length > 0) {
-                        models.forEach((imgUrl, index) => {
-                            const imgEl = document.createElement('img');
-                            imgEl.src = imgUrl;
-                            imgEl.alt = `모델 이미지 ${index + 1}`;
-                            imgEl.loading = 'lazy';
-                            imgEl.style.cssText = "width: 100%; display: block; margin: 0; padding: 0; border: none; height: auto;";
-                            detailModelImagesContainer.appendChild(imgEl);
-                        });
-                        detailModelImagesContainer.style.display = 'block';
-                    } else {
-                        detailModelImagesContainer.style.display = 'none';
-                    }
                 }
 
                 // 3) B2B/B2C 공통 사이즈 스펙 정보 (info + size 데이터 바인딩)

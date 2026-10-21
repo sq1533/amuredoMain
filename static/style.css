@@ -4412,6 +4412,7 @@ body.main-body {
 
 /* ==========================================================================
    📱 통합 반응형 미디어 쿼리 오버라이드: 와이드 모바일(1024px 이하) 및 모바일(640px 이하)
+   - 1024px 이하에서는 스크롤 차단 없이 I -> II -> III 순차 페이드업(Fade-Up) 적용
    ========================================================================== */
 
 @media screen and (max-width: 1024px) {
@@ -4423,28 +4424,29 @@ body.main-body {
         grid-column: 1 / span 6 !important;
         padding: 0 20px !important;
     }
-    .antioch-story-section.scrolly-active .antioch-story-grid {
-        min-height: 460px !important;
+    .antioch-story-section.scrolly-done .antioch-story-grid {
+        animation: none !important;
     }
-    .antioch-story-section.scrolly-active .antioch-story-col {
-        top: 0 !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        max-width: 460px !important;
-        flex-direction: column !important;
-        justify-content: flex-start !important;
-        gap: 0 !important;
+    /* 와이드모바일·모바일 순차 페이드업 (스크롤 차단 없음) */
+    .antioch-story-section.scrolly-mobile-stagger .antioch-story-col,
+    .antioch-story-section.scrolly-mobile-stagger .antioch-story-divider {
+        opacity: 0 !important;
+        transform: translateY(28px) !important;
+        transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1) !important;
     }
-    .antioch-story-section.scrolly-active .antioch-story-col .antioch-story-img-guide {
-        order: 1 !important; /* 위쪽: 이미지 */
-        flex: none !important;
-        width: 100% !important;
-        margin-bottom: 22px !important;
+    .antioch-story-section.scrolly-mobile-stagger .antioch-story-col[data-story-step="1"].is-visible {
+        transition-delay: 0.05s !important;
     }
-    .antioch-story-section.scrolly-active .antioch-story-col .antioch-story-text-group {
-        order: 2 !important; /* 아래쪽: 텍스트 요소 */
-        flex: none !important;
-        width: 100% !important;
+    .antioch-story-section.scrolly-mobile-stagger .antioch-story-col[data-story-step="2"].is-visible {
+        transition-delay: 0.22s !important;
+    }
+    .antioch-story-section.scrolly-mobile-stagger .antioch-story-col[data-story-step="3"].is-visible {
+        transition-delay: 0.39s !important;
+    }
+    .antioch-story-section.scrolly-mobile-stagger .antioch-story-col.is-visible,
+    .antioch-story-section.scrolly-mobile-stagger .antioch-story-divider.is-visible {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
     }
     .life-essentials-section {
         grid-column: span 6 !important;
@@ -4471,6 +4473,12 @@ body.main-body {
         height: 4px !important;
         background-color: #E2E2E2 !important; /* 연한 회색 */
         margin: 25px 0 !important;
+    }
+    /* 모바일 1열 수직 배치 시에는 스크롤에 맞춰 각 요소 도달 즉시 부드럽게 페이드업 */
+    .antioch-story-section.scrolly-mobile-stagger .antioch-story-col[data-story-step="1"].is-visible,
+    .antioch-story-section.scrolly-mobile-stagger .antioch-story-col[data-story-step="2"].is-visible,
+    .antioch-story-section.scrolly-mobile-stagger .antioch-story-col[data-story-step="3"].is-visible {
+        transition-delay: 0.05s !important;
     }
     .life-essentials-section {
         grid-column: span 4 !important;
