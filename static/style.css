@@ -229,9 +229,11 @@ body {
 .main-header .pc-nav-left,
 .main-header .pc-nav-center,
 .main-header .pc-nav-right,
+.main-header .pc-subnav-bar,
 .main-header .logo-wrapper,
 .main-header .menu-toggle-btn,
-.main-header .page-nav {
+.main-header .page-nav,
+.main-header.subnav-open {
     pointer-events: auto;
 }
 
@@ -3262,10 +3264,16 @@ body.main-body {
 
 /* 📱 1024px 이하 모바일/태블릿 헤더 및 드로어 반응형 오버라이드 (가변 햄버거/로고 복구) */
 @media (max-width: 1024px) {
+    :root {
+        --hamburger-btn-size: 6vw !important;
+        --hamburger-bar-width: 3vw !important;
+        --hamburger-bar-spacing: -0.9vw !important;
+    }
     body {
         padding-top: 0 !important;
     }
-    .main-header {
+    .main-header,
+    .main-header.scrolled {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -3282,20 +3290,16 @@ body.main-body {
         pointer-events: none;
     }
     .main-header.scrolled {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: 10vw !important;
-        border-radius: 0 !important;
-        border: none !important;
-        border-bottom: 1px solid #eaeaea !important;
-        background: rgba(244, 243, 240, 0.95) !important;
-        padding: 1rem 1.5rem !important;
         box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important;
-        z-index: 10020 !important;
     }
-    .pc-nav-center, .pc-nav-right { display: none !important; }
+    .main-header .pc-nav-center,
+    .main-header .pc-nav-right,
+    .main-header .pc-subnav-bar,
+    .pc-nav-center,
+    .pc-nav-right,
+    .pc-subnav-bar {
+        display: none !important;
+    }
     
     .menu-toggle-btn { 
         display: flex !important; 
@@ -3414,11 +3418,63 @@ body.main-body {
         border: none !important;
         display: block !important;
     }
+    .nav-links li.mobile-nav-group {
+        margin-bottom: 14px !important;
+    }
+    .nav-links li .mobile-brand-trigger {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        font-weight: 700 !important;
+        color: #222 !important;
+    }
+    .mobile-nav-group.open .mobile-brand-trigger {
+        color: #4A2E1B !important;
+    }
+    .mobile-nav-chevron {
+        font-size: 0.95rem;
+        color: #666;
+        transition: transform 0.25s ease;
+    }
+    .mobile-nav-group.open .mobile-nav-chevron {
+        transform: rotate(180deg);
+        color: #4A2E1B;
+    }
+    .mobile-subnav-list {
+        list-style: none !important;
+        margin: 0 !important;
+        padding: 0 0 0 14px !important;
+        border-left: 2px solid rgba(74, 46, 27, 0.2) !important;
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease, margin 0.25s ease;
+    }
+    .mobile-nav-group.open .mobile-subnav-list {
+        max-height: 320px;
+        opacity: 1;
+        margin: 6px 0 12px 4px !important;
+    }
+    .mobile-subnav-list li {
+        margin-bottom: 6px !important;
+    }
+    .nav-links .mobile-subnav-list li .mobile-subnav-btn {
+        font-size: 1.02rem !important;
+        font-weight: 500 !important;
+        color: #555 !important;
+        padding: 7px 0 !important;
+    }
+    .nav-links .mobile-subnav-list li .mobile-subnav-btn:hover,
+    .nav-links .mobile-subnav-list li .mobile-subnav-btn:active {
+        color: #4A2E1B !important;
+        font-weight: 700 !important;
+    }
 }
 
-/* 💻 PC 환경 헤더 스타일 - 알약 플로팅 형태 복구 (1025px 이상) */
+/* 💻 PC 환경 헤더 스타일 - 알약 플로팅 형태 복구 및 세로 확장 모션 (1025px 이상) */
 @media (min-width: 1025px) {
-    .main-header {
+    .main-header,
+    .main-header.scrolled {
         position: fixed !important;
         top: 20px !important;
         left: 10% !important;
@@ -3429,26 +3485,32 @@ body.main-body {
         -webkit-backdrop-filter: blur(15px);
         display: flex !important;
         justify-content: space-between !important;
-        align-items: center !important;
+        align-items: flex-start !important;
         padding: 0 4rem !important;
         z-index: 10020 !important;
         border: 1px solid rgba(234, 234, 234, 0.5) !important;
         border-radius: 24px !important;
         box-shadow: 0 10px 30px rgba(0,0,0,0.06) !important;
-        transition: all 0.4s ease;
+        overflow: hidden !important;
+        transition: height 0.36s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease !important;
     }
     .main-header.scrolled {
-        position: fixed !important;
-        top: 20px !important;
-        left: 10% !important;
-        width: 80% !important;
-        height: 4vw !important;
-        border-radius: 24px !important;
         background: rgba(244, 243, 240, 0.85) !important;
-        border: 1px solid rgba(234, 234, 234, 0.6) !important;
+        border-color: rgba(234, 234, 234, 0.6) !important;
         box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
-        padding: 0 4rem !important;
-        z-index: 10020 !important;
+    }
+    .main-header.subnav-open,
+    .main-header.scrolled.subnav-open {
+        height: calc(4vw + 52px) !important;
+        background: rgba(244, 243, 240, 0.94) !important;
+        border-color: rgba(220, 216, 208, 0.8) !important;
+        box-shadow: 0 16px 38px rgba(0, 0, 0, 0.1) !important;
+    }
+    .main-header .logo-wrapper,
+    .main-header .pc-nav-right {
+        height: 4vw !important;
+        display: flex !important;
+        align-items: center !important;
     }
 }
 
@@ -3533,17 +3595,119 @@ body.main-body {
    🏁 PC 헤더 3분할 정렬 및 플로팅 퀵 메뉴 + 슬라이드인 검색창 스타일
    ========================================================================== */
 
-/* 상단 헤더 정렬 조율 */
+/* 상단 헤더 정렬 조율 및 일체형 세로 확장 서브바 (옵션 1 + 추천 A안) */
+.main-header.subnav-open .nav-switch-btn {
+    text-shadow: none !important;
+}
+
 .pc-nav-center {
-    display: flex !important;
-    gap: 3.5rem !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 2vw !important;
+    transform: translate(-50%, -50%) !important;
+    display: flex;
+    gap: 4rem !important;
     align-items: center !important;
     justify-content: center !important;
-    flex: 1 !important;
+}
+
+.pc-brand-trigger {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    position: relative !important;
+    padding: 6px 4px !important;
+}
+
+.pc-brand-trigger .nav-chevron {
+    font-size: 0.75rem;
+    opacity: 0.65;
+    display: inline-block;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.pc-brand-trigger:hover,
+.pc-brand-trigger.active {
+    color: #4A2E1B !important;
+}
+
+.pc-brand-trigger.active .nav-chevron {
+    transform: rotate(180deg);
+    opacity: 1;
+}
+
+.pc-brand-trigger::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #4A2E1B;
+    transform: scaleX(0);
+    transition: transform 0.25s ease;
+}
+
+.pc-brand-trigger.active::after {
+    transform: scaleX(1);
+}
+
+.pc-subnav-bar {
+    position: absolute;
+    top: 4vw;
+    left: 4rem;
+    right: 4rem;
+    width: calc(100% - 8rem);
+    height: 52px;
+    background: transparent;
+    border-top: 1px solid rgba(74, 46, 27, 0.12);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    box-sizing: border-box;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1), transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.28s;
+    pointer-events: none;
+    z-index: 999;
+}
+
+.pc-subnav-bar.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.pc-subnav-group {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 3.2rem;
+}
+
+.pc-subnav-group.active {
+    display: flex;
+}
+
+.subnav-item-btn {
+    font-size: var(--fs-sm) !important;
+    font-weight: 600 !important;
+    color: #444 !important;
+    padding: 4px 8px !important;
+    letter-spacing: 0.5px !important;
+    text-shadow: none !important;
+    transition: color 0.2s ease !important;
+}
+
+.subnav-item-btn:hover {
+    color: #4A2E1B !important;
 }
 
 .pc-nav-right {
-    display: flex !important;
+    display: flex;
     gap: 2rem !important;
     align-items: center !important;
     justify-content: flex-end !important;
@@ -3669,7 +3833,8 @@ body.main-body {
 }
 
 #globalSearchInput {
-    flex: 1 !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
     border: none !important;
     outline: none !important;
     font-size: 1.1rem !important;
@@ -3683,6 +3848,12 @@ body.main-body {
 }
 
 .search-submit-btn {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     background: #4A2E1B !important;
     color: #ffffff !important;
     border: none !important;
@@ -3696,116 +3867,6 @@ body.main-body {
 
 .search-submit-btn:hover {
     background: #362113 !important;
-}
-
-/* 🏁 전역 반응형 그리드 시스템 정의 */
-
-/* 📱 1024px 이하 모바일 헤더/드로어 반응형 오버라이드 */
-@media (max-width: 1024px) {
-    :root {
-        --hamburger-btn-size: 6vw !important;
-        --hamburger-bar-width: 3vw !important;
-        --hamburger-bar-spacing: -0.9vw !important;
-    }
-    body {
-        padding-top: 0 !important;
-    }
-    .main-header {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: 10vw !important;
-        border-radius: 0 !important;
-        border: none !important;
-        border-bottom: 1px solid #eaeaea !important;
-        background: rgba(244, 243, 240, 0.95) !important;
-        padding: 1rem 1.5rem !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
-        justify-content: center !important;
-        z-index: 10020 !important;
-        pointer-events: none;
-    }
-    .main-header.scrolled {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: 10vw !important;
-        border-radius: 0 !important;
-        border: none !important;
-        border-bottom: 1px solid #eaeaea !important;
-        background: rgba(244, 243, 240, 0.95) !important;
-        padding: 1rem 1.5rem !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important;
-        z-index: 10020 !important;
-    }
-    .pc-nav-center, .pc-nav-right { display: none !important; }
-    .menu-toggle-btn { display: flex !important; position: absolute; right: 1.5rem !important; left: auto !important; top: 50% !important; transform: translateY(-50%) !important; pointer-events: auto; }
-    .logo-wrapper { width: auto !important; position: absolute; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; pointer-events: auto; }
-    
-    .page-nav { 
-        display: flex !important; 
-        position: fixed !important;
-        top: 0 !important;
-        width: 300px !important; 
-        right: -300px !important; 
-        height: 100vh !important;
-        background: #F4F3F0 !important;
-        z-index: 10065 !important;
-        transition: right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
-        padding: 80px 0 40px 0 !important;
-        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.08) !important;
-        flex-direction: column !important;
-        justify-content: flex-start !important;
-        pointer-events: auto;
-    }
-    .page-nav.open { 
-        right: 0 !important; 
-    }
-    .close-menu-btn {
-        display: block !important;
-        position: absolute !important;
-        top: 20px !important;
-        right: 20px !important;
-        background: transparent !important;
-        border: none !important;
-        font-size: 1.5rem !important;
-        cursor: pointer !important;
-        color: #222 !important;
-    }
-    .nav-overlay {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        background: transparent !important;
-        z-index: 10060 !important;
-        display: none;
-        opacity: 0;
-        transition: opacity 0.3s !important;
-    }
-    .nav-overlay.active {
-        display: block !important;
-        opacity: 1 !important;
-    }
-    .nav-links {
-        list-style: none !important;
-        padding: 0 2rem !important;
-        margin: 0 !important;
-    }
-    .nav-links li {
-        margin-bottom: 20px !important;
-    }
-    .nav-links li .nav-switch-btn {
-        width: 100% !important;
-        text-align: left !important;
-        padding: 10px 0 !important;
-        font-size: 1.2rem !important;
-        border: none !important;
-        display: block !important;
-    }
 }
 
 /* 🕶️ 상품 상세페이지 B2B/B2C 공통 사이즈 정보 (info) 레이아웃 */

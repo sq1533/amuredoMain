@@ -65,31 +65,67 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const headerHTML = `
-            <header class="main-header">
+            <header class="main-header" id="globalMainHeader">
                 <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="메뉴 열기">
                     <span class="hamburger-box"></span>
                 </button>
                 <div class="logo-wrapper">
                     <img src="/static/img/logo.png" alt="amuredo Logo" class="logo" style="cursor: pointer;" onclick="location.href='/'">
                 </div>
-                <nav class="pc-nav-center">
-                    <button class="nav-switch-btn" onclick="location.href='/trench'">Trench</button>
-                    <button class="nav-switch-btn" onclick="location.href='/ascot'">Ascot</button>
-                    <button class="nav-switch-btn" onclick="location.href='/uncon'">Uncon</button>
-                    <button class="nav-switch-btn" onclick="location.href='/bolero'">Bolero</button>
-                    <button class="nav-switch-btn" onclick="location.href='/dublin'">Dublin</button>
+                <nav class="pc-nav-center" id="pcNavCenter">
+                    <button type="button" class="nav-switch-btn pc-brand-trigger" data-brand="amuredo" aria-expanded="false">
+                        <span>아무래도</span>
+                        <span class="nav-chevron" aria-hidden="true">▾</span>
+                    </button>
+                    <button type="button" class="nav-switch-btn pc-brand-trigger" data-brand="antioch" aria-expanded="false">
+                        <span>안티오크</span>
+                        <span class="nav-chevron" aria-hidden="true">▾</span>
+                    </button>
                 </nav>
                 <nav class="pc-nav-right">
                     ${rightNavHTML}
                 </nav>
+                <div class="pc-subnav-bar" id="pcSubnavBar" aria-hidden="true">
+                    <div class="pc-subnav-group" data-brand-panel="amuredo">
+                        <button type="button" class="nav-switch-btn subnav-item-btn" data-collection="browline">하금테</button>
+                        <button type="button" class="nav-switch-btn subnav-item-btn" data-collection="horn">뿔테</button>
+                        <button type="button" class="nav-switch-btn subnav-item-btn" data-collection="sunglasses">선글라스</button>
+                    </div>
+                    <div class="pc-subnav-group" data-brand-panel="antioch">
+                        <button type="button" class="nav-switch-btn subnav-item-btn" onclick="location.href='/trench'">트렌치</button>
+                        <button type="button" class="nav-switch-btn subnav-item-btn" onclick="location.href='/ascot'">애스콧</button>
+                        <button type="button" class="nav-switch-btn subnav-item-btn" onclick="location.href='/uncon'">언컨</button>
+                        <button type="button" class="nav-switch-btn subnav-item-btn" onclick="location.href='/bolero'">볼레로</button>
+                        <button type="button" class="nav-switch-btn subnav-item-btn" onclick="location.href='/dublin'">더블린</button>
+                    </div>
+                </div>
                 <nav class="page-nav" id="pageNav">
                     <button class="close-menu-btn" id="closeMenuBtn" aria-label="메뉴 닫기">✕</button>
                     <ul class="nav-links">
-                        <li><button class="nav-switch-btn" onclick="location.href='/trench'">Trench</button></li>
-                        <li><button class="nav-switch-btn" onclick="location.href='/ascot'">Ascot</button></li>
-                        <li><button class="nav-switch-btn" onclick="location.href='/uncon'">Uncon</button></li>
-                        <li><button class="nav-switch-btn" onclick="location.href='/bolero'">Bolero</button></li>
-                        <li><button class="nav-switch-btn" onclick="location.href='/dublin'">Dublin</button></li>
+                        <li class="mobile-nav-group" data-mobile-brand="amuredo">
+                            <button type="button" class="nav-switch-btn mobile-brand-trigger" aria-expanded="false">
+                                <span>아무래도</span>
+                                <span class="mobile-nav-chevron" aria-hidden="true">▾</span>
+                            </button>
+                            <ul class="mobile-subnav-list">
+                                <li><button type="button" class="nav-switch-btn mobile-subnav-btn" data-collection="browline">하금테</button></li>
+                                <li><button type="button" class="nav-switch-btn mobile-subnav-btn" data-collection="horn">뿔테</button></li>
+                                <li><button type="button" class="nav-switch-btn mobile-subnav-btn" data-collection="sunglasses">선글라스</button></li>
+                            </ul>
+                        </li>
+                        <li class="mobile-nav-group" data-mobile-brand="antioch">
+                            <button type="button" class="nav-switch-btn mobile-brand-trigger" aria-expanded="false">
+                                <span>안티오크</span>
+                                <span class="mobile-nav-chevron" aria-hidden="true">▾</span>
+                            </button>
+                            <ul class="mobile-subnav-list">
+                                <li><button type="button" class="nav-switch-btn mobile-subnav-btn" onclick="location.href='/trench'">트렌치</button></li>
+                                <li><button type="button" class="nav-switch-btn mobile-subnav-btn" onclick="location.href='/ascot'">애스콧</button></li>
+                                <li><button type="button" class="nav-switch-btn mobile-subnav-btn" onclick="location.href='/uncon'">언컨</button></li>
+                                <li><button type="button" class="nav-switch-btn mobile-subnav-btn" onclick="location.href='/bolero'">볼레로</button></li>
+                                <li><button type="button" class="nav-switch-btn mobile-subnav-btn" onclick="location.href='/dublin'">더블린</button></li>
+                            </ul>
+                        </li>
                         <li style="margin-top: 25px; border-top: 1px solid #4A2E1B; padding-top: 15px;">
                             <button class="nav-switch-btn" id="sidebarSearchBtn" style="display: inline-flex; align-items: center; gap: 10px; color: #555; font-weight: 600;">
                                 <span class="material-icons" style="font-size: 1.45rem;">search</span>
@@ -138,6 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
     injectGlobalFooter();
 
     const bindMenuEvents = () => {
+        const mainHeader = document.getElementById("globalMainHeader") || document.querySelector(".main-header");
         const menuBtn = document.getElementById("menuToggleBtn");
         const closeBtn = document.getElementById("closeMenuBtn");
         const pageNav = document.getElementById("pageNav");
@@ -152,6 +189,100 @@ document.addEventListener("DOMContentLoaded", () => {
             if (closeBtn) closeBtn.onclick = toggleMenu;
             overlay.onclick = toggleMenu;
         }
+
+        // PC 2-Depth 슬림 서브 헤더바 (Hover & Click 제어)
+        const pcBrandTriggers = document.querySelectorAll(".pc-brand-trigger");
+        const pcSubnavBar = document.getElementById("pcSubnavBar");
+        const pcSubnavGroups = document.querySelectorAll(".pc-subnav-group");
+        let subnavCloseTimer = null;
+
+        const openPcSubnav = (brand) => {
+            if (subnavCloseTimer) {
+                clearTimeout(subnavCloseTimer);
+                subnavCloseTimer = null;
+            }
+            if (mainHeader) mainHeader.classList.add("subnav-open");
+            if (pcSubnavBar) {
+                pcSubnavBar.classList.add("open");
+                pcSubnavBar.setAttribute("aria-hidden", "false");
+            }
+            pcBrandTriggers.forEach(btn => {
+                const isMatch = btn.getAttribute("data-brand") === brand;
+                btn.classList.toggle("active", isMatch);
+                btn.setAttribute("aria-expanded", isMatch ? "true" : "false");
+            });
+            pcSubnavGroups.forEach(group => {
+                const isMatch = group.getAttribute("data-brand-panel") === brand;
+                group.classList.toggle("active", isMatch);
+            });
+        };
+
+        const closePcSubnav = () => {
+            if (mainHeader) mainHeader.classList.remove("subnav-open");
+            if (pcSubnavBar) {
+                pcSubnavBar.classList.remove("open");
+                pcSubnavBar.setAttribute("aria-hidden", "true");
+            }
+            pcBrandTriggers.forEach(btn => {
+                btn.classList.remove("active");
+                btn.setAttribute("aria-expanded", "false");
+            });
+            pcSubnavGroups.forEach(group => group.classList.remove("active"));
+        };
+
+        const scheduleClosePcSubnav = () => {
+            if (subnavCloseTimer) clearTimeout(subnavCloseTimer);
+            subnavCloseTimer = setTimeout(closePcSubnav, 140);
+        };
+
+        pcBrandTriggers.forEach(btn => {
+            const brand = btn.getAttribute("data-brand");
+            btn.addEventListener("mouseenter", () => openPcSubnav(brand));
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                if (btn.classList.contains("active") && pcSubnavBar && pcSubnavBar.classList.contains("open")) {
+                    closePcSubnav();
+                } else {
+                    openPcSubnav(brand);
+                }
+            });
+        });
+
+        if (mainHeader) {
+            mainHeader.addEventListener("mouseleave", scheduleClosePcSubnav);
+            mainHeader.addEventListener("mouseenter", () => {
+                if (subnavCloseTimer) {
+                    clearTimeout(subnavCloseTimer);
+                    subnavCloseTimer = null;
+                }
+            });
+        }
+        document.addEventListener("click", (e) => {
+            if (mainHeader && !mainHeader.contains(e.target)) {
+                closePcSubnav();
+            }
+        });
+
+        // 모바일 드로어 아코디언 제어 (현재 경로에 해당하는 그룹은 자동 펼침)
+        const mobileGroups = document.querySelectorAll(".mobile-nav-group");
+        const currentPath = window.location.pathname.toLowerCase();
+        const antiochPaths = ["/trench", "/ascot", "/uncon", "/bolero", "/dublin"];
+
+        mobileGroups.forEach(group => {
+            const trigger = group.querySelector(".mobile-brand-trigger");
+            const brand = group.getAttribute("data-mobile-brand");
+            if (brand === "antioch" && antiochPaths.includes(currentPath)) {
+                group.classList.add("open");
+                if (trigger) trigger.setAttribute("aria-expanded", "true");
+            }
+            if (trigger) {
+                trigger.onclick = (e) => {
+                    e.preventDefault();
+                    const isOpen = group.classList.toggle("open");
+                    trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+                };
+            }
+        });
     };
     bindMenuEvents();
 
@@ -668,7 +799,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1단계: 쿠키 값 기준으로 지연 없이 즉각 선제 렌더링
     const initialRole = getRoleFromCookie();
     renderQuickMenu(initialRole);
-    reorganizeMobileMenu(initialRole === "wholesale");
     window.updateGlobalCartBadge(initialRole);
 
     // 2단계: 백그라운드 세션 체크 및 불일치 시 UI 보정
@@ -681,7 +811,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 // 쿠키 갱신 (유효기간 30일)
                 document.cookie = `amuredo_role=${encodeURIComponent(verifiedRole)}; path=/; max-age=2592000`;
                 renderQuickMenu(verifiedRole);
-                reorganizeMobileMenu(verifiedRole === "wholesale");
                 window.updateGlobalCartBadge(verifiedRole);
             } else {
                 // 평상시에도 실시간 DB 수량을 체크하여 쿠키/UI 반영
@@ -736,26 +865,4 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
     checkSignupSuccess();
-
-    // 🏁 모바일 메뉴 재구조화 함수 (모든 상품 도매 판매 통합으로 분리 구분선 제거)
-    function reorganizeMobileMenu(isWholesale) {
-        const navLinks = document.querySelector(".nav-links");
-        if (!navLinks) return;
-
-        // 기존에 추가되었던 도매 구분선 제거
-        const oldDivider = navLinks.querySelector(".wholesale-menu-divider");
-        if (oldDivider) oldDivider.remove();
-
-        const links = Array.from(navLinks.querySelectorAll("li"));
-        let antiochLi = links.find(li => li.innerText.trim().toLowerCase().includes("antioch"));
-        
-        if (antiochLi) {
-            // Antioch 버튼의 스타일을 일반 메뉴와 동일하게 일체화
-            const antiochBtn = antiochLi.querySelector("button");
-            if (antiochBtn) {
-                antiochBtn.style.color = "";
-                antiochBtn.style.fontWeight = "";
-            }
-        }
-    }
 });
