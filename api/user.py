@@ -95,7 +95,7 @@ def send_telegram_wholesale_notification(token: str, chat_id: str, message: str)
         print(f"🔥 도매 가입 텔레그램 알림 백그라운드 발송 실패: {e}")
 
 @router.post("/register")
-async def register_wholesale(
+def register_wholesale(
     background_tasks: BackgroundTasks,
     name: str = Form(...),
     email: str = Form(...),
@@ -172,7 +172,7 @@ async def check_wholesale_status(request: Request):
     }
 
 @router.post("/login")
-async def login_wholesale(
+def login_wholesale(
     request: Request,
     response: Response,
     email: str = Form(...),
@@ -264,7 +264,7 @@ async def sync_cart(request: Request):
         
         sanitized_email = sanitize_email_for_rtdb(user_id)
         ref = rtdb.reference(f"cart/{sanitized_email}")
-        ref.set(cart_data)
+        await run_in_threadpool(ref.set, cart_data)
         
         return {"status": "success", "message": "장바구니가 동기화되었습니다."}
     except Exception as e:
@@ -272,7 +272,7 @@ async def sync_cart(request: Request):
         return {"status": "error", "message": str(e)}
 
 @router.get("/cart/load")
-async def load_cart(request: Request):
+def load_cart(request: Request):
     user_id = request.session.get("user_id")
     user_role = request.session.get("user_role")
     if not user_id or not user_role:
@@ -292,7 +292,7 @@ async def load_cart(request: Request):
 
 # 회원 정보 조회 (마이페이지용)
 @router.get("/me")
-async def get_my_info(request: Request):
+def get_my_info(request: Request):
     try:
         email = request.session.get("user_id")
         if not email or not request.session.get("is_wholesale"):
@@ -317,7 +317,7 @@ async def get_my_info(request: Request):
 
 # 비밀번호 변경 API
 @router.post("/change_password")
-async def change_password(
+def change_password(
     request: Request,
     current_password: str = Form(...),
     new_password: str = Form(...)
@@ -461,10 +461,10 @@ async def naver_callback(request: Request, code: str = None, state: str = None, 
         if not naver_id or not email:
             return RedirectResponse(url="/login?error=essential_data_missing")
             
-        # DB 연결 및 일반 회원 컬렉션('general_users') 조회
+        # DB 연결 및 일반 회원 컬렉션('general_users') 조회 (스레드풀 비동기 위임)
         db = firestore.client()
         user_ref = db.collection('general_users').document(email)
-        user_doc = user_ref.get()
+        user_doc = await run_in_threadpool(user_ref.get)
         
         # 세션에서 마지막 방문 페이지 획득 및 제거
         next_url = request.session.pop("social_next", None)
@@ -484,7 +484,7 @@ async def naver_callback(request: Request, code: str = None, state: str = None, 
             try:
                 sanitized_email = sanitize_email_for_rtdb(email)
                 ref = rtdb.reference(f"cart/{sanitized_email}")
-                cart_data = ref.get()
+                cart_data = await run_in_threadpool(ref.get)
                 if cart_data:
                     response.set_cookie(
                         key="general_cart",
@@ -523,7 +523,7 @@ async def naver_callback(request: Request, code: str = None, state: str = None, 
                 "privacy_agreed_at": firestore.SERVER_TIMESTAMP,
                 "privacy_version": "v1.0"
             }
-            user_ref.set(new_user_data)
+            await run_in_threadpool(user_ref.set, new_user_data)
             
             # 신규 가입 즉시 세션 및 쿠키 로그인 처리
             request.session["user_id"] = email
@@ -662,10 +662,10 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
         if not email:
             return RedirectResponse(url="/login?error=essential_data_missing")
             
-        # DB 연결 및 일반 회원 컬렉션('general_users') 조회
+        # DB 연결 및 일반 회원 컬렉션('general_users') 조회 (스레드풀 비동기 위임)
         db = firestore.client()
         user_ref = db.collection('general_users').document(email)
-        user_doc = user_ref.get()
+        user_doc = await run_in_threadpool(user_ref.get)
         
         # 세션에서 마지막 방문 페이지 획득 및 제거
         next_url = request.session.pop("social_next", None)
@@ -685,7 +685,7 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
             try:
                 sanitized_email = sanitize_email_for_rtdb(email)
                 ref = rtdb.reference(f"cart/{sanitized_email}")
-                cart_data = ref.get()
+                cart_data = await run_in_threadpool(ref.get)
                 if cart_data:
                     response.set_cookie(
                         key="general_cart",
@@ -724,7 +724,7 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
                 "privacy_agreed_at": firestore.SERVER_TIMESTAMP,
                 "privacy_version": "v1.0"
             }
-            user_ref.set(new_user_data)
+            await run_in_threadpool(user_ref.set, new_user_data)
             
             # 신규 가입 즉시 세션 및 쿠키 로그인 처리
             request.session["user_id"] = email
@@ -749,7 +749,7 @@ async def kakao_callback(request: Request, code: str = None, state: str = None, 
 # 7. 파트너 안경점 조회 API 신설
 # -------------------------------------------------------------
 @router.get("/partners")
-async def get_partners():
+def get_partners():
     """
     Firestore 'partner_store' 컬렉션에 등록된 모든 파트너 안경점 정보를 조회하여 반환합니다.
     """
@@ -785,10 +785,8 @@ async def get_partners():
 # -------------------------------------------------------------
 # 🏁 일반 소셜 로그인 고객의 마이페이지 데이터 조회 API 엔진 탑재
 # -------------------------------------------------------------
-from fastapi.responses import JSONResponse
-
 @router.get("/general/me")
-async def get_general_user_info(request: Request):
+def get_general_user_info(request: Request):
     """
     일반 소셜 로그인 고객의 마이페이지 연동용 정보(이메일, 연락처, 소셜가입제공자)를 Firestore에서 가져옵니다.
     """
@@ -832,7 +830,7 @@ async def get_general_user_info(request: Request):
 # 🏁 일반 소셜 로그인 고객 회원 탈퇴 API
 # -------------------------------------------------------------
 @router.post("/general/withdraw")
-async def withdraw_general_user(request: Request, response: Response):
+def withdraw_general_user(request: Request, response: Response):
     """
     일반 소셜 로그인 고객의 회원 탈퇴를 처리합니다.
     탈퇴 고객의 Firestore 문서 role 필드를 "out"으로 대체하여 탈퇴 처리를 식별하고, 세션 및 쿠키를 정리합니다.

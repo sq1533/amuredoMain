@@ -87,9 +87,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 </nav>
                 <div class="pc-subnav-bar" id="pcSubnavBar" aria-hidden="true">
                     <div class="pc-subnav-group" data-brand-panel="amuredo">
-                        <button type="button" class="nav-switch-btn subnav-item-btn" data-collection="browline">하금테</button>
-                        <button type="button" class="nav-switch-btn subnav-item-btn" data-collection="horn">뿔테</button>
-                        <button type="button" class="nav-switch-btn subnav-item-btn" data-collection="sunglasses">선글라스</button>
+                        <button type="button" class="nav-switch-btn subnav-item-btn" onclick="location.href='/oxford'">옥스포드</button>
+                        <button type="button" class="nav-switch-btn subnav-item-btn" onclick="location.href='/denim'">데님</button>
+                        <button type="button" class="nav-switch-btn subnav-item-btn" onclick="location.href='/linen'">린넨</button>
                     </div>
                     <div class="pc-subnav-group" data-brand-panel="antioch">
                         <button type="button" class="nav-switch-btn subnav-item-btn" onclick="location.href='/trench'">트렌치</button>
@@ -108,9 +108,9 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <span class="mobile-nav-chevron" aria-hidden="true">▾</span>
                             </button>
                             <ul class="mobile-subnav-list">
-                                <li><button type="button" class="nav-switch-btn mobile-subnav-btn" data-collection="browline">하금테</button></li>
-                                <li><button type="button" class="nav-switch-btn mobile-subnav-btn" data-collection="horn">뿔테</button></li>
-                                <li><button type="button" class="nav-switch-btn mobile-subnav-btn" data-collection="sunglasses">선글라스</button></li>
+                                <li><button type="button" class="nav-switch-btn mobile-subnav-btn" onclick="location.href='/oxford'">옥스포드</button></li>
+                                <li><button type="button" class="nav-switch-btn mobile-subnav-btn" onclick="location.href='/denim'">데님</button></li>
+                                <li><button type="button" class="nav-switch-btn mobile-subnav-btn" onclick="location.href='/linen'">린넨</button></li>
                             </ul>
                         </li>
                         <li class="mobile-nav-group" data-mobile-brand="antioch">
@@ -266,12 +266,14 @@ document.addEventListener("DOMContentLoaded", () => {
         // 모바일 드로어 아코디언 제어 (현재 경로에 해당하는 그룹은 자동 펼침)
         const mobileGroups = document.querySelectorAll(".mobile-nav-group");
         const currentPath = window.location.pathname.toLowerCase();
+        const amuredoPaths = ["/oxford", "/denim", "/linen"];
         const antiochPaths = ["/trench", "/ascot", "/uncon", "/bolero", "/dublin"];
 
         mobileGroups.forEach(group => {
             const trigger = group.querySelector(".mobile-brand-trigger");
             const brand = group.getAttribute("data-mobile-brand");
-            if (brand === "antioch" && antiochPaths.includes(currentPath)) {
+            if ((brand === "amuredo" && amuredoPaths.includes(currentPath)) ||
+                (brand === "antioch" && antiochPaths.includes(currentPath))) {
                 group.classList.add("open");
                 if (trigger) trigger.setAttribute("aria-expanded", "true");
             }

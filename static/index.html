@@ -20,12 +20,12 @@
     <meta property="og:type" content="website">
     
     <!-- 아무레도 브랜드 파비콘(Favicon) 설정 -->
-    <link rel="icon" href="/static/img/icon.webp?v=1.0" type="image/webp">
-    <link rel="apple-touch-icon" href="/static/img/icon.webp?v=1.0">
+    <link rel="icon" href="/static/img/icon.webp?v=128.0" type="image/webp">
+    <link rel="apple-touch-icon" href="/static/img/icon.webp?v=128.0">
     <!-- 전역 메인 폰트: 프리텐다드(Pretendard) 연결 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <!-- 외부 스타일시트 연결 (캐시 무효화) -->
-    <link rel="stylesheet" href="/static/style.css?v=121.0">
+    <link rel="stylesheet" href="/static/style.css?v=128.0">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17793333010"></script>
     <script>
@@ -288,7 +288,37 @@
                 </div>
             </div>
 
-                        <!-- 하단: 시리즈 제목 텍스트 (12x1) -->
+            <!-- 🏁 AMUREDO 컬렉션 섹션: 시리즈 제목 텍스트 (12x1) -->
+            <div class="grid-cell series-gap-title" style="border: none !important; padding-left: clamp(20px, 4vw, 40px) !important;">
+                <h2 class="font-serif fs-t" style="font-weight: 800; color: #4A2E1B; margin: 20px 0 25px 0;">AMUREDO 컬렉션</h2>
+            </div>
+
+            <!-- AMUREDO 컬렉션 그리드 컨테이너 (ANTIOCH 컬렉션과 동일한 배열 및 배치) -->
+            <div class="grid-cell series-gap-title antioch-collection-grid amuredo-collection-grid">
+                <!-- 1. Oxford -->
+                <div class="antioch-collection-card" onclick="location.href='/oxford'">
+                    <div class="series-img-wrapper">
+                        <img src="/static/img/03_1_series_oxford.webp" alt="Oxford" class="base-img">
+                    </div>
+                    <span class="antioch-collection-label">Oxford</span>
+                </div>
+                <!-- 2. Denim -->
+                <div class="antioch-collection-card" onclick="location.href='/denim'">
+                    <div class="series-img-wrapper">
+                        <img src="/static/img/03_1_series_denim.webp" alt="Denim" class="base-img">
+                    </div>
+                    <span class="antioch-collection-label">Denim</span>
+                </div>
+                <!-- 3. Linen -->
+                <div class="antioch-collection-card" onclick="location.href='/linen'">
+                    <div class="series-img-wrapper">
+                        <img src="/static/img/03_1_series_linen.webp" alt="Linen" class="base-img">
+                    </div>
+                    <span class="antioch-collection-label">Linen</span>
+                </div>
+            </div>
+
+            <!-- 하단: 시리즈 제목 텍스트 (12x1) -->
             <div class="grid-cell series-gap-title" style="border: none !important; padding-left: clamp(20px, 4vw, 40px) !important;">
                 <h2 class="font-serif fs-t" style="font-weight: 800; color: #4A2E1B; margin: 20px 0 25px 0;">ANTIOCH 컬렉션</h2>
             </div>
@@ -440,8 +470,8 @@
     </div>
 
     <!-- 공통 로직 자바스크립트 연결 (캐시 무효화 v5.3) -->
-    <script src="/static/main.js?v=121.0"></script>
-<script src="/static/globalWholesale.js?v=121.0"></script>
+    <script src="/static/main.js?v=128.0"></script>
+<script src="/static/globalWholesale.js?v=128.0"></script>
 </body>
 
 </html>

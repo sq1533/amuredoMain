@@ -1,13 +1,14 @@
-from fastapi import APIRouter, Request, HTTPException, BackgroundTasks, Form
+from fastapi import APIRouter, Request, HTTPException, BackgroundTasks, Form, Query
 from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
 from starlette.concurrency import run_in_threadpool
 from typing import Optional
 import requests
 import json
 import os
+import random
 import re
 import base64
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from firebase_admin import db as rtdb
 from firebase_admin import firestore
 
@@ -43,31 +44,18 @@ except Exception as e:
 # -------------------------------------------------------------
 KAKAOPAY_CID = ""
 KAKAOPAY_SECRET_KEY = ""
-KAKAOPAY_APPROVAL_URL = ""
-KAKAOPAY_CANCEL_URL = ""
-KAKAOPAY_FAIL_URL = ""
-
 TOSSPAY_API_KEY = ""
-TOSSPAY_RET_URL = ""
-TOSSPAY_RET_CANCEL_URL = ""
 
 pay_config_path = os.path.join(os.path.dirname(__file__), "..", "database", "pay_api.json")
 try:
     if os.path.exists(pay_config_path):
         with open(pay_config_path, "r", encoding="utf-8") as f:
             pay_data = json.load(f)
-            
             kp_data = pay_data.get("kakaopay", {})
             KAKAOPAY_CID = kp_data.get("cid", "")
             KAKAOPAY_SECRET_KEY = kp_data.get("secret_key", "")
-            KAKAOPAY_APPROVAL_URL = kp_data.get("approval_url", "")
-            KAKAOPAY_CANCEL_URL = kp_data.get("cancel_url", "")
-            KAKAOPAY_FAIL_URL = kp_data.get("fail_url", "")
-            
             tp_data = pay_data.get("tosspay", {})
             TOSSPAY_API_KEY = tp_data.get("api_key", "")
-            TOSSPAY_RET_URL = tp_data.get("retUrl", "")
-            TOSSPAY_RET_CANCEL_URL = tp_data.get("retCancelUrl", "")
 except Exception as e:
     print(f"🔥 카카오페이/토스페이 설정 로드 에러: {e}")
 
@@ -116,6 +104,38 @@ def confirm_danal_payment(method: str, transaction_id: str, merchant_id: str, am
 def sanitize_email(email: str):
     return email.replace(".", ",")
 
+def _get_item_data_from_any_col(db_fs, item_id: str) -> Optional[dict]:
+    """
+    Firestore 'item_ato'(안티오크) 및 'item'(아무래도) 컬렉션에서 단일 상품을 1회 배치 RPC(get_all)로 통합 조회합니다.
+    """
+    if not item_id:
+        return None
+    refs = [
+        db_fs.collection("item_ato").document(item_id),
+        db_fs.collection("item").document(item_id),
+    ]
+    for snap in db_fs.get_all(refs):
+        if snap.exists:
+            return snap.to_dict()
+    return None
+
+def _get_items_map_from_any_col(db_fs, item_ids: list) -> dict:
+    """
+    여러 상품 ID를 'item_ato'와 'item' 두 컬렉션에서 단일 배치 RPC(get_all)로 한 번에 조회하여 {id: dict} 맵으로 반환합니다.
+    """
+    unique_ids = [iid for iid in dict.fromkeys(item_ids or []) if iid]
+    if not unique_ids:
+        return {}
+    refs = []
+    for iid in unique_ids:
+        refs.append(db_fs.collection("item_ato").document(iid))
+        refs.append(db_fs.collection("item").document(iid))
+    result = {}
+    for snap in db_fs.get_all(refs):
+        if snap.exists and snap.id not in result:
+            result[snap.id] = snap.to_dict()
+    return result
+
 @router.get("/config")
 async def get_payment_config(request: Request):
     """
@@ -124,7 +144,6 @@ async def get_payment_config(request: Request):
     if not request.session.get("user_id"):
         raise HTTPException(status_code=403, detail="Unauthorized")
         
-    from datetime import datetime, timedelta, timezone
     kst = timezone(timedelta(hours=9))
     expire_time = datetime.now(kst) + timedelta(hours=24)
     expire_datetime_str = expire_time.strftime("%Y%m%d%H%M%S")
@@ -154,9 +173,9 @@ async def create_pending_order(request: Request):
         order_id = body.get("orderId")
         safe_email = sanitize_email(email)
         
-        # RTDB에 계층형 가주문 저장
+        # RTDB에 계층형 가주문 저장 (스레드풀 비동기 위임)
         ref = rtdb.reference(f'ws_orders/{safe_email}/{order_id}')
-        ref.set({
+        order_payload = {
             "orderId": order_id,
             "orderName": body.get("orderName"),
             "amount": body.get("amount"),
@@ -173,7 +192,8 @@ async def create_pending_order(request: Request):
             },
             "status": "결제대기",
             "createdAt": datetime.now().isoformat()
-        })
+        }
+        await run_in_threadpool(ref.set, order_payload)
         return {"status": "success"}
     except Exception as e:
         print(f"🔥 가주문 생성 에러: {e}")
@@ -207,7 +227,7 @@ def send_telegram_message(chat_id, text):
         print(f"🔥 텔레그램 발송 에러: {e}")
 
 @router.get("/my_orders")
-async def get_my_orders(request: Request):
+def get_my_orders(request: Request):
     """
     현재 로그인한 도매 유저의 전체 주문 내역을 계층 구조에서 가져옴.
     """
@@ -234,12 +254,8 @@ async def get_my_orders(request: Request):
         print(f"🔥 내 주문 목록 로드 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
-@router.post("/cancel_request")
-async def request_order_cancel(request: Request, background_tasks: BackgroundTasks):
-    """
-    도매 고객이 주문 취소를 요청했을 때 호출됨.
-    관리자 텔레그램으로 정보를 전송함.
-    """
+async def _handle_ws_order_claim(request: Request, background_tasks: BackgroundTasks, action_label: str, icon: str):
+    """도매 주문 취소/교환 요청 공통 처리 헬퍼"""
     email = request.session.get("user_id")
     if not email:
         return JSONResponse(status_code=403, content={"status": "error", "message": "권한 없음"})
@@ -249,78 +265,36 @@ async def request_order_cancel(request: Request, background_tasks: BackgroundTas
         order_id = body.get("orderId")
         safe_email = sanitize_email(email)
         
-        # RTDB에서 주문 정보 확인
         ref = rtdb.reference(f'ws_orders/{safe_email}/{order_id}')
-        order_data = ref.get()
-        
+        order_data = await run_in_threadpool(ref.get)
         if not order_data:
             return JSONResponse(status_code=404, content={"status": "error", "message": "주문을 찾을 수 없습니다."})
 
-        # 텔레그램 메시지 구성
         customer = order_data.get("customer", {})
         message = (
-            f"<b>🚨 도매 주문 취소 요청 알림</b>\n\n"
+            f"<b>{icon} 도매 주문 {action_label} 요청 알림</b>\n\n"
             f"<b>주문번호:</b> {order_id}\n"
             f"<b>주문명:</b> {order_data.get('orderName')}\n"
             f"<b>금액:</b> ₩{order_data.get('amount'):,}\n\n"
-            f"<b>[취소 요청 고객 정보]</b>\n"
+            f"<b>[{action_label} 요청 고객 정보]</b>\n"
             f"<b>성함:</b> {customer.get('name')}\n"
             f"<b>연락처:</b> {customer.get('phone')}\n"
             f"<b>이메일:</b> {customer.get('email')}\n"
         )
-        
         background_tasks.add_task(send_telegram_message, CANCEL_CHAT_ID, message)
-        
-        # [신규] DB 상태를 '취소 요청 완료'로 업데이트
-        ref.update({"status": "취소 요청 완료"})
-        
-        return {"status": "success", "message": "취소 요청이 완료되었습니다. 관리자 확인 후 처리가 진행됩니다."}
+        await run_in_threadpool(ref.update, {"status": f"{action_label} 요청 완료"})
+        return {"status": "success", "message": f"{action_label} 요청이 완료되었습니다. 관리자 확인 후 처리가 진행됩니다."}
     except Exception as e:
-        print(f"🔥 취소 요청 처리 에러: {e}")
+        print(f"🔥 {action_label} 요청 처리 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+@router.post("/cancel_request")
+async def request_order_cancel(request: Request, background_tasks: BackgroundTasks):
+    return await _handle_ws_order_claim(request, background_tasks, "취소", "🚨")
 
 @router.post("/exchange_request")
 async def request_order_exchange(request: Request, background_tasks: BackgroundTasks):
-    """
-    도매 고객이 주문 교환을 요청했을 때 호출됨.
-    관리자 텔레그램으로 정보를 전송하고 상태를 업데이트함.
-    """
-    email = request.session.get("user_id")
-    if not email:
-        return JSONResponse(status_code=403, content={"status": "error", "message": "권한 없음"})
-
-    try:
-        body = await request.json()
-        order_id = body.get("orderId")
-        safe_email = sanitize_email(email)
-        
-        ref = rtdb.reference(f'ws_orders/{safe_email}/{order_id}')
-        order_data = ref.get()
-        
-        if not order_data:
-            return JSONResponse(status_code=404, content={"status": "error", "message": "주문을 찾을 수 없습니다."})
-
-        customer = order_data.get("customer", {})
-        message = (
-            f"<b>🔄 도매 주문 교환 요청 알림</b>\n\n"
-            f"<b>주문번호:</b> {order_id}\n"
-            f"<b>주문명:</b> {order_data.get('orderName')}\n"
-            f"<b>금액:</b> ₩{order_data.get('amount'):,}\n\n"
-            f"<b>[교환 요청 고객 정보]</b>\n"
-            f"<b>성함:</b> {customer.get('name')}\n"
-            f"<b>연락처:</b> {customer.get('phone')}\n"
-            f"<b>이메일:</b> {customer.get('email')}\n"
-        )
-        
-        background_tasks.add_task(send_telegram_message, CANCEL_CHAT_ID, message)
-        
-        # DB 상태를 '교환 요청 완료'로 업데이트
-        ref.update({"status": "교환 요청 완료"})
-        
-        return {"status": "success", "message": "교환 요청이 완료되었습니다. 관리자 확인 후 처리가 진행됩니다."}
-    except Exception as e:
-        print(f"🔥 교환 요청 처리 에러: {e}")
-        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+    return await _handle_ws_order_claim(request, background_tasks, "교환", "🔄")
 
 def get_next_hour_slot(time_str: str) -> str:
     try:
@@ -331,7 +305,7 @@ def get_next_hour_slot(time_str: str) -> str:
         return ""
 
 @router.get("/check_active_booking")
-async def check_active_booking(request: Request):
+def check_active_booking(request: Request):
     """
     현재 로그인한 고객의 활성 예약("예약 완료" 상태)이 이미 존재하는지 검사합니다. (1인 1회 제한용)
     """
@@ -357,7 +331,7 @@ async def check_active_booking(request: Request):
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
 @router.get("/visit_schedule")
-async def get_visit_schedule(date: str):
+def get_visit_schedule(date: str):
     """
     특정 날짜(YYYY-MM-DD)의 본사 방문 피팅 예약 가능 시간 슬롯 현황을 RTDB에서 조회합니다.
     """
@@ -394,20 +368,12 @@ async def create_booking(request: Request, background_tasks: BackgroundTasks):
         items = body.get("items", [])
         booking_type = body.get("bookingType", "store") # "store" (안경점) 또는 "visit" (본사 방문)
         
-        # 1. 1인 1회 예약 제한 정책 검증 (로그인 이메일 기준 활성 예약 조회)
-        safe_email = sanitize_email(email)
-        bookings_ref = rtdb.reference(f'booking/{safe_email}')
-        existing_bookings = bookings_ref.get()
-        if existing_bookings:
-            for b in existing_bookings.values():
-                if b.get("status") == "예약 완료":
-                    return JSONResponse(status_code=400, content={"status": "error", "message": "이미 활성화된 피팅 예약 내역이 존재합니다. 예약은 1인당 1회만 가능합니다."})
-        
-        # 2. 필수 데이터 검증 및 분기 정보 세팅
+        # 1. 필수 데이터 검증 및 분기 정보 세팅
         store_name = ""
         reserved_date = ""
         reserved_time = ""
         address = ""
+        next_time = ""
         
         if booking_type == "visit":
             reserved_date = body.get("reservedDate", "")
@@ -423,83 +389,94 @@ async def create_booking(request: Request, background_tasks: BackgroundTasks):
                     return JSONResponse(status_code=400, content={"status": "error", "message": "당일 예약 또는 과거 날짜의 예약은 불가능합니다."})
             except ValueError:
                 return JSONResponse(status_code=400, content={"status": "error", "message": "올바르지 않은 예약 날짜 형식입니다."})
+                
+            next_time = get_next_hour_slot(reserved_time)
+            if not next_time:
+                return JSONResponse(status_code=400, content={"status": "error", "message": "올바르지 않은 예약 시간입니다."})
         else:
             store_name = body.get("storeName", "")
             if not items or not store_name:
                 return JSONResponse(status_code=400, content={"status": "error", "message": "필수 안경점 예약 정보가 누락되었습니다."})
 
-        # 3. 고유 예약 ID 생성 (B + 년월일시분초 + 무작위 3자리)
-        import random
         now = datetime.now()
         booking_id = f"B{now.strftime('%y%m%d%H%M%S')}{random.randint(100, 999)}"
-        
-        # 4. 본사 방문 피팅 예약인 경우: 실시간 스케줄 락(Locking) 설정 (연속 2시간)
-        if booking_type == "visit":
-            next_time = get_next_hour_slot(reserved_time)
-            if not next_time:
-                return JSONResponse(status_code=400, content={"status": "error", "message": "올바르지 않은 예약 시간입니다."})
-            
-            # RTDB에서 가용 여부 선행 검증 (동시 예약 충돌 방지)
-            schedule_ref = rtdb.reference(f'schedule/{reserved_date}')
-            slots = schedule_ref.get() or {}
-            
-            slot1_status = slots.get(reserved_time, {}).get("status", "available")
-            slot2_status = slots.get(next_time, {}).get("status", "available")
-            
-            if slot1_status == "reserved" or slot2_status == "reserved":
-                return JSONResponse(status_code=400, content={"status": "error", "message": "선택하신 시간대에 이미 다른 예약이 확정되었습니다. 다른 시간을 선택해 주세요."})
-            
-            # 2개 시간 슬롯 락 적용
-            schedule_ref.child(reserved_time).update({"status": "reserved", "booking_id": booking_id})
-            schedule_ref.child(next_time).update({"status": "reserved", "booking_id": booking_id})
-            
-        # 5. Firestore에서 예약자 실명 및 연락처 연동
-        db_fs = firestore.client()
-        
-        customer_name = "알 수 없음"
-        customer_phone = "알 수 없음"
-        
-        if user_role == "general":
-            user_doc = db_fs.collection("general_users").document(email).get()
-            if user_doc.exists:
-                ud = user_doc.to_dict()
-                customer_name = ud.get("name", "일반 고객")
-                customer_phone = ud.get("phoneNumber", "연락처 미등록")
-        elif user_role == "wholesale":
-            user_doc = db_fs.collection("wholesale_users").document(email).get()
-            if user_doc.exists:
-                ud = user_doc.to_dict()
-                customer_name = ud.get("name", "도매 고객")
-                customer_phone = ud.get("business_number", "사업자 회원")
-                
-        # 첫 번째 안경 아이템 이름을 백엔드에서 직접 조회하여 요약 생성
-        first_item_name = "안경 상품"
-        if len(items) > 0:
-            try:
-                item_doc = db_fs.collection("item").document(items[0]).get()
-                if item_doc.exists:
-                    first_item_name = item_doc.to_dict().get("name", "안경 상품")
-            except Exception as ie:
-                print(f"🔥 예약 상품 정보 연동 중 에러: {ie}")
-                
+        safe_email = sanitize_email(email)
+
+        def _execute_booking_tx():
+            bookings_ref = rtdb.reference(f'booking/{safe_email}')
+            existing_bookings = bookings_ref.get()
+            if existing_bookings:
+                for b in existing_bookings.values():
+                    if b.get("status") == "예약 완료":
+                        return ("ACTIVE_EXISTS", None, None, None)
+
+            # 본사 방문 피팅 예약인 경우: RTDB 원자적 트랜잭션(Transaction)으로 연속 2시간 슬롯 선점
+            if booking_type == "visit":
+                schedule_ref = rtdb.reference(f'schedule/{reserved_date}')
+                def _tx_lock_slots(current_slots):
+                    if current_slots is None:
+                        current_slots = {}
+                    s1 = (current_slots.get(reserved_time) or {}).get("status", "available")
+                    s2 = (current_slots.get(next_time) or {}).get("status", "available")
+                    if s1 == "reserved" or s2 == "reserved":
+                        raise rtdb.TransactionAbortedError("Slot already reserved")
+                    current_slots[reserved_time] = {"status": "reserved", "booking_id": booking_id}
+                    current_slots[next_time] = {"status": "reserved", "booking_id": booking_id}
+                    return current_slots
+                try:
+                    schedule_ref.transaction(_tx_lock_slots)
+                except rtdb.TransactionAbortedError:
+                    return ("SLOT_TAKEN", None, None, None)
+
+            db_fs = firestore.client()
+            c_name = "알 수 없음"
+            c_phone = "알 수 없음"
+            if user_role == "general":
+                user_doc = db_fs.collection("general_users").document(email).get()
+                if user_doc.exists:
+                    ud = user_doc.to_dict()
+                    c_name = ud.get("name", "일반 고객")
+                    c_phone = ud.get("phoneNumber", "연락처 미등록")
+            elif user_role == "wholesale":
+                user_doc = db_fs.collection("wholesale_users").document(email).get()
+                if user_doc.exists:
+                    ud = user_doc.to_dict()
+                    c_name = ud.get("name", "도매 고객")
+                    c_phone = ud.get("business_number", "사업자 회원")
+
+            f_item_name = "안경 상품"
+            if len(items) > 0:
+                try:
+                    idata = _get_item_data_from_any_col(db_fs, items[0])
+                    if idata:
+                        f_item_name = idata.get("name", "안경 상품")
+                except Exception as ie:
+                    print(f"🔥 예약 상품 정보 연동 중 에러: {ie}")
+
+            booking_data = {
+                "bookingId": booking_id,
+                "items": items,
+                "bookingType": booking_type,
+                "storeName": store_name,
+                "reservedDate": reserved_date,
+                "reservedTime": reserved_time,
+                "address": address,
+                "customerName": c_name,
+                "customerPhone": c_phone,
+                "customerEmail": email,
+                "status": "예약 완료",
+                "createdAt": now.isoformat()
+            }
+            bookings_ref.child(booking_id).set(booking_data)
+            return ("OK", c_name, c_phone, f_item_name)
+
+        tx_status, customer_name, customer_phone, first_item_name = await run_in_threadpool(_execute_booking_tx)
+        if tx_status == "ACTIVE_EXISTS":
+            return JSONResponse(status_code=400, content={"status": "error", "message": "이미 활성화된 피팅 예약 내역이 존재합니다. 예약은 1인당 1회만 가능합니다."})
+        if tx_status == "SLOT_TAKEN":
+            return JSONResponse(status_code=400, content={"status": "error", "message": "선택하신 시간대에 이미 다른 예약이 확정되었습니다. 다른 시간을 선택해 주세요."})
+
         goods_summary = f"{first_item_name} 포함 총 {len(items)}개"
-        
-        # 6. Firebase RTDB 예약 노드 저장
-        booking_data = {
-            "bookingId": booking_id,
-            "items": items,
-            "bookingType": booking_type,
-            "storeName": store_name,
-            "reservedDate": reserved_date,
-            "reservedTime": reserved_time,
-            "address": address,
-            "customerName": customer_name,
-            "customerPhone": customer_phone,
-            "customerEmail": email,
-            "status": "예약 완료",
-            "createdAt": now.isoformat()
-        }
-        bookings_ref.child(booking_id).set(booking_data)
         
         # 7. 텔레그램 user_request_id 채널로 접수 메시지 전송
         if booking_type == "visit":
@@ -532,7 +509,7 @@ async def create_booking(request: Request, background_tasks: BackgroundTasks):
 # 🏁 일반 매장 피팅 예약 조회 및 취소 API 엔진 탑재
 # -------------------------------------------------------------
 @router.get("/my_bookings")
-async def get_my_bookings(request: Request):
+def get_my_bookings(request: Request):
     """
     현재 로그인한 고객의 오프라인 안경점 피팅 예약 내역 목록을 RTDB에서 조회합니다.
     """
@@ -571,16 +548,15 @@ async def cancel_booking(request: Request, booking_id: str, background_tasks: Ba
     try:
         safe_email = sanitize_email(email)
         
-        # 🏁 RTDB에서 기존 예약 정보 조회
+        # 🏁 RTDB에서 기존 예약 정보 조회 (스레드풀 비동기 위임)
         ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
-        booking_data = ref.get()
+        booking_data = await run_in_threadpool(ref.get)
         
         if not booking_data:
             return JSONResponse(status_code=404, content={"status": "error", "message": "예약 내역을 찾을 수 없습니다."})
             
         # 🏁 [신규] 당일 취소 제한 및 과거 예약 취소 차단 로직 적용
         booking_type = booking_data.get("bookingType", "store")
-        from datetime import timezone, timedelta
         kst = timezone(timedelta(hours=9))
         now_kst = datetime.now(kst)
         today_kst = now_kst.date()
@@ -623,40 +599,37 @@ async def cancel_booking(request: Request, booking_id: str, background_tasks: Ba
                 except Exception as date_err:
                     print(f"🔥 매장 접수일 파싱 에러: {date_err}")
         
-        # 🏁 1. DB의 예약 상태를 '예약 취소'로 업데이트
-        ref.update({
-            "status": "예약 취소",
-            "cancelledAt": datetime.now().isoformat()
-        })
-        
-        # 🏁 1.5. 본사 방문 피팅 예약인 경우: 실시간 스케줄 락 해제 (연속 2시간)
-        booking_type = booking_data.get("bookingType", "store")
-        if booking_type == "visit":
-            reserved_date = booking_data.get("reservedDate")
-            reserved_time = booking_data.get("reservedTime")
-            if reserved_date and reserved_time:
-                next_time = get_next_hour_slot(reserved_time)
-                if next_time:
-                    schedule_ref = rtdb.reference(f'schedule/{reserved_date}')
-                    schedule_ref.child(reserved_time).update({"status": "available", "booking_id": None})
-                    schedule_ref.child(next_time).update({"status": "available", "booking_id": None})
-        
-        # 🏁 2. 텔레그램 user_cancel_id 채널로 취소 알림 발송
+        def _execute_cancel_db():
+            ref.update({
+                "status": "예약 취소",
+                "cancelledAt": datetime.now().isoformat()
+            })
+            if booking_type == "visit":
+                r_date = booking_data.get("reservedDate")
+                r_time = booking_data.get("reservedTime")
+                if r_date and r_time:
+                    n_time = get_next_hour_slot(r_time)
+                    if n_time:
+                        schedule_ref = rtdb.reference(f'schedule/{r_date}')
+                        schedule_ref.child(r_time).update({"status": "available", "booking_id": None})
+                        schedule_ref.child(n_time).update({"status": "available", "booking_id": None})
+            db_fs = firestore.client()
+            items_arr = booking_data.get("items", [])
+            f_name = "안경 상품"
+            if len(items_arr) > 0:
+                try:
+                    idata = _get_item_data_from_any_col(db_fs, items_arr[0])
+                    if idata:
+                        f_name = idata.get("name", "안경 상품")
+                except Exception:
+                    pass
+            return f_name
+
+        first_item_name = await run_in_threadpool(_execute_cancel_db)
         customer_name = booking_data.get("customerName", "알 수 없음")
         customer_phone = booking_data.get("customerPhone", "알 수 없음")
         store_name = booking_data.get("storeName", "미선택 매장")
-        
-        # 첫 상품명 조회를 시도하여 요약 생성
-        db_fs = firestore.client()
         items = booking_data.get("items", [])
-        first_item_name = "안경 상품"
-        if len(items) > 0:
-            try:
-                item_doc = db_fs.collection("item").document(items[0]).get()
-                if item_doc.exists:
-                    first_item_name = item_doc.to_dict().get("name", "안경 상품")
-            except Exception:
-                pass
         goods_summary = f"{first_item_name} 포함 총 {len(items)}개"
         
         tg_message = (
@@ -717,7 +690,7 @@ async def search_external_store(request: Request, keyword: str):
             "size": 15 # 최대 15개 반환
         }
         
-        response = await run_in_threadpool(requests.get, url, headers=headers, params=params)
+        response = await run_in_threadpool(requests.get, url, headers=headers, params=params, timeout=5)
         if response.status_code != 200:
             print(f"🔥 카카오 로컬 API 호출 에러: {response.text}")
             return JSONResponse(status_code=response.status_code, content={"status": "error", "message": "카카오 API 호출에 실패했습니다."})
@@ -746,7 +719,7 @@ async def search_external_store(request: Request, keyword: str):
 # 🏁 피팅 완료 상품 선택 결제 신규 API 엔지니어링 탑재
 # -------------------------------------------------------------
 @router.get("/booking_checkout_details/{booking_id}")
-async def get_booking_checkout_details(request: Request, booking_id: str):
+def get_booking_checkout_details(request: Request, booking_id: str):
     """
     고객의 피팅 완료된 예약건의 상세 내역 및 상품 목록을 조회합니다.
     도매가(wsPrice)는 절대 참조하지 않고 일반 소비자 가격(price)만 강제 적용합니다.
@@ -768,35 +741,32 @@ async def get_booking_checkout_details(request: Request, booking_id: str):
         if booking_data.get("status") not in ["이용 완료", "결제 완료"]:
             return JSONResponse(status_code=400, content={"status": "error", "message": "피팅이 완료되지 않은 예약건은 결제할 수 없습니다."})
             
-        # 3. 예약된 안경 아이템들의 정보 및 일반 소비자 가격 조회
+        # 3. 예약된 안경 아이템들의 정보 및 일반 소비자 가격 배치 조회 ('item_ato' 및 'item' 통합)
         db_fs = firestore.client()
+        items_arr = booking_data.get("items", [])
+        items_map = _get_items_map_from_any_col(db_fs, items_arr)
         
         items_list = []
-        items_arr = booking_data.get("items", [])
         for item_id in items_arr:
-            try:
-                item_doc = db_fs.collection("item").document(item_id).get()
-                if item_doc.exists:
-                    idata = item_doc.to_dict()
-                    # 오직 일반 소비자 가격(price)만 획득 (wsPrice 무시)
-                    price_val = idata.get("price", 0)
-                    items_list.append({
-                        "id": item_id,
-                        "name": idata.get("name", "안경 상품"),
-                        "image": (idata.get("paths") and idata.get("paths")[0]) or "/static/img/ready.webp",
-                        "category": idata.get("category", ""),
-                        "price": price_val
-                    })
-                else:
-                    items_list.append({
-                        "id": item_id,
-                        "name": f"안경 상품 ({item_id})",
-                        "image": "/static/img/ready.webp",
-                        "category": "",
-                        "price": 0
-                    })
-            except Exception as ie:
-                print(f"🔥 아이템 정보 연동 중 에러: {ie}")
+            idata = items_map.get(item_id)
+            if idata:
+                # 오직 일반 소비자 가격(price)만 획득 (wsPrice 무시)
+                price_val = idata.get("price", 0)
+                items_list.append({
+                    "id": item_id,
+                    "name": idata.get("name", "안경 상품"),
+                    "image": (idata.get("paths") and idata.get("paths")[0]) or "/static/img/ready.webp",
+                    "category": idata.get("category", ""),
+                    "price": price_val
+                })
+            else:
+                items_list.append({
+                    "id": item_id,
+                    "name": f"안경 상품 ({item_id})",
+                    "image": "/static/img/ready.webp",
+                    "category": "",
+                    "price": 0
+                })
                 
         # 4. 이미 결제 완료된 내역이 존재하는지 확인
         payment_ref = rtdb.reference(f'booking_payments/{booking_id}')
@@ -839,62 +809,67 @@ async def create_pending_booking_order(request: Request):
             
         safe_email = sanitize_email(email)
         
-        # 1. 예약 건 정보 조회 및 direct_buy 예외 분기
-        db_fs = firestore.client()
-        if booking_id.startswith("DIRECT-"):
-            user_doc = db_fs.collection("general_users").document(email).get()
-            user_name = "일반 고객"
-            user_phone = ""
-            if user_doc.exists:
-                ud = user_doc.to_dict()
-                user_name = ud.get("name", "일반 고객")
-                user_phone = ud.get("phoneNumber", "")
-            booking_data = {
-                "customerName": user_name,
-                "customerPhone": user_phone,
-                "bookingType": "direct"
-            }
-        else:
-            booking_ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
-            booking_data = booking_ref.get()
-            if not booking_data:
-                return JSONResponse(status_code=404, content={"status": "error", "message": "예약 내역을 찾을 수 없습니다."})
-            
-        # 2. 서버 측 소비자 가격 합산 연산 (변조 방지)
-        total_amount = 0
-        for item_id in selected_item_ids:
-            if not booking_id.startswith("DIRECT-") and item_id not in booking_data.get("items", []):
-                return JSONResponse(status_code=400, content={"status": "error", "message": "예약 내역에 포함되지 않은 상품이 선택되었습니다."})
-                
-            item_doc = db_fs.collection("item_ato").document(item_id).get()
-            if item_doc.exists:
-                idata = item_doc.to_dict()
-                total_amount += int(idata.get("price", 0))
-                
-        if total_amount <= 0:
+        def _prepare_pending_booking_order():
+            db_fs = firestore.client()
+            if booking_id.startswith("DIRECT-"):
+                user_doc = db_fs.collection("general_users").document(email).get()
+                user_name = "일반 고객"
+                user_phone = ""
+                if user_doc.exists:
+                    ud = user_doc.to_dict()
+                    user_name = ud.get("name", "일반 고객")
+                    user_phone = ud.get("phoneNumber", "")
+                b_data = {
+                    "customerName": user_name,
+                    "customerPhone": user_phone,
+                    "bookingType": "direct"
+                }
+            else:
+                booking_ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
+                b_data = booking_ref.get()
+                if not b_data:
+                    return ("NOT_FOUND", None, 0)
+
+            for iid in selected_item_ids:
+                if not booking_id.startswith("DIRECT-") and iid not in b_data.get("items", []):
+                    return ("INVALID_ITEM", None, 0)
+
+            items_map = _get_items_map_from_any_col(db_fs, selected_item_ids)
+            t_amount = 0
+            for iid in selected_item_ids:
+                idata = items_map.get(iid)
+                if idata:
+                    t_amount += int(idata.get("price", 0))
+
+            if t_amount <= 0:
+                return ("INVALID_AMOUNT", None, 0)
+
+            now_dt = datetime.now()
+            ord_id = f"BKORD{now_dt.strftime('%y%m%d%H%M%S')}{random.randint(100, 999)}"
+            ref = rtdb.reference(f'booking_orders/{ord_id}')
+            ref.set({
+                "orderId": ord_id,
+                "bookingId": booking_id,
+                "amount": t_amount,
+                "items": selected_item_ids,
+                "customer": {
+                    "name": b_data.get("customerName", "고객"),
+                    "phone": phone or b_data.get("customerPhone", ""),
+                    "email": email
+                },
+                "address": address or b_data.get("address", ""),
+                "status": "결제대기",
+                "createdAt": now_dt.isoformat()
+            })
+            return ("OK", ord_id, t_amount)
+
+        prep_status, order_id, total_amount = await run_in_threadpool(_prepare_pending_booking_order)
+        if prep_status == "NOT_FOUND":
+            return JSONResponse(status_code=404, content={"status": "error", "message": "예약 내역을 찾을 수 없습니다."})
+        if prep_status == "INVALID_ITEM":
+            return JSONResponse(status_code=400, content={"status": "error", "message": "예약 내역에 포함되지 않은 상품이 선택되었습니다."})
+        if prep_status == "INVALID_AMOUNT":
             return JSONResponse(status_code=400, content={"status": "error", "message": "결제 금액이 올바르지 않습니다."})
-            
-        # 3. 고유 가주문 ID 생성
-        import random
-        now = datetime.now()
-        order_id = f"BKORD{now.strftime('%y%m%d%H%M%S')}{random.randint(100, 999)}"
-        
-        # 4. booking_orders 노드에 가결제 정보 기록
-        ref = rtdb.reference(f'booking_orders/{order_id}')
-        ref.set({
-            "orderId": order_id,
-            "bookingId": booking_id,
-            "amount": total_amount,
-            "items": selected_item_ids,
-            "customer": {
-                "name": booking_data.get("customerName", "고객"),
-                "phone": phone or booking_data.get("customerPhone", ""),
-                "email": email
-            },
-            "address": address or booking_data.get("address", ""),
-            "status": "결제대기",
-            "createdAt": now.isoformat()
-        })
         
         return {"status": "success", "orderId": order_id, "amount": total_amount}
     except Exception as e:
@@ -904,8 +879,6 @@ async def create_pending_booking_order(request: Request):
 # -------------------------------------------------------------
 # 🏁 다날 결제 전용 성공/실패 콜백 엔드포인트
 # -------------------------------------------------------------
-from fastapi import Form, Query
-
 async def process_wholesale_success(
     request: Request,
     background_tasks: BackgroundTasks,
@@ -926,16 +899,24 @@ async def process_wholesale_success(
     if not email:
         return RedirectResponse(url="/login")
 
+    # 0. 중복 결제 승인 콜백 멱등성(Idempotency) 방어: 이미 '결제 완료'된 주문이면 즉시 성공 페이지로 이동
+    safe_session_email = sanitize_email(email)
+    existing_ws_ref = rtdb.reference(f"ws_orders/{safe_session_email}/{final_order_id}")
+    existing_ws_order = await run_in_threadpool(existing_ws_ref.get)
+    if existing_ws_order and existing_ws_order.get("status") == "결제 완료":
+        redirect_response = RedirectResponse(url=f"/wholesale/success?orderId={final_order_id}", status_code=303)
+        redirect_response.delete_cookie(key="wholesale_cart", path="/")
+        return redirect_response
+
     # 1. 결제수단 판별
     # pg_token이 전달된 경우 -> 카카오페이
     if pg_token:
         ref = rtdb.reference(f"payment_temp/{final_order_id}")
-        temp_data = ref.get()
+        temp_data = await run_in_threadpool(ref.get)
         if not temp_data:
             return await process_payment_fail(request, code="SESSION_NOT_FOUND", message="가결제 세션 정보를 찾을 수 없습니다.", orderId=final_order_id)
         
         tid = temp_data.get("tid")
-        approve_amount = temp_data.get("amount")
         customer_email = temp_data.get("email")
         
         url = "https://open-api.kakaopay.com/online/v1/payment/approve"
@@ -956,11 +937,11 @@ async def process_wholesale_success(
             err_msg = res_json.get("msg", "카카오페이 승인 실패")
             return await process_payment_fail(request, code="APPROVE_ERROR", message=err_msg, orderId=final_order_id)
             
-        ref.delete()
+        await run_in_threadpool(ref.delete)
         
         safe_email = sanitize_email(customer_email)
         ws_order_ref = rtdb.reference(f"ws_orders/{safe_email}/{final_order_id}")
-        ws_order_ref.update({
+        await run_in_threadpool(ws_order_ref.update, {
             "status": "결제 완료",
             "transactionId": tid,
             "paidAt": datetime.now().isoformat(),
@@ -979,7 +960,7 @@ async def process_wholesale_success(
             
         safe_email = sanitize_email(email)
         ref = rtdb.reference(f'ws_orders/{safe_email}/{final_order_id}')
-        order_data = ref.get()
+        order_data = await run_in_threadpool(ref.get)
         if not order_data:
             return RedirectResponse(url="/wholesale/cart", status_code=303)
             
@@ -1009,7 +990,7 @@ async def process_wholesale_success(
             "paidAt": datetime.now().isoformat()
         }
         
-        ref.update(update_payload)
+        await run_in_threadpool(ref.update, update_payload)
         
         redirect_response = RedirectResponse(url=f"/wholesale/success?orderId={final_order_id}", status_code=303)
         redirect_response.delete_cookie(key="wholesale_cart", path="/")
@@ -1018,7 +999,7 @@ async def process_wholesale_success(
     # 그 외의 경우 -> 토스페이
     else:
         ref = rtdb.reference(f"payment_temp/{final_order_id}")
-        temp_data = ref.get()
+        temp_data = await run_in_threadpool(ref.get)
         if not temp_data:
             return await process_payment_fail(request, code="SESSION_NOT_FOUND", message="가결제 세션 정보를 찾을 수 없습니다.", orderId=final_order_id)
             
@@ -1038,11 +1019,11 @@ async def process_wholesale_success(
             err_msg = res_json.get("msg", "토스페이 승인 실패")
             return await process_payment_fail(request, code="EXECUTE_ERROR", message=err_msg, orderId=final_order_id)
             
-        ref.delete()
+        await run_in_threadpool(ref.delete)
         
         safe_email = sanitize_email(customer_email)
         ws_order_ref = rtdb.reference(f"ws_orders/{safe_email}/{final_order_id}")
-        ws_order_ref.update({
+        await run_in_threadpool(ws_order_ref.update, {
             "status": "결제 완료",
             "transactionId": pay_token,
             "paidAt": datetime.now().isoformat(),
@@ -1074,6 +1055,12 @@ async def process_booking_success(
     if not email:
         return RedirectResponse(url="/login")
 
+    # 0. 중복 결제 승인 콜백 멱등성(Idempotency) 방어: 이미 '결제 완료'된 주문이면 즉시 성공 페이지로 이동
+    existing_bk_order_ref = rtdb.reference(f"booking_orders/{final_order_id}")
+    existing_bk_order = await run_in_threadpool(existing_bk_order_ref.get)
+    if existing_bk_order and existing_bk_order.get("status") == "결제 완료":
+        return RedirectResponse(url=f"/general/payment_success?orderId={final_order_id}", status_code=303)
+
     selected_method = ""
     pg_provider = ""
     resolved_transaction_id = ""
@@ -1084,7 +1071,7 @@ async def process_booking_success(
     if pg_token:
         # 카카오페이 승인
         ref = rtdb.reference(f"payment_temp/{final_order_id}")
-        temp_data = ref.get()
+        temp_data = await run_in_threadpool(ref.get)
         if not temp_data:
             return HTMLResponse(content="<h1>가결제 세션 정보를 찾을 수 없습니다.</h1>", status_code=404)
             
@@ -1110,7 +1097,7 @@ async def process_booking_success(
             err_msg = res_json.get("msg", "카카오페이 승인 실패")
             return await process_payment_fail(request, code="APPROVE_ERROR", message=err_msg, orderId=final_order_id)
             
-        ref.delete()
+        await run_in_threadpool(ref.delete)
         selected_method = "KAKAOPAY"
         pg_provider = "kakaopay"
         resolved_transaction_id = tid
@@ -1122,7 +1109,7 @@ async def process_booking_success(
             return HTMLResponse(content=f"<script>alert({safe_msg}); window.location.href='/general/bookings';</script>", status_code=200)
             
         order_ref = rtdb.reference(f'booking_orders/{final_order_id}')
-        order_data = order_ref.get()
+        order_data = existing_bk_order or await run_in_threadpool(order_ref.get)
         if not order_data:
             return HTMLResponse(content="<h1>가주문 정보를 찾을 수 없습니다.</h1>", status_code=404)
             
@@ -1152,7 +1139,7 @@ async def process_booking_success(
     else:
         # 토스페이 승인
         ref = rtdb.reference(f"payment_temp/{final_order_id}")
-        temp_data = ref.get()
+        temp_data = await run_in_threadpool(ref.get)
         if not temp_data:
             return HTMLResponse(content="<h1>가결제 세션 정보를 찾을 수 없습니다.</h1>", status_code=404)
             
@@ -1173,14 +1160,14 @@ async def process_booking_success(
             err_msg = res_json.get("msg", "토스페이 승인 실패")
             return await process_payment_fail(request, code="EXECUTE_ERROR", message=err_msg, orderId=final_order_id)
             
-        ref.delete()
+        await run_in_threadpool(ref.delete)
         selected_method = "TOSSPAY"
         pg_provider = "tosspay"
         resolved_transaction_id = pay_token
 
-    # 2. 피팅 완료 결제 성공 후 DB 상태 동기화 처리
+    # 2. 피팅 완료 결제 성공 후 DB 상태 동기화 처리 (스레드풀 비동기 위임)
     booking_order_ref = rtdb.reference(f"booking_orders/{final_order_id}")
-    order_data = booking_order_ref.get()
+    order_data = existing_bk_order or await run_in_threadpool(booking_order_ref.get)
     if not order_data:
         return HTMLResponse(content="<h1>피팅 가결제 정보를 찾을 수 없습니다.</h1>", status_code=404)
         
@@ -1189,67 +1176,64 @@ async def process_booking_success(
         customer_email = order_data.get("customer", {}).get("email")
         
     status_text = "결제 완료"
-    
-    payment_payload = {
-        "orderId": final_order_id,
-        "transactionId": resolved_transaction_id,
-        "amount": int(resolved_amount),
-        "paidItems": order_data.get("items", []),
-        "status": status_text,
-        "method": selected_method,
-        "pgProvider": pg_provider,
-        "paidAt": datetime.now().isoformat()
-    }
-    
-    # 결제 상태 저장
-    payment_ref = rtdb.reference(f"booking_payments/{booking_id}/{final_order_id}")
-    payment_ref.set(payment_payload)
+    paid_items_ids = order_data.get("items", [])
 
-    # 가주문 상태 업데이트
-    booking_order_update = {
-        "status": status_text,
-        "transactionId": resolved_transaction_id,
-        "method": selected_method,
-        "pgProvider": pg_provider,
-        "paidAt": datetime.now().isoformat()
-    }
-    booking_order_ref.update(booking_order_update)
+    def _finalize_booking_payment_db():
+        now_iso = datetime.now().isoformat()
+        payment_payload = {
+            "orderId": final_order_id,
+            "transactionId": resolved_transaction_id,
+            "amount": int(resolved_amount),
+            "paidItems": paid_items_ids,
+            "status": status_text,
+            "method": selected_method,
+            "pgProvider": pg_provider,
+            "paidAt": now_iso
+        }
+        payment_ref = rtdb.reference(f"booking_payments/{booking_id}/{final_order_id}")
+        payment_ref.set(payment_payload)
 
-    # 예약 상태 업데이트
-    if not booking_id.startswith("DIRECT-"):
-        safe_email = sanitize_email(customer_email)
-        booking_ref = rtdb.reference(f"booking/{safe_email}/{booking_id}")
-        booking_ref.update({"status": status_text})
+        booking_order_update = {
+            "status": status_text,
+            "transactionId": resolved_transaction_id,
+            "method": selected_method,
+            "pgProvider": pg_provider,
+            "paidAt": now_iso
+        }
+        booking_order_ref.update(booking_order_update)
 
-        # 결제 완료 시 작성된 리뷰가 있다면 구매 완료 스티커 부착 상태로 업데이트
-        try:
-            bdata = booking_ref.get()
-            if bdata:
-                r_date = bdata.get("reservedDate")
-                r_time = bdata.get("reservedTime")
-                if r_date and r_time:
-                    review_doc_id = f"{r_date}_{r_time}"
-                    db_fs = firestore.client()
-                    review_ref = db_fs.collection("fitting_reviews").document(review_doc_id)
-                    if review_ref.get().exists:
-                        review_ref.update({"is_purchased": True})
-        except Exception as re_err:
-            print(f"🔥 결제 완료 후 리뷰 상태 업데이트 실패: {re_err}")
+        db_fs = firestore.client()
+        if not booking_id.startswith("DIRECT-"):
+            safe_email = sanitize_email(customer_email)
+            booking_ref = rtdb.reference(f"booking/{safe_email}/{booking_id}")
+            booking_ref.update({"status": status_text})
 
-    # 텔레그램 접수 안내
+            try:
+                bdata = booking_ref.get()
+                if bdata:
+                    r_date = bdata.get("reservedDate")
+                    r_time = bdata.get("reservedTime")
+                    if r_date and r_time:
+                        review_doc_id = f"{r_date}_{r_time}"
+                        review_ref = db_fs.collection("fitting_reviews").document(review_doc_id)
+                        if review_ref.get().exists:
+                            review_ref.update({"is_purchased": True})
+            except Exception as re_err:
+                print(f"🔥 결제 완료 후 리뷰 상태 업데이트 실패: {re_err}")
+
+        f_item_name = "안경 상품"
+        if len(paid_items_ids) > 0:
+            try:
+                idata = _get_item_data_from_any_col(db_fs, paid_items_ids[0])
+                if idata:
+                    f_item_name = idata.get("name", "안경 상품")
+            except Exception:
+                pass
+        return f_item_name
+
+    first_item_name = await run_in_threadpool(_finalize_booking_payment_db)
     customer_name = order_data.get("customer", {}).get("name", "알 수 없음")
     customer_phone = order_data.get("customer", {}).get("phone", "알 수 없음")
-    
-    db_fs = firestore.client()
-    paid_items_ids = order_data.get("items", [])
-    first_item_name = "안경 상품"
-    if len(paid_items_ids) > 0:
-        try:
-            item_doc = db_fs.collection("item_ato").document(paid_items_ids[0]).get()
-            if item_doc.exists:
-                first_item_name = item_doc.to_dict().get("name", "안경 상품")
-        except Exception:
-            pass
     goods_summary = f"{first_item_name} 포함 총 {len(paid_items_ids)}개"
     
     status_msg = "결제 완료"
@@ -1642,9 +1626,9 @@ async def kakaopay_ready(request: Request):
             tid = res_json.get("tid")
             redirect_url = res_json.get("next_redirect_pc_url") # PC 기준
             
-            # 가주문 임시 세션 및 tid 보존
+            # 가주문 임시 세션 및 tid 보존 (스레드풀 비동기 위임)
             ref = rtdb.reference(f"payment_temp/{order_id}")
-            ref.set({
+            await run_in_threadpool(ref.set, {
                 "tid": tid,
                 "amount": int(amount),
                 "email": email,
@@ -1721,9 +1705,9 @@ async def tosspay_ready(request: Request):
             pay_token = res_json.get("payToken")
             redirect_url = res_json.get("checkoutPage")
 
-            # 가주문 임시 세션 및 payToken 보존
+            # 가주문 임시 세션 및 payToken 보존 (스레드풀 비동기 위임)
             ref = rtdb.reference(f"payment_temp/{order_id}")
-            ref.set({
+            await run_in_threadpool(ref.set, {
                 "payToken": pay_token,
                 "amount": int(amount),
                 "email": email,
@@ -1752,7 +1736,7 @@ async def tosspay_fail(request: Request, orderNo: str, status: str):
 # 🏁 결제 성공 영수증 조회를 위한 신규 API 2종
 # -------------------------------------------------------------
 @router.get("/order/{order_id}")
-async def get_wholesale_order_detail(request: Request, order_id: str):
+def get_wholesale_order_detail(request: Request, order_id: str):
     email = request.session.get("user_id")
     if not email:
         raise HTTPException(status_code=403, detail="Unauthorized")
@@ -1778,7 +1762,7 @@ async def get_wholesale_order_detail(request: Request, order_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/booking_order/{order_id}")
-async def get_booking_order_detail(request: Request, order_id: str):
+def get_booking_order_detail(request: Request, order_id: str):
     email = request.session.get("user_id")
     if not email:
         raise HTTPException(status_code=403, detail="Unauthorized")
@@ -1790,31 +1774,28 @@ async def get_booking_order_detail(request: Request, order_id: str):
         if not order_data:
             raise HTTPException(status_code=404, detail="Booking order not found")
             
-        # 2. 아이템 ID 리스트를 기반으로 실제 상품 정보(이름, 단가) 조회
+        # 2. 아이템 ID 리스트를 기반으로 실제 상품 정보(이름, 단가) 배치 조회 ('item_ato' 및 'item' 통합)
         db_fs = firestore.client()
+        items_arr = order_data.get("items", [])
+        items_map = _get_items_map_from_any_col(db_fs, items_arr)
         
         items_list = []
-        items_arr = order_data.get("items", [])
         for item_id in items_arr:
-            try:
-                item_doc = db_fs.collection("item").document(item_id).get()
-                if item_doc.exists:
-                    idata = item_doc.to_dict()
-                    items_list.append({
-                        "id": item_id,
-                        "name": idata.get("name", "안경 상품"),
-                        "price": idata.get("price", 0),
-                        "quantity": 1
-                    })
-                else:
-                    items_list.append({
-                        "id": item_id,
-                        "name": f"안경 상품 ({item_id})",
-                        "price": 0,
-                        "quantity": 1
-                    })
-            except Exception as ie:
-                print(f"🔥 아이템 정보 연동 중 에러: {ie}")
+            idata = items_map.get(item_id)
+            if idata:
+                items_list.append({
+                    "id": item_id,
+                    "name": idata.get("name", "안경 상품"),
+                    "price": idata.get("price", 0),
+                    "quantity": 1
+                })
+            else:
+                items_list.append({
+                    "id": item_id,
+                    "name": f"안경 상품 ({item_id})",
+                    "price": 0,
+                    "quantity": 1
+                })
                 
         return {
             "status": "success",
@@ -1875,51 +1856,44 @@ async def create_review(request: Request):
             
         safe_email = sanitize_email(email)
         
-        # 1. 예약 정보 조회 및 검증
-        booking_ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
-        booking_data = booking_ref.get()
-        if not booking_data:
-            raise HTTPException(status_code=404, detail="예약 내역을 찾을 수 없습니다.")
-            
-        status = booking_data.get("status")
-        if status not in ["이용 완료", "결제 완료"]:
-            raise HTTPException(status_code=400, detail="이용 완료 또는 결제 완료된 예약만 후기를 작성할 수 있습니다.")
-            
-        reserved_date = booking_data.get("reservedDate")
-        reserved_time = booking_data.get("reservedTime")
-        customer_name = booking_data.get("customerName", "고객")
-        
-        if not reserved_date or not reserved_time:
-            raise HTTPException(status_code=400, detail="예약 날짜 또는 시간 정보가 누락되었습니다.")
-            
-        # 문서 ID 생성
-        review_doc_id = f"{reserved_date}_{reserved_time}"
-        
-        # 2. Firestore 중복 체크 및 저장
-        db_fs = firestore.client()
-        
-        review_ref = db_fs.collection("fitting_reviews").document(review_doc_id)
-        if review_ref.get().exists:
-            raise HTTPException(status_code=400, detail="이미 해당 예약에 대한 후기가 등록되어 있습니다.")
-            
-        # 3. 구매 완료 여부 체크 (rtdb booking_payments 노드 존재 검사)
-        payments_ref = rtdb.reference(f"booking_payments/{booking_id}")
-        payments_data = payments_ref.get()
-        is_purchased = payments_data is not None
-        
-        # Firestore에 후기 데이터 저장
-        review_data = {
-            "bookingId": booking_id,
-            "customerName": customer_name,
-            "customerEmail": email,
-            "reservedDate": reserved_date,
-            "reservedTime": reserved_time,
-            "content": content.strip(),
-            "rating": rating,
-            "is_purchased": is_purchased,
-            "created_at": datetime.now().isoformat()
-        }
-        review_ref.set(review_data)
+        def _save_review_db():
+            booking_ref = rtdb.reference(f'booking/{safe_email}/{booking_id}')
+            booking_data = booking_ref.get()
+            if not booking_data:
+                return (404, "예약 내역을 찾을 수 없습니다.")
+            status = booking_data.get("status")
+            if status not in ["이용 완료", "결제 완료"]:
+                return (400, "이용 완료 또는 결제 완료된 예약만 후기를 작성할 수 있습니다.")
+            reserved_date = booking_data.get("reservedDate")
+            reserved_time = booking_data.get("reservedTime")
+            customer_name = booking_data.get("customerName", "고객")
+            if not reserved_date or not reserved_time:
+                return (400, "예약 날짜 또는 시간 정보가 누락되었습니다.")
+            review_doc_id = f"{reserved_date}_{reserved_time}"
+            db_fs = firestore.client()
+            review_ref = db_fs.collection("fitting_reviews").document(review_doc_id)
+            if review_ref.get().exists:
+                return (400, "이미 해당 예약에 대한 후기가 등록되어 있습니다.")
+            payments_ref = rtdb.reference(f"booking_payments/{booking_id}")
+            payments_data = payments_ref.get()
+            is_purchased = payments_data is not None
+            review_data = {
+                "bookingId": booking_id,
+                "customerName": customer_name,
+                "customerEmail": email,
+                "reservedDate": reserved_date,
+                "reservedTime": reserved_time,
+                "content": content.strip(),
+                "rating": rating,
+                "is_purchased": is_purchased,
+                "created_at": datetime.now().isoformat()
+            }
+            review_ref.set(review_data)
+            return (200, "OK")
+
+        err_code, err_msg = await run_in_threadpool(_save_review_db)
+        if err_code != 200:
+            raise HTTPException(status_code=err_code, detail=err_msg)
         
         return {"status": "success", "message": "후기가 성공적으로 등록되었습니다."}
         
@@ -1930,7 +1904,7 @@ async def create_review(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/booking/{booking_id}/review_status")
-async def get_booking_review_status(request: Request, booking_id: str):
+def get_booking_review_status(request: Request, booking_id: str):
     """
     특정 예약건에 이미 작성한 후기가 있는지 조회합니다.
     """
@@ -1961,7 +1935,7 @@ async def get_booking_review_status(request: Request, booking_id: str):
         return {"status": "error", "message": str(e), "has_review": False}
 
 @router.get("/fitting_reviews")
-async def get_fitting_reviews(limit: int = 30):
+def get_fitting_reviews(limit: int = 30):
     """
     모든 고객들이 피팅 후기를 볼 수 있도록 전체 리뷰를 조회합니다. (최신순, limit 개수 제한)
     개인정보 보호를 위해 작성자명은 마스킹 처리하여 반환합니다.
@@ -1999,14 +1973,8 @@ async def get_fitting_reviews(limit: int = 30):
         print(f"🔥 전체 리뷰 조회 중 에러: {e}")
         return {"status": "error", "message": str(e), "reviews": []}
 
-@router.post("/booking_order/cancel_request")
-async def request_booking_order_cancel(request: Request, background_tasks: BackgroundTasks):
-    """
-    일반 고객이 예약 완료 및 결제 완료된 상품 주문의 취소를 요청했을 때 호출됨.
-    booking_id를 받아 booking_payments에서 order_id를 조회하고,
-    booking_orders, booking_payments, booking 노드의 상태를 '취소 요청 완료'로 업데이트하고
-    관리자 텔레그램으로 취소 요청 알림을 발송합니다.
-    """
+async def _handle_booking_order_claim(request: Request, background_tasks: BackgroundTasks, action_label: str, icon: str):
+    """B2C 일반 예약 결제 주문 취소/교환 요청 공통 처리 헬퍼"""
     email = request.session.get("user_id")
     if not email:
         return JSONResponse(status_code=403, content={"status": "error", "message": "로그인이 필요합니다."})
@@ -2014,13 +1982,11 @@ async def request_booking_order_cancel(request: Request, background_tasks: Backg
     try:
         body = await request.json()
         booking_id = body.get("bookingId")
-        
         if not booking_id:
             return JSONResponse(status_code=400, content={"status": "error", "message": "예약번호가 필요합니다."})
 
-        # 1. booking_payments/{booking_id}에서 order_id 조회
         payments_ref = rtdb.reference(f"booking_payments/{booking_id}")
-        payments_data = payments_ref.get()
+        payments_data = await run_in_threadpool(payments_ref.get)
         if not payments_data:
             return JSONResponse(status_code=404, content={"status": "error", "message": "결제 정보를 찾을 수 없습니다."})
 
@@ -2028,157 +1994,55 @@ async def request_booking_order_cancel(request: Request, background_tasks: Backg
         if not order_ids:
             return JSONResponse(status_code=404, content={"status": "error", "message": "주문번호를 조회할 수 없습니다."})
         
-        order_id = None
-        for oid in order_ids:
-            p_info = payments_data.get(oid)
-            if isinstance(p_info, dict) and p_info.get("status") == "결제 완료":
-                order_id = oid
-                break
-        if not order_id:
-            order_id = order_ids[0]
+        order_id = next(
+            (oid for oid in order_ids if isinstance(payments_data.get(oid), dict) and payments_data[oid].get("status") == "결제 완료"),
+            order_ids[0]
+        )
 
-        # 2. booking_orders에서 주문 정보 확인
         order_ref = rtdb.reference(f"booking_orders/{order_id}")
-        order_data = order_ref.get()
+        order_data = await run_in_threadpool(order_ref.get)
         if not order_data:
             return JSONResponse(status_code=404, content={"status": "error", "message": "주문 정보를 찾을 수 없습니다."})
 
-        # 권한 및 상태 검증
         customer_email = order_data.get("customer", {}).get("email")
         if customer_email != email:
             return JSONResponse(status_code=403, content={"status": "error", "message": "요청 권한이 없습니다."})
 
-        current_status = order_data.get("status")
-        if current_status != "결제 완료":
-            return JSONResponse(status_code=400, content={"status": "error", "message": "결제 완료 상태의 주문만 취소 요청이 가능합니다."})
+        if order_data.get("status") != "결제 완료":
+            return JSONResponse(status_code=400, content={"status": "error", "message": f"결제 완료 상태의 주문만 {action_label} 요청이 가능합니다."})
 
-        # 3. 3개 노드 상태 동기화 업데이트 ("취소 요청 완료")
-        status_text = "취소 요청 완료"
-        
-        # booking_orders/{order_id}
-        order_ref.update({"status": status_text})
-        
-        # booking_payments/{booking_id}/{order_id}
-        payments_ref.child(order_id).update({"status": status_text})
-            
-        # booking/{safe_email}/{booking_id}
-        safe_email = sanitize_email(email)
-        booking_ref = rtdb.reference(f"booking/{safe_email}/{booking_id}")
-        if booking_ref.get():
-            booking_ref.update({"status": status_text})
+        status_text = f"{action_label} 요청 완료"
+        def _sync_claim_status():
+            order_ref.update({"status": status_text})
+            payments_ref.child(order_id).update({"status": status_text})
+            safe_email = sanitize_email(email)
+            booking_ref = rtdb.reference(f"booking/{safe_email}/{booking_id}")
+            if booking_ref.get():
+                booking_ref.update({"status": status_text})
+        await run_in_threadpool(_sync_claim_status)
 
-        # 4. 텔레그램 메시지 구성 및 전송
         customer = order_data.get("customer", {})
-        customer_name = customer.get("name", "알 수 없음")
-        customer_phone = customer.get("phone", "알 수 없음")
         amount = order_data.get("amount", 0)
-        
         message = (
-            f"<b>🚨 B2C 일반 주문 취소 요청 알림</b>\n\n"
+            f"<b>{icon} B2C 일반 주문 {action_label} 요청 알림</b>\n\n"
             f"<b>주문번호:</b> {order_id}\n"
             f"<b>예약 ID:</b> {booking_id}\n"
             f"<b>금액:</b> ₩{amount:,}\n\n"
-            f"<b>[취소 요청 고객 정보]</b>\n"
-            f"<b>성함:</b> {customer_name}\n"
-            f"<b>연락처:</b> {customer_phone}\n"
+            f"<b>[{action_label} 요청 고객 정보]</b>\n"
+            f"<b>성함:</b> {customer.get('name', '알 수 없음')}\n"
+            f"<b>연락처:</b> {customer.get('phone', '알 수 없음')}\n"
             f"<b>이메일:</b> {customer_email}\n"
         )
-        
         background_tasks.add_task(send_telegram_message, CANCEL_CHAT_ID, message)
-
-        return {"status": "success", "message": "취소 요청이 완료되었습니다. 관리자 확인 후 처리가 진행됩니다."}
+        return {"status": "success", "message": f"{action_label} 요청이 완료되었습니다. 관리자 확인 후 처리가 진행됩니다."}
     except Exception as e:
-        print(f"🔥 일반 주문 취소 요청 처리 에러: {e}")
+        print(f"🔥 일반 주문 {action_label} 요청 처리 에러: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+@router.post("/booking_order/cancel_request")
+async def request_booking_order_cancel(request: Request, background_tasks: BackgroundTasks):
+    return await _handle_booking_order_claim(request, background_tasks, "취소", "🚨")
 
 @router.post("/booking_order/exchange_request")
 async def request_booking_order_exchange(request: Request, background_tasks: BackgroundTasks):
-    """
-    일반 고객이 예약 완료 및 결제 완료된 상품 주문의 교환을 요청했을 때 호출됨.
-    booking_id를 받아 booking_payments에서 order_id를 조회하고,
-    booking_orders, booking_payments, booking 노드의 상태를 '교환 요청 완료'로 업데이트하고
-    관리자 텔레그램으로 교환 요청 알림을 발송합니다.
-    """
-    email = request.session.get("user_id")
-    if not email:
-        return JSONResponse(status_code=403, content={"status": "error", "message": "로그인이 필요합니다."})
-
-    try:
-        body = await request.json()
-        booking_id = body.get("bookingId")
-        
-        if not booking_id:
-            return JSONResponse(status_code=400, content={"status": "error", "message": "예약번호가 필요합니다."})
-
-        # 1. booking_payments/{booking_id}에서 order_id 조회
-        payments_ref = rtdb.reference(f"booking_payments/{booking_id}")
-        payments_data = payments_ref.get()
-        if not payments_data:
-            return JSONResponse(status_code=404, content={"status": "error", "message": "결제 정보를 찾을 수 없습니다."})
-
-        order_ids = list(payments_data.keys())
-        if not order_ids:
-            return JSONResponse(status_code=404, content={"status": "error", "message": "주문번호를 조회할 수 없습니다."})
-        
-        order_id = None
-        for oid in order_ids:
-            p_info = payments_data.get(oid)
-            if isinstance(p_info, dict) and p_info.get("status") == "결제 완료":
-                order_id = oid
-                break
-        if not order_id:
-            order_id = order_ids[0]
-
-        # 2. booking_orders에서 주문 정보 확인
-        order_ref = rtdb.reference(f"booking_orders/{order_id}")
-        order_data = order_ref.get()
-        if not order_data:
-            return JSONResponse(status_code=404, content={"status": "error", "message": "주문 정보를 찾을 수 없습니다."})
-
-        # 권한 및 상태 검증
-        customer_email = order_data.get("customer", {}).get("email")
-        if customer_email != email:
-            return JSONResponse(status_code=403, content={"status": "error", "message": "요청 권한이 없습니다."})
-
-        current_status = order_data.get("status")
-        if current_status != "결제 완료":
-            return JSONResponse(status_code=400, content={"status": "error", "message": "결제 완료 상태의 주문만 교환 요청이 가능합니다."})
-
-        # 3. 3개 노드 상태 동기화 업데이트 ("교환 요청 완료")
-        status_text = "교환 요청 완료"
-        
-        # booking_orders/{order_id}
-        order_ref.update({"status": status_text})
-        
-        # booking_payments/{booking_id}/{order_id}
-        payments_ref.child(order_id).update({"status": status_text})
-            
-        # booking/{safe_email}/{booking_id}
-        safe_email = sanitize_email(email)
-        booking_ref = rtdb.reference(f"booking/{safe_email}/{booking_id}")
-        if booking_ref.get():
-            booking_ref.update({"status": status_text})
-
-        # 4. 텔레그램 메시지 구성 및 전송
-        customer = order_data.get("customer", {})
-        customer_name = customer.get("name", "알 수 없음")
-        customer_phone = customer.get("phone", "알 수 없음")
-        amount = order_data.get("amount", 0)
-        
-        message = (
-            f"<b>🔄 B2C 일반 주문 교환 요청 알림</b>\n\n"
-            f"<b>주문번호:</b> {order_id}\n"
-            f"<b>예약 ID:</b> {booking_id}\n"
-            f"<b>금액:</b> ₩{amount:,}\n\n"
-            f"<b>[교환 요청 고객 정보]</b>\n"
-            f"<b>성함:</b> {customer_name}\n"
-            f"<b>연락처:</b> {customer_phone}\n"
-            f"<b>이메일:</b> {customer_email}\n"
-        )
-        
-        background_tasks.add_task(send_telegram_message, CANCEL_CHAT_ID, message)
-
-        return {"status": "success", "message": "교환 요청이 완료되었습니다. 관리자 확인 후 처리가 진행됩니다."}
-    except Exception as e:
-        print(f"🔥 일반 주문 교환 요청 처리 에러: {e}")
-        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+    return await _handle_booking_order_claim(request, background_tasks, "교환", "🔄")
