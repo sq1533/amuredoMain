@@ -9,6 +9,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 import json
 import os
+import re
 import secrets
 from typing import List
 
