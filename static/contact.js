@@ -58,23 +58,24 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedFiles.forEach((file, index) => {
             const itemWrap = document.createElement("div");
             itemWrap.className = "file-info-item";
-            itemWrap.style.display = "flex";
-            itemWrap.style.alignItems = "center";
-            itemWrap.style.gap = "10px";
-            itemWrap.style.marginTop = "8px";
-            itemWrap.style.fontSize = "0.9rem";
-            itemWrap.style.color = "#555";
 
-            itemWrap.innerHTML = `
-                <span class="file-name">${file.name}</span>
-                <span class="btn-remove-file" data-index="${index}" style="cursor:pointer; color:#ff4d4d; font-weight:bold;">✕</span>
-            `;
-            filePreview.appendChild(itemWrap);
+            const nameSpan = document.createElement("span");
+            nameSpan.className = "file-name";
+            nameSpan.textContent = file.name;
 
-            // 삭제 버튼 이벤트 연결
-            itemWrap.querySelector(".btn-remove-file").addEventListener("click", () => {
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.className = "btn-remove-file";
+            removeBtn.setAttribute("data-index", index);
+            removeBtn.setAttribute("aria-label", `${file.name} 첨부 취소`);
+            removeBtn.textContent = "✕";
+            removeBtn.addEventListener("click", () => {
                 removeFile(index);
             });
+
+            itemWrap.appendChild(nameSpan);
+            itemWrap.appendChild(removeBtn);
+            filePreview.appendChild(itemWrap);
         });
     }
 
